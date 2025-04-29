@@ -1,30 +1,19 @@
-import java.util.Properties
-
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
 }
-val properties = Properties().apply {
-    load(rootProject.file("apikey.properties").inputStream())
-}
-
-val serverUrl: String = properties.getProperty("base_url") ?: ""
 
 android {
-    namespace = "com.D107.runmate"
+    namespace = "com.D107.runmate.presentation"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.D107.runmate"
-        minSdk = 28
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        minSdk = 24
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "BASE_URL", serverUrl)
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
@@ -43,14 +32,12 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    buildFeatures {
-        buildConfig = true
+    viewBinding {
+        enable = true
     }
 }
 
 dependencies {
-    implementation(project(":presentation"))
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -60,7 +47,17 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+    // Navigation
+    implementation(libs.androidx.navigation.fragment)
+    implementation(libs.androidx.navigation.ui)
+
+    // Glide
+    implementation (libs.glide)
+
+    // MPAndroidChart
+    implementation(libs.mpandroidchart)
+
     // Hilt
-    implementation("com.google.dagger:hilt-android:2.51.1")
-    kapt("com.google.dagger:hilt-android-compiler:2.51.1")
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
 }
