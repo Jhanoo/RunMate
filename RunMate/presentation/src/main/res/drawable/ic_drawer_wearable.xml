@@ -1,0 +1,42 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+  <item android:state_selected="false">
+    <vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="22dp"
+        android:height="20dp"
+        android:viewportWidth="22"
+        android:viewportHeight="20">
+      <path
+          android:pathData="M8,7.6L14,12.7L10.857,16V4L14,7.3L8,12.4"
+          android:strokeLineJoin="round"
+          android:strokeWidth="1.5"
+          android:fillColor="#00000000"
+          android:strokeColor="#71839B"
+          android:strokeLineCap="round"/>
+      <path
+          android:pathData="M1,13V7C1,5.409 1.632,3.883 2.757,2.757C3.883,1.632 5.409,1 7,1H15C16.591,1 18.117,1.632 19.243,2.757C20.368,3.883 21,5.409 21,7V13C21,14.591 20.368,16.117 19.243,17.243C18.117,18.368 16.591,19 15,19H7C5.409,19 3.883,18.368 2.757,17.243C1.632,16.117 1,14.591 1,13Z"
+          android:strokeWidth="1.5"
+          android:fillColor="#00000000"
+          android:strokeColor="#71839B"/>
+    </vector>
+  </item>
+  <item android:state_selected="true">
+    <vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="22dp"
+        android:height="20dp"
+        android:viewportWidth="22"
+        android:viewportHeight="20">
+      <path
+          android:pathData="M8,7.6L14,12.7L10.857,16V4L14,7.3L8,12.4"
+          android:strokeLineJoin="round"
+          android:strokeWidth="1.5"
+          android:fillColor="#00000000"
+          android:strokeColor="#000000"
+          android:strokeLineCap="round"/>
+      <path
+          android:pathData="M1,13V7C1,5.409 1.632,3.883 2.757,2.757C3.883,1.632 5.409,1 7,1H15C16.591,1 18.117,1.632 19.243,2.757C20.368,3.883 21,5.409 21,7V13C21,14.591 20.368,16.117 19.243,17.243C18.117,18.368 16.591,19 15,19H7C5.409,19 3.883,18.368 2.757,17.243C1.632,16.117 1,14.591 1,13Z"
+          android:strokeWidth="1.5"
+          android:fillColor="#00000000"
+          android:strokeColor="#000000"/>
+    </vector>
+  </item>
+</selector>
