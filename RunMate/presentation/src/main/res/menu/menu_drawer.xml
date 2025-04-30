@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/drawer_running"
+            android:title="달리기"
+            android:icon="@drawable/ic_drawer_running" />
+        <item
+            android:id="@+id/drawer_manager"
+            android:title="AI 매니저"
+            android:icon="@drawable/ic_drawer_manager" />
+        <item
+            android:id="@+id/drawer_wearable"
+            android:title="웨어러블"
+            android:icon="@drawable/ic_drawer_wearable" />
+        <item
+            android:id="@+id/drawer_group"
+            android:title="그룹"
+            android:icon="@drawable/ic_drawer_group" />
+        <item
+            android:id="@+id/drawer_history"
+            android:title="히스토리"
+            android:icon="@drawable/ic_drawer_history" />
+    </group>
+
+</menu>
