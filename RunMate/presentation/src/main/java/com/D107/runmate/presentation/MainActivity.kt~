@@ -13,12 +13,26 @@ import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import com.D107.runmate.presentation.databinding.ActivityMainBinding
+<<<<<<< HEAD
+import com.D107.runmate.presentation.databinding.DrawerMainBinding
+=======
 import com.D107.runmate.presentation.databinding.DrawerHeaderBinding
 import com.google.android.material.navigation.NavigationView
+>>>>>>> ba8f7b1910629ebe10601906f771605ea552ac60
 import com.ssafy.locket.presentation.base.BaseActivity
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
+<<<<<<< HEAD
+class MainActivity : BaseActivity<DrawerMainBinding>(DrawerMainBinding::inflate) {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        binding.mainInclude.mainBtn.setOnClickListener {
+            binding.mainDrawerLayout.openDrawer(GravityCompat.START)
+        }
+    }
+=======
 class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::inflate),
     NavigationView.OnNavigationItemSelectedListener {
 
@@ -137,4 +151,5 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
 
         binding.navView.layoutParams = params
     }
+>>>>>>> ba8f7b1910629ebe10601906f771605ea552ac60
 }

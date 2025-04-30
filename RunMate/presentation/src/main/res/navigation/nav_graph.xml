@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/runningFragment">
+
+    <fragment
+        android:id="@+id/AIManagerFragment"
+        android:name="com.D107.runmate.presentation.manager.AIManagerFragment"
+        android:label="fragment_a_i_manager"
+        tools:layout="@layout/fragment_a_i_manager" />
+    <fragment
+        android:id="@+id/runningFragment"
+        android:name="com.D107.runmate.presentation.running.RunningFragment"
+        android:label="fragment_running"
+        tools:layout="@layout/fragment_running" />
+    <fragment
+        android:id="@+id/groupFragment"
+        android:name="com.D107.runmate.presentation.group.GroupFragment"
+        android:label="fragment_group"
+        tools:layout="@layout/fragment_group" />
+    <fragment
+        android:id="@+id/historyFragment"
+        android:name="com.D107.runmate.presentation.history.HistoryFragment"
+        android:label="fragment_history"
+        tools:layout="@layout/fragment_history" />
+    <fragment
+        android:id="@+id/wearableFragment"
+        android:name="com.D107.runmate.presentation.wearable.WearableFragment"
+        android:label="fragment_wearable"
+        tools:layout="@layout/fragment_wearable" />
+
+</navigation>
