@@ -60,4 +60,10 @@ dependencies {
     // Hilt
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
+
+    // DotLottie
+    implementation(libs.dotlottie.android)
+
+    // KakaoMap
+    implementation(libs.android)
 }

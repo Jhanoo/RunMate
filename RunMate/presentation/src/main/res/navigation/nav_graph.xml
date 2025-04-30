@@ -30,5 +30,10 @@
         android:name="com.D107.runmate.presentation.wearable.WearableFragment"
         android:label="fragment_wearable"
         tools:layout="@layout/fragment_wearable" />
+    <fragment
+        android:id="@+id/goalSettingFragment"
+        android:name="com.D107.runmate.presentation.manager.GoalSettingFragment"
+        android:label="fragment_goal_setting"
+        tools:layout="@layout/fragment_goal_setting" />
 
 </navigation>

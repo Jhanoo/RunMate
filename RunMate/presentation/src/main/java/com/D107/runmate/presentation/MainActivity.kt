@@ -2,6 +2,7 @@ package com.D107.runmate.presentation
 
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
@@ -9,6 +10,7 @@ import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
@@ -31,7 +33,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         binding.navView.setNavigationItemSelectedListener(this)
 
         // 초기 메뉴 아이템(달리기) 선택 상태로 설정
-        binding.navView.menu.findItem(R.id.drawer_running).isChecked = true
+//        binding.navView.menu.findItem(R.id.drawer_running).isChecked = true
+        onNavigationItemSelected(binding.navView.menu.findItem(R.id.drawer_running))
 
         val headerView = binding.navView.getHeaderView(0)
         val headerBinding = DrawerHeaderBinding.bind(headerView)
@@ -51,6 +54,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         val destinationMap = mapOf(
             R.id.drawer_running to R.id.runningFragment,
+//            R.id.drawer_running to R.id.goalSettingFragment,
             R.id.drawer_group to R.id.groupFragment,
             R.id.drawer_history to R.id.historyFragment,
             R.id.drawer_wearable to R.id.wearableFragment,
@@ -120,7 +124,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
             }
         }
         true
-
+        hideHamburgerBtn(navController)
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
@@ -136,5 +140,19 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         params.width = drawerWidth
 
         binding.navView.layoutParams = params
+    }
+
+    private fun hideHamburgerBtn(navController: NavController) {
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            binding.btnMenu.visibility = when (destination.id) {
+                R.id.goalSettingFragment -> View.VISIBLE
+                R.id.runningFragment -> View.VISIBLE
+                R.id.groupFragment -> View.VISIBLE
+                R.id.historyFragment -> View.VISIBLE
+                R.id.wearableFragment -> View.VISIBLE
+                R.id.AIManagerFragment -> View.VISIBLE
+                else -> View.GONE
+            }
+        }
     }
 }

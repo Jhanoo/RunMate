@@ -3,4 +3,6 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="manager_onboarding_description">AI 매니저가 <b>달리기 수준, 목표, 마라톤 일정</b>에 맞춘 맞춤형 러닝 플랜을 제공합니다. 마라톤 준비부터 일상 러닝까지, 최적의 훈련 스케줄을 일일 퀘스트로 완료하며 체계적으로 러닝 실력을 향상시켜 보세요. 데이터 기반의 코칭으로 부상 없이 목표 달성까지 함께합니다.</string>
 </resources>
