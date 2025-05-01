@@ -1,0 +1,32 @@
+# 1) 환경변수 파일 / 시크릿
+.env
+.env.*            # .env.prod, .env.local 등
+*.pem             # SSH 키
+*.key             # 비밀키 파일
+*.jks             # Java 키스토어
+
+# 2) 빌드 아티팩트
+/build/
+/target/
+/out/
+!*/src/main/resources    # 리소스는 남겨두되 build 된 결과물은 무시
+
+# 3) Gradle, Maven 캐시
+.gradle/
+/**/gradle-wrapper.jar
+.mvn/
+!gradlew
+!gradlew.bat
+
+# 4) IDE 설정
+.idea/
+/*.iml
+.vscode/
+
+# 5) 운영체제 파일
+.DS_Store
+Thumbs.db
+
+# 6) 로그, 임시 파일
+*.log
+tmp/

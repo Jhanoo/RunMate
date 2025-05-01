@@ -1,0 +1,40 @@
+services:
+  springboot:
+    build: .
+    container_name: runmate-backend
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - project-net
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    env_file:
+      - .env
+    environment:
+      # 기본 슈퍼유저로 initdb 수행
+      # POSTGRES_USER, POSTGRES_DB 는 지정하지 않습니다.
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      # initdb 후 init-user-db.sh 를 실행
+      - ./postgres-init:/docker-entrypoint-initdb.d
+    networks:
+      - project-net
+
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: always
+    networks:
+      - project-net
+
+networks:
+  project-net:
+    driver: bridge
