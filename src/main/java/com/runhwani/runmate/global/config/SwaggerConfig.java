@@ -1,9 +1,5 @@
 package com.runhwani.runmate.global.config;
 
-import org.springdoc.core.models.GroupedOpenApi;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
@@ -11,22 +7,26 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
+import org.springdoc.core.models.GroupedOpenApi;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SwaggerConfig {
 
     private Info apiInfo() {
         return new Info()
-            .title("[RunMate] REST API")
-            .description("SSAFY 특화 프로젝트 **RunMate 서비스의 API 명세서**입니다.")
-            .version("v1.0")
+            .title("RunMate REST API")
+            .description("SSAFY 자율 프로젝트 **RunMate 서비스의 API 명세서**입니다.")
+            .version("1.0.0")
             .contact(new Contact()
                 .name("Team RunHwani")
                 .email("kimh0414@gmail.com")
                 .url("https://k12d107.p.ssafy.io"))
             .license(new License()
-                .name("License of API")
-                .url("API license URL"));
+                .name("Apache 2.0")
+                .url("http://springdoc.org"));
     }
 
     private SecurityScheme createApiKeyScheme() {
@@ -38,7 +38,12 @@ public class SwaggerConfig {
 
     @Bean
     public OpenAPI openApi() {
+        Server server = new Server();
+        server.setUrl("");
+        server.setDescription("RunMate API Docs");
+
         return new OpenAPI()
+            .addServersItem(server)
             .addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
             .components(new Components().addSecuritySchemes("Bearer Authentication", createApiKeyScheme()))
             .info(apiInfo());
@@ -46,46 +51,65 @@ public class SwaggerConfig {
 
     @Bean
     public GroupedOpenApi authApi() {
-        String[] paths = {"/api/auth/**"};
         return GroupedOpenApi.builder()
-            .group("1. 인증 관리")
-            .pathsToMatch(paths)
+            .group("1. 인증 API")
+            .pathsToMatch("/api/auth/**")
             .build();
     }
 
     @Bean
-    public GroupedOpenApi userApi() {
-        String[] paths = {"/api/users/**"};
+    public GroupedOpenApi maintainApi() {
         return GroupedOpenApi.builder()
-            .group("2. 사용자 관리")
-            .pathsToMatch(paths)
+            .group("2. 유지 API")
+            .pathsToMatch("/api/maintain/**")
             .build();
     }
 
     @Bean
-    public GroupedOpenApi runningApi() {
-        String[] paths = {"/api/running/**"};
+    public GroupedOpenApi courseApi() {
         return GroupedOpenApi.builder()
-            .group("3. 러닝 관리")
-            .pathsToMatch(paths)
+            .group("3. 코스 API")
+            .pathsToMatch("/api/courses/**")
             .build();
     }
 
     @Bean
-    public GroupedOpenApi crewApi() {
-        String[] paths = {"/api/crews/**"};
+    public GroupedOpenApi groupApi() {
         return GroupedOpenApi.builder()
-            .group("4. 크루 관리")
-            .pathsToMatch(paths)
+            .group("4. 그룹 API")
+            .pathsToMatch("/api/groups/**")
             .build();
     }
 
     @Bean
-    public GroupedOpenApi recordApi() {
-        String[] paths = {"/api/records/**"};
+    public GroupedOpenApi careerApi() {
         return GroupedOpenApi.builder()
-            .group("5. 기록 관리")
-            .pathsToMatch(paths)
+            .group("5. 커리큘럼 API")
+            .pathsToMatch("/api/careers/**")
+            .build();
+    }
+
+    @Bean
+    public GroupedOpenApi diaryApi() {
+        return GroupedOpenApi.builder()
+            .group("6. 달리기 API")
+            .pathsToMatch("/api/diary/**")
+            .build();
+    }
+
+    @Bean
+    public GroupedOpenApi historyApi() {
+        return GroupedOpenApi.builder()
+            .group("7. 히스토리 API")
+            .pathsToMatch("/api/history/**")
+            .build();
+    }
+
+    @Bean
+    public GroupedOpenApi marathonApi() {
+        return GroupedOpenApi.builder()
+            .group("8. 마라톤 API")
+            .pathsToMatch("/api/marathon/**")
             .build();
     }
 } 

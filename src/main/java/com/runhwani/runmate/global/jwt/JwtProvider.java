@@ -57,4 +57,9 @@ public class JwtProvider {
             return false;
         }
     }
+
+    public void invalidateToken(String token) {
+        // TODO: Redis나 다른 저장소를 사용하여 블랙리스트 관리
+        // 현재는 클라이언트 측에서 토큰을 삭제하는 방식으로 처리
+    }
 } 
