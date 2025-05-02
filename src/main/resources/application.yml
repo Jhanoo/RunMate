@@ -19,8 +19,6 @@ management:
         include: health,info
 
 
-server:
-  port: 8081
 
 jwt:
   secret: ${JWT_SECRET:your-default-jwt-secret-key-should-be-very-long-and-secure}
