@@ -17,5 +17,10 @@ public class RunmateApplication {
         public String hello() {
             return "Hello, RunHwani Team!";
         }
+        
+        @GetMapping("/api/test")
+        public String test() {
+            return "Application is running properly!";
+        }
     }
 }

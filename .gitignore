@@ -30,3 +30,7 @@ Thumbs.db
 # 6) 로그, 임시 파일
 *.log
 tmp/
+
+# Application properties
+src/main/resources/application.yml
+src/main/resources/application.properties

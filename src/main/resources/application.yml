@@ -17,3 +17,26 @@ management:
     web:
       exposure:
         include: health,info
+
+
+server:
+  port: 8081
+
+jwt:
+  secret: ${JWT_SECRET:your-default-jwt-secret-key-should-be-very-long-and-secure}
+  token-validity-in-seconds: 86400
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    disable-swagger-default-url: true
+    enabled: true
+    config-url: /v3/api-docs/swagger-config
+    urls:
+      - url: /v3/api-docs
+        name: API Docs
+  api-docs:
+    path: /v3/api-docs
+  show-actuator: false
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
