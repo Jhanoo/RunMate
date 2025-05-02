@@ -66,4 +66,7 @@ dependencies {
 
     // KakaoMap
     implementation(libs.android)
+
+    // Google Location
+    implementation(libs.play.services.location)
 }

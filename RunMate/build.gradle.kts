@@ -12,4 +12,5 @@ plugins {
     alias(libs.plugins.android.library) apply false
     alias(libs.plugins.jetbrains.kotlin.jvm) apply false
     id("com.google.dagger.hilt.android") version "2.51.1" apply false
+    id("com.google.gms.google-services") version "4.4.2" apply false
 }
