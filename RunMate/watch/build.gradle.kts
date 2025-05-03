@@ -58,8 +58,17 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.splashscreen)
+    implementation(libs.volley)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    //Glide
+    implementation(libs.landscapist.glide)
+    implementation(libs.glide)
+
+    //Coil
+    implementation(libs.coil.gif)
+    implementation(libs.coil.compose)
 }
