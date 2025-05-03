@@ -45,12 +45,18 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             var showSplash by remember { mutableStateOf(true) }
+            var currentScreen by remember { mutableStateOf("splash") }
 
             RunMateTheme {
                 if (showSplash) {
                     SplashScreen(onTimeout = { showSplash = false })
                 } else {
                     MenuScreen()
+                }
+
+                when (currentScreen) {
+                    "splash" -> SplashScreen(onTimeout = { currentScreen = "menu" })
+                    "menu" -> MenuScreen(onNavigateToSplash = { currentScreen = "splash" })
                 }
             }
         }

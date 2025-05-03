@@ -1,5 +1,6 @@
 package com.D107.runmate.watch.presentation.splash
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
@@ -14,6 +15,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.wear.compose.material.Text
 import coil.compose.AsyncImage
@@ -25,6 +30,7 @@ import kotlinx.coroutines.launch
 import com.D107.runmate.watch.R
 
 // PNG 프레임들을 사용하는 방식
+@SuppressLint("ResourceAsColor")
 @Composable
 fun SplashScreen(onTimeout: () -> Unit) {
     val configuration = LocalConfiguration.current
@@ -70,7 +76,7 @@ fun SplashScreen(onTimeout: () -> Unit) {
                 initialValue = 0f,
                 targetValue = 1f,
                 animationSpec = tween(
-                    durationMillis = 5000,
+                    durationMillis = 3000,
                     easing = LinearEasing
                 )
             ) { value, _ ->
@@ -84,7 +90,7 @@ fun SplashScreen(onTimeout: () -> Unit) {
 
     val gifSize = 150.dp
     val startX = -(screenWidth.value / 2) - (gifSize.value / 2)
-    val endX = (screenWidth.value / 2) + (gifSize.value / 2)
+    val endX = (screenWidth.value / 2) + (gifSize.value / 2) + 90f
     val gifOffsetX = startX + (endX - startX) * animationProgress
 
     Box(
@@ -97,7 +103,25 @@ fun SplashScreen(onTimeout: () -> Unit) {
             text = "RUNMATE",
             fontSize = 42.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Gray
+            color = colorResource(id = R.color.gray_text2)
+        )
+
+        // 흰색 텍스트 (클리핑 적용)
+        Text(
+            text = "RUNMATE",
+            fontSize = 42.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            modifier = Modifier
+                .clipToBounds()
+                .drawWithContent {
+                    clipRect(
+                        left = 0f,
+                        right = size.width * animationProgress
+                    ) {
+                        this@drawWithContent.drawContent()
+                    }
+                }
         )
 
         Image(
