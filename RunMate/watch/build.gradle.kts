@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.D107.runmate.watch"
-        minSdk = 28
+        minSdk = 30
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -64,11 +64,15 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    //Glide
-    implementation(libs.landscapist.glide)
-    implementation(libs.glide)
+    // Wear Compose 의존성 추가
+    implementation(libs.androidx.compose.material.v130)
+    implementation(libs.androidx.compose.foundation.v130)
+    implementation(libs.androidx.compose.navigation)
 
-    //Coil
+    // Coil
     implementation(libs.coil.gif)
     implementation(libs.coil.compose)
+
+    // Navigation
+    implementation(libs.androidx.compose.navigation.v120)
 }

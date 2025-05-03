@@ -28,8 +28,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.TimeText
+import androidx.wear.compose.navigation.SwipeDismissableNavHost
+import androidx.wear.compose.navigation.composable
+import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import com.D107.runmate.watch.R
 import com.D107.runmate.watch.presentation.menu.MenuScreen
+import com.D107.runmate.watch.presentation.pace.PaceScreen
 import com.D107.runmate.watch.presentation.running.RunningScreen
 import com.D107.runmate.watch.presentation.splash.SplashScreen
 import com.D107.runmate.watch.presentation.theme.RunMateTheme
@@ -44,30 +48,51 @@ class MainActivity : ComponentActivity() {
         setTheme(android.R.style.Theme_DeviceDefault)
 
         setContent {
-            var showSplash by remember { mutableStateOf(true) }
-            var currentScreen by remember { mutableStateOf("splash") }
+//            var currentScreen by remember { mutableStateOf("splash") }
 
             RunMateTheme {
-                if (showSplash) {
-                    SplashScreen(onTimeout = { showSplash = false })
-                } else {
-                    MenuScreen()
-                }
+                val navController = rememberSwipeDismissableNavController()
 
-                when (currentScreen) {
-                    "splash" -> SplashScreen(onTimeout = { currentScreen = "menu" })
-                    "menu" -> MenuScreen(onNavigateToSplash = { currentScreen = "splash" })
+                SwipeDismissableNavHost(
+                    navController = navController,
+                    startDestination = "splash"
+                ) {
+                    composable("splash") {
+                        SplashScreen(
+                            onTimeout = {
+                                navController.navigate("menu") {
+                                    popUpTo("splash") { inclusive = true }
+                                }
+                            }
+                        )
+                    }
+
+                    composable("menu") {
+                        MenuScreen(
+                            onNavigateToRunning = { navController.navigate("running") },
+                            onNavigateToPace = { navController.navigate("pace") }
+                        )
+                    }
+
+                    composable("running") {
+                        RunningScreen()
+                    }
+
+                    composable("pace") {
+                        PaceScreen()
+                    }
+
                 }
             }
         }
     }
 }
 
-@Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true, showBackground = true)
-@Composable
-fun ScreenPreview() {
-    RunMateTheme {
-        MenuScreen()
-//        SplashScreen(onTimeout = {})
-    }
-}
+//@Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true, showBackground = true)
+//@Composable
+//fun ScreenPreview() {
+//    RunMateTheme {
+//        MenuScreen()
+////        SplashScreen(onTimeout = {})
+//    }
+//}
