@@ -30,6 +30,7 @@ import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.TimeText
 import com.D107.runmate.watch.R
 import com.D107.runmate.watch.presentation.menu.MenuScreen
+import com.D107.runmate.watch.presentation.pace.PaceScreen
 import com.D107.runmate.watch.presentation.running.RunningScreen
 import com.D107.runmate.watch.presentation.splash.SplashScreen
 import com.D107.runmate.watch.presentation.theme.RunMateTheme
@@ -44,30 +45,28 @@ class MainActivity : ComponentActivity() {
         setTheme(android.R.style.Theme_DeviceDefault)
 
         setContent {
-            var showSplash by remember { mutableStateOf(true) }
             var currentScreen by remember { mutableStateOf("splash") }
 
             RunMateTheme {
-                if (showSplash) {
-                    SplashScreen(onTimeout = { showSplash = false })
-                } else {
-                    MenuScreen()
-                }
-
                 when (currentScreen) {
                     "splash" -> SplashScreen(onTimeout = { currentScreen = "menu" })
-                    "menu" -> MenuScreen(onNavigateToSplash = { currentScreen = "splash" })
+                    "menu" -> MenuScreen(
+                        onNavigateToRunning = { currentScreen = "running" },
+                        onNavigateToPace = { currentScreen = "pace" },
+                    )
+                    "running" -> RunningScreen()
+                    "pace" -> PaceScreen()
                 }
             }
         }
     }
 }
 
-@Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true, showBackground = true)
-@Composable
-fun ScreenPreview() {
-    RunMateTheme {
-        MenuScreen()
-//        SplashScreen(onTimeout = {})
-    }
-}
+//@Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true, showBackground = true)
+//@Composable
+//fun ScreenPreview() {
+//    RunMateTheme {
+//        MenuScreen()
+////        SplashScreen(onTimeout = {})
+//    }
+//}
