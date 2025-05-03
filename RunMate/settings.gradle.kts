@@ -10,6 +10,7 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
         maven("https://jitpack.io")
+//        maven("https://devrepo.kakao.com/nexus/repository/kakaomap-releases/")
     }
 }
 dependencyResolutionManagement {
@@ -18,6 +19,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven("https://jitpack.io")
+        maven("https://devrepo.kakao.com/nexus/repository/kakaomap-releases/")
     }
 }
 
@@ -26,3 +28,4 @@ include(":app")
 include(":presentation")
 include(":data")
 include(":domain")
+include(":watch")

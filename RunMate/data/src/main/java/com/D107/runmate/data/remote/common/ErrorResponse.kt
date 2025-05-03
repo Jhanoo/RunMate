@@ -2,9 +2,7 @@ package com.D107.runmate.data.remote.common
 
 import com.D107.runmate.data.mapper.DataMapper
 import com.D107.runmate.domain.model.base.NetworkError
-import kotlinx.parcelize.Parcelize
 
-@Parcelize
 class ErrorResponse(
     val timestamp   : String? = null,
     val status      : String? = null,

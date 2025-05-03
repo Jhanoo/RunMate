@@ -10,6 +10,8 @@ val properties = Properties().apply {
     load(rootProject.file("apikey.properties").inputStream())
 }
 
+val restApiKey: String = properties.getProperty("rest_api_key") ?: ""
+val nativeApiKey: String = properties.getProperty("native_api_key") ?: ""
 val serverUrl: String = properties.getProperty("base_url") ?: ""
 
 android {
@@ -24,6 +26,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "REST_API_KEY", restApiKey)
+        buildConfigField("String", "NATIVE_API_KEY", nativeApiKey)
         buildConfigField("String", "BASE_URL", serverUrl)
     }
 
@@ -49,6 +53,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":domain"))
+    implementation(project(":data"))
     implementation(project(":presentation"))
 
     implementation(libs.androidx.core.ktx)
@@ -61,6 +67,9 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     // Hilt
-    implementation("com.google.dagger:hilt-android:2.51.1")
-    kapt("com.google.dagger:hilt-android-compiler:2.51.1")
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
+
+    // KakaoMap
+    implementation(libs.android)
 }
