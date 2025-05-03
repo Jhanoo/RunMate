@@ -28,6 +28,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.TimeText
+import androidx.wear.compose.navigation.SwipeDismissableNavHost
+import androidx.wear.compose.navigation.composable
+import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import com.D107.runmate.watch.R
 import com.D107.runmate.watch.presentation.menu.MenuScreen
 import com.D107.runmate.watch.presentation.pace.PaceScreen
@@ -45,17 +48,40 @@ class MainActivity : ComponentActivity() {
         setTheme(android.R.style.Theme_DeviceDefault)
 
         setContent {
-            var currentScreen by remember { mutableStateOf("splash") }
+//            var currentScreen by remember { mutableStateOf("splash") }
 
             RunMateTheme {
-                when (currentScreen) {
-                    "splash" -> SplashScreen(onTimeout = { currentScreen = "menu" })
-                    "menu" -> MenuScreen(
-                        onNavigateToRunning = { currentScreen = "running" },
-                        onNavigateToPace = { currentScreen = "pace" },
-                    )
-                    "running" -> RunningScreen()
-                    "pace" -> PaceScreen()
+                val navController = rememberSwipeDismissableNavController()
+
+                SwipeDismissableNavHost(
+                    navController = navController,
+                    startDestination = "splash"
+                ) {
+                    composable("splash") {
+                        SplashScreen(
+                            onTimeout = {
+                                navController.navigate("menu") {
+                                    popUpTo("splash") { inclusive = true }
+                                }
+                            }
+                        )
+                    }
+
+                    composable("menu") {
+                        MenuScreen(
+                            onNavigateToRunning = { navController.navigate("running") },
+                            onNavigateToPace = { navController.navigate("pace") }
+                        )
+                    }
+
+                    composable("running") {
+                        RunningScreen()
+                    }
+
+                    composable("pace") {
+                        PaceScreen()
+                    }
+
                 }
             }
         }
