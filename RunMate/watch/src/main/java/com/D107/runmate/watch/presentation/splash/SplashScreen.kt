@@ -13,62 +13,78 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.animation.core.*
-import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
 import androidx.wear.compose.material.Text
 import coil.compose.AsyncImage
 import coil.ImageLoader
-import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.request.ImageRequest
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.D107.runmate.watch.R
 
+// PNG 프레임들을 사용하는 방식
 @Composable
 fun SplashScreen(onTimeout: () -> Unit) {
-    val context = LocalContext.current
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
 
     var animationProgress by remember { mutableStateOf(0f) }
+    var currentFrame by remember { mutableStateOf(0) }
 
-    // 애니메이션 WebP를 위한 ImageLoader 설정
-    val imageLoader = remember {
-        ImageLoader.Builder(context)
-            .components {
-                // AnimatedWebP 지원
-                if (android.os.Build.VERSION.SDK_INT >= 28) {
-                    add(ImageDecoderDecoder.Factory())
-                } else {
-                    add(GifDecoder.Factory())
-                }
-            }
-            .build()
+    // 애니메이션 프레임 리스트 (예: tonie_frame_1.png, tonie_frame_2.png ...)
+    val frameResources = remember {
+        listOf(
+            R.drawable.tonie_1,
+            R.drawable.tonie_2,
+            R.drawable.tonie_3,
+            R.drawable.tonie_4,
+            R.drawable.tonie_5,
+            R.drawable.tonie_6,
+//            R.drawable.tonie_7,
+            R.drawable.tonie_8,
+            R.drawable.tonie_9,
+            R.drawable.tonie_10,
+            R.drawable.tonie_11,
+            R.drawable.tonie_12,
+            R.drawable.tonie_13,
+            R.drawable.tonie_14,
+            R.drawable.tonie_15,
+            R.drawable.tonie_16,
+        )
     }
 
     LaunchedEffect(Unit) {
+        // 프레임 애니메이션
+        launch {
+            while (true) {
+                delay(15) // 프레임 레이트 조절
+                currentFrame = (currentFrame + 1) % frameResources.size
+            }
+        }
+
+        // 위치 애니메이션
         launch {
             animate(
                 initialValue = 0f,
                 targetValue = 1f,
                 animationSpec = tween(
-                    durationMillis = 10000,
-                    easing = FastOutSlowInEasing
+                    durationMillis = 5000,
+                    easing = LinearEasing
                 )
             ) { value, _ ->
                 animationProgress = value
             }
         }
 
-        delay(10000)
+        delay(5000)
         onTimeout()
     }
 
-    val gifSize = 200.dp
-    val startX = -(screenWidth.value / 2) + (gifSize.value / 2)
-    val endX = (screenWidth.value / 2) - (gifSize.value / 2)
+    val gifSize = 150.dp
+    val startX = -(screenWidth.value / 2) - (gifSize.value / 2)
+    val endX = (screenWidth.value / 2) + (gifSize.value / 2)
     val gifOffsetX = startX + (endX - startX) * animationProgress
 
     Box(
@@ -81,39 +97,19 @@ fun SplashScreen(onTimeout: () -> Unit) {
             text = "RUNMATE",
             fontSize = 42.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Black
+            color = Color.Gray
         )
 
-        // 흰색 텍스트 (클리핑 적용)
-        Text(
-            text = "RUNMATE",
-            fontSize = 42.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-            modifier = Modifier
-                .clipToBounds()
-                .drawWithContent {
-                    clipRect(
-                        left = 0f,
-                        right = size.width * animationProgress
-                    ) {
-                        this@drawWithContent.drawContent()
-                    }
-                }
-        )
-
-        AsyncImage(
-            model = ImageRequest.Builder(context)
-                .data(R.drawable.tonie)
-                .crossfade(false)
-                .memoryCachePolicy(coil.request.CachePolicy.DISABLED) // 캐시 비활성화로 애니메이션 재생 보장
-                .build(),
-            imageLoader = imageLoader,
+        Image(
+            painter = painterResource(id = frameResources[currentFrame]),
             contentDescription = null,
             modifier = Modifier
                 .size(gifSize)
                 .graphicsLayer {
                     translationX = gifOffsetX
+
+                    // 하드웨어 가속
+                    alpha = 0.99f
                 }
         )
     }
