@@ -1,7 +1,9 @@
 package com.D107.runmate.presentation.utils
 
+import android.content.Context
 import android.content.res.Resources
 import android.graphics.Rect
+import android.util.TypedValue
 import android.view.TouchDelegate
 import android.view.View
 import android.view.ViewGroup
@@ -80,6 +82,12 @@ object CommonUtils {
             rect.right += extraPadding
             parentView.touchDelegate = TouchDelegate(rect, this)
         }
+    }
+
+    fun dpToPx(context: Context, dp: Float): Int {
+        return TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP, dp, context.resources.displayMetrics
+        ).toInt()
     }
 }
 

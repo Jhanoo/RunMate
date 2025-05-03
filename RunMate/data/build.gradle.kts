@@ -76,3 +76,7 @@ dependencies {
     implementation(libs.moshi)
     implementation(libs.converter.moshi)
 }
+
+kapt {
+    correctErrorTypes = true  // Hilt 오류 방지[6]
+}

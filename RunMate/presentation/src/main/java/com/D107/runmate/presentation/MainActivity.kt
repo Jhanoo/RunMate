@@ -2,8 +2,6 @@ package com.D107.runmate.presentation
 
 import android.Manifest
 import android.content.Context
-import android.location.Location
-import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -18,22 +16,14 @@ import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import com.D107.runmate.presentation.databinding.ActivityMainBinding
 import com.D107.runmate.presentation.databinding.DrawerHeaderBinding
+import com.D107.runmate.presentation.utils.LocationUtils.getLocation
+import com.D107.runmate.presentation.utils.LocationUtils.isEnableLocationSystem
+import com.D107.runmate.presentation.utils.LocationUtils.showLocationEnableDialog
 import com.D107.runmate.presentation.utils.PermissionChecker
-import com.google.android.gms.common.api.ResolvableApiException
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.LocationSettingsRequest
-import com.google.android.gms.location.SettingsClient
 import com.google.android.material.navigation.NavigationView
 import com.ssafy.locket.presentation.base.BaseActivity
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CancellableContinuation
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 private const val TAG = "MainActivity"
 
@@ -156,11 +146,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     private fun checkPermission() {
         if (!checker.checkPermission(this, runtimePermissions)) {
             checker.setOnGrantedListener {
+                Log.d(TAG, "checkPermission: checkBack")
                 checkBackgroundPermission()
             }
             checker.requestPermissionLauncher.launch(runtimePermissions)
             return
         }
+        Log.d(TAG, "checkPermission: checkBack2")
         checkBackgroundPermission()
     }
 
@@ -180,109 +172,19 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     private fun onAllPermissionsGranted() {
         lifecycleScope.launch {
             try {
-                val location = getLocation()
-                Log.d(TAG, "onAllPermissionsGranted: ${location.latitude} ${location.longitude}")
-                viewModel.setUserLocation(UserLocationState.Exist(location))
+                mContext?.let {
+                    if(isEnableLocationSystem(it)) {
+                        val location = getLocation(it)
+                        viewModel.setUserLocation(UserLocationState.Exist(location))
+                    } else {
+                        showLocationEnableDialog(it)
+                    }
+                }
             } catch (e: Exception) {
                 Log.d(TAG, "onAllPermissionsGranted: ${e.message}")
             }
         }
     }
-
-    // TODO GPS 설정 확인 추가
-    private suspend fun getLocation(): Location = suspendCancellableCoroutine { cont ->
-        val context = mContext ?: run {
-            cont.resumeWithException(IllegalStateException("Context is null"))
-            return@suspendCancellableCoroutine
-        }
-
-        val locationRequest = LocationRequest.create().apply {
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        }
-        val builder = LocationSettingsRequest.Builder()
-            .addLocationRequest(locationRequest)
-
-        val client: SettingsClient = LocationServices.getSettingsClient(context)
-        client.checkLocationSettings(builder.build())
-            .addOnSuccessListener { response ->
-                Log.d(TAG, "getLocation: success")
-                requestLocation(cont, context)
-            }
-            .addOnFailureListener { exception ->
-                Log.d(TAG, "getLocation: exception ${exception.message}")
-                if (exception is ResolvableApiException) {
-                    cont.resumeWithException(Exception("Location services are disabled. Please enable."))
-                } else {
-                    cont.resumeWithException(exception)
-                }
-            }
-    }
-
-    private fun requestLocation(
-        cont: CancellableContinuation<Location>,
-        context: Context
-    ) {
-        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-
-        fusedLocationClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, null)
-            .addOnSuccessListener { location ->
-                if (location != null) {
-                    cont.resume(location)
-                } else {
-                    fusedLocationClient.lastLocation
-                        .addOnSuccessListener { lastLocation ->
-                            cont.resume(lastLocation ?: getFallbackLocation())
-                        }
-                }
-            }
-            .addOnFailureListener { e ->
-                cont.resumeWithException(e)
-            }
-    }
-
-
-//    private suspend fun getLocation(): Location = suspendCancellableCoroutine { cont ->
-//        mContext?.let {
-//
-//            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(it)
-//
-//            val locationManager = it.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-//            if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-//                cont.resumeWithException(IllegalStateException("Location services are disabled"))
-//                return@suspendCancellableCoroutine
-//            }
-//
-//            fusedLocationClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, null)
-//                .addOnSuccessListener { location: Location? ->
-//                    if (location == null) {
-//                        fusedLocationClient.lastLocation
-//                            .addOnSuccessListener { lastLocation ->
-//                                cont.resume(lastLocation ?: getFallbackLocation())
-//                            }
-//                            .addOnFailureListener {
-//                                Log.d(TAG, "getLocation: ${it.message}")
-//                                cont.resumeWithException(it)
-//                            }
-//                        Log.d(TAG, "getLocation: location is null")
-//                    } else {
-//                        CoroutineScope(Dispatchers.IO).launch {
-//                            try {
-//                                mLocation = location
-//                                Log.d(TAG, "getLocation: location ${location}")
-//                                cont.resume(mLocation)
-//                            } catch (e: Exception) {
-//                                Log.d(TAG, "getLocation: exception ${e.message}")
-//                                cont.resumeWithException(e)
-//                            }
-//                        }
-//                    }
-//                }
-//                .addOnFailureListener { exception ->
-//                    cont.resumeWithException(exception)
-//                }
-//        }
-//
-//    }
 
     private fun initDrawerHeader() {
         binding.navView.setNavigationItemSelectedListener(this)
@@ -326,10 +228,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         }
     }
 
-    private fun getFallbackLocation(): Location {
-        val fallbackLocation = Location("fallback")
-        fallbackLocation.latitude = 37.406960
-        fallbackLocation.longitude = 127.115587
-        return fallbackLocation
+    override fun onResume() {
+        super.onResume()
+        checkPermission()
     }
 }

@@ -46,4 +46,5 @@
         app:layout_constraintDimensionRatio="2.3076"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/btn_set_pace"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

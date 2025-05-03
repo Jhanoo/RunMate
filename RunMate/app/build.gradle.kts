@@ -79,3 +79,7 @@ dependencies {
     // KakaoMap
     implementation(libs.android)
 }
+
+kapt {
+    correctErrorTypes = true
+}

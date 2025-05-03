@@ -69,4 +69,11 @@ dependencies {
 
     // Google Location
     implementation(libs.play.services.location)
+
+    // CircleImageView
+    implementation(libs.circleimageview)
+}
+
+kapt {
+    correctErrorTypes = true
 }
