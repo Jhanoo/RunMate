@@ -28,7 +28,7 @@ import com.D107.runmate.watch.R
 data class RunningData(
     val time: String = "1:10:13",
     val bpm: String = "135",
-    val pace: String = "05'17\"",
+    val pace: String = "5'10\"",
     val distance: String = "8.5"
 )
 
@@ -56,6 +56,9 @@ fun RunningScreen(
         runningData.copy(pace = pace.replace(":", "'") + "\"")
     }
 
+    // pace가 "0:00"이 아닌지 확인
+    val isPaceFixed = pace != "0:00"
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -63,20 +66,20 @@ fun RunningScreen(
             .drawBehind {
                 // 배경 원형 테두리
                 drawArc(
-                    color = Color.DarkGray,
+                    color = Color(0xFF202124),
                     startAngle = -90f,
                     sweepAngle = 360f,
                     useCenter = false,
-                    style = Stroke(width = 4.dp.toPx())
+                    style = Stroke(width = 5.dp.toPx())
                 )
 
                 // 진행 상태 표시
                 drawArc(
-                    color = Color(0xFF00FF00), // Green color
+                    color = Color(0xFF53D357), // primary color
                     startAngle = -90f,
                     sweepAngle = 360f * progress,
                     useCenter = false,
-                    style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round)
+                    style = Stroke(width = 5.dp.toPx(), cap = StrokeCap.Round)
                 )
             }
             .padding(20.dp), // 상태바 안쪽 여백
@@ -87,7 +90,7 @@ fun RunningScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Top display
+            // 위쪽 상태 버튼
             DisplayButton(
                 modifier = Modifier.padding(top = 20.dp),
                 displayMode = DisplayMode.values()[topDisplayIndex],
@@ -96,29 +99,50 @@ fun RunningScreen(
                 onClick = { topDisplayIndex = (topDisplayIndex + 1) % 4 }
             )
 
-            // Middle row with left and right displays
+            // 아래쪽 상태 버튼
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                DisplayButton(
-                    displayMode = DisplayMode.values()[leftDisplayIndex],
-                    runningData = runningData,
-                    onClick = { leftDisplayIndex = (leftDisplayIndex + 1) % 4 }
-                )
+                if (isPaceFixed) {
+                    // pace가 전달된 경우: 왼쪽은 runningData의 pace 고정
+                    DisplayButton(
+                        displayMode = DisplayMode.PACE,
+                        runningData = runningData,
+                        onClick = {}, // 클릭 이벤트 비활성화
+                        customLabel = "페이스"
+                    )
+                } else {
+                    // pace가 전달되지 않은 경우: 기존 동작 유지
+                    DisplayButton(
+                        displayMode = DisplayMode.values()[leftDisplayIndex],
+                        runningData = runningData,
+                        onClick = { leftDisplayIndex = (leftDisplayIndex + 1) % 4 }
+                    )
+                }
 
-                DisplayButton(
-                    displayMode = DisplayMode.values()[rightDisplayIndex],
-                    runningData = currentRunningData,
-                    onClick = { rightDisplayIndex = (rightDisplayIndex + 1) % 4 }
-                )
+                if (isPaceFixed) {
+                    // pace가 전달된 경우: 오른쪽은 목표 페이스 고정
+                    DisplayButton(
+                        displayMode = DisplayMode.PACE,
+                        runningData = currentRunningData,
+                        onClick = {}, // 클릭 이벤트 비활성화
+                        customLabel = "목표 페이스"
+                    )
+                } else {
+                    // pace가 전달되지 않은 경우: 기존 동작 유지
+                    DisplayButton(
+                        displayMode = DisplayMode.values()[rightDisplayIndex],
+                        runningData = runningData,
+                        onClick = { rightDisplayIndex = (rightDisplayIndex + 1) % 4 }
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(30.dp))
-
-
         }
+
         // Pause button
         Box(
             modifier = Modifier
@@ -136,7 +160,7 @@ fun RunningScreen(
                 contentDescription = "Pause",
                 modifier = Modifier
                     .padding(top = 14.dp)
-                    .size(24.dp)  // 이미지 크기 조정
+                    .size(24.dp)
             )
         }
     }
@@ -148,7 +172,8 @@ private fun DisplayButton(
     displayMode: DisplayMode,
     runningData: RunningData,
     isLarge: Boolean = false,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    customLabel: String? = null
 ) {
     Column(
         modifier = modifier.clickable(onClick = onClick),
@@ -168,15 +193,11 @@ private fun DisplayButton(
             textAlign = TextAlign.Center
         )
         Text(
-            text = when (displayMode) {
-                DisplayMode.TIME -> displayMode.label
-                DisplayMode.BPM -> displayMode.label
-                DisplayMode.PACE -> displayMode.label
-                DisplayMode.DISTANCE -> displayMode.label
-            },
+            text = customLabel ?: displayMode.label,
             fontSize = 10.sp,
             color = Color.Gray,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            modifier = Modifier.offset(y=(-4).dp)
         )
     }
 }
