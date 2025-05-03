@@ -15,6 +15,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -25,49 +29,45 @@ import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.TimeText
 import com.D107.runmate.watch.R
+import com.D107.runmate.watch.presentation.menu.MenuScreen
+import com.D107.runmate.watch.presentation.running.RunningScreen
+import com.D107.runmate.watch.presentation.splash.SplashScreen
 import com.D107.runmate.watch.presentation.theme.RunMateTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
-
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+
+        splashScreen.setKeepOnScreenCondition { false }
 
         setTheme(android.R.style.Theme_DeviceDefault)
 
         setContent {
-            WearApp("Android")
+            var showSplash by remember { mutableStateOf(true) }
+            var currentScreen by remember { mutableStateOf("splash") }
+
+            RunMateTheme {
+                if (showSplash) {
+                    SplashScreen(onTimeout = { showSplash = false })
+                } else {
+                    MenuScreen()
+                }
+
+                when (currentScreen) {
+                    "splash" -> SplashScreen(onTimeout = { currentScreen = "menu" })
+                    "menu" -> MenuScreen(onNavigateToSplash = { currentScreen = "splash" })
+                }
+            }
         }
     }
 }
 
+@Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true, showBackground = true)
 @Composable
-fun WearApp(greetingName: String) {
+fun ScreenPreview() {
     RunMateTheme {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colors.background),
-            contentAlignment = Alignment.Center
-        ) {
-            TimeText()
-            Greeting(greetingName = greetingName)
-        }
+        MenuScreen()
+//        SplashScreen(onTimeout = {})
     }
-}
-
-@Composable
-fun Greeting(greetingName: String) {
-    Text(
-        modifier = Modifier.fillMaxWidth(),
-        textAlign = TextAlign.Center,
-        color = MaterialTheme.colors.primary,
-        text = stringResource(R.string.hello_world, greetingName)
-    )
-}
-
-@Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true)
-@Composable
-fun DefaultPreview() {
-    WearApp("Preview Android")
 }
