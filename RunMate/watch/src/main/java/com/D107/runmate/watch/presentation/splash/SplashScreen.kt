@@ -13,6 +13,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.animation.core.*
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.wear.compose.material.Text
 import coil.compose.AsyncImage
 import coil.ImageLoader
@@ -51,7 +54,7 @@ fun SplashScreen(onTimeout: () -> Unit) {
                 initialValue = 0f,
                 targetValue = 1f,
                 animationSpec = tween(
-                    durationMillis = 5000,
+                    durationMillis = 10000,
                     easing = FastOutSlowInEasing
                 )
             ) { value, _ ->
@@ -78,7 +81,25 @@ fun SplashScreen(onTimeout: () -> Unit) {
             text = "RUNMATE",
             fontSize = 42.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Gray
+            color = Color.Black
+        )
+
+        // 흰색 텍스트 (클리핑 적용)
+        Text(
+            text = "RUNMATE",
+            fontSize = 42.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            modifier = Modifier
+                .clipToBounds()
+                .drawWithContent {
+                    clipRect(
+                        left = 0f,
+                        right = size.width * animationProgress
+                    ) {
+                        this@drawWithContent.drawContent()
+                    }
+                }
         )
 
         AsyncImage(
