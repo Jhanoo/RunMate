@@ -1,4 +1,7 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
+
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:d107}
     username: ${DB_USERNAME:runhwani}
@@ -15,21 +18,25 @@ spring:
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
-  redis:
-    host: ${REDIS_HOST:k12d107.p.ssafy.io}
-    port: ${REDIS_PORT:6379}
-    timeout: 10000
-    lettuce:
-      pool:
-        max-active: 8
-        max-idle: 8
-        min-idle: 0
-        max-wait: -1
-    connect-timeout: 10000
+  data:
+    redis:
+      host: ${REDIS_HOST:k12d107.p.ssafy.io}
+      port: ${REDIS_PORT:6379}
+      timeout: 10000
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1
+      connect-timeout: 10000
 
 mybatis:
-  mapper-locations: classpath:mapper/**/*.xml
-  type-aliases-package: com.runhwani.runmate.domain
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  mapper-locations: classpath:mappers/*.xml
+  type-aliases-package: com.runhwani.runmate.model
 
 management:
   endpoints:
@@ -45,7 +52,7 @@ jwt:
 
 springdoc:
   swagger-ui:
-    path: /swagger-ui.html
+    path: /swagger-ui/index.html
     disable-swagger-default-url: true
     enabled: true
     config-url: /v3/api-docs/swagger-config
@@ -57,5 +64,12 @@ springdoc:
   show-actuator: false
   default-produces-media-type: application/json
   default-consumes-media-type: application/json
+
+logging:
+  level:
+    com.runhwani.runmate: DEBUG
+    org.mybatis: DEBUG
+
+
 server:
   port: 8081
