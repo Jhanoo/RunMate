@@ -79,7 +79,16 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("pace") {
-                        PaceScreen()
+                        PaceScreen(
+                            onPaceSelected = { pace ->
+                                navController.navigate("running/$pace")
+                            }
+                        )
+                    }
+
+                    composable("running/{pace}") { backStackEntry ->
+                        val pace = backStackEntry.arguments?.getString("pace") ?: "0:00"
+                        RunningScreen(pace = pace)
                     }
 
                 }
