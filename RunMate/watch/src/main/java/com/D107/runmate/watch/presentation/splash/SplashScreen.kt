@@ -65,7 +65,7 @@ fun SplashScreen(onTimeout: () -> Unit) {
         // 프레임 애니메이션
         launch {
             while (true) {
-                delay(15) // 프레임 레이트 조절
+                delay(30) // 프레임 레이트 조절
                 currentFrame = (currentFrame + 1) % frameResources.size
             }
         }
@@ -88,7 +88,7 @@ fun SplashScreen(onTimeout: () -> Unit) {
         onTimeout()
     }
 
-    val gifSize = 150.dp
+    val gifSize = 190.dp
     val startX = -(screenWidth.value / 2) - (gifSize.value / 2)
     val endX = (screenWidth.value / 2) + (gifSize.value / 2) + 90f
     val gifOffsetX = startX + (endX - startX) * animationProgress
