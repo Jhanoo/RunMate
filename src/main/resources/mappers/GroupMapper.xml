@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.runhwani.runmate.dao.GroupDao">
+
+    <!-- resultMap 정의 (컬럼↔필드 매핑) -->
+    <resultMap id="GroupResult" type="com.runhwani.runmate.model.Group">
+        <id column="group_id" property="groupId" javaType="java.util.UUID"/>
+        <result column="group_name" property="groupName"/>
+        <result column="course_id" property="courseId" javaType="java.util.UUID"/>
+        <result column="start_time" property="startTime"/>
+        <result column="start_location" property="startLocation"/>
+        <result column="latitude" property="latitude"/>
+        <result column="longitude" property="longitude"/>
+        <result column="invite_code" property="inviteCode"/>
+    </resultMap>
+
+    <!-- insert 구문 -->
+    <insert id="insert" parameterType="com.runhwani.runmate.model.Group">
+        INSERT INTO groups (group_id, group_name, course_id,
+                            start_time, start_location,
+                            latitude, longitude, invite_code)
+        VALUES (#{groupId}, #{groupName}, #{courseId},
+                #{startTime}, #{startLocation},
+                #{latitude}, #{longitude}, #{inviteCode})
+    </insert>
+
+    <!-- (선택) findById -->
+    <select id="findById" resultMap="GroupResult" parameterType="java.util.UUID">
+        SELECT *
+        FROM groups
+        WHERE group_id = #{groupId}
+    </select>
+</mapper>

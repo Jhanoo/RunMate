@@ -1,31 +1,33 @@
-package com.runhwani.runmate.model;
+// src/main/java/com/runhwani/runmate/dto/GroupResponse.java
+package com.runhwani.runmate.dto.response.group;
 
 import lombok.*;
 import java.util.UUID;
 import java.time.LocalDateTime;
 
 /**
- * 그룹 정보
+ * 그룹 생성 응답용 DTO
  */
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Group {
-    /** PK (groups.group_id) */
+public class GroupResponse {
+    /** 생성된 그룹 ID */
     private UUID groupId;
-    /** 그룹 이름 */
+    /** 발급된 초대 코드 */
+    private String inviteCode;
+    /** 그룹명 */
     private String groupName;
-    /** 연관 코스 (courses.course_id FK) */
+    /** 연관 코스 ID */
     private UUID courseId;
-    /** 시작 시각 */
+    /** 시작 일시 */
     private LocalDateTime startTime;
-    /** 시작 위치(주소) */
+    /** 시작 위치 */
     private String startLocation;
     /** 시작 지점 위도 */
     private Double latitude;
     /** 시작 지점 경도 */
     private Double longitude;
-    /** 초대 코드 */
-    private String inviteCode;
 }
