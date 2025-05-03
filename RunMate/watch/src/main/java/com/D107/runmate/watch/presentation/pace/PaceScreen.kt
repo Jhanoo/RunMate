@@ -127,10 +127,10 @@ fun PacePickerColumn(
     LaunchedEffect(state) {
         snapshotFlow { state.centerItemIndex }
             .collect { index ->
-                if (index in items.indices){
+                if (index in items.indices) {
                     onItemSelected(items[index])
                 }
-        }
+            }
     }
 
     ScalingLazyColumn(
@@ -140,7 +140,12 @@ fun PacePickerColumn(
             .width(40.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        autoCentering = androidx.wear.compose.foundation.lazy.AutoCenteringParams(itemIndex = 0)
+        autoCentering = androidx.wear.compose.foundation.lazy.AutoCenteringParams(itemIndex = 0),
+
+        flingBehavior = androidx.wear.compose.foundation.lazy.ScalingLazyColumnDefaults.snapFlingBehavior(
+            state = state,
+            snapOffset = 0.dp // 중앙에 정확히 스냅
+        )
     ) {
         items(items.size) { index ->
             val item = items[index]
