@@ -1,4 +1,4 @@
 # S12P31D107
 
 ## 🏃‍➡️ 캐릭터 소개
-![톤톤이](/uploads/5174b56416810609381d08f008653b76/톤톤이.gif){width=500}
+<img src="https://lab.ssafy.com/s12-final/S12P31D107/-/raw/master/images/tonie.gif?ref_type=heads" />
