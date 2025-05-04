@@ -59,9 +59,11 @@ fun ResultScreen(
             )
 
             HorizontalDivider(
-                thickness = .5.dp,
+                modifier = Modifier.width(110.dp),
+                thickness = .8.dp,
 //                color = Color.Gray,
-                color = colorResource(id = R.color.gray_text2)
+                color = colorResource(id = R.color.gray_text2),
+
             )
 
             Text(
