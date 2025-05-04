@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.runhwani.runmate.dao.CourseDao">
+
+    <insert id="insertCourse" parameterType="com.runhwani.runmate.model.Course">
+        INSERT INTO courses (
+            course_id,
+            course_name,
+            is_shared,
+            distance,
+            avg_elevation,
+            start_location,
+            gpx_file,
+            created_by
+        ) VALUES (
+                     #{courseId},
+                     #{courseName},
+                     #{isShared},
+                     #{distance},
+                     #{avgElevation},
+                     #{startLocation},
+                     #{gpxFile},
+                     #{createdBy}
+                 )
+    </insert>
+
+</mapper>
