@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/runningFragment">
+    app:startDestination="@id/insoleFragment">
 
     <fragment
         android:id="@+id/AIManagerFragment"
@@ -29,6 +29,17 @@
         android:id="@+id/wearableFragment"
         android:name="com.D107.runmate.presentation.wearable.WearableFragment"
         android:label="fragment_wearable"
-        tools:layout="@layout/fragment_wearable" />
+        tools:layout="@layout/fragment_wearable">
+<!--        &lt;!&ndash;  추후 ViewPager등을 사용하면 지우기   &ndash;&gt;-->
+<!--        <action-->
+<!--            android:id="@+id/action_wearable_to_insole"-->
+<!--            app:destination="@id/insoleFragment" />-->
+
+    </fragment>
+    <fragment
+        android:id="@+id/insoleFragment"
+        android:name="com.D107.runmate.presentation.wearable.InsoleFragment"
+        android:label="fragment_insole"
+        tools:layout="@layout/fragment_insole" />
 
 </navigation>

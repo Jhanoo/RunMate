@@ -75,4 +75,7 @@ dependencies {
     // Moshi
     implementation(libs.moshi)
     implementation(libs.converter.moshi)
+
+    //Timber
+    implementation("com.jakewharton.timber:timber:5.0.1")
 }
