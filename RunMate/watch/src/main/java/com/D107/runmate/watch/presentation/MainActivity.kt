@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
                     navController = navController,
                     startDestination = "splash"
                 ) {
-                    
+
                     // 스플래시 화면에서 메뉴 화면으로 이동 (백스택x)
                     composable("splash") {
                         SplashScreen(
@@ -63,7 +63,11 @@ class MainActivity : ComponentActivity() {
                     // 메뉴 화면에서 러닝, 페이스 설정 화면으로 이동
                     composable("menu") {
                         MenuScreen(
-                            onNavigateToRunning = { navController.navigate("running") },
+                            onNavigateToRunning = {
+                                navController.navigate("running") {
+                                    popUpTo("menu") { inclusive = true }
+                                }
+                            },
                             onNavigateToPace = { navController.navigate("pace") }
                         )
                     }
@@ -73,7 +77,10 @@ class MainActivity : ComponentActivity() {
                         PaceScreen(
                             onPaceSelected = { pace ->
                                 savedPace = pace
-                                navController.navigate("running/$pace")
+                                navController.navigate("running/$pace") {
+                                    popUpTo("menu") {inclusive = true}
+                                    launchSingleTop = true
+                                }
                             }
                         )
                     }
@@ -89,7 +96,7 @@ class MainActivity : ComponentActivity() {
                                 savedRunningData = currentRunningData
 
                                 navController.navigate("pause/${mode.name}/$data") {
-                                    popUpTo("running") { inclusive = false }
+                                    popUpTo("running") {inclusive = true}
                                     launchSingleTop = true
                                 }
                             }
@@ -111,7 +118,7 @@ class MainActivity : ComponentActivity() {
                                 savedRunningData = currentRunningData
 
                                 navController.navigate("pause/${mode.name}/$data") {
-                                    popUpTo("running/{pace}") { inclusive = false }
+                                    popUpTo("running/{pace}") { inclusive = true }
                                     launchSingleTop = true
                                 }
                             }
@@ -120,7 +127,9 @@ class MainActivity : ComponentActivity() {
 
                     // 일시정지 화면에서 러닝,결과 화면으로 이동 (백스택x)
                     composable("pause/{mode}/{data}") { backStackEntry ->
-                        val mode = DisplayMode.valueOf(backStackEntry.arguments?.getString("mode") ?: "TIME")
+                        val mode = DisplayMode.valueOf(
+                            backStackEntry.arguments?.getString("mode") ?: "TIME"
+                        )
                         val data = backStackEntry.arguments?.getString("data") ?: ""
 
                         PauseScreen(
@@ -149,8 +158,7 @@ class MainActivity : ComponentActivity() {
                                 savedRunningData = RunningData()
 
                                 navController.navigate("result") {
-                                    popUpTo("menu") { inclusive = false }
-                                    launchSingleTop = true
+                                    popUpTo(0) { inclusive = true }
                                 }
                             }
                         )
@@ -158,7 +166,13 @@ class MainActivity : ComponentActivity() {
 
                     // 결과 화면
                     composable("result") {
-                        ResultScreen()
+                        ResultScreen(
+                            onClick = {
+                                navController.navigate("menu") {
+                                    popUpTo(0) { inclusive = true }
+                                }
+                            }
+                        )
                     }
                 }
             }
