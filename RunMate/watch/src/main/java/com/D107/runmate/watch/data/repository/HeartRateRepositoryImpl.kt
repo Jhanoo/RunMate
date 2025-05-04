@@ -38,7 +38,7 @@ class HeartRateRepositoryImpl @Inject constructor(
             val heartRateDataPoints = data.getData(DataType.HEART_RATE_BPM)
             heartRateDataPoints.forEach { dataPoint ->
                 val bpm = dataPoint.value.toInt() // 데이터에서 bpm 추출
-                Log.d("sensor","심박수 in RepoImpl : $bpm")
+//                Log.d("sensor","심박수 in RepoImpl : $bpm")
                 _heartRateFlow.value = HeartRate(bpm)
             }
         }

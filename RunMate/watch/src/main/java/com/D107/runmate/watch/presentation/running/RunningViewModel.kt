@@ -24,7 +24,7 @@ class RunningViewModel @Inject constructor(
 
     // ViewModel이 생성될 때 심박수 수집 시작
     init {
-        Log.d("sensor", "ViewModel init")
+//        Log.d("sensor", "ViewModel init")
         viewModelScope.launch {
             startHeartRateMonitoringUseCase()
             collectHeartRate()
@@ -36,7 +36,7 @@ class RunningViewModel @Inject constructor(
         viewModelScope.launch {
             getHeartRateUseCase()
                 .collect{ heartRate ->
-                    Log.d("sensor","심박수 in ViewModel : ${heartRate.bpm}")
+//                    Log.d("sensor","심박수 in ViewModel : ${heartRate.bpm}")
                     _heartRate.value = heartRate.bpm // 수집한 심박수 값 갱신
                 }
         }

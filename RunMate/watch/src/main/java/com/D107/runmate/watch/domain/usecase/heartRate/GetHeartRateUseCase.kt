@@ -14,7 +14,7 @@ class GetHeartRateUseCase @Inject constructor(
     operator fun invoke(): Flow<HeartRate> {
         return heartRateRepository.getHeartRateFlow()
             .onEach { heartRate ->
-                Log.d("sensor", "UseCase에서 전달하는 심박수: ${heartRate.bpm}")
+//                Log.d("sensor", "UseCase에서 전달하는 심박수: ${heartRate.bpm}")
             }
     }
 }
