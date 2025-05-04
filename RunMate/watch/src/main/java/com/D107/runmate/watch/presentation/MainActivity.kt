@@ -1,5 +1,7 @@
 package com.D107.runmate.watch.presentation
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,6 +13,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
@@ -23,7 +27,10 @@ import com.D107.runmate.watch.presentation.running.RunningData
 import com.D107.runmate.watch.presentation.running.RunningScreen
 import com.D107.runmate.watch.presentation.splash.SplashScreen
 import com.D107.runmate.watch.presentation.theme.RunMateTheme
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.components.ActivityComponent
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -32,6 +39,17 @@ class MainActivity : ComponentActivity() {
         splashScreen.setKeepOnScreenCondition { false }
 
         setTheme(android.R.style.Theme_DeviceDefault)
+
+        // 권환 확인 및 요청
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.BODY_SENSORS)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.BODY_SENSORS),
+                BODY_SENSOR_PERMISSION_REQUEST_CODE
+            )
+        }
 
         setContent {
             RunMateTheme {
@@ -78,7 +96,7 @@ class MainActivity : ComponentActivity() {
                             onPaceSelected = { pace ->
                                 savedPace = pace
                                 navController.navigate("running/$pace") {
-                                    popUpTo("menu") {inclusive = true}
+                                    popUpTo("menu") { inclusive = true }
                                     launchSingleTop = true
                                 }
                             }
@@ -96,7 +114,7 @@ class MainActivity : ComponentActivity() {
                                 savedRunningData = currentRunningData
 
                                 navController.navigate("pause/${mode.name}/$data") {
-                                    popUpTo("running") {inclusive = true}
+                                    popUpTo("running") { inclusive = true }
                                     launchSingleTop = true
                                 }
                             }
@@ -108,7 +126,7 @@ class MainActivity : ComponentActivity() {
                         val pace = backStackEntry.arguments?.getString("pace") ?: "0:00"
                         RunningScreen(
                             pace = pace,
-                            runningData = savedRunningData,
+//                            runningData = savedRunningData,
                             savedState = Triple(savedTopIndex, savedLeftIndex, savedRightIndex),
                             onPauseClick = { mode, data, topIndex, leftIndex, rightIndex, currentRunningData ->
                                 savedTopIndex = topIndex
@@ -177,6 +195,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+
+    }
+
+    companion object {
+        private const val BODY_SENSOR_PERMISSION_REQUEST_CODE = 1
     }
 }
 

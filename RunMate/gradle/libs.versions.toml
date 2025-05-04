@@ -8,7 +8,9 @@ composeMaterialVersion = "1.3.0"
 composeNavigation = "1.2.0"
 converterMoshi = "2.9.0"
 glide = "4.16.0"
+healthServicesClient = "1.0.0-rc02"
 hiltAndroidCompiler = "2.51.1"
+hiltNavigationCompose = "1.2.0"
 kotlin = "1.9.0"
 coreKtx = "1.10.1"
 junit = "4.13.2"
@@ -41,6 +43,8 @@ androidx-compose-material-v130 = { module = "androidx.wear.compose:compose-mater
 androidx-compose-navigation = { module = "androidx.wear.compose:compose-navigation", version.ref = "composeFoundationVersion" }
 androidx-compose-navigation-v120 = { module = "androidx.wear.compose:compose-navigation", version.ref = "composeNavigation" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-health-services-client = { module = "androidx.health:health-services-client", version.ref = "healthServicesClient" }
+androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-navigation-fragment = { module = "androidx.navigation:navigation-fragment", version.ref = "navigationFragment" }
 androidx-navigation-safe-args-gradle-plugin = { module = "androidx.navigation:navigation-safe-args-gradle-plugin", version.ref = "navVersion" }
 androidx-navigation-ui = { module = "androidx.navigation:navigation-ui", version.ref = "navigationFragment" }

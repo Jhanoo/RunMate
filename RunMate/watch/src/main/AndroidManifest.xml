@@ -5,7 +5,15 @@
 
     <uses-feature android:name="android.hardware.type.watch" />
 
+    <!--  BODY_SENSORS 권한  -->
+    <uses-permission android:name="android.permission.BODY_SENSORS" />
+    <uses-permission android:name="android.permission.BODY_SENSORS_BACKGROUND" />
+
+    <!--  사용자 활동 시작/종료 감지  -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+
     <application
+        android:name=".presentation.WatchApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -16,10 +24,6 @@
             android:name="com.google.android.wearable"
             android:required="true" />
 
-        <!--
-               Set to true if your app is Standalone, that is, it does not require the handheld
-               app to run.
-        -->
         <meta-data
             android:name="com.google.android.wearable.standalone"
             android:value="true" />

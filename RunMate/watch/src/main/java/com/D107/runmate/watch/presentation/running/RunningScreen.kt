@@ -1,5 +1,6 @@
 package com.D107.runmate.watch.presentation.running
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,6 +23,7 @@ import androidx.wear.compose.material.ButtonDefaults
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.wear.compose.material.Text
 import com.D107.runmate.watch.R
 
@@ -42,23 +44,49 @@ enum class DisplayMode(val label: String) {
 @Composable
 fun RunningScreen(
     pace: String = "0:00", // PaceScreen에서 넘겨받은 값
-    runningData: RunningData = RunningData(),
     progress: Float = 0.1f, // 0.0 to 1.0
     isPaused: Boolean = false,
     savedState: Triple<Int, Int, Int>? = null,
-    onPauseClick: (DisplayMode, String, Int, Int, Int, RunningData) -> Unit = { _, _, _, _, _, _ -> }
+    onPauseClick: (DisplayMode, String, Int, Int, Int, RunningData) -> Unit = { _, _, _, _, _, _ -> },
+    viewModel: RunningViewModel = hiltViewModel()
 ) {
+    // BPM 상태 수집
+    val bpm by viewModel.heartRate.collectAsState()
+    Log.d("sensor","UI에서 관찰 중인 심박수 : $bpm")
+
     var topDisplayIndex by remember { mutableStateOf(savedState?.first ?: 0) }
     var leftDisplayIndex by remember { mutableStateOf(savedState?.second ?: 1) }
     var rightDisplayIndex by remember { mutableStateOf(savedState?.third ?: 2) }
 
     // 기본 데이터에 전달받은 pace를 반영
-    val currentRunningData = remember(pace) {
-        runningData.copy(pace = pace.replace(":", "'") + "\"")
+    // 실시간 BPM 반영
+    val currentRunningData = remember(pace, bpm) {
+        RunningData(
+            pace = if (pace != "0:00") pace.replace(":", "'") + "\"" else "5'10\"",
+            bpm = bpm.toString(),
+            distance = "8.5",
+            time = "1:10:13",
+        )
     }
 
     // pace가 "0:00"이 아닌지 확인
     val isPaceFixed = pace != "0:00"
+
+    // 화면 진입시 모니터링 시작
+    LaunchedEffect(Unit) {
+        viewModel.startMonitoring()
+    }
+
+    // 화면 종료시 모니터링 중지
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.stopMonitoring()
+        }
+    }
+
+    LaunchedEffect(bpm) {
+        Log.d("sensor","심박수 변경됨 : $bpm")
+    }
 
     Box(
         modifier = Modifier
@@ -94,8 +122,8 @@ fun RunningScreen(
             // 위쪽 상태 버튼
             DisplayButton(
                 modifier = Modifier.padding(top = 20.dp),
-                displayMode = DisplayMode.values()[topDisplayIndex],
-                runningData = runningData,
+                displayMode = DisplayMode.entries[topDisplayIndex],
+                runningData = currentRunningData,
                 isLarge = true,
                 onClick = { topDisplayIndex = (topDisplayIndex + 1) % 4 }
             )
@@ -110,7 +138,7 @@ fun RunningScreen(
                     // pace가 전달된 경우: 왼쪽은 runningData의 pace 고정
                     DisplayButton(
                         displayMode = DisplayMode.PACE,
-                        runningData = runningData,
+                        runningData = currentRunningData,
                         onClick = {}, // 클릭 이벤트 비활성화
                         customLabel = "페이스"
                     )
@@ -118,7 +146,7 @@ fun RunningScreen(
                     // pace가 전달되지 않은 경우: 기존 동작 유지
                     DisplayButton(
                         displayMode = DisplayMode.values()[leftDisplayIndex],
-                        runningData = runningData,
+                        runningData = currentRunningData,
                         onClick = { leftDisplayIndex = (leftDisplayIndex + 1) % 4 }
                     )
                 }
@@ -135,7 +163,7 @@ fun RunningScreen(
                     // pace가 전달되지 않은 경우: 기존 동작 유지
                     DisplayButton(
                         displayMode = DisplayMode.values()[rightDisplayIndex],
-                        runningData = runningData,
+                        runningData = currentRunningData,
                         onClick = { rightDisplayIndex = (rightDisplayIndex + 1) % 4 }
                     )
                 }
@@ -156,12 +184,19 @@ fun RunningScreen(
                 .clickable(onClick = {
                     val titleMode = DisplayMode.entries[topDisplayIndex]
                     val titleData = when (titleMode) {
-                        DisplayMode.TIME -> runningData.time
-                        DisplayMode.BPM -> runningData.bpm
-                        DisplayMode.PACE -> runningData.pace
-                        DisplayMode.DISTANCE -> runningData.distance
+                        DisplayMode.TIME -> currentRunningData.time
+                        DisplayMode.BPM -> currentRunningData.bpm
+                        DisplayMode.PACE -> currentRunningData.pace
+                        DisplayMode.DISTANCE -> currentRunningData.distance
                     }
-                    onPauseClick(titleMode, titleData, topDisplayIndex, leftDisplayIndex, rightDisplayIndex, runningData)
+                    onPauseClick(
+                        titleMode,
+                        titleData,
+                        topDisplayIndex,
+                        leftDisplayIndex,
+                        rightDisplayIndex,
+                        currentRunningData
+                    )
                 }),
             contentAlignment = Alignment.TopCenter
         ) {
