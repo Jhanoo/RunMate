@@ -2,11 +2,15 @@ version: '3'
 
 services:
   springboot:
+    image: openjdk:17-jdk-slim
     build: .
     container_name: runmate-backend
+    volumes:
+      - ./app.jar:/app/app.jar     # 호스트의 app.jar를 컨테이너에 마운트
     restart: always
     ports:
       - "8080:8080"
+    command: ["java","-jar","/app/app.jar"]
     env_file:
       - .env
     depends_on:
