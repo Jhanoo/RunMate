@@ -30,6 +30,17 @@ spring:
           min-idle: 0
           max-wait: -1
       connect-timeout: 10000
+  # multipart 설정
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+      resolve-lazily: true
+  # mvc 설정
+  mvc:
+    converters:
+      preferred-json-mapper: jackson
 
 mybatis:
   configuration:
@@ -52,7 +63,7 @@ jwt:
 
 springdoc:
   swagger-ui:
-    path: /swagger-ui/index.html
+    path: /swagger-ui.html
     disable-swagger-default-url: true
     enabled: true
     config-url: /v3/api-docs/swagger-config
@@ -73,3 +84,8 @@ logging:
 
 server:
   port: 8080
+
+course:
+  gpx:
+    # gpt 추천 경로 : EC2 실제 저장 경로로 들어가야 한다.
+    dir: /home/ubuntu/gpx
