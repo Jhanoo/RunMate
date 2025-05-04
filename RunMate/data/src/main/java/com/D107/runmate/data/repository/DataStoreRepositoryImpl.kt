@@ -21,4 +21,10 @@ class DataStoreRepositoryImpl @Inject constructor(
     override suspend fun saveAccessToken(accessToken: String) = dataStore.saveAccessToken(accessToken)
 
     override suspend fun clearAll() = dataStore.clearAll()
+
+    override val savedInsoleAddresses: Flow<Pair<String?, String?>> = dataStore.savedAddressesFlow
+
+    override suspend fun saveInsoleAddresses(leftAddress: String, rightAddress: String) = dataStore.saveInsoleAddresses(leftAddress, rightAddress)
+
+    override suspend fun clearInsoleAddresses() = dataStore.clearInsoleAddresses()
 }

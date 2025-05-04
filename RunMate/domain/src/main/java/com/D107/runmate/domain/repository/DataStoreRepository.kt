@@ -13,4 +13,8 @@ interface DataStoreRepository {
     suspend fun saveAccessToken(accessToken: String)
 
     suspend fun clearAll()
+
+    val savedInsoleAddresses: Flow<Pair<String?, String?>> // 이름 변경 고려 (savedAddressesFlow -> savedInsoleAddresses)
+    suspend fun saveInsoleAddresses(leftAddress: String, rightAddress: String)
+    suspend fun clearInsoleAddresses()
 }

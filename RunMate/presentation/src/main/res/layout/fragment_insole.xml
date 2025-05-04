@@ -4,130 +4,322 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:background="#F5F5F5">
 
-    <Button
-        android:id="@+id/buttonPair"
+
+    <!-- Connected Insole Card -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_insole_status_insole"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="스마트 인솔 페어링"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="36dp"
+        android:layout_marginEnd="16dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="2dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <TextView
-        android:id="@+id/textViewConnectionStatus"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+
+            <!-- Connected Insole View -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_connected_insole"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/iv_connected_insole"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/img_insole"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+                <!--    버튼색은 나중에 다른 버튼이랑 맞게-->
+                <Button
+                    android:id="@+id/btn_disconnect_insole"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:text="연결 끊기"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/iv_connected_insole"
+                    app:layout_constraintTop_toBottomOf="@id/tv_insole_name_insole"/>
+                <TextView
+                    android:id="@+id/tv_insole_name_insole"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Runmate Insole"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/iv_connected_insole"
+                    app:layout_constraintTop_toTopOf="@id/iv_connected_insole" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Disconnected Insole View -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_disconnected_insole"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/iv_disconnected_image_insole"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/img_no_insole"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tv_disconnected_message_insole"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="연결된 인솔이 없습니다"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toTopOf="@id/btn_find_insole"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/iv_disconnected_image_insole"
+                    app:layout_constraintTop_toTopOf="@id/iv_disconnected_image_insole"
+                    app:layout_constraintVertical_chainStyle="packed" />
+                <!--    버튼색은 나중에 다른 버튼이랑 맞게-->
+                <Button
+                    android:id="@+id/btn_find_insole"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:text="인솔 찾기"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/iv_disconnected_image_insole"
+                    app:layout_constraintTop_toBottomOf="@id/tv_disconnected_message_insole" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Diagnosis Results Card -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_diagnosis_results_insole"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:gravity="center"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:layout_marginEnd="16dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="2dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/buttonPair"
-        tools:text="연결 상태: 양쪽 연결됨" />
+        app:layout_constraintTop_toBottomOf="@id/card_insole_status_insole">
 
-    <TextView
-        android:id="@+id/textViewSelectedLeft"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="4dp"
-        app:layout_constraintEnd_toStartOf="@id/textViewSelectedRight"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textViewConnectionStatus"
-        tools:text="선택된 왼쪽: Insole_L (XX:XX)" />
-
-    <TextView
-        android:id="@+id/textViewSelectedRight"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/textViewSelectedLeft"
-        app:layout_constraintTop_toBottomOf="@id/textViewConnectionStatus"
-        tools:text="선택된 오른쪽: Insole_R (YY:YY)" />
-
-
-    <LinearLayout
-        android:id="@+id/layoutLeftData"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:orientation="vertical"
-        android:padding="8dp"
-        app:layout_constraintEnd_toStartOf="@id/layoutRightData"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textViewSelectedLeft">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="왼쪽 인솔 데이터"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
-
-        <TextView
-            android:id="@+id/textViewLeftFsr"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            tools:text="FSR: 100, 200, 300, 0, 1000" />
+            android:padding="16dp">
 
-        <TextView
-            android:id="@+id/textViewLeftYpr"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            tools:text="YPR: 10.5, -20.1, 5.8" />
+            <TextView
+                android:id="@+id/tv_diagnosis_title_insole"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="러닝 착지 패턴 분석"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-    </LinearLayout>
+            <!-- Diagnosis Results View -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_diagnosis_results_insole"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_diagnosis_title_insole">
 
-    <LinearLayout
-        android:id="@+id/layoutRightData"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:orientation="vertical"
-        android:padding="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/layoutLeftData"
-        app:layout_constraintTop_toBottomOf="@id/textViewSelectedRight">
+                <ImageView
+                    android:id="@+id/iv_insole_heatmap_insole"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:src="@drawable/img_no_insole"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="오른쪽 인솔 데이터"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                <TextView
+                    android:id="@+id/tv_midfoot_label_insole"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="미드풋"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toEndOf="@id/iv_insole_heatmap_insole"
+                    app:layout_constraintTop_toTopOf="@id/iv_insole_heatmap_insole" />
 
-        <TextView
-            android:id="@+id/textViewRightFsr"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            tools:text="FSR: 150, 250, 350, 1000, 0" />
+                <TextView
+                    android:id="@+id/tv_midfoot_value_insole"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:text="37%"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@id/tv_midfoot_label_insole"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/tv_midfoot_label_insole" />
 
-        <TextView
-            android:id="@+id/textViewRightYpr"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            tools:text="YPR: 12.3, -22.4, 6.1" />
+                <TextView
+                    android:id="@+id/tv_forefoot_label_insole"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:text="포어풋"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toEndOf="@id/iv_insole_heatmap_insole"
+                    app:layout_constraintTop_toBottomOf="@id/tv_midfoot_label_insole" />
 
-    </LinearLayout>
+                <TextView
+                    android:id="@+id/tv_forefoot_value_insole"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:text="45%"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@id/tv_forefoot_label_insole"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/tv_forefoot_label_insole" />
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/buttonPair"
-        app:layout_constraintEnd_toEndOf="@+id/buttonPair"
-        app:layout_constraintStart_toStartOf="@+id/buttonPair"
-        app:layout_constraintTop_toTopOf="@+id/buttonPair" />
+                <TextView
+                    android:id="@+id/tv_heel_label_insole"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:text="힐 스트라이크"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toEndOf="@id/iv_insole_heatmap_insole"
+                    app:layout_constraintTop_toBottomOf="@id/tv_forefoot_label_insole" />
 
+                <TextView
+                    android:id="@+id/tv_heel_value_insole"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:text="18%"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@id/tv_heel_label_insole"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/tv_heel_label_insole" />
 
+                <TextView
+                    android:id="@+id/tv_analysis_title_insole"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="스마트 균형 분석"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_heel_label_insole" />
+
+                <TextView
+                    android:id="@+id/tv_analysis_content_insole"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="오른쪽 발의 외측 엄지이 좌측 대비 23% 높게 나타나는 발자세감 패턴이 확인되었으며, 이러한 비대칭적 보행은 뼈관절 질환 초기 증상일 수 있어 추가 진정학적 검사가 필요합니다."
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_analysis_title_insole" />
+
+                <Button
+                    android:id="@+id/btn_diagnose_insole"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="진단하기"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_analysis_content_insole" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- No Diagnosis Results View -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_no_diagnosis_insole"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_diagnosis_title_insole">
+
+                <TextView
+                    android:id="@+id/tv_no_diagnosis_message_insole"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:gravity="center"
+                    android:padding="24dp"
+                    android:text="진단 결과가 없습니다"
+                    android:textColor="#777777"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tv_connect_insole_message_insole"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:padding="8dp"
+                    android:text="스마트 인솔을 연결하고 진단받아보세요"
+                    android:textColor="#777777"
+                    android:textSize="14sp"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_no_diagnosis_message_insole" />
+
+                <Button
+                    android:id="@+id/btn_diagnose_no_results_insole"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="진단하기"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_connect_insole_message_insole" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
 </androidx.constraintlayout.widget.ConstraintLayout>

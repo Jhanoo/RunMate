@@ -22,6 +22,7 @@ import com.D107.runmate.domain.model.Insole.InsoleConnectionState
 import com.D107.runmate.domain.model.Insole.SmartInsole
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentInsoleBinding
+import com.D107.runmate.presentation.wearable.state.InsoleCardState
 import com.D107.runmate.presentation.wearable.viewmodel.InsoleViewModel
 import com.google.android.material.snackbar.Snackbar
 import com.ssafy.locket.presentation.base.BaseFragment
@@ -65,8 +66,6 @@ class InsoleFragment : BaseFragment<FragmentInsoleBinding>(
                 if (!it.value) {
                     allGranted = false
                     Timber.w("Permission denied: ${it.key}")
-                    // 사용자에게 권한 필요성 설명 또는 앱 종료 등 처리
-                    showSnackbar("BLE 기능을 사용하려면 권한 승인이 필요합니다.")
                 }
             }
             if (allGranted) {
@@ -85,7 +84,6 @@ class InsoleFragment : BaseFragment<FragmentInsoleBinding>(
                 startActualScan()
             } else {
                 Timber.w("Bluetooth not enabled by user")
-                showSnackbar("블루투스를 활성화해야 인솔을 찾을 수 있습니다.")
             }
         }
 
@@ -97,20 +95,38 @@ class InsoleFragment : BaseFragment<FragmentInsoleBinding>(
     }
 
     private fun setupButtonClickListeners() {
-        binding.buttonPair.setOnClickListener {
+        binding.btnFindInsole.setOnClickListener {
             Timber.d("click")
-            // 페어링 버튼 클릭 시
-            // 1. 현재 연결 상태 확인 -> 연결되어 있으면 연결 해제? 아니면 무시? -> 여기선 해제 후 재시도
-            if (viewModel.connectionState.value != InsoleConnectionState.DISCONNECTED &&
-                viewModel.connectionState.value != InsoleConnectionState.FAILED) {
-                Timber.d("showDisconnectDialog")
-                showDisconnectDialog()
-            } else {
-                // 2. 권한 확인 및 스캔 시작
-                Timber.d("권한 확인")
-                checkPermissionsAndStartScan()
-            }
+            Timber.d("권한 확인")
+            checkPermissionsAndStartScan()
+
         }
+
+        binding.btnDisconnectInsole.setOnClickListener{
+            showDisconnectDialog()
+        }
+
+        binding.btnDiagnoseInsole.setOnClickListener {
+//            viewModel.startDiagnosis()
+        }
+
+        binding.btnDiagnoseNoResultsInsole.setOnClickListener {
+//            viewModel.startDiagnosis()
+        }
+//        binding.buttonPair.setOnClickListener {
+//            Timber.d("click")
+//            // 페어링 버튼 클릭 시
+//            // 1. 현재 연결 상태 확인 -> 연결되어 있으면 연결 해제? 아니면 무시? -> 여기선 해제 후 재시도
+//            if (viewModel.connectionState.value != InsoleConnectionState.DISCONNECTED &&
+//                viewModel.connectionState.value != InsoleConnectionState.FAILED) {
+//                Timber.d("showDisconnectDialog")
+//                showDisconnectDialog()
+//            } else {
+//                // 2. 권한 확인 및 스캔 시작
+//                Timber.d("권한 확인")
+//                checkPermissionsAndStartScan()
+//            }
+//        }
     }
 
     private fun checkPermissionsAndStartScan() {
@@ -131,7 +147,6 @@ class InsoleFragment : BaseFragment<FragmentInsoleBinding>(
     private fun checkBluetoothAndStartScan() {
         val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
         if (bluetoothAdapter == null) {
-            showSnackbar("이 기기는 블루투스를 지원하지 않습니다.")
             return
         }
         if (!bluetoothAdapter.isEnabled) {
@@ -154,13 +169,46 @@ class InsoleFragment : BaseFragment<FragmentInsoleBinding>(
     }
 
     private fun observeViewModel() {
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // 스캔 상태 관찰 (Dialog 표시/숨김, ProgressBar)
+                // --- 인솔 카드 상태 관찰 ---
+                launch {
+                    viewModel.insoleCardState.collect { state ->
+                        Timber.d("InsoleCardState collected: $state")
+                        updateInsoleCardUI(state)
+                    }
+                }
+
+                // --- 스캔 상태 관찰 (Dialog 관련) ---
                 launch {
                     viewModel.scanState.collect { isScanning ->
-                        binding.progressBar.visibility = if (isScanning) View.VISIBLE else View.GONE
-                        binding.buttonPair.isEnabled = !isScanning // 스캔 중 버튼 비활성화
+                        // ProgressBar는 별도로 관리? 아니면 Dialog 내부에?
+                        // 여기서는 일단 ProgressBar 없다고 가정
+                        if (isScanning && (deviceListDialog == null || !deviceListDialog!!.isShowing)) {
+                            showDeviceSelectionDialog()
+                        } else if (!isScanning && deviceListDialog != null && deviceListDialog!!.isShowing) {
+                            deviceListDialog?.dismiss()
+                        }
+                    }
+                }
+
+                // --- 연결 상태 (세부 텍스트 업데이트 등에 사용 가능) ---
+                launch {
+                    viewModel.connectionState.collect { state ->
+                        // 필요 시 연결 상태 텍스트 업데이트 (현재는 카드 UI로 대체됨)
+                        // updateConnectionStatusUI(state)
+                        if (state == InsoleConnectionState.FULLY_CONNECTED ||
+                            state == InsoleConnectionState.FAILED ||
+                            state == InsoleConnectionState.DISCONNECTED) {
+                            deviceListDialog?.dismiss() // 스캔/선택 Dialog 닫기
+                        }
+                    }
+                }
+
+                launch {
+                    viewModel.scanState.collect { isScanning ->
+                        binding.btnFindInsole.isEnabled = !isScanning // 스캔 중 버튼 비활성화
                         if (isScanning && (deviceListDialog == null || !deviceListDialog!!.isShowing)) {
                             showDeviceSelectionDialog() // 스캔 시작 시 Dialog 표시
                         } else if (!isScanning && deviceListDialog != null && deviceListDialog!!.isShowing) {
@@ -180,52 +228,78 @@ class InsoleFragment : BaseFragment<FragmentInsoleBinding>(
                     }
                 }
 
-                // 선택된 인솔 관찰 (UI 표시)
-                launch {
-                    viewModel.selectedLeftInsole.collect { device ->
-                        binding.textViewSelectedLeft.text = if (device != null) {
-                            "선택된 왼쪽: ${device.name ?: "Unknown"} (${device.address})"
-                        } else {
-                            "선택된 왼쪽: 없음"
-                        }
-                    }
-                }
-                launch {
-                    viewModel.selectedRightInsole.collect { device ->
-                        binding.textViewSelectedRight.text = if (device != null) {
-                            "선택된 오른쪽: ${device.name ?: "Unknown"} (${device.address})"
-                        } else {
-                            "선택된 오른쪽: 없음"
-                        }
-                    }
-                }
+            }
+        }
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                // 스캔 상태 관찰 (Dialog 표시/숨김, ProgressBar)
 
-                // 연결 상태 관찰
-                launch {
-                    viewModel.connectionState.collect { state ->
-                        updateConnectionStatusUI(state)
-                        // 연결 완료/실패/끊김 시 Dialog 닫기
-                        if (state == InsoleConnectionState.FULLY_CONNECTED ||
-                            state == InsoleConnectionState.FAILED ||
-                            state == InsoleConnectionState.DISCONNECTED) {
-                            deviceListDialog?.dismiss()
-                        }
-                    }
-                }
+//
+//                // 선택된 인솔 관찰 (UI 표시)
+//                launch {
+//                    viewModel.selectedLeftInsole.collect { device ->
+//                        binding.textViewSelectedLeft.text = if (device != null) {
+//                            "선택된 왼쪽: ${device.name ?: "Unknown"} (${device.address})"
+//                        } else {
+//                            "선택된 왼쪽: 없음"
+//                        }
+//                    }
+//                }
+//                launch {
+//                    viewModel.selectedRightInsole.collect { device ->
+//                        binding.textViewSelectedRight.text = if (device != null) {
+//                            "선택된 오른쪽: ${device.name ?: "Unknown"} (${device.address})"
+//                        } else {
+//                            "선택된 오른쪽: 없음"
+//                        }
+//                    }
+//                }
+//
+//                // 연결 상태 관찰
+//                launch {
+//                    viewModel.connectionState.collect { state ->
+//                        updateConnectionStatusUI(state)
+//                        // 연결 완료/실패/끊김 시 Dialog 닫기
+//                        if (state == InsoleConnectionState.FULLY_CONNECTED ||
+//                            state == InsoleConnectionState.FAILED ||
+//                            state == InsoleConnectionState.DISCONNECTED) {
+//                            deviceListDialog?.dismiss()
+//                        }
+//                    }
+//                }
+//
+////                // 결합된 데이터 관찰
+////                launch {
+////                    viewModel.combinedData.collect { data ->
+////                        updateInsoleDataUI(data)
+////                    }
+////                }
+//
+//            }
+//        }
+    }
 
-                // 결합된 데이터 관찰
-                launch {
-                    viewModel.combinedData.collect { data ->
-                        updateInsoleDataUI(data)
-                    }
-                }
-
-                // 오류 이벤트 관찰
-                launch {
-                    viewModel.errorEvent.collect { message ->
-                        showSnackbar(message)
-                    }
-                }
+    private fun updateInsoleCardUI(state: InsoleCardState) {
+        when (state) {
+            InsoleCardState.CONNECTED -> {
+                binding.layoutConnectedInsole.visibility = View.VISIBLE
+                binding.layoutDisconnectedInsole.visibility = View.GONE
+                // 필요 시 연결된 인솔 이름 등 추가 정보 업데이트
+                binding.tvInsoleNameInsole.text = "Runmate 인솔 연결됨" // 또는 저장된 이름 사용
+            }
+            InsoleCardState.DISCONNECTED_SAVED -> {
+                binding.layoutConnectedInsole.visibility = View.GONE
+                binding.layoutDisconnectedInsole.visibility = View.VISIBLE
+                // 저장된 기기가 있음을 알리는 텍스트/UI 적용
+                binding.tvDisconnectedMessageInsole.text = "저장된 인솔과 연결 끊김"
+                binding.btnFindInsole.text = "다시 연결" // 버튼 텍스트 변경 등
+            }
+            InsoleCardState.DISCONNECTED_NO_SAVED -> {
+                binding.layoutConnectedInsole.visibility = View.GONE
+                binding.layoutDisconnectedInsole.visibility = View.VISIBLE
+                // 초기 상태 UI
+                binding.tvDisconnectedMessageInsole.text = "연결된 인솔이 없습니다"
+                binding.btnFindInsole.text = "인솔 찾기"
             }
         }
     }
@@ -294,7 +368,6 @@ class InsoleFragment : BaseFragment<FragmentInsoleBinding>(
                 if (viewModel.scanState.value) { // 아직 스캔 중이었다면 중지
                     viewModel.stopScan()
                 }
-                viewModel.clearSelection() // Dialog 닫히면 선택 초기화
                 // Dialog 내에서 실행되던 collect job 취소
                 job.cancel()
                 jobLeft.cancel()
@@ -328,7 +401,7 @@ class InsoleFragment : BaseFragment<FragmentInsoleBinding>(
                 if (viewModel.scanState.value) {
                     viewModel.stopScan()
                 }
-                viewModel.clearSelection()
+//                viewModel.clearSelection()
                 job.cancel()
                 jobLeft.cancel()
                 jobRight.cancel()
@@ -353,7 +426,6 @@ class InsoleFragment : BaseFragment<FragmentInsoleBinding>(
         rightTv?.text = "오른쪽: ${viewModel.selectedRightInsole.value?.name ?: "미선택"}"
     }
 
-    // 기존 Dialog 업데이트 (내용만)
     private fun updateDeviceListDialog(devices: List<SmartInsole>) {
         deviceListDialog?.let { dialog ->
             val listView = dialog.findViewById<android.widget.ListView>(R.id.listViewDevices)
@@ -366,63 +438,61 @@ class InsoleFragment : BaseFragment<FragmentInsoleBinding>(
 
     private fun showDisconnectDialog() {
         AlertDialog.Builder(requireContext())
-            .setTitle("연결 해제")
-            .setMessage("이미 인솔이 연결되어 있습니다. 연결을 해제하시겠습니까?")
-            .setPositiveButton("해제") { _, _ ->
-                viewModel.disconnect()
+            .setTitle("인솔 삭제")
+            .setMessage("연결된 인솔을 삭제하시겠습니까?")
+            .setPositiveButton("삭제") { _, _ ->
+                viewModel.forgetDevice()
             }
             .setNegativeButton("취소", null)
             .show()
     }
 
-    private fun updateConnectionStatusUI(state: InsoleConnectionState) {
-        binding.textViewConnectionStatus.text = when (state) {
-            InsoleConnectionState.DISCONNECTED -> "연결 상태: 연결 안됨"
-            InsoleConnectionState.CONNECTING -> "연결 상태: 연결 중..."
-            InsoleConnectionState.PARTIALLY_CONNECTED -> "연결 상태: 한쪽만 연결됨"
-            InsoleConnectionState.FULLY_CONNECTED -> "연결 상태: 양쪽 인솔 연결됨"
-            InsoleConnectionState.FAILED -> "연결 상태: 연결 실패"
-        }
-        // 연결 상태에 따라 페어링 버튼 텍스트 변경 등 추가 UI 로직 가능
-        binding.buttonPair.text = if (state == InsoleConnectionState.FULLY_CONNECTED || state == InsoleConnectionState.PARTIALLY_CONNECTED) {
-            "연결 해제 / 재시도"
-        } else {
-            "스마트 인솔 페어링"
-        }
-    }
+//    private fun updateConnectionStatusUI(state: InsoleConnectionState) {
+//        binding.textViewConnectionStatus.text = when (state) {
+//            InsoleConnectionState.DISCONNECTED -> "연결 상태: 연결 안됨"
+//            InsoleConnectionState.CONNECTING -> "연결 상태: 연결 중..."
+//            InsoleConnectionState.PARTIALLY_CONNECTED -> "연결 상태: 한쪽만 연결됨"
+//            InsoleConnectionState.FULLY_CONNECTED -> "연결 상태: 양쪽 인솔 연결됨"
+//            InsoleConnectionState.FAILED -> "연결 상태: 연결 실패"
+//        }
+//        // 연결 상태에 따라 페어링 버튼 텍스트 변경 등 추가 UI 로직 가능
+//        binding.buttonPair.text = if (state == InsoleConnectionState.FULLY_CONNECTED || state == InsoleConnectionState.PARTIALLY_CONNECTED) {
+//            "연결 해제 / 재시도"
+//        } else {
+//            "스마트 인솔 페어링"
+//        }
+//    }
 
-    private fun updateInsoleDataUI(data: CombinedInsoleData?) {
-        if (data == null) {
-            // 데이터 없을 때 기본값 표시
-            binding.textViewLeftFsr.text = "FSR: N/A"
-            binding.textViewLeftYpr.text = "YPR: N/A"
-            binding.textViewRightFsr.text = "FSR: N/A"
-            binding.textViewRightYpr.text = "YPR: N/A"
-            return
-        }
+//    private fun updateInsoleDataUI(data: CombinedInsoleData?) {
+//        if (data == null) {
+//            // 데이터 없을 때 기본값 표시
+//            binding.textViewLeftFsr.text = "FSR: N/A"
+//            binding.textViewLeftYpr.text = "YPR: N/A"
+//            binding.textViewRightFsr.text = "FSR: N/A"
+//            binding.textViewRightYpr.text = "YPR: N/A"
+//            return
+//        }
+//
+//        // 왼쪽 데이터 업데이트
+//        data.left?.let {
+//            binding.textViewLeftFsr.text = "FSR: ${it.bigToe}, ${it.smallToe}, ${it.heel}, ${it.archLeft}, ${it.archRight}"
+//            binding.textViewLeftYpr.text = String.format(Locale.US, "YPR: %.1f, %.1f, %.1f", it.yaw, it.pitch, it.roll)
+//        } ?: run {
+//            binding.textViewLeftFsr.text = "FSR: N/A"
+//            binding.textViewLeftYpr.text = "YPR: N/A"
+//        }
+//
+//        // 오른쪽 데이터 업데이트
+//        data.right?.let {
+//            binding.textViewRightFsr.text = "FSR: ${it.bigToe}, ${it.smallToe}, ${it.heel}, ${it.archLeft}, ${it.archRight}"
+//            binding.textViewRightYpr.text = String.format(Locale.US, "YPR: %.1f, %.1f, %.1f", it.yaw, it.pitch, it.roll)
+//        } ?: run {
+//            binding.textViewRightFsr.text = "FSR: N/A"
+//            binding.textViewRightYpr.text = "YPR: N/A"
+//        }
+//    }
 
-        // 왼쪽 데이터 업데이트
-        data.left?.let {
-            binding.textViewLeftFsr.text = "FSR: ${it.bigToe}, ${it.smallToe}, ${it.heel}, ${it.archLeft}, ${it.archRight}"
-            binding.textViewLeftYpr.text = String.format(Locale.US, "YPR: %.1f, %.1f, %.1f", it.yaw, it.pitch, it.roll)
-        } ?: run {
-            binding.textViewLeftFsr.text = "FSR: N/A"
-            binding.textViewLeftYpr.text = "YPR: N/A"
-        }
 
-        // 오른쪽 데이터 업데이트
-        data.right?.let {
-            binding.textViewRightFsr.text = "FSR: ${it.bigToe}, ${it.smallToe}, ${it.heel}, ${it.archLeft}, ${it.archRight}"
-            binding.textViewRightYpr.text = String.format(Locale.US, "YPR: %.1f, %.1f, %.1f", it.yaw, it.pitch, it.roll)
-        } ?: run {
-            binding.textViewRightFsr.text = "FSR: N/A"
-            binding.textViewRightYpr.text = "YPR: N/A"
-        }
-    }
-
-    private fun showSnackbar(message: String) {
-        Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
-    }
 
     override fun onDestroyView() {
         super.onDestroyView()
