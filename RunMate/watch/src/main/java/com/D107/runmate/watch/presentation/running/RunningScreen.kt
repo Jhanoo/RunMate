@@ -46,7 +46,7 @@ enum class DisplayMode(val label: String) {
 @Composable
 fun RunningScreen(
     pace: String = "0:00", // PaceScreen에서 넘겨받은 값
-    progress: Float = 0.1f, // 0.0 to 1.0
+//    progress: Float = 0.1f, // 0.0 to 1.0
     isPaused: Boolean = false,
     savedState: Triple<Int, Int, Int>? = null,
     onPauseClick: (DisplayMode, String, Int, Int, Int, RunningData) -> Unit = { _, _, _, _, _, _ -> },
@@ -65,6 +65,7 @@ fun RunningScreen(
 
     // 거리 측정
     val distance by viewModel.distance.collectAsState()
+    val progress = (distance % 1.0).toFloat()
 
     // 기본 데이터에 전달받은 pace를 반영
     // 실시간 BPM 반영

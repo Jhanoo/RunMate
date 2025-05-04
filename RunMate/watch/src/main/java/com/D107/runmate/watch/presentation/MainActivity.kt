@@ -3,6 +3,7 @@ package com.D107.runmate.watch.presentation
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Half.toFloat
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -164,9 +165,15 @@ class MainActivity : ComponentActivity() {
                         )
                         val data = backStackEntry.arguments?.getString("data") ?: ""
 
+                        // 현재 저장된 거리에서 progress 계산
+                        val progression = savedRunningData.distance.toFloatOrNull()?.let { distance ->
+                            (distance % 1.0).toFloat()
+                        } ?: 0f
+
                         PauseScreen(
                             displayMode = mode,
                             displayData = data,
+                            progress = progression,
                             onStartClick = {
                                 // 타이머 재시작
                                 runningViewModel.startTimer()
