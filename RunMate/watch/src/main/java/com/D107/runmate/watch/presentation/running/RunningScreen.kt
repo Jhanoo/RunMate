@@ -45,11 +45,12 @@ fun RunningScreen(
     runningData: RunningData = RunningData(),
     progress: Float = 0.1f, // 0.0 to 1.0
     isPaused: Boolean = false,
-    onPauseClick: () -> Unit = {}
+    savedState: Triple<Int, Int, Int>? = null,
+    onPauseClick: (DisplayMode, String, Int, Int, Int, RunningData) -> Unit = { _, _, _, _, _, _ -> }
 ) {
-    var topDisplayIndex by remember { mutableStateOf(0) }
-    var leftDisplayIndex by remember { mutableStateOf(1) }
-    var rightDisplayIndex by remember { mutableStateOf(2) }
+    var topDisplayIndex by remember { mutableStateOf(savedState?.first ?: 0) }
+    var leftDisplayIndex by remember { mutableStateOf(savedState?.second ?: 1) }
+    var rightDisplayIndex by remember { mutableStateOf(savedState?.third ?: 2) }
 
     // 기본 데이터에 전달받은 pace를 반영
     val currentRunningData = remember(pace) {
@@ -146,13 +147,22 @@ fun RunningScreen(
         // Pause button
         Box(
             modifier = Modifier
-                .offset(y=120.dp)
+                .offset(y = 120.dp)
                 .size(140.dp)
                 .background(
                     color = colorResource(id = R.color.secondary),
                     shape = CircleShape
                 )
-                .clickable(onClick = onPauseClick),
+                .clickable(onClick = {
+                    val titleMode = DisplayMode.entries[topDisplayIndex]
+                    val titleData = when (titleMode) {
+                        DisplayMode.TIME -> runningData.time
+                        DisplayMode.BPM -> runningData.bpm
+                        DisplayMode.PACE -> runningData.pace
+                        DisplayMode.DISTANCE -> runningData.distance
+                    }
+                    onPauseClick(titleMode, titleData, topDisplayIndex, leftDisplayIndex, rightDisplayIndex, runningData)
+                }),
             contentAlignment = Alignment.TopCenter
         ) {
             Image(
@@ -197,7 +207,7 @@ private fun DisplayButton(
             fontSize = 10.sp,
             color = Color.Gray,
             textAlign = TextAlign.Center,
-            modifier = Modifier.offset(y=(-4).dp)
+            modifier = Modifier.offset(y = (-4).dp)
         )
     }
 }

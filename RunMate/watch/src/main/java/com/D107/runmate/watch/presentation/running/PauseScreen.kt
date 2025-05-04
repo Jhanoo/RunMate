@@ -32,6 +32,8 @@ import com.D107.runmate.watch.R
 
 @Composable
 fun PauseScreen(
+    displayMode: DisplayMode = DisplayMode.TIME,
+    displayData: String = "1:10:13",
     progress: Float = 0.1f, // 0.0 to 1.0
     onStartClick: () -> Unit = {},
     onStopClick: () -> Unit = {}
@@ -69,7 +71,7 @@ fun PauseScreen(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "1:10:13",
+                text = displayData,
                 fontSize = 44.sp,
                 fontWeight = FontWeight.Bold,
                 fontStyle = FontStyle.Italic,
@@ -78,7 +80,7 @@ fun PauseScreen(
                 modifier = Modifier.offset(y = 20.dp)
             )
             Text(
-                text = "시간",
+                text = displayMode.label,
                 fontSize = 10.sp,
                 color = Color.Gray,
                 textAlign = TextAlign.Center,
