@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
@@ -25,6 +26,7 @@ import com.D107.runmate.watch.presentation.running.PauseScreen
 import com.D107.runmate.watch.presentation.running.ResultScreen
 import com.D107.runmate.watch.presentation.running.RunningData
 import com.D107.runmate.watch.presentation.running.RunningScreen
+import com.D107.runmate.watch.presentation.running.RunningViewModel
 import com.D107.runmate.watch.presentation.splash.SplashScreen
 import com.D107.runmate.watch.presentation.theme.RunMateTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -54,6 +56,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             RunMateTheme {
                 val navController = rememberSwipeDismissableNavController()
+
+                val runningViewModel: RunningViewModel = hiltViewModel()
 
                 // RunningScreen의 상태를 저장할 변수들
                 var savedTopIndex by remember { mutableStateOf(0) }
@@ -106,6 +110,7 @@ class MainActivity : ComponentActivity() {
                     // 페이스 설정 후 시작하는 경우
                     composable("running") {
                         RunningScreen(
+                            viewModel = runningViewModel,
                             savedState = Triple(savedTopIndex, savedLeftIndex, savedRightIndex),
                             onPauseClick = { mode, data, topIndex, leftIndex, rightIndex, currentRunningData ->
                                 savedTopIndex = topIndex
@@ -125,6 +130,7 @@ class MainActivity : ComponentActivity() {
                     composable("running/{pace}") { backStackEntry ->
                         val pace = backStackEntry.arguments?.getString("pace") ?: "0:00"
                         RunningScreen(
+                            viewModel = runningViewModel,
                             pace = pace,
 //                            runningData = savedRunningData,
                             savedState = Triple(savedTopIndex, savedLeftIndex, savedRightIndex),
@@ -154,6 +160,9 @@ class MainActivity : ComponentActivity() {
                             displayMode = mode,
                             displayData = data,
                             onStartClick = {
+                                // 타이머 재시작
+                                runningViewModel.startTimer()
+
                                 // savedPace 값에 따라 올바른 running 화면으로 이동
                                 if (savedPace != "0:00") {
                                     navController.navigate("running/$savedPace") {
@@ -168,6 +177,9 @@ class MainActivity : ComponentActivity() {
                                 }
                             },
                             onStopClick = {
+                                // 타이머 리셋
+                                runningViewModel.resetTimer()
+
                                 // 상태 초기화
                                 savedTopIndex = 0
                                 savedLeftIndex = 1

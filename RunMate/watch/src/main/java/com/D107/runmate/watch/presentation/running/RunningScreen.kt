@@ -54,18 +54,21 @@ fun RunningScreen(
     val bpm by viewModel.heartRate.collectAsState()
     Log.d("sensor","UI에서 관찰 중인 심박수 : $bpm")
 
+    // 시간 측정
+    val formattedTime by viewModel.formattedTime.collectAsState()
+
     var topDisplayIndex by remember { mutableStateOf(savedState?.first ?: 0) }
     var leftDisplayIndex by remember { mutableStateOf(savedState?.second ?: 1) }
     var rightDisplayIndex by remember { mutableStateOf(savedState?.third ?: 2) }
 
     // 기본 데이터에 전달받은 pace를 반영
     // 실시간 BPM 반영
-    val currentRunningData = remember(pace, bpm) {
+    val currentRunningData = remember(pace, bpm, formattedTime) {
         RunningData(
             pace = if (pace != "0:00") pace.replace(":", "'") + "\"" else "5'10\"",
             bpm = bpm.toString(),
             distance = "8.5",
-            time = "1:10:13",
+            time = formattedTime,
         )
     }
 
@@ -75,6 +78,7 @@ fun RunningScreen(
     // 화면 진입시 모니터링 시작
     LaunchedEffect(Unit) {
         viewModel.startMonitoring()
+        viewModel.startTimer()
     }
 
     // 화면 종료시 모니터링 중지
@@ -182,6 +186,8 @@ fun RunningScreen(
                     shape = CircleShape
                 )
                 .clickable(onClick = {
+                    viewModel.pauseTimer() // 타이머 일시정지
+                    
                     val titleMode = DisplayMode.entries[topDisplayIndex]
                     val titleData = when (titleMode) {
                         DisplayMode.TIME -> currentRunningData.time
