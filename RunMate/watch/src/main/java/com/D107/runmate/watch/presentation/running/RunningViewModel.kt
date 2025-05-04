@@ -69,10 +69,10 @@ class RunningViewModel @Inject constructor(
                 getDistanceUseCase()
                     .collect { distance ->
                         _distance.value = distance.kilometers
-                        Log.d("distance", "ViewModel received distance: %.4f km".format(distance.kilometers))
+//                        Log.d("distance", "ViewModel received distance: %.4f km".format(distance.kilometers))
                     }
             } catch (e: Exception) {
-                Log.e("distance", "Error collecting distance: ${e.message}")
+//                Log.e("distance", "Error collecting distance: ${e.message}")
             }
         }
     }

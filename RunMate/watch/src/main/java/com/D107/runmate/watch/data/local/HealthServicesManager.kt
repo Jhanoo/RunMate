@@ -43,10 +43,10 @@ class HealthServicesManagerImpl @Inject constructor(
             // PASSIVE 방식으로 등록시도
             if (capabilities.supportedDataTypesMeasure.isNotEmpty()) {
                 measureClient.registerMeasureCallback(DataType.DISTANCE, callback)
-                Log.d("distance", "DISTANCE callback registered successfully")
+//                Log.d("distance", "DISTANCE callback registered successfully")
             }
         } catch (e: Exception) {
-            Log.e("distance", "Failed to register distance callback: ${e.message}")
+//            Log.e("distance", "Failed to register distance callback: ${e.message}")
         }
     }
 

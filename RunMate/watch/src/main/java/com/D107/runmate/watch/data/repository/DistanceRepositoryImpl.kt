@@ -32,10 +32,10 @@ class DistanceRepositoryImpl @Inject constructor(
                 lastLocation?.let { last ->
                     val distance = last.distanceTo(location)
                     totalDistance += distance / 1000.0  // 미터를 킬로미터로 변환하면서 더하기
-                    Log.d(
-                        "distance",
-                        "New distance: %.4f m, Total: %.4f km".format(distance, totalDistance)
-                    )
+//                    Log.d(
+//                        "distance",
+//                        "New distance: %.4f m, Total: %.4f km".format(distance, totalDistance)
+//                    )
                     _distanceFlow.tryEmit(Distance(totalDistance))
                 }
                 lastLocation = location

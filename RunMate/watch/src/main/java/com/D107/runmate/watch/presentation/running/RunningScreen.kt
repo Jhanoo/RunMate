@@ -54,7 +54,7 @@ fun RunningScreen(
 ) {
     // BPM 상태 수집
     val bpm by viewModel.heartRate.collectAsState()
-    Log.d("sensor","UI에서 관찰 중인 심박수 : $bpm")
+//    Log.d("sensor","UI에서 관찰 중인 심박수 : $bpm")
 
     // 시간 측정
     val formattedTime by viewModel.formattedTime.collectAsState()
@@ -94,7 +94,7 @@ fun RunningScreen(
     }
 
     LaunchedEffect(bpm) {
-        Log.d("sensor","심박수 변경됨 : $bpm")
+//        Log.d("sensor","심박수 변경됨 : $bpm")
     }
 
     Box(
