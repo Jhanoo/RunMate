@@ -1,6 +1,7 @@
 package com.D107.runmate.watch.data.local
 
 import android.content.Context
+import android.util.Log
 import androidx.health.services.client.HealthServices
 import androidx.health.services.client.MeasureCallback
 import androidx.health.services.client.data.DataType
@@ -13,6 +14,8 @@ import javax.inject.Singleton
 interface HealthServicesManager {
     suspend fun registerHeartRateCallback(callback: MeasureCallback)
     suspend fun unregisterHeartRateCallback(callback: MeasureCallback)
+    suspend fun registerDistanceCallback(callback: MeasureCallback)
+    suspend fun unregisterDistanceCallback(callback: MeasureCallback)
 }
 
 @Singleton
@@ -32,6 +35,23 @@ class HealthServicesManagerImpl @Inject constructor(
 
     override suspend fun unregisterHeartRateCallback(callback: MeasureCallback) {
         measureClient.unregisterMeasureCallback(DataType.HEART_RATE_BPM, callback)
+    }
+
+    override suspend fun registerDistanceCallback(callback: MeasureCallback) {
+        try {
+            val capabilities = measureClient.getCapabilities()
+            // PASSIVE 방식으로 등록시도
+            if (capabilities.supportedDataTypesMeasure.isNotEmpty()) {
+                measureClient.registerMeasureCallback(DataType.DISTANCE, callback)
+                Log.d("distance", "DISTANCE callback registered successfully")
+            }
+        } catch (e: Exception) {
+            Log.e("distance", "Failed to register distance callback: ${e.message}")
+        }
+    }
+
+    override suspend fun unregisterDistanceCallback(callback: MeasureCallback) {
+        measureClient.unregisterMeasureCallback(DataType.DISTANCE, callback)
     }
 
 }

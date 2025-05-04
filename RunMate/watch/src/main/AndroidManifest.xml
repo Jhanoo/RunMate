@@ -12,6 +12,11 @@
     <!--  사용자 활동 시작/종료 감지  -->
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
 
+    <!--  위치 권한 추가  -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+
     <application
         android:name=".presentation.WatchApplication"
         android:allowBackup="true"

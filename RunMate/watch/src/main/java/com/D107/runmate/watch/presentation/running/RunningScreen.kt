@@ -1,5 +1,6 @@
 package com.D107.runmate.watch.presentation.running
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -41,6 +42,7 @@ enum class DisplayMode(val label: String) {
     DISTANCE("km")
 }
 
+@SuppressLint("DefaultLocale")
 @Composable
 fun RunningScreen(
     pace: String = "0:00", // PaceScreen에서 넘겨받은 값
@@ -61,13 +63,16 @@ fun RunningScreen(
     var leftDisplayIndex by remember { mutableStateOf(savedState?.second ?: 1) }
     var rightDisplayIndex by remember { mutableStateOf(savedState?.third ?: 2) }
 
+    // 거리 측정
+    val distance by viewModel.distance.collectAsState()
+
     // 기본 데이터에 전달받은 pace를 반영
     // 실시간 BPM 반영
-    val currentRunningData = remember(pace, bpm, formattedTime) {
+    val currentRunningData = remember(pace, bpm, formattedTime, distance) {
         RunningData(
             pace = if (pace != "0:00") pace.replace(":", "'") + "\"" else "5'10\"",
             bpm = bpm.toString(),
-            distance = "8.5",
+            distance = String.format("%.1f", distance),
             time = formattedTime,
         )
     }
@@ -187,7 +192,7 @@ fun RunningScreen(
                 )
                 .clickable(onClick = {
                     viewModel.pauseTimer() // 타이머 일시정지
-                    
+
                     val titleMode = DisplayMode.entries[topDisplayIndex]
                     val titleData = when (titleMode) {
                         DisplayMode.TIME -> currentRunningData.time

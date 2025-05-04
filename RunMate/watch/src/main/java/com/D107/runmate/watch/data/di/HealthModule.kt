@@ -2,7 +2,9 @@ package com.D107.runmate.watch.data.di
 
 import com.D107.runmate.watch.data.local.HealthServicesManager
 import com.D107.runmate.watch.data.local.HealthServicesManagerImpl
+import com.D107.runmate.watch.data.repository.DistanceRepositoryImpl
 import com.D107.runmate.watch.data.repository.HeartRateRepositoryImpl
+import com.D107.runmate.watch.domain.repository.DistanceRepository
 import com.D107.runmate.watch.domain.repository.HeartRateRepository
 import dagger.Binds
 import dagger.Module
@@ -26,4 +28,9 @@ abstract class HealthModule {
         healthServicesManagerImpl: HealthServicesManagerImpl
     ): HealthServicesManager
 
+    @Binds
+    @Singleton
+    abstract fun bindDistanceRepository(
+        distanceRepositoryImpl: DistanceRepositoryImpl
+    ): DistanceRepository
 }

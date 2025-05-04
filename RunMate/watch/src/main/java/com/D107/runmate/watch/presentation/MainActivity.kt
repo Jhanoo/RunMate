@@ -44,11 +44,17 @@ class MainActivity : ComponentActivity() {
 
         // 권환 확인 및 요청
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.BODY_SENSORS)
+            != PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
                 this,
-                arrayOf(Manifest.permission.BODY_SENSORS),
+                arrayOf(
+                    Manifest.permission.BODY_SENSORS,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACTIVITY_RECOGNITION
+                ),
                 BODY_SENSOR_PERMISSION_REQUEST_CODE
             )
         }
@@ -86,6 +92,7 @@ class MainActivity : ComponentActivity() {
                     composable("menu") {
                         MenuScreen(
                             onNavigateToRunning = {
+                                runningViewModel.resetTimer()
                                 navController.navigate("running") {
                                     popUpTo("menu") { inclusive = true }
                                 }
@@ -99,6 +106,7 @@ class MainActivity : ComponentActivity() {
                         PaceScreen(
                             onPaceSelected = { pace ->
                                 savedPace = pace
+                                runningViewModel.resetTimer()
                                 navController.navigate("running/$pace") {
                                     popUpTo("menu") { inclusive = true }
                                     launchSingleTop = true

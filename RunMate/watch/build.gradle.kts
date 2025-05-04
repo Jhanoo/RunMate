@@ -96,6 +96,7 @@ dependencies {
 
     // Android Health Services API
     implementation(libs.androidx.health.services.client)
+    implementation(libs.play.services.location)
 
     // 테스트 의존성
     testImplementation("junit:junit:4.13.2")
