@@ -1,54 +1,60 @@
 pipeline {
-  agent any
-  environment {
-    REMOTE       = 'ubuntu@k12d107.p.ssafy.io'
-    APPDIR       = '/home/ubuntu/runmate-backend'
-    JAR_NAME     = 'app.jar'
-    CONTAINER    = 'runmate-backend'
-    COMPOSE_FILE = "${APPDIR}/docker-compose.yml"
-  }
+    agent any
 
-  stages {
-    stage('Checkout') {
-      steps {
-        git(
-          url: 'https://lab.ssafy.com/s12-final/S12P31D107.git',
-          branch: 'develop/back',
-          credentialsId: 'gitlab-https'
-        )
-      }
+    environment {
+        REMOTE    = 'ubuntu@k12d107.p.ssafy.io'
+        APPDIR    = '/home/ubuntu/runmate-backend'
+        JAR_NAME  = 'app.jar'
     }
 
-    stage('Build JAR') {
-      steps {
-        sh './gradlew clean bootJar -x test'
-      }
-    }
-
-    stage('Deploy to EC2') {
-      steps {
-        sshagent(['ec2-ssh']) {
-          // 1) 빌드된 JAR 전송
-          sh """
-            scp -o StrictHostKeyChecking=no build/libs/*.jar \
-                ${REMOTE}:${APPDIR}/${JAR_NAME}
-          """
-
-          // 2) EC2에서 docker-compose 재시작
-          sh """
-            ssh -o StrictHostKeyChecking=no ${REMOTE} \\
-              'cd ${APPDIR} &&
-               docker-compose down &&
-               docker-compose up -d
-              '
-          """
+    stages {
+        stage('Checkout') {
+            steps {
+                git(
+                  url: 'https://lab.ssafy.com/s12-final/S12P31D107.git',
+                  branch: 'develop/back',
+                  credentialsId: 'gitlab-https'
+                )
+            }
         }
-      }
-    }
-  }
 
-  post {
-    success { echo '✅ Deploy succeeded' }
-    failure { echo '❌ Deploy failed' }
-  }
+        stage('Grant Permissions') {
+            steps {
+                // gradlew 파일에 실행 권한 추가
+                sh 'chmod +x gradlew'
+            }
+        }
+
+        stage('Build JAR') {
+            steps {
+                // 이제 실행 권한 있으니 빌드 가능
+                sh './gradlew clean bootJar -x test'
+            }
+        }
+
+        stage('Deploy to EC2') {
+            steps {
+                sshagent(['ec2-ssh']) {
+                    // 1) 빌드된 JAR 전송
+                    sh """
+                      scp -o StrictHostKeyChecking=no build/libs/*.jar \
+                          ${REMOTE}:${APPDIR}/${JAR_NAME}
+                    """
+                    // 2) EC2에서 docker-compose 재시작
+                    sh """
+                      ssh -o StrictHostKeyChecking=no ${REMOTE} \\
+                        'cd ${APPDIR} &&
+                         docker-compose down &&
+                         docker-compose up -d
+                        '
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        success { echo '✅ Deploy succeeded' }
+        failure { echo '❌ Deploy failed' }
+    }
 }
