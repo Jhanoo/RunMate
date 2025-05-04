@@ -13,6 +13,8 @@ class StartTimerUseCase @Inject constructor(){
         pauseTime: Long,
         onTick: (Long) -> Unit
     ) : Flow<Long> = flow {
+        var elapsed = pauseTime
+
         val actualStartTime = if (startTime == 0L) {
             System.currentTimeMillis()
         } else {
@@ -20,9 +22,9 @@ class StartTimerUseCase @Inject constructor(){
         }
 
         while (currentCoroutineContext().isActive) {
-            val elapsed = System.currentTimeMillis() - actualStartTime
             emit(elapsed)
             delay(1000)
+            elapsed += 1000
         }
     }
 }

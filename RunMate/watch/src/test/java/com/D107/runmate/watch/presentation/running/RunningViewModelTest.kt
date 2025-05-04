@@ -5,6 +5,8 @@ import com.D107.runmate.watch.domain.model.HeartRate
 import com.D107.runmate.watch.domain.usecase.heartRate.GetHeartRateUseCase
 import com.D107.runmate.watch.domain.usecase.heartRate.StartHeartRateMonitoringUseCase
 import com.D107.runmate.watch.domain.usecase.heartRate.StopHeartRateMonitoringUseCase
+import com.D107.runmate.watch.domain.usecase.timer.FormatTimeUseCase
+import com.D107.runmate.watch.domain.usecase.timer.StartTimerUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -16,6 +18,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mock
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.verify
@@ -34,6 +37,11 @@ class RunningViewModelTest {
 
     @Mock
     private lateinit var stopHeartRateMonitoringUseCase: StopHeartRateMonitoringUseCase
+
+    @Mock
+    private lateinit var startTimerUseCase: StartTimerUseCase
+
+    val formatTimeUseCase: FormatTimeUseCase = mock()
 
     private lateinit var viewModel: RunningViewModel
     private val testDispatcher = StandardTestDispatcher()
@@ -58,7 +66,9 @@ class RunningViewModelTest {
         viewModel = RunningViewModel(
             getHeartRateUseCase,
             startHeartRateMonitoringUseCase,
-            stopHeartRateMonitoringUseCase
+            stopHeartRateMonitoringUseCase,
+            startTimerUseCase,
+            formatTimeUseCase
         )
         advanceUntilIdle()
 
@@ -76,7 +86,9 @@ class RunningViewModelTest {
         viewModel = RunningViewModel(
             getHeartRateUseCase,
             startHeartRateMonitoringUseCase,
-            stopHeartRateMonitoringUseCase
+            stopHeartRateMonitoringUseCase,
+            startTimerUseCase,
+            formatTimeUseCase
         )
         advanceUntilIdle()
 
@@ -94,7 +106,9 @@ class RunningViewModelTest {
         viewModel = RunningViewModel(
             getHeartRateUseCase,
             startHeartRateMonitoringUseCase,
-            stopHeartRateMonitoringUseCase
+            stopHeartRateMonitoringUseCase,
+            startTimerUseCase,
+            formatTimeUseCase
         )
         advanceUntilIdle()
 
@@ -113,7 +127,9 @@ class RunningViewModelTest {
         viewModel = RunningViewModel(
             getHeartRateUseCase,
             startHeartRateMonitoringUseCase,
-            stopHeartRateMonitoringUseCase
+            stopHeartRateMonitoringUseCase,
+            startTimerUseCase,
+            formatTimeUseCase
         )
         advanceUntilIdle()
 
@@ -135,7 +151,9 @@ class RunningViewModelTest {
         viewModel = RunningViewModel(
             getHeartRateUseCase,
             startHeartRateMonitoringUseCase,
-            stopHeartRateMonitoringUseCase
+            stopHeartRateMonitoringUseCase,
+            startTimerUseCase,
+            formatTimeUseCase
         )
         advanceUntilIdle()
 
