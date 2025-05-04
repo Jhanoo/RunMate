@@ -10,7 +10,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 @Service
@@ -42,19 +45,25 @@ public class CourseServiceImpl implements CourseService {
             UUID fileUUID = UUID.randomUUID();
             gpxFileName = fileUUID + ".gpx";
 
+            log.debug("경로 확인");
+
             // 디렉토리 존재 확인 및 생성
             Path dirPath = Paths.get(gpxStoragePath);
             if (!Files.exists(dirPath)) {
+                log.debug("폴더 없음: {}", dirPath.toAbsolutePath());
                 Files.createDirectories(dirPath);
+                log.debug("폴더 생성");
             }
 
+            log.debug("저장 시작");
             // 파일 저장 경로 구성
             Path gpxPath = Paths.get(gpxStoragePath, gpxFileName);
+            log.debug("경로 불러오기 성공");
             Files.copy(gpxFile.getInputStream(), gpxPath, StandardCopyOption.REPLACE_EXISTING);
             log.debug("GPX 파일 저장 완료: {}", gpxPath);
         }
         course.setGpxFile(gpxFileName);
-
+        log.debug(course.toString());
         // 3. DB에 저장
         courseDao.insertCourse(course);
         log.debug("코스 DB 저장 완료: {}", course.getCourseId());
