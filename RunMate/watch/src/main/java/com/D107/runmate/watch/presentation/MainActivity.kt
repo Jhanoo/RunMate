@@ -1,6 +1,7 @@
 package com.D107.runmate.watch.presentation
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Half.toFloat
@@ -35,6 +36,7 @@ import dagger.hilt.android.components.ActivityComponent
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @SuppressLint("StateFlowValueCalledInComposition", "DefaultLocale")
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -166,9 +168,10 @@ class MainActivity : ComponentActivity() {
                         val data = backStackEntry.arguments?.getString("data") ?: ""
 
                         // 현재 저장된 거리에서 progress 계산
-                        val progression = savedRunningData.distance.toFloatOrNull()?.let { distance ->
-                            (distance % 1.0).toFloat()
-                        } ?: 0f
+                        val progression =
+                            savedRunningData.distance.toFloatOrNull()?.let { distance ->
+                                (distance % 1.0).toFloat()
+                            } ?: 0f
 
                         PauseScreen(
                             displayMode = mode,
@@ -192,8 +195,12 @@ class MainActivity : ComponentActivity() {
                                 }
                             },
                             onStopClick = {
-                                // 타이머 리셋
-                                runningViewModel.resetTimer()
+                                val finalDistance =
+                                    String.format("%.2f", runningViewModel.distance.value)
+                                val finalTime = runningViewModel.formattedTime.value
+                                val finalAvgPace = runningViewModel.avgPace.value
+                                val finalMaxHeartRate = runningViewModel.maxHeartRate.value
+                                val finalAvgHeartRate = runningViewModel.avgHeartRate.value
 
                                 // 상태 초기화
                                 savedTopIndex = 0
@@ -202,16 +209,34 @@ class MainActivity : ComponentActivity() {
                                 savedPace = "0:00"
                                 savedRunningData = RunningData()
 
-                                navController.navigate("result") {
+                                navController.navigate("result/$finalDistance/$finalTime/$finalAvgPace/$finalMaxHeartRate/$finalAvgHeartRate") {
                                     popUpTo(0) { inclusive = true }
                                 }
+
+                                // 타이머 리셋
+                                runningViewModel.resetTimer()
                             }
                         )
                     }
 
                     // 결과 화면
-                    composable("result") {
+                    composable(
+                        "result/{distance}/{time}/{avgPace}/{maxHeartRate}/{avgHeartRate}"
+                    ) { backStackEntry ->
+                        val distance = backStackEntry.arguments?.getString("distance") ?: "0.00"
+                        val time = backStackEntry.arguments?.getString("time") ?: "0:00:00"
+                        val avgPace = backStackEntry.arguments?.getString("avgPace") ?: "--'--\""
+                        val maxHeartRate =
+                            backStackEntry.arguments?.getString("maxHeartRate")?.toIntOrNull() ?: 0
+                        val avgHeartRate =
+                            backStackEntry.arguments?.getString("avgHeartRate")?.toIntOrNull() ?: 0
+
                         ResultScreen(
+                            distance = distance,
+                            time = time,
+                            avgPace = avgPace,
+                            maxHeartRate = maxHeartRate,
+                            avgHeartRate = avgHeartRate,
                             onClick = {
                                 navController.navigate("menu") {
                                     popUpTo(0) { inclusive = true }

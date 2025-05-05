@@ -38,6 +38,10 @@ class RunningViewModel @Inject constructor(
     private val _heartRate = MutableStateFlow(0)
     val heartRate: StateFlow<Int> = _heartRate.asStateFlow()
 
+    // 최대 심박수 저장 변수
+    private val _maxHeartRate = MutableStateFlow(0)
+    val maxHeartRate: StateFlow<Int> = _maxHeartRate.asStateFlow()
+
     private val _runningTime = MutableStateFlow(0L)
     val runningTime: StateFlow<Long> = _runningTime.asStateFlow()
 
@@ -64,6 +68,19 @@ class RunningViewModel @Inject constructor(
 
     @Inject
     lateinit var calculatePaceUseCase: CalculatePaceUseCase
+
+    // 페이스 기록 및 심박수 기록 저장 리스트
+    private val paceRecords = mutableListOf<String>()
+    private val heartRateRecords = mutableListOf<Int>()
+    private var lastHeartRateRecordTime = 0L
+    private var lastPaceRecordTime = 0L
+
+    // 평균 페이스와 평균 심박수 계산 결과
+    private val _avgPace = MutableStateFlow("--'--\"")
+    val avgPace: StateFlow<String> = _avgPace.asStateFlow()
+
+    private val _avgHeartRate = MutableStateFlow(0)
+    val avgHeartRate: StateFlow<Int> = _avgHeartRate.asStateFlow()
 
     init {
 //        Log.d("sensor", "ViewModel init")
@@ -101,8 +118,25 @@ class RunningViewModel @Inject constructor(
         viewModelScope.launch {
             getHeartRateUseCase()
                 .collect { heartRate ->
-//                    Log.d("sensor","심박수 in ViewModel : ${heartRate.bpm}")
-                    _heartRate.value = heartRate.bpm // 수집한 심박수 값 갱신
+                    val bpm = heartRate.bpm
+                    _heartRate.value = bpm
+
+                    // 최대 심박수 갱신
+                    if (bpm > _maxHeartRate.value) {
+                        _maxHeartRate.value = bpm
+                    }
+
+                    // 심박수 기록 추가 (5초마다)
+                    val currentTime = System.currentTimeMillis()
+                    if (currentTime - lastHeartRateRecordTime >= 5000) {
+                        heartRateRecords.add(bpm)
+                        lastHeartRateRecordTime = currentTime
+
+                        // 평균 심박수 계산
+                        if (heartRateRecords.isNotEmpty()) {
+                            _avgHeartRate.value = heartRateRecords.sum() / heartRateRecords.size
+                        }
+                    }
                 }
         }
     }
@@ -125,14 +159,56 @@ class RunningViewModel @Inject constructor(
                 val timeSeconds = (newest.first - oldest.first) / 1000.0
                 val distanceChange = newest.second - oldest.second
 
-                // 계산 로직 단순화
                 if (timeSeconds > 5 && distanceChange > 0.005) {
-                    _currentPace.value = calculatePaceUseCase(distanceChange, timeSeconds.toLong())
-                    Log.d("pace", "계산됨: 시간=${timeSeconds}초, 거리=${distanceChange}km, 페이스=${_currentPace.value}")
+                    val newPace = calculatePaceUseCase(distanceChange, timeSeconds.toLong())
+                    _currentPace.value = newPace
+
+                    // 페이스 기록 추가 (5초마다)
+                    val paceRecordTime = System.currentTimeMillis()
+                    if (paceRecordTime - lastPaceRecordTime >= 5000 && newPace != "--'--\"") {
+                        paceRecords.add(newPace)
+                        lastPaceRecordTime = paceRecordTime
+
+                        // 평균 페이스 계산
+                        calculateAveragePace()
+                    }
                 } else {
                     _currentPace.value = "--'--\""
                 }
             }
+        }
+    }
+
+    // 평균 페이스 계산
+    private fun calculateAveragePace() {
+        if (paceRecords.isEmpty()) {
+            _avgPace.value = "--'--\""
+            return
+        }
+
+        // 페이스를 초로 변환하여 평균 계산
+        var totalSeconds = 0L
+        var validCount = 0
+
+        paceRecords.forEach { pace ->
+            if (pace != "--'--\"") {
+                val parts = pace.split("'", "\"")
+                if (parts.size >= 2) {
+                    val minutes = parts[0].toIntOrNull() ?: 0
+                    val seconds = parts[1].toIntOrNull() ?: 0
+                    totalSeconds += (minutes * 60 + seconds)
+                    validCount++
+                }
+            }
+        }
+
+        if (validCount > 0) {
+            val avgSeconds = totalSeconds / validCount
+            val avgMinutes = avgSeconds / 60
+            val avgSecs = avgSeconds % 60
+            _avgPace.value = String.format("%d'%02d\"", avgMinutes, avgSecs)
+        } else {
+            _avgPace.value = "--'--\""
         }
     }
 
@@ -231,19 +307,18 @@ class RunningViewModel @Inject constructor(
         _runningTime.value = 0L
         _formattedTime.value = "0:00:00"
         _distance.value = 0.0
-        _currentPace.value = "0'00\"" // 페이스 명시적 리셋 추가
+        _currentPace.value = "0'00\""
+        _maxHeartRate.value = 0
+        _avgHeartRate.value = 0
+        _avgPace.value = "--'--\""
         lastPaceCalculationTime = 0L
-        lastCalculatedDistance = 0.0 // 마지막 계산 거리 초기화
+        lastCalculatedDistance = 0.0
+        lastHeartRateRecordTime = 0L
+        lastPaceRecordTime = 0L
         recentDistances.clear()
+        heartRateRecords.clear()
+        paceRecords.clear()
         distanceRepository.resetDistance()
-//        isDistanceMonitoring = false
-//
-//        // DistanceRepository의 resetDistance 직접 호출
-//        viewModelScope.launch {
-//            stopDistanceMonitoringUseCase()  // 먼저 모니터링 중지
-//            // Repository에 직접 접근
-//            (distanceRepository as? DistanceRepositoryImpl)?.resetDistance()
-//        }
     }
 
 }

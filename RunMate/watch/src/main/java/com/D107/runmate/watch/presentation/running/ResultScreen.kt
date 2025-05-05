@@ -36,6 +36,11 @@ import com.D107.runmate.watch.R
 
 @Composable
 fun ResultScreen(
+    distance: String = "0.00",
+    time: String = "0:00:00",
+    avgPace: String = "--'--\"",
+    maxHeartRate: Int = 0,
+    avgHeartRate: Int = 0,
     onClick: () -> Unit = {}
 ) {
     Box(
@@ -49,13 +54,13 @@ fun ResultScreen(
                 .fillMaxSize()
                 .padding(vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(3.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp)
 //            verticalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
                 text = "러닝 기록",
 //                modifier = Modifier.offset(y = 10.dp)
-            fontSize = 14.sp,
+                fontSize = 14.sp,
             )
 
             HorizontalDivider(
@@ -64,22 +69,22 @@ fun ResultScreen(
 //                color = Color.Gray,
                 color = colorResource(id = R.color.gray_text2),
 
-            )
+                )
 
             Text(
-                text = "1.44km",
+                text = "${distance}km",
                 fontSize = 44.sp,
                 fontWeight = FontWeight.Bold,
                 fontStyle = FontStyle.Italic,
                 color = Color.White,
                 textAlign = TextAlign.Center,
-//                modifier = Modifier.offset(y = 20.dp)
             )
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 25.dp),
+                    .padding(horizontal = 25.dp)
+                    .offset(y=(-5).dp),
                 verticalArrangement = Arrangement.spacedBy(3.dp)
             ) {
 
@@ -115,7 +120,7 @@ fun ResultScreen(
                     }
 
                     Text(
-                        text = "00:21:33",
+                        text = time,
                         fontSize = 14.sp,
                     )
                 }
@@ -152,8 +157,45 @@ fun ResultScreen(
                     }
 
                     Text(
-                        text = "05'10\"",
+                        text = avgPace,
                         color = colorResource(id = R.color.primary),
+                        fontSize = 14.sp,
+                    )
+                }
+
+                // 최대 심박수
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "최대 심박수",
+                        color = Color.DarkGray,
+                        fontSize = 12.sp,
+                    )
+
+                    Canvas(
+                        modifier = Modifier
+                            .height(15.dp)
+                            .width(63.dp)
+                    ) {
+                        val dotRadius = .8.dp.toPx()
+                        val spaceBetweenDots = 4.dp.toPx()
+                        var currentX = dotRadius
+
+                        while (currentX < size.width) {
+                            drawCircle(
+                                color = Color.DarkGray,
+                                radius = dotRadius,
+                                center = Offset(currentX, size.height / 2)
+                            )
+                            currentX += spaceBetweenDots
+                        }
+                    }
+
+                    Text(
+                        text = maxHeartRate.toString(),
                         fontSize = 14.sp,
                     )
                 }
@@ -190,47 +232,11 @@ fun ResultScreen(
                     }
 
                     Text(
-                        text = "110",
+                        text = avgHeartRate.toString(),
                         fontSize = 14.sp,
                     )
                 }
 
-                // 칼로리
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "칼로리",
-                        color = Color.DarkGray,
-                        fontSize = 12.sp,
-                    )
-
-                    Canvas(
-                        modifier = Modifier
-                            .height(15.dp)
-                            .width(85.dp)
-                    ) {
-                        val dotRadius = .8.dp.toPx()
-                        val spaceBetweenDots = 4.dp.toPx()
-                        var currentX = dotRadius
-
-                        while (currentX < size.width) {
-                            drawCircle(
-                                color = Color.DarkGray,
-                                radius = dotRadius,
-                                center = Offset(currentX, size.height / 2)
-                            )
-                            currentX += spaceBetweenDots
-                        }
-                    }
-
-                    Text(
-                        text = "105",
-                        fontSize = 14.sp,
-                    )
-                }
             }
 
         }
@@ -244,7 +250,7 @@ fun ResultScreen(
                     color = colorResource(id = R.color.secondary),
                     shape = CircleShape
                 )
-                .clickable(onClick = {onClick()}),
+                .clickable(onClick = { onClick() }),
             contentAlignment = Alignment.TopCenter
         ) {
             Image(
