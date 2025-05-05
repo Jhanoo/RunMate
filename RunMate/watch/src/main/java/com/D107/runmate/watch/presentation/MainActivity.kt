@@ -196,7 +196,7 @@ class MainActivity : ComponentActivity() {
                             },
                             onStopClick = {
                                 val finalDistance =
-                                    String.format("%.2f", runningViewModel.distance.value)
+                                    String.format("%.1f", runningViewModel.distance.value)
                                 val finalTime = runningViewModel.formattedTime.value
                                 val finalAvgPace = runningViewModel.avgPace.value
                                 val finalMaxHeartRate = runningViewModel.maxHeartRate.value
@@ -223,7 +223,7 @@ class MainActivity : ComponentActivity() {
                     composable(
                         "result/{distance}/{time}/{avgPace}/{maxHeartRate}/{avgHeartRate}"
                     ) { backStackEntry ->
-                        val distance = backStackEntry.arguments?.getString("distance") ?: "0.00"
+                        val distance = backStackEntry.arguments?.getString("distance") ?: "0.0"
                         val time = backStackEntry.arguments?.getString("time") ?: "0:00:00"
                         val avgPace = backStackEntry.arguments?.getString("avgPace") ?: "--'--\""
                         val maxHeartRate =

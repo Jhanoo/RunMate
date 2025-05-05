@@ -147,47 +147,101 @@ fun RunningScreen(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (isPaceFixed) {
-                    // pace가 전달된 경우: 왼쪽은 runningData의 pace 고정
-                    DisplayButton(
-                        displayMode = DisplayMode.PACE,
-                        runningData = RunningData(
-                            time = currentRunningData.time,
-                            bpm = currentRunningData.bpm,
-                            pace = currentPace, // 현재 계산된 페이스
-                            distance = currentRunningData.distance
-                        ),
-                        onClick = {}, // 클릭 이벤트 비활성화
-                        customLabel = "페이스"
-                    )
-                } else {
-                    // pace가 전달되지 않은 경우: 기존 동작 유지
-                    DisplayButton(
-                        displayMode = DisplayMode.entries[leftDisplayIndex],
-                        runningData = currentRunningData,
-                        onClick = { leftDisplayIndex = (leftDisplayIndex + 1) % 4 }
+                // 왼쪽 버튼과 라벨
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    if (isPaceFixed) {
+                        // pace가 전달된 경우: 왼쪽은 runningData의 pace 고정
+                        Column(
+                            modifier = Modifier.clickable(onClick = {}),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = currentPace,
+                                fontSize = 21.sp,
+                                fontWeight = FontWeight.Normal,
+                                fontStyle = FontStyle.Normal,
+                                color = Color.White,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    } else {
+                        // pace가 전달되지 않은 경우: 기존 동작 유지
+                        Column(
+                            modifier = Modifier.clickable(onClick = { leftDisplayIndex = (leftDisplayIndex + 1) % 4 }),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = when (DisplayMode.entries[leftDisplayIndex]) {
+                                    DisplayMode.TIME -> currentRunningData.time
+                                    DisplayMode.BPM -> currentRunningData.bpm
+                                    DisplayMode.PACE -> currentRunningData.pace
+                                    DisplayMode.DISTANCE -> currentRunningData.distance
+                                },
+                                fontSize = 21.sp,
+                                fontWeight = FontWeight.Normal,
+                                fontStyle = FontStyle.Normal,
+                                color = Color.White,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                    Text(
+                        text = if (isPaceFixed) "페이스" else DisplayMode.entries[leftDisplayIndex].label,
+                        fontSize = 10.sp,
+                        color = Color.Gray,
+                        textAlign = TextAlign.Center
                     )
                 }
 
-                if (isPaceFixed) {
-                    // pace가 전달된 경우: 오른쪽은 목표 페이스 고정
-                    DisplayButton(
-                        displayMode = DisplayMode.PACE,
-                        runningData = RunningData(
-                            time = currentRunningData.time,
-                            bpm = currentRunningData.bpm,
-                            pace = pace.replace(":", "'") + "\"", // 목표 페이스
-                            distance = currentRunningData.distance
-                        ),
-                        onClick = {}, // 클릭 이벤트 비활성화
-                        customLabel = "목표 페이스"
-                    )
-                } else {
-                    // pace가 전달되지 않은 경우: 기존 동작 유지
-                    DisplayButton(
-                        displayMode = DisplayMode.entries[rightDisplayIndex],
-                        runningData = currentRunningData,
-                        onClick = { rightDisplayIndex = (rightDisplayIndex + 1) % 4 }
+                // 오른쪽 버튼과 라벨
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    if (isPaceFixed) {
+                        // pace가 전달된 경우: 오른쪽은 목표 페이스 고정
+                        Column(
+                            modifier = Modifier.clickable(onClick = {}),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = pace.replace(":", "'") + "\"",
+                                fontSize = 21.sp,
+                                fontWeight = FontWeight.Normal,
+                                fontStyle = FontStyle.Normal,
+                                color = Color.White,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    } else {
+                        // pace가 전달되지 않은 경우: 기존 동작 유지
+                        Column(
+                            modifier = Modifier.clickable(onClick = { rightDisplayIndex = (rightDisplayIndex + 1) % 4 }),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = when (DisplayMode.entries[rightDisplayIndex]) {
+                                    DisplayMode.TIME -> currentRunningData.time
+                                    DisplayMode.BPM -> currentRunningData.bpm
+                                    DisplayMode.PACE -> currentRunningData.pace
+                                    DisplayMode.DISTANCE -> currentRunningData.distance
+                                },
+                                fontSize = 21.sp,
+                                fontWeight = FontWeight.Normal,
+                                fontStyle = FontStyle.Normal,
+                                color = Color.White,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                    Text(
+                        text = if (isPaceFixed) "목표 페이스" else DisplayMode.entries[rightDisplayIndex].label,
+                        fontSize = 10.sp,
+                        color = Color.Gray,
+                        textAlign = TextAlign.Center
                     )
                 }
             }

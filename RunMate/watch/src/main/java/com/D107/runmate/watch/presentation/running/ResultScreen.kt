@@ -36,7 +36,7 @@ import com.D107.runmate.watch.R
 
 @Composable
 fun ResultScreen(
-    distance: String = "0.00",
+    distance: String = "0.0",
     time: String = "0:00:00",
     avgPace: String = "--'--\"",
     maxHeartRate: Int = 0,
@@ -71,14 +71,30 @@ fun ResultScreen(
 
                 )
 
-            Text(
-                text = "${distance}km",
-                fontSize = 44.sp,
-                fontWeight = FontWeight.Bold,
-                fontStyle = FontStyle.Italic,
-                color = Color.White,
-                textAlign = TextAlign.Center,
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.Bottom
+            ) {
+                Text(
+                    text = distance,
+                    fontSize = 44.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontStyle = FontStyle.Italic,
+                    color = Color.White,
+                    textAlign = TextAlign.Center,
+                )
+
+                Text(
+                    text = "km",
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontStyle = FontStyle.Italic,
+                    color = Color.White,
+                    textAlign = TextAlign.Center,
+                )
+            }
 
             Column(
                 modifier = Modifier
