@@ -8,13 +8,16 @@ composeMaterialVersion = "1.3.0"
 composeNavigation = "1.2.0"
 converterMoshi = "2.9.0"
 glide = "4.16.0"
+healthServicesClient = "1.0.0-rc02"
 hiltAndroidCompiler = "2.51.1"
+hiltNavigationCompose = "1.2.0"
 kotlin = "1.9.0"
 coreKtx = "1.10.1"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
 appcompat = "1.6.1"
+kotlinxCoroutinesGuava = "1.7.3"
 landscapistGlide = "2.2.13"
 material = "1.10.0"
 activity = "1.8.0"
@@ -23,6 +26,7 @@ moshi = "1.13.0"
 mpandroidchart = "v3.1.0"
 navigationFragment = "2.8.9"
 navVersion = "2.7.5"
+playServicesLocation = "21.3.0"
 runtimeAndroid = "1.7.8"
 jetbrainsKotlinJvm = "1.9.0"
 playServicesWearable = "19.0.0"
@@ -33,6 +37,8 @@ activityCompose = "1.7.2"
 coreSplashscreen = "1.0.1"
 volley = "1.2.1"
 material3Android = "1.3.2"
+junitKtx = "1.2.1"
+uiTestJunit4Android = "1.8.0"
 
 [libraries]
 android = { module = "com.kakao.maps.open:android", version.ref = "android" }
@@ -41,6 +47,8 @@ androidx-compose-material-v130 = { module = "androidx.wear.compose:compose-mater
 androidx-compose-navigation = { module = "androidx.wear.compose:compose-navigation", version.ref = "composeFoundationVersion" }
 androidx-compose-navigation-v120 = { module = "androidx.wear.compose:compose-navigation", version.ref = "composeNavigation" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-health-services-client = { module = "androidx.health:health-services-client", version.ref = "healthServicesClient" }
+androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-navigation-fragment = { module = "androidx.navigation:navigation-fragment", version.ref = "navigationFragment" }
 androidx-navigation-safe-args-gradle-plugin = { module = "androidx.navigation:navigation-safe-args-gradle-plugin", version.ref = "navVersion" }
 androidx-navigation-ui = { module = "androidx.navigation:navigation-ui", version.ref = "navigationFragment" }
@@ -54,6 +62,7 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+kotlinx-coroutines-guava = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-guava", version.ref = "kotlinxCoroutinesGuava" }
 landscapist-glide = { module = "com.github.skydoves:landscapist-glide", version.ref = "landscapistGlide" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
@@ -61,6 +70,7 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 androidx-runtime-android = { group = "androidx.compose.runtime", name = "runtime-android", version.ref = "runtimeAndroid" }
 moshi = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshi" }
 mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpandroidchart" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 play-services-wearable = { group = "com.google.android.gms", name = "play-services-wearable", version.ref = "playServicesWearable" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
@@ -74,6 +84,8 @@ androidx-activity-compose = { group = "androidx.activity", name = "activity-comp
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
 volley = { group = "com.android.volley", name = "volley", version.ref = "volley" }
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
+androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }
+androidx-ui-test-junit4-android = { group = "androidx.compose.ui", name = "ui-test-junit4-android", version.ref = "uiTestJunit4Android" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
