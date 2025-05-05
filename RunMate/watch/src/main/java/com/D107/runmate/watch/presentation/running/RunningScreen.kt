@@ -67,13 +67,16 @@ fun RunningScreen(
     val distance by viewModel.distance.collectAsState()
     val progress = (distance % 1.0).toFloat()
 
+    // 페이스
+    val currentPace by viewModel.currentPace.collectAsState()
+
     // 기본 데이터에 전달받은 pace를 반영
     // 실시간 BPM 반영
-    val currentRunningData = remember(pace, bpm, formattedTime, distance) {
+    val currentRunningData = remember(pace, bpm, formattedTime, distance, currentPace) {
         RunningData(
-            pace = if (pace != "0:00") pace.replace(":", "'") + "\"" else "5'10\"",
+            pace = if (pace != "0:00") pace.replace(":", "'") + "\"" else currentPace,
             bpm = bpm.toString(),
-            distance = String.format("%.1f", distance),
+            distance = String.format("%.2f", distance),
             time = formattedTime,
         )
     }
@@ -148,14 +151,19 @@ fun RunningScreen(
                     // pace가 전달된 경우: 왼쪽은 runningData의 pace 고정
                     DisplayButton(
                         displayMode = DisplayMode.PACE,
-                        runningData = currentRunningData,
+                        runningData = RunningData(
+                            time = currentRunningData.time,
+                            bpm = currentRunningData.bpm,
+                            pace = currentPace, // 현재 계산된 페이스
+                            distance = currentRunningData.distance
+                        ),
                         onClick = {}, // 클릭 이벤트 비활성화
                         customLabel = "페이스"
                     )
                 } else {
                     // pace가 전달되지 않은 경우: 기존 동작 유지
                     DisplayButton(
-                        displayMode = DisplayMode.values()[leftDisplayIndex],
+                        displayMode = DisplayMode.entries[leftDisplayIndex],
                         runningData = currentRunningData,
                         onClick = { leftDisplayIndex = (leftDisplayIndex + 1) % 4 }
                     )
@@ -165,14 +173,19 @@ fun RunningScreen(
                     // pace가 전달된 경우: 오른쪽은 목표 페이스 고정
                     DisplayButton(
                         displayMode = DisplayMode.PACE,
-                        runningData = currentRunningData,
+                        runningData = RunningData(
+                            time = currentRunningData.time,
+                            bpm = currentRunningData.bpm,
+                            pace = pace.replace(":", "'") + "\"", // 목표 페이스
+                            distance = currentRunningData.distance
+                        ),
                         onClick = {}, // 클릭 이벤트 비활성화
                         customLabel = "목표 페이스"
                     )
                 } else {
                     // pace가 전달되지 않은 경우: 기존 동작 유지
                     DisplayButton(
-                        displayMode = DisplayMode.values()[rightDisplayIndex],
+                        displayMode = DisplayMode.entries[rightDisplayIndex],
                         runningData = currentRunningData,
                         onClick = { rightDisplayIndex = (rightDisplayIndex + 1) % 4 }
                     )
