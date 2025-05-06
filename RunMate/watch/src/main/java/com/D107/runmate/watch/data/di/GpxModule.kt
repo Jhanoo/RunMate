@@ -26,7 +26,9 @@ object GpxModule {
             context,
             GpxDatabase::class.java,
             "gpx_database"
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides

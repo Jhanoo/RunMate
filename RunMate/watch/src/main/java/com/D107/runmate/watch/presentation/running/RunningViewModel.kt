@@ -23,9 +23,15 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import android.content.Context
 import android.content.Intent
+import com.D107.runmate.watch.data.repository.CadenceRepositoryImpl
+import com.D107.runmate.watch.domain.repository.CadenceRepository
+import com.D107.runmate.watch.domain.usecase.cadence.GetCadenceUseCase
 import com.D107.runmate.watch.domain.usecase.gpx.CreateGpxFileUseCase
 import com.D107.runmate.watch.presentation.service.LocationTrackingService
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
+import kotlin.coroutines.cancellation.CancellationException
 
 
 @HiltViewModel
@@ -38,7 +44,9 @@ class RunningViewModel @Inject constructor(
     private val getDistanceUseCase: GetDistanceUseCase,
     private val startDistanceMonitoringUseCase: StartDistanceMonitoringUseCase,
     private val stopDistanceMonitoringUseCase: StopDistanceMonitoringUseCase,
-    private val distanceRepository: DistanceRepository
+    private val distanceRepository: DistanceRepository,
+    private val getCadenceUseCase: GetCadenceUseCase,
+    private val cadenceRepository: CadenceRepository
 ) : ViewModel() {
     // 심박수
     private val _heartRate = MutableStateFlow(0)
@@ -96,16 +104,63 @@ class RunningViewModel @Inject constructor(
     private val _isLocationTrackingActive = MutableStateFlow(false)
     val isLocationTrackingActive: StateFlow<Boolean> = _isLocationTrackingActive.asStateFlow()
 
+    // 케이던스 관련 상태 추가
+    private val _cadence = MutableStateFlow(0)
+    val cadence: StateFlow<Int> = _cadence.asStateFlow()
+    private var cadenceJob: Job? = null
+
     init {
 //        Log.d("sensor", "ViewModel init")
         viewModelScope.launch {
             startHeartRateMonitoringUseCase()
             collectHeartRate()
             collectDistance() // 여기에 추가
-            Log.d("pace", "ViewModel init: 거리 수집 시작")
+            Log.d("Cadence", "ViewModel init: 케이던스 모니터링 시작")
         }
         observeHeartRateAndPaceForTracking()
     }
+
+    // 케이던스 수집 시작 메서드
+    private fun startCadenceCollection() {
+        // 기존 작업 취소
+        cadenceJob?.cancel()
+
+        // 케이던스 모니터링 시작
+//        (cadenceRepository as? CadenceRepositoryImpl)?.startMonitoring()
+
+        // 새 작업 시작
+        cadenceJob = viewModelScope.launch {
+            try {
+                while(isActive) {
+                    try {
+                        val cadenceValue = getCadenceUseCase()
+                        _cadence.value = cadenceValue
+                        Log.d("Cadence", "캐이던스 업데이트: $cadenceValue SPM")
+                    } catch (e: Exception) {
+                        Log.e("Cadence", "캐이던스 값 가져오기 실패: ${e.message}")
+                    }
+                    delay(3000) // 3초마다 업데이트
+                }
+            } catch (e: CancellationException) {
+                // 코루틴 취소는 정상적인 흐름으로 처리
+                Log.d("Cadence", "캐이던스 수집 작업이 정상적으로 취소됨")
+            } catch (e: Exception) {
+                // 다른 예외는 에러로 로그
+                Log.e("Cadence", "캐이던스 수집 중 예상치 못한 오류: ${e.message}")
+            }
+        }
+        Log.d("Cadence", "케이던스 수집 시작됨")
+    }
+
+    // 케이던스 수집 중지 메서드
+    private fun stopCadenceCollection() {
+        cadenceJob?.cancel()
+        cadenceJob = null
+        (cadenceRepository as? CadenceRepositoryImpl)?.stopMonitoring()
+        Log.d("Cadence", "케이던스 수집 중지됨")
+    }
+
+
 
     // 위치 추적 서비스 시작
     fun startLocationTracking(context: Context) {
@@ -162,6 +217,13 @@ class RunningViewModel @Inject constructor(
             // 페이스 변경 감지 및 서비스에 전달
             currentPace.collect { pace ->
                 LocationTrackingService.updatePace(pace)
+            }
+        }
+
+        viewModelScope.launch {
+            cadence.collect { cadenceValue ->
+                // 서비스에 캐이던스 업데이트 함수가 있다면 사용
+                Log.d("Cadence", "캐이던스 현재값: $cadenceValue")
             }
         }
     }
@@ -325,6 +387,9 @@ class RunningViewModel @Inject constructor(
     fun startTimer() {
         if (timerJob?.isActive == true) return
 
+        // 케이던스 수집 시작
+        startCadenceCollection()
+
         // 페이스 계산 Job 변수 추가
         val paceJob = viewModelScope.launch {
             while(true) {
@@ -365,6 +430,9 @@ class RunningViewModel @Inject constructor(
     fun pauseTimer() {
         Log.d("pace", "타이머 일시정지: 페이스 계산 중지")
 
+        // 케이던스 수집 중지
+        stopCadenceCollection()
+
         timerJob?.cancel()
         pausedTime = _runningTime.value
 
@@ -393,6 +461,7 @@ class RunningViewModel @Inject constructor(
         heartRateRecords.clear()
         paceRecords.clear()
         distanceRepository.resetDistance()
+        stopCadenceCollection()
     }
 
     // 러닝 종료 시 GPX 파일 생성

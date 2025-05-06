@@ -14,7 +14,9 @@ import android.os.Looper
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.D107.runmate.watch.R
+import com.D107.runmate.watch.data.repository.CadenceRepositoryImpl
 import com.D107.runmate.watch.domain.model.GpxTrackPoint
+import com.D107.runmate.watch.domain.repository.CadenceRepository
 import com.D107.runmate.watch.domain.repository.GpxRepository
 import com.D107.runmate.watch.presentation.MainActivity
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -40,9 +42,13 @@ class LocationTrackingService : Service() {
     @Inject
     lateinit var gpxRepository: GpxRepository
 
+    @Inject
+    lateinit var cadenceRepository: CadenceRepository
+
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var lastLocation: Location? = null
+
 
     companion object {
         private const val NOTIFICATION_ID = 1
@@ -71,6 +77,13 @@ class LocationTrackingService : Service() {
         fun updatePace(pace: String) {
             currentPace = pace
         }
+
+        private var lastCadence = 0
+
+        fun updateCadence(cadence: Int) {
+            lastCadence = cadence
+            Log.d("Cadence", "서비스에 캐이던스 값 설정: $cadence")
+        }
     }
 
     // 위치 업데이트 콜백
@@ -79,6 +92,7 @@ class LocationTrackingService : Service() {
             locationResult.lastLocation?.let { location ->
 
                 val now = Date()
+                val currentCadence = cadenceRepository.getCurrentCadence()
 
                 // 위치 데이터 수집 (5초마다 호출됨)
                 val trackPoint = GpxTrackPoint(
@@ -87,7 +101,7 @@ class LocationTrackingService : Service() {
                     elevation = location.altitude,
                     time = now,
                     heartRate = lastHeartRate,
-                    cadence = 180, // 고정 값
+                    cadence = currentCadence, // 고정 값
                     pace = currentPace
                 )
 
@@ -130,11 +144,13 @@ class LocationTrackingService : Service() {
     private fun pause() {
         Log.d(TAG, "위치 추적 일시 중지")
         stopLocationUpdates()
+        (cadenceRepository as CadenceRepositoryImpl).pauseMonitoring()
     }
 
     private fun resume() {
         Log.d(TAG, "위치 추적 재개")
         startLocationUpdates()
+        (cadenceRepository as CadenceRepositoryImpl).resumeMonitoring()
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -147,12 +163,18 @@ class LocationTrackingService : Service() {
         // 위치 업데이트 시작
         startLocationUpdates()
 
+        // 케이던스 모니터링 시작
+        (cadenceRepository as CadenceRepositoryImpl).startMonitoring()
+
         Log.d(TAG, "위치 추적 서비스 시작됨")
     }
 
     private fun stop() {
         // 위치 업데이트 중지
         stopLocationUpdates()
+
+        // 케이던스 모니터링 중지
+        (cadenceRepository as CadenceRepositoryImpl).stopMonitoring()
 
         // 서비스 중지
         stopForeground(STOP_FOREGROUND_REMOVE)

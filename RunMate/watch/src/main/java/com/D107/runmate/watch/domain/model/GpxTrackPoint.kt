@@ -3,21 +3,21 @@ package com.D107.runmate.watch.domain.model
 import java.util.Date
 
 data class GpxTrackPoint(
-    val latitude: Double,         // 위도
-    val longitude: Double,        // 경도
-    val elevation: Double,        // 고도 (미터)
-    val time: Date,               // 시간
-    val heartRate: Int,           // 심박수 (BPM)
-    val cadence: Int = 180,       // 케이던스 (고정값 180)
-    val pace: String              // 페이스 (분:초/km)
+    val latitude: Double,   // 위도
+    val longitude: Double,  // 경도
+    val elevation: Double,  // 고도 (미터)
+    val time: Date,         // 시간
+    val heartRate: Int,     // 심박수 (BPM)
+    val cadence: Int,       // 케이던스
+    val pace: String        // 페이스 (분:초/km)
 )
 
 // GPX 파일 메타데이터
 data class GpxMetadata(
-    val name: String,             // 트랙 이름
-    val desc: String = "",        // 설명
-    val startTime: Date,          // 시작 시간
-    val endTime: Date             // 종료 시간
+    val name: String,       // 트랙 이름
+    val desc: String = "",  // 설명
+    val startTime: Date,    // 시작 시간
+    val endTime: Date       // 종료 시간
 )
 
 // GPX 파일 상태
