@@ -1,9 +1,8 @@
 package com.D107.runmate.domain.repository
 
-import com.D107.runmate.domain.model.Insole.CombinedInsoleData
-import com.D107.runmate.domain.model.Insole.SmartInsole
-import com.D107.runmate.domain.model.Insole.InsoleConnectionState
-import com.D107.runmate.domain.model.Insole.InsoleData
+import com.D107.runmate.domain.model.smartinsole.CombinedInsoleData
+import com.D107.runmate.domain.model.smartinsole.SmartInsole
+import com.D107.runmate.domain.model.smartinsole.InsoleConnectionState
 import com.D107.runmate.domain.model.base.ResponseStatus
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow

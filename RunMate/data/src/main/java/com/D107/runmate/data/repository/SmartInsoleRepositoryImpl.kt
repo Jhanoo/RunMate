@@ -1,18 +1,16 @@
 package com.D107.runmate.data.repository
 
 import android.annotation.SuppressLint
-import com.D107.runmate.data.local.UserDataStoreSource
 import com.D107.runmate.data.mapper.SmartInsoleMapper
 import com.D107.runmate.data.remote.datasource.BleConstants
 import com.D107.runmate.data.remote.datasource.BleDataSource
-import com.D107.runmate.domain.model.Insole.CombinedInsoleData
-import com.D107.runmate.domain.model.Insole.SmartInsole
-import com.D107.runmate.domain.model.Insole.InsoleConnectionState
-import com.D107.runmate.domain.model.Insole.InsoleData
-import com.D107.runmate.domain.model.Insole.InsoleSide
+import com.D107.runmate.domain.model.smartinsole.CombinedInsoleData
+import com.D107.runmate.domain.model.smartinsole.SmartInsole
+import com.D107.runmate.domain.model.smartinsole.InsoleConnectionState
+import com.D107.runmate.domain.model.smartinsole.InsoleData
+import com.D107.runmate.domain.model.smartinsole.InsoleSide
 import com.D107.runmate.domain.model.base.NetworkError
 import com.D107.runmate.domain.model.base.ResponseStatus
-import com.D107.runmate.domain.repository.DataStoreRepository
 import com.D107.runmate.domain.repository.SmartInsoleRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers

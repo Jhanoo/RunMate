@@ -1,4 +1,4 @@
-package com.D107.runmate.domain.model.Insole
+package com.D107.runmate.domain.model.smartinsole
 
 data class SmartInsole(
     val name: String?,

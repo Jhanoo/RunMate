@@ -1,4 +1,4 @@
-package com.D107.runmate.domain.usecase.smartInsole
+package com.D107.runmate.domain.usecase.smartinsole
 
 import com.D107.runmate.domain.repository.SmartInsoleRepository
 import javax.inject.Inject

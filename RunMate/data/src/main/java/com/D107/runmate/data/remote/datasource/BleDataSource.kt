@@ -16,8 +16,8 @@ import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.os.Build
 import android.os.ParcelUuid
-import com.D107.runmate.domain.model.Insole.InsoleConnectionState
-import com.D107.runmate.domain.model.Insole.InsoleSide
+import com.D107.runmate.domain.model.smartinsole.InsoleConnectionState
+import com.D107.runmate.domain.model.smartinsole.InsoleSide
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -27,10 +27,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine

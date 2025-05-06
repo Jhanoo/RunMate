@@ -4,6 +4,7 @@ plugins {
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
     id("kotlin-parcelize")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 android {
@@ -78,4 +79,7 @@ dependencies {
 
     //Timber
     implementation("com.jakewharton.timber:timber:5.0.1")
+
+    //Serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
 }

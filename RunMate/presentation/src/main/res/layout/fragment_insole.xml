@@ -57,16 +57,36 @@
                     app:layout_constraintTop_toBottomOf="@id/tv_insole_name_insole"/>
                 <TextView
                     android:id="@+id/tv_insole_name_insole"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:text="Runmate Insole"
                     android:textColor="@android:color/black"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/iv_connected_insole"
                     app:layout_constraintTop_toTopOf="@id/iv_connected_insole" />
+                <ImageView
+                    android:id="@+id/iv_bluetooth_connect_insole"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_bluetooth_connect"
+                    android:layout_marginStart="4dp"
+                    app:layout_constraintStart_toEndOf="@id/tv_insole_name_insole"
+                    app:layout_constraintTop_toTopOf="@id/tv_insole_name_insole"
+                    app:layout_constraintBottom_toBottomOf="@id/tv_insole_name_insole"
+                    />
+                <ImageView
+                    android:id="@+id/iv_bluetooth_disconnect_insole"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_bluetooth_disconnect"
+                    android:visibility="gone"
+                    android:layout_marginStart="4dp"
+                    app:layout_constraintStart_toEndOf="@id/tv_insole_name_insole"
+                    app:layout_constraintTop_toTopOf="@id/tv_insole_name_insole"
+                    app:layout_constraintBottom_toBottomOf="@id/tv_insole_name_insole"
+                    />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -147,9 +167,8 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Diagnosis Results View -->
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/layout_diagnosis_results_insole"
+                android:id="@+id/layout_analysis_results_insole"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -159,7 +178,7 @@
                 app:layout_constraintTop_toBottomOf="@id/tv_diagnosis_title_insole">
 
                 <ImageView
-                    android:id="@+id/iv_insole_heatmap_insole"
+                    android:id="@+id/iv_footstrike_insole"
                     android:layout_width="120dp"
                     android:layout_height="120dp"
                     android:src="@drawable/img_no_insole"
@@ -173,8 +192,8 @@
                     android:layout_marginStart="16dp"
                     android:text="미드풋"
                     android:textSize="14sp"
-                    app:layout_constraintStart_toEndOf="@id/iv_insole_heatmap_insole"
-                    app:layout_constraintTop_toTopOf="@id/iv_insole_heatmap_insole" />
+                    app:layout_constraintStart_toEndOf="@id/iv_footstrike_insole"
+                    app:layout_constraintTop_toTopOf="@id/iv_footstrike_insole" />
 
                 <TextView
                     android:id="@+id/tv_midfoot_value_insole"
@@ -196,7 +215,7 @@
                     android:layout_marginTop="16dp"
                     android:text="포어풋"
                     android:textSize="14sp"
-                    app:layout_constraintStart_toEndOf="@id/iv_insole_heatmap_insole"
+                    app:layout_constraintStart_toEndOf="@id/iv_footstrike_insole"
                     app:layout_constraintTop_toBottomOf="@id/tv_midfoot_label_insole" />
 
                 <TextView
@@ -217,9 +236,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="16dp"
-                    android:text="힐 스트라이크"
+                    android:text="리어풋"
                     android:textSize="14sp"
-                    app:layout_constraintStart_toEndOf="@id/iv_insole_heatmap_insole"
+                    app:layout_constraintStart_toEndOf="@id/iv_footstrike_insole"
                     app:layout_constraintTop_toBottomOf="@id/tv_forefoot_label_insole" />
 
                 <TextView
@@ -239,7 +258,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="24dp"
-                    android:text="스마트 균형 분석"
+                    android:text="걸음 걸이 분석"
                     android:textColor="@android:color/black"
                     android:textSize="16sp"
                     android:textStyle="bold"

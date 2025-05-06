@@ -1,5 +1,6 @@
 package com.D107.runmate.domain.repository
 
+import com.D107.runmate.domain.model.smartinsole.GaitAnalysisResult
 import kotlinx.coroutines.flow.Flow
 
 interface DataStoreRepository {
@@ -17,4 +18,8 @@ interface DataStoreRepository {
     val savedInsoleAddresses: Flow<Pair<String?, String?>> // 이름 변경 고려 (savedAddressesFlow -> savedInsoleAddresses)
     suspend fun saveInsoleAddresses(leftAddress: String, rightAddress: String)
     suspend fun clearInsoleAddresses()
+
+    val savedGaitAnalysisResult : Flow<GaitAnalysisResult?>
+    suspend fun saveGaitAnalysisResult(gaitAnalysisResult: GaitAnalysisResult)
+
 }

@@ -1,7 +1,6 @@
-package com.D107.runmate.domain.usecase.smartInsole
+package com.D107.runmate.domain.usecase.smartinsole
 
-import com.D107.runmate.domain.model.Insole.CombinedInsoleData
-import com.D107.runmate.domain.model.Insole.InsoleData
+import com.D107.runmate.domain.model.smartinsole.CombinedInsoleData
 import com.D107.runmate.domain.model.base.ResponseStatus
 import com.D107.runmate.domain.repository.SmartInsoleRepository
 import kotlinx.coroutines.flow.Flow

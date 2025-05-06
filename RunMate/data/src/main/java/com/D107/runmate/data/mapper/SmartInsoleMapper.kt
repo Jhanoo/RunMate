@@ -2,8 +2,8 @@ package com.D107.runmate.data.mapper
 
 import android.annotation.SuppressLint
 import android.bluetooth.le.ScanResult
-import com.D107.runmate.domain.model.Insole.InsoleSide
-import com.D107.runmate.domain.model.Insole.SmartInsole
+import com.D107.runmate.domain.model.smartinsole.InsoleSide
+import com.D107.runmate.domain.model.smartinsole.SmartInsole
 import javax.inject.Inject
 import javax.inject.Singleton
 

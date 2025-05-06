@@ -1,4 +1,4 @@
-package com.D107.runmate.domain.model.Insole
+package com.D107.runmate.domain.model.smartinsole
 
 import com.D107.runmate.domain.model.base.BaseModel
 

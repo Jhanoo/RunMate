@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
-import com.D107.runmate.domain.model.Insole.SmartInsole
+import com.D107.runmate.domain.model.smartinsole.SmartInsole
 
 class SmartInsoleArrayAdapter(
     context: Context,

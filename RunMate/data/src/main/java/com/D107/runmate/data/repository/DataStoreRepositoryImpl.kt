@@ -1,6 +1,7 @@
 package com.D107.runmate.data.repository
 
 import com.D107.runmate.data.local.UserDataStoreSource
+import com.D107.runmate.domain.model.smartinsole.GaitAnalysisResult
 import com.D107.runmate.domain.repository.DataStoreRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -27,4 +28,8 @@ class DataStoreRepositoryImpl @Inject constructor(
     override suspend fun saveInsoleAddresses(leftAddress: String, rightAddress: String) = dataStore.saveInsoleAddresses(leftAddress, rightAddress)
 
     override suspend fun clearInsoleAddresses() = dataStore.clearInsoleAddresses()
+
+    override val savedGaitAnalysisResult: Flow<GaitAnalysisResult?> = dataStore.savedGaitAnalysisResult
+
+    override suspend fun saveGaitAnalysisResult(gaitAnalysisResult: GaitAnalysisResult) = dataStore.saveGaitAnalysisResult(gaitAnalysisResult)
 }
