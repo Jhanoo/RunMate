@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
@@ -27,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.wear.compose.material.Text
 import com.D107.runmate.watch.R
 
@@ -36,9 +38,12 @@ fun PauseScreen(
     displayData: String = "1:10:13",
     progress: Float = 0.1f, // 0.0 to 1.0
     onStartClick: () -> Unit = {},
-    onStopClick: () -> Unit = {}
+    onStopClick: () -> Unit = {},
+    viewModel: RunningViewModel = hiltViewModel()
 
 ) {
+    val localContext = LocalContext.current
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -102,7 +107,11 @@ fun PauseScreen(
                             color = colorResource(id = R.color.primary),
                             shape = CircleShape
                         )
-                    .clickable(onClick = onStartClick),
+                    .clickable(onClick = {
+                        // 위치 추적 재개
+                        viewModel.resumeLocationTracking(localContext)
+                        onStartClick()
+                    }),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(

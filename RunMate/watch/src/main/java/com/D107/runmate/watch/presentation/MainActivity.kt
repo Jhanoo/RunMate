@@ -207,6 +207,9 @@ class MainActivity : ComponentActivity() {
                                 val finalAvgHeartRate = runningViewModel.avgHeartRate.value
                                 val applicationContext = this@MainActivity.applicationContext
 
+                                // 위치 추적 서비스 중지 후 GPX 파일 생성
+                                runningViewModel.stopLocationTracking(applicationContext)
+
                                 // GPX 파일 생성
                                 try {
                                     val result = runningViewModel.createGpxFile(

@@ -92,6 +92,10 @@ class RunningViewModel @Inject constructor(
     @Inject
     lateinit var createGpxFileUseCase: CreateGpxFileUseCase
 
+    // 위치 추적 서비스가 실행 중인지 여부
+    private val _isLocationTrackingActive = MutableStateFlow(false)
+    val isLocationTrackingActive: StateFlow<Boolean> = _isLocationTrackingActive.asStateFlow()
+
     init {
 //        Log.d("sensor", "ViewModel init")
         viewModelScope.launch {
@@ -114,7 +118,26 @@ class RunningViewModel @Inject constructor(
         val intent = Intent(context, LocationTrackingService::class.java)
         intent.action = LocationTrackingService.ACTION_START
         context.startService(intent)
+        _isLocationTrackingActive.value = true
         Log.d("GpxTracking", "위치 추적 서비스 시작 요청 완료 - HR: ${_heartRate.value}, Pace: ${_currentPace.value}")
+    }
+
+    // 위치 추적 서비스 일시 중지
+    fun pauseLocationTracking(context: Context) {
+        Log.d("GpxTracking", "위치 추적 서비스 일시 중지 요청")
+        val intent = Intent(context, LocationTrackingService::class.java)
+        intent.action = LocationTrackingService.ACTION_PAUSE
+        context.startService(intent)
+        _isLocationTrackingActive.value = false
+    }
+
+    // 위치 추적 서비스 재개
+    fun resumeLocationTracking(context: Context) {
+        Log.d("GpxTracking", "위치 추적 서비스 재개 요청")
+        val intent = Intent(context, LocationTrackingService::class.java)
+        intent.action = LocationTrackingService.ACTION_RESUME
+        context.startService(intent)
+        _isLocationTrackingActive.value = true
     }
 
     // 위치 추적 서비스 중지
@@ -123,6 +146,7 @@ class RunningViewModel @Inject constructor(
         val intent = Intent(context, LocationTrackingService::class.java)
         intent.action = LocationTrackingService.ACTION_STOP
         context.startService(intent)
+        _isLocationTrackingActive.value = false
     }
 
     // 심박수와 페이스 업데이트를 위한 Observe 설정

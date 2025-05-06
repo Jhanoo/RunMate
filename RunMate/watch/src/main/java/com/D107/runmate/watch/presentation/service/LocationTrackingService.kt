@@ -52,6 +52,8 @@ class LocationTrackingService : Service() {
 
         // Service 시작/종료를 위한 Intent actions
         const val ACTION_START = "com.D107.runmate.watch.START_TRACKING"
+        const val ACTION_PAUSE = "com.D107.runmate.watch.PAUSE_TRACKING"
+        const val ACTION_RESUME = "com.D107.runmate.watch.RESUME_TRACKING"
         const val ACTION_STOP = "com.D107.runmate.watch.STOP_TRACKING"
 
         // 심박수 가져오는 방법
@@ -86,7 +88,10 @@ class LocationTrackingService : Service() {
                     pace = currentPace
                 )
 
-                Log.d("GpxTracking", "위치 포인트 수집: lat=${location.latitude}, lon=${location.longitude}, hr=${lastHeartRate}, pace=${currentPace}")
+                Log.d(
+                    "GpxTracking",
+                    "위치 포인트 수집: lat=${location.latitude}, lon=${location.longitude}, hr=${lastHeartRate}, pace=${currentPace}"
+                )
 
                 // Repository에 트랙 포인트 추가
                 serviceScope.launch {
@@ -110,11 +115,23 @@ class LocationTrackingService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        when(intent?.action) {
+        when (intent?.action) {
             ACTION_START -> start()
+            ACTION_PAUSE -> pause()
+            ACTION_RESUME -> resume()
             ACTION_STOP -> stop()
         }
         return START_STICKY
+    }
+
+    private fun pause() {
+        Log.d(TAG, "위치 추적 일시 중지")
+        stopLocationUpdates()
+    }
+
+    private fun resume() {
+        Log.d(TAG, "위치 추적 재개")
+        startLocationUpdates()
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -151,7 +168,8 @@ class LocationTrackingService : Service() {
                 description = "러닝 중 위치를 추적합니다"
             }
 
-            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
     }

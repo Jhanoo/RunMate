@@ -267,6 +267,7 @@ fun RunningScreen(
                 )
                 .clickable(onClick = {
                     viewModel.pauseTimer() // 타이머 일시정지
+                    viewModel.pauseLocationTracking(localContext) // 위치 추적 일시 중지
 
                     val titleMode = DisplayMode.entries[topDisplayIndex]
                     val titleData = when (titleMode) {

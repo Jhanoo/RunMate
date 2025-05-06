@@ -52,22 +52,22 @@ fun ResultScreen(
     onClick: () -> Unit = {},
     viewModel: RunningViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
+//    val context = LocalContext.current
 
     // 화면 진입 시 GPX 파일 생성
-    LaunchedEffect(Unit) {
-        val runName = "RunMate_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(
-            Date()
-        )}"
-        viewModel.createGpxFile(context, runName).onSuccess { fileId ->
-            Log.d("GPX", "GPX 파일 생성 성공: ID=$fileId")
-
-            // 파일 생성 성공 시 즉시 업로드 시도
-            GpxUploadWorker
-        }.onFailure { error ->
-            Log.e("GPX", "GPX 파일 생성 실패: ${error.message}")
-        }
-    }
+//    LaunchedEffect(Unit) {
+//        val runName = "RunMate_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(
+//            Date()
+//        )}"
+//        viewModel.createGpxFile(context, runName).onSuccess { fileId ->
+//            Log.d("GPX", "GPX 파일 생성 성공: ID=$fileId")
+//
+//            // 파일 생성 성공 시 즉시 업로드 시도
+//            GpxUploadWorker
+//        }.onFailure { error ->
+//            Log.e("GPX", "GPX 파일 생성 실패: ${error.message}")
+//        }
+//    }
 
     Box(
         modifier = Modifier
