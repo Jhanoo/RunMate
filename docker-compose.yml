@@ -7,6 +7,7 @@ services:
     container_name: runmate-backend
     volumes:
       - ./app.jar:/app/app.jar     # 호스트의 app.jar를 컨테이너에 마운트
+      - runmate-logs:/app/logs     # 로그 데이터를 위한 볼륨 추가
     restart: always
     ports:
       - "8080:8080"
@@ -32,6 +33,7 @@ services:
     volumes:
       # initdb 후 init-user-db.sh 를 실행
       - ./postgres-init:/docker-entrypoint-initdb.d
+      - postgres-data:/var/lib/postgresql/data  # 데이터베이스 데이터를 위한 볼륨 추가
     networks:
       - project-net
     ports:
@@ -43,6 +45,9 @@ services:
     restart: always
     ports:
       - "6379:6379"
+    volumes:
+      - redis-data:/data  # Redis 데이터를 위한 볼륨 추가
+    command: redis-server --appendonly yes  # AOF 지속성 활성화
     networks:
       - project-net
 
@@ -57,6 +62,7 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
       - certbot-etc:/etc/letsencrypt
       - web-root:/var/www/html
+      - nginx-logs:/var/log/nginx  # Nginx 로그를 위한 볼륨 추가
     depends_on:
       - springboot
     networks:
@@ -82,3 +88,7 @@ volumes:
   certbot-etc:
   certbot-var:
   web-root:
+  postgres-data:  # PostgreSQL 데이터 볼륨 정의
+  redis-data:     # Redis 데이터 볼륨 정의
+  runmate-logs:   # 애플리케이션 로그 볼륨 정의
+  nginx-logs:     # Nginx 로그 볼륨 정의

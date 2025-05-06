@@ -3,10 +3,15 @@ spring:
     import: optional:file:.env[.properties]
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:d107}
-    username: ${DB_USERNAME:runhwani}
-    password: ${DB_PASSWORD:runmated107}
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-test-query: SELECT 1
 
   jpa:
     hibernate:
@@ -20,7 +25,7 @@ spring:
 
   data:
     redis:
-      host: ${REDIS_HOST:k12d107.p.ssafy.io}
+      host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       timeout: 10000
       lettuce:
@@ -78,9 +83,8 @@ springdoc:
 
 logging:
   level:
-    com.runhwani.runmate: DEBUG
-    org.mybatis: DEBUG
-
+    root: INFO
+    com.runhwani.runmate: INFO
 
 server:
   port: 8080
