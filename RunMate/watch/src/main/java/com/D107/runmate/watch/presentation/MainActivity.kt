@@ -19,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
@@ -34,6 +35,9 @@ import com.D107.runmate.watch.presentation.splash.SplashScreen
 import com.D107.runmate.watch.presentation.theme.RunMateTheme
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.components.ActivityComponent
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -207,57 +211,65 @@ class MainActivity : ComponentActivity() {
                                 val finalAvgHeartRate = runningViewModel.avgHeartRate.value
                                 val applicationContext = this@MainActivity.applicationContext
 
-                                // 위치 추적 서비스 중지 후 GPX 파일 생성
-                                runningViewModel.stopLocationTracking(applicationContext)
+                                // 위치 추적 서비스 중지 후 GPX 파일 생성 (비동기로 처리)
+                                lifecycleScope.launch {
+                                    try {
+                                        val result = runningViewModel.createGpxFile(
+                                            applicationContext,
+                                            "러닝 ${
+                                                SimpleDateFormat(
+                                                    "yyyy-MM-dd HH:mm",
+                                                    Locale.getDefault()
+                                                ).format(Date())
+                                            }"
+                                        )
+                                        result.fold(
+                                            onSuccess = { fileId ->
+                                                Log.d("GPX", "GPX 파일 생성 성공: ID=$fileId")
+                                            },
+                                            onFailure = { error ->
+                                                Log.e("GPX", "GPX 파일 생성 실패: ${error.message}")
+                                            }
+                                        )
+                                    } catch (e: Exception) {
+                                        Log.e("GPX", "GPX 파일 생성 중 예외 발생: ${e.message}", e)
+                                    }
 
-                                // GPX 파일 생성
-                                try {
-                                    val result = runningViewModel.createGpxFile(
-                                        applicationContext,
-                                        "러닝 ${SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(
-                                            Date()
-                                        )}"
-                                    )
-                                    result.fold(
-                                        onSuccess = { fileId ->
-                                            Log.d("GPX", "GPX 파일 생성 성공: ID=$fileId")
-                                        },
-                                        onFailure = { error ->
-                                            Log.e("GPX", "GPX 파일 생성 실패: ${error.message}")
+                                    // 생성 완료 후 화면 전환 (UI 스레드에서 실행)
+                                    withContext(Dispatchers.Main) {
+                                        // 상태 초기화
+                                        savedTopIndex = 0
+                                        savedLeftIndex = 1
+                                        savedRightIndex = 2
+                                        savedPace = "0:00"
+                                        savedRunningData = RunningData()
+
+                                        navController.navigate("result/$finalDistance/$finalTime/$finalAvgPace/$finalMaxHeartRate/$finalAvgHeartRate") {
+                                            popUpTo(0) { inclusive = true }
                                         }
-                                    )
-                                } catch (e: Exception) {
-                                    Log.e("GPX", "GPX 파일 생성 중 예외 발생: ${e.message}", e)
+
+                                        // 타이머 리셋
+                                        runningViewModel.resetTimer()
+                                    }
                                 }
-
-                                // 상태 초기화
-                                savedTopIndex = 0
-                                savedLeftIndex = 1
-                                savedRightIndex = 2
-                                savedPace = "0:00"
-                                savedRunningData = RunningData()
-
-                                navController.navigate("result/$finalDistance/$finalTime/$finalAvgPace/$finalMaxHeartRate/$finalAvgHeartRate") {
-                                    popUpTo(0) { inclusive = true }
-                                }
-
-                                // 타이머 리셋
-                                runningViewModel.resetTimer()
-                            }
-                        )
+                            })
                     }
 
                     // 결과 화면
                     composable(
                         "result/{distance}/{time}/{avgPace}/{maxHeartRate}/{avgHeartRate}"
                     ) { backStackEntry ->
-                        val distance = backStackEntry.arguments?.getString("distance") ?: "0.0"
+                        val distance =
+                            backStackEntry.arguments?.getString("distance") ?: "0.0"
                         val time = backStackEntry.arguments?.getString("time") ?: "0:00:00"
-                        val avgPace = backStackEntry.arguments?.getString("avgPace") ?: "--'--\""
+                        val avgPace =
+                            backStackEntry.arguments?.getString("avgPace") ?: "--'--\""
                         val maxHeartRate =
-                            backStackEntry.arguments?.getString("maxHeartRate")?.toIntOrNull() ?: 0
+                            backStackEntry.arguments?.getString("maxHeartRate")
+                                ?.toIntOrNull() ?: 0
                         val avgHeartRate =
-                            backStackEntry.arguments?.getString("avgHeartRate")?.toIntOrNull() ?: 0
+                            backStackEntry.arguments?.getString("avgHeartRate")
+                                ?.toIntOrNull() ?: 0
 
                         ResultScreen(
                             distance = distance,

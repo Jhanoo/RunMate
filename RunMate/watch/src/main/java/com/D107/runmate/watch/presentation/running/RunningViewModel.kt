@@ -396,20 +396,18 @@ class RunningViewModel @Inject constructor(
     }
 
     // 러닝 종료 시 GPX 파일 생성
-    fun createGpxFile(context: Context, runName: String): Result<Long> {
+    suspend fun createGpxFile(context: Context, runName: String): Result<Long> {
         // 위치 추적 서비스 중지
         stopLocationTracking(context)
 
         // GPX 파일 생성
-        return runBlocking {
-            createGpxFileUseCase(
-                runName = runName,
-                totalDistance = _distance.value,
-                totalTime = _runningTime.value,
-                avgHeartRate = _avgHeartRate.value,
-                maxHeartRate = _maxHeartRate.value
-            )
-        }
+        return createGpxFileUseCase(
+            runName = runName,
+            totalDistance = _distance.value,
+            totalTime = _runningTime.value,
+            avgHeartRate = _avgHeartRate.value,
+            maxHeartRate = _maxHeartRate.value
+        )
     }
 
 }

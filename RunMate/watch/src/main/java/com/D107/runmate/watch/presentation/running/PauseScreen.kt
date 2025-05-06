@@ -1,5 +1,6 @@
 package com.D107.runmate.watch.presentation.running
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -31,6 +33,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.wear.compose.material.Text
 import com.D107.runmate.watch.R
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun PauseScreen(
@@ -43,6 +49,7 @@ fun PauseScreen(
 
 ) {
     val localContext = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     Box(
         modifier = Modifier
@@ -107,11 +114,11 @@ fun PauseScreen(
                             color = colorResource(id = R.color.primary),
                             shape = CircleShape
                         )
-                    .clickable(onClick = {
-                        // 위치 추적 재개
-                        viewModel.resumeLocationTracking(localContext)
-                        onStartClick()
-                    }),
+                        .clickable(onClick = {
+                            // 위치 추적 재개
+                            viewModel.resumeLocationTracking(localContext)
+                            onStartClick()
+                        }),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
@@ -130,7 +137,24 @@ fun PauseScreen(
                             color = colorResource(id = R.color.btn_red),
                             shape = CircleShape
                         )
-                    .clickable(onClick = onStopClick),
+                        .clickable {
+                            coroutineScope.launch {
+                                try {
+                                    val result = viewModel.createGpxFile(
+                                        localContext,
+                                        "러닝 ${SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(
+                                            Date()
+                                        )}"
+                                    )
+                                    // 결과 처리...
+                                } catch (e: Exception) {
+                                    Log.e("GPX", "GPX 파일 생성 중 예외 발생: ${e.message}", e)
+                                }
+
+                                // UI 업데이트나 콜백 호출
+                                onStopClick()
+                            }
+                        },
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
