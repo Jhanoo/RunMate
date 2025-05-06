@@ -33,7 +33,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("*"));
+        configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization"));
@@ -54,13 +54,11 @@ public class SecurityConfig {
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                    "/auth/signup",
-                    "/auth/login",
+                    "/api/auth/**",
                     "/test/**",
                     "/api/**",
                     "/swagger-ui/**",
-                    "/v3/api-docs/**",
-                    "/api/auth/signup"
+                    "/v3/api-docs/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             );
