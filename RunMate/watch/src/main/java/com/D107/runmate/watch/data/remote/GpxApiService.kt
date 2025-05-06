@@ -13,7 +13,7 @@ interface GpxApiService {
     @Multipart
     @POST("api/gpx/upload")
     suspend fun uploadGpxFile(
-        @Part file: File
+        @Part file: MultipartBody.Part
     ): Response<UploadResponse>
 
     // 확장 함수로 File을 MultipartBody.Part로 변환

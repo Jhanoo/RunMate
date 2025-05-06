@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.wear.compose.material.Text
 import com.D107.runmate.watch.R
+import com.D107.runmate.watch.presentation.worker.GpxUploadWorker
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -60,6 +61,9 @@ fun ResultScreen(
         )}"
         viewModel.createGpxFile(context, runName).onSuccess { fileId ->
             Log.d("GPX", "GPX 파일 생성 성공: ID=$fileId")
+
+            // 파일 생성 성공 시 즉시 업로드 시도
+            GpxUploadWorker
         }.onFailure { error ->
             Log.e("GPX", "GPX 파일 생성 실패: ${error.message}")
         }

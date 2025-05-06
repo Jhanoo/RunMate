@@ -32,4 +32,7 @@ interface GpxRepository {
 
     // GPX 파일 서버 업로드
     suspend fun uploadGpxFile(file: File): Boolean
+
+    // GPX 파일 ID 가져오기
+    suspend fun getGpxFileById(id: Long): GpxFile?
 }

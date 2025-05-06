@@ -105,6 +105,7 @@ class RunningViewModel @Inject constructor(
 
     // 위치 추적 서비스 시작
     fun startLocationTracking(context: Context) {
+        Log.d("GpxTracking", "위치 추적 서비스 시작 요청")
         // 현재 심박수와 페이스 정보를 서비스에 전달
         LocationTrackingService.updateHeartRate(_heartRate.value)
         LocationTrackingService.updatePace(_currentPace.value)
@@ -113,10 +114,12 @@ class RunningViewModel @Inject constructor(
         val intent = Intent(context, LocationTrackingService::class.java)
         intent.action = LocationTrackingService.ACTION_START
         context.startService(intent)
+        Log.d("GpxTracking", "위치 추적 서비스 시작 요청 완료 - HR: ${_heartRate.value}, Pace: ${_currentPace.value}")
     }
 
     // 위치 추적 서비스 중지
     fun stopLocationTracking(context: Context) {
+        Log.d("GpxTracking", "위치 추적 서비스 중지 요청")
         val intent = Intent(context, LocationTrackingService::class.java)
         intent.action = LocationTrackingService.ACTION_STOP
         context.startService(intent)

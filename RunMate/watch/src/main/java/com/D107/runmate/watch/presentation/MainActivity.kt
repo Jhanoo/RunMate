@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Half.toFloat
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -33,6 +34,9 @@ import com.D107.runmate.watch.presentation.splash.SplashScreen
 import com.D107.runmate.watch.presentation.theme.RunMateTheme
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.components.ActivityComponent
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -201,6 +205,27 @@ class MainActivity : ComponentActivity() {
                                 val finalAvgPace = runningViewModel.avgPace.value
                                 val finalMaxHeartRate = runningViewModel.maxHeartRate.value
                                 val finalAvgHeartRate = runningViewModel.avgHeartRate.value
+                                val applicationContext = this@MainActivity.applicationContext
+
+                                // GPX 파일 생성
+                                try {
+                                    val result = runningViewModel.createGpxFile(
+                                        applicationContext,
+                                        "러닝 ${SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(
+                                            Date()
+                                        )}"
+                                    )
+                                    result.fold(
+                                        onSuccess = { fileId ->
+                                            Log.d("GPX", "GPX 파일 생성 성공: ID=$fileId")
+                                        },
+                                        onFailure = { error ->
+                                            Log.e("GPX", "GPX 파일 생성 실패: ${error.message}")
+                                        }
+                                    )
+                                } catch (e: Exception) {
+                                    Log.e("GPX", "GPX 파일 생성 중 예외 발생: ${e.message}", e)
+                                }
 
                                 // 상태 초기화
                                 savedTopIndex = 0

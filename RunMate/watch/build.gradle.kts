@@ -72,6 +72,7 @@ dependencies {
     implementation(libs.androidx.material3.android)
     implementation(libs.androidx.junit.ktx)
     implementation(libs.androidx.ui.test.junit4.android)
+    implementation(libs.androidx.hilt.common)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)

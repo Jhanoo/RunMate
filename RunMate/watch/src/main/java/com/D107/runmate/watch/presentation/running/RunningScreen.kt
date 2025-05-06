@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.ButtonDefaults
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -84,10 +85,16 @@ fun RunningScreen(
     // pace가 "0:00"이 아닌지 확인
     val isPaceFixed = pace != "0:00"
 
+    val localContext = LocalContext.current
+
     // 화면 진입시 모니터링 시작
     LaunchedEffect(Unit) {
         viewModel.startMonitoring()
         viewModel.startTimer()
+
+        // 위치 추적 서비스 시작
+        viewModel.startLocationTracking(localContext)
+        Log.d("GpxTracking", "런닝 화면에서 위치 추적 서비스 시작")
     }
 
     // 화면 종료시 모니터링 중지

@@ -86,14 +86,20 @@ class LocationTrackingService : Service() {
                     pace = currentPace
                 )
 
+                Log.d("GpxTracking", "위치 포인트 수집: lat=${location.latitude}, lon=${location.longitude}, hr=${lastHeartRate}, pace=${currentPace}")
+
                 // Repository에 트랙 포인트 추가
                 serviceScope.launch {
-                    gpxRepository.addTrackPoint(trackPoint)
-                    Log.d(TAG, "트랙 포인트 저장: $trackPoint")
+                    try {
+                        gpxRepository.addTrackPoint(trackPoint)
+                        Log.d("GpxTracking", "트랙 포인트 저장 성공")
+                    } catch (e: Exception) {
+                        Log.e("GpxTracking", "트랙 포인트 저장 실패: ${e.message}", e)
+                    }
                 }
 
                 lastLocation = location
-            }
+            } ?: Log.e("GpxTracking", "위치 결과가 null입니다")
         }
     }
 
