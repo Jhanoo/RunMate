@@ -1,67 +1,61 @@
 package com.runhwani.runmate.exception;
 
 import com.runhwani.runmate.dto.common.CommonResponse;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.server.ResponseStatusException;
 
-/**
- * 전역 예외 처리
- */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    /**
-     * Spring에서 상태코드와 메시지를 던질 때 사용하는 예외(ResponseStatusException)를 처리
-     */
-    @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<CommonResponse<Void>> handleResponseStatus(ResponseStatusException ex) {
-        // ex.getReason()에 담긴 메시지를 그대로 클라이언트에 전달
-        CommonResponse<Void> body = CommonResponse.error(ex.getReason());
+    // CustomException 처리
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<CommonResponse<Void>> handleCustomException(CustomException e) {
         return ResponseEntity
-                .status(ex.getStatusCode())
-                .body(body);
+                .status(e.getErrorCode().getStatus())
+                .body(new CommonResponse<>(e.getErrorCode().getMessage(), null));
     }
 
-    /**
-     * @Valid, @RequestBody 검증 실패 시 발생하는 예외 처리
-     */
+    // 400 - 잘못된 요청
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<CommonResponse<Void>> handleValidation(MethodArgumentNotValidException ex) {
-        // 첫 번째 필드 오류 메시지를 취합해서 전달
-        String message = ex.getFieldErrors().stream()
-                .map(err -> err.getField() + ": " + err.getDefaultMessage())
-                .findFirst()
-                .orElse("잘못된 요청입니다.");
-        CommonResponse<Void> body = CommonResponse.error(message);
+    public ResponseEntity<CommonResponse<Void>> handleValidationExceptions(MethodArgumentNotValidException e) {
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(body);
+                .badRequest()
+                .body(new CommonResponse<>(ErrorCode.INVALID_REQUEST.getMessage(), null));
     }
 
-    /**
-     * IllegalArgumentException 등 비즈니스 로직에서 던진 예외 처리
-     */
+    // 401 - 인증되지 않은 사용자
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<CommonResponse<Void>> handleUnauthorizedException(SecurityException e) {
+        return ResponseEntity
+                .status(ErrorCode.UNAUTHORIZED_USER.getStatus())
+                .body(new CommonResponse<>(ErrorCode.UNAUTHORIZED_USER.getMessage(), null));
+    }
+
+    // 403 - 권한 없음
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<CommonResponse<Void>> handleAccessDeniedException(AccessDeniedException e) {
+        return ResponseEntity
+                .status(ErrorCode.FORBIDDEN_ACCESS.getStatus())
+                .body(new CommonResponse<>(ErrorCode.FORBIDDEN_ACCESS.getMessage(), null));
+    }
+
+    // 404 - 리소스를 찾을 수 없음
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<CommonResponse<Void>> handleIllegalArg(IllegalArgumentException ex) {
-        CommonResponse<Void> body = CommonResponse.error(ex.getMessage());
+    public ResponseEntity<CommonResponse<Void>> handleIllegalArgumentException(IllegalArgumentException e) {
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(body);
+                .status(ErrorCode.RESOURCE_NOT_FOUND.getStatus())
+                .body(new CommonResponse<>(ErrorCode.RESOURCE_NOT_FOUND.getMessage(), null));
     }
 
-    /**
-     * 그 외 모든 예외 처리 (500)
-     */
+    // 500 - 서버 내부 오류
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<CommonResponse<Void>> handleAny(Exception ex) {
-        // 로그로 남기고 싶다면 여기서 로깅
-        CommonResponse<Void> body = CommonResponse.error("서버에 오류가 발생했습니다.");
+    public ResponseEntity<CommonResponse<Void>> handleException(Exception e) {
         return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(body);
+                .status(ErrorCode.INTERNAL_SERVER_ERROR.getStatus())
+                .body(new CommonResponse<>(ErrorCode.INTERNAL_SERVER_ERROR.getMessage(), null));
     }
-}
+} 

@@ -31,9 +31,7 @@ Thumbs.db
 *.log
 tmp/
 
-# Application properties
-src/main/resources/application.yml
-src/main/resources/application.properties
+
 
 HELP.md
 .gradle
@@ -73,9 +71,6 @@ out/
 ### VS Code ###
 .vscode/
 
-### Application properties ###
-src/main/resources/application.yml
-src/main/resources/application.properties
 
 ### Logs ###
 *.log

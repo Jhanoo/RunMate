@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.runhwani.runmate.dao.UserDao">
+    
+    <select id="findByEmail" resultType="User">
+        SELECT * FROM users WHERE email = #{email}
+    </select>
+    
+    <select id="findByUserId" resultType="User">
+        SELECT * FROM users WHERE user_id = #{userId}
+    </select>
+    
+    <select id="existsByEmail" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM users WHERE email = #{email})
+    </select>
+    
+    <select id="existsByNickname" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM users WHERE nickname = #{nickname})
+    </select>
+    
+    <insert id="insert">
+        INSERT INTO users (
+            user_id, email, password, nickname, 
+            profile_image, avg_pace, created_at
+        ) VALUES (
+            #{userId}, #{email}, #{password}, #{nickname}, 
+            #{profileImage}, #{avgPace}, #{createdAt}
+        )
+    </insert>
+</mapper> 
