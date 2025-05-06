@@ -29,7 +29,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import java.util.Calendar
 import java.util.Date
+import java.util.TimeZone
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -75,7 +77,12 @@ class LocationTrackingService : Service() {
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             locationResult.lastLocation?.let { location ->
-                val now = Date()
+
+                val now = Calendar.getInstance().apply {
+                    timeInMillis = System.currentTimeMillis()
+                    // 시간대를 한국 시간으로 설정
+                    timeZone = TimeZone.getTimeZone("Asia/Seoul")
+                }.time
 
                 // 위치 데이터 수집 (5초마다 호출됨)
                 val trackPoint = GpxTrackPoint(

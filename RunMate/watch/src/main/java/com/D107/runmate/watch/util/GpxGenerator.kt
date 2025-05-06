@@ -11,7 +11,7 @@ import java.util.TimeZone
 class GpxGenerator {
     companion object {
         // ISO 8601 포맷 (GPX 표준)
-        private val DATE_FORMAT = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
+        private val DATE_FORMAT = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).apply {
             timeZone = TimeZone.getTimeZone("UTC")
         }
 
@@ -67,6 +67,7 @@ class GpxGenerator {
                                         <gpxtpx:TrackPointExtension>
                                             <gpxtpx:hr>${point.heartRate}</gpxtpx:hr>
                                             <gpxtpx:cad>${point.cadence}</gpxtpx:cad>
+                                            <gpxtpx:pace>${point.pace}</gpxtpx:pace>
                                         </gpxtpx:TrackPointExtension>
                                     </extensions>
                                 </trkpt>
