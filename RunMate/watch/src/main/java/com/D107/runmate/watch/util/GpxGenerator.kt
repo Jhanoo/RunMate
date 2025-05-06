@@ -12,7 +12,7 @@ class GpxGenerator {
     companion object {
         // ISO 8601 포맷 (GPX 표준)
         private val DATE_FORMAT = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).apply {
-            timeZone = TimeZone.getTimeZone("UTC")
+            timeZone = TimeZone.getTimeZone("Asia/Seoul")
         }
 
         fun createGpxFile(
