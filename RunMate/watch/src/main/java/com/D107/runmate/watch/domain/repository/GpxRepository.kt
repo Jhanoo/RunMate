@@ -35,4 +35,10 @@ interface GpxRepository {
 
     // GPX 파일 ID 가져오기
     suspend fun getGpxFileById(id: Long): GpxFile?
+
+    // 트랙 포인트를 일괄 저장
+    suspend fun saveTrackPointsBatch(trackPoints: List<GpxTrackPoint>)
+
+    // DB에서 모든 트랙 포인트 가져오기
+    suspend fun getAllTrackPoints(sessionId: String): List<GpxTrackPoint>
 }

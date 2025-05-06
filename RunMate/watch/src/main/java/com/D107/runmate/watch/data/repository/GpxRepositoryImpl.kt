@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.D107.runmate.watch.data.local.GpxDao
 import com.D107.runmate.watch.data.local.GpxEntity
+import com.D107.runmate.watch.data.local.TrackPointEntity
 import com.D107.runmate.watch.data.remote.GpxApiService
 import com.D107.runmate.watch.domain.model.GpxFile
 import com.D107.runmate.watch.domain.model.GpxMetadata
@@ -19,6 +20,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import java.util.Date
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,26 +31,48 @@ class GpxRepositoryImpl @Inject constructor(
     private val gpxApiService: GpxApiService
 ) : GpxRepository {
 
+    // 메모리 버퍼 크기 제한 설정
+    private val MAX_BUFFER_SIZE = 120 // 10분 간격으로 DB에 저장
+
+    // 현재 세션 ID
+    private var currentSessionId: String = UUID.randomUUID().toString()
+
     // 현재 세션의 트랙 포인트 저장소 (메모리)
     private val sessionTrackPoints = mutableListOf<GpxTrackPoint>()
 
     override suspend fun addTrackPoint(trackPoint: GpxTrackPoint) {
         sessionTrackPoints.add(trackPoint)
         Log.d("GpxTracking", "트랙 포인트 추가됨: 현재 총 ${sessionTrackPoints.size}개 포인트")
+
+        // 버퍼가 꽉 차면 DB에 일괄 저장하고 메모리에서 제거
+        if (sessionTrackPoints.size >= MAX_BUFFER_SIZE) {
+            saveTrackPointsBatch(sessionTrackPoints)
+            sessionTrackPoints.clear()
+        }
     }
 
     override suspend fun getSessionTrackPoints(): List<GpxTrackPoint> {
-        Log.d("GpxTracking", "세션 트랙 포인트 조회: ${sessionTrackPoints.size}개")
-        return sessionTrackPoints.toList()
+        // 현재 세션의 모든 트랙 포인트를 가져옴 (메모리 + DB)
+        return getAllTrackPoints(currentSessionId)
     }
 
     override suspend fun clearSession() {
-        val count = sessionTrackPoints.size
+        // 메모리 포인트 삭제
+        val memoryCount = sessionTrackPoints.size
         sessionTrackPoints.clear()
-        Log.d("GpxTracking", "세션 트랙 포인트 초기화: ${count}개 삭제됨")
+
+        // DB 포인트도 삭제
+        val dbCount = gpxDao.deleteTrackPointsBySession(currentSessionId)
+
+        Log.d("GpxTracking", "세션 트랙 포인트 초기화: 메모리 ${memoryCount}개, DB ${dbCount}개 삭제됨")
+
+        // 새 세션 ID 생성
+        currentSessionId = UUID.randomUUID().toString()
     }
 
     override suspend fun createGpxFile(metadata: GpxMetadata): File {
+        // 모든 트랙 포인트 로드 (메모리 + DB)
+        val allTrackPoints = getSessionTrackPoints()
         Log.d("GpxTracking", "GPX 파일 생성 시작: 트랙 포인트 ${sessionTrackPoints.size}개")
 
         // GPX 디렉토리 확인 및 생성
@@ -70,7 +94,7 @@ class GpxRepositoryImpl @Inject constructor(
         // GPX 파일 생성
         val success = GpxGenerator.createGpxFile(
             file = gpxFile,
-            trackPoints = sessionTrackPoints,
+            trackPoints = allTrackPoints,
             metadata = metadata
         )
 
@@ -143,5 +167,49 @@ class GpxRepositoryImpl @Inject constructor(
             avgHeartRate = entity.avgHeartRate,
             maxHeartRate = entity.maxHeartRate
         )
+    }
+
+    override suspend fun saveTrackPointsBatch(trackPoints: List<GpxTrackPoint>) {
+        // TrackPoint 엔티티로 변환
+        val entities = trackPoints.map { point ->
+            TrackPointEntity(
+                sessionId = currentSessionId,
+                latitude = point.latitude,
+                longitude = point.longitude,
+                elevation = point.elevation,
+                time = point.time.time,
+                heartRate = point.heartRate,
+                cadence = point.cadence,
+                pace = point.pace
+            )
+        }
+
+        // DB에 일괄 저장
+        gpxDao.insertTrackPoints(entities)
+        Log.d("GpxTracking", "${entities.size}개의 트랙 포인트를 DB에 저장")
+    }
+
+    override suspend fun getAllTrackPoints(sessionId: String): List<GpxTrackPoint> {
+        // 1. 메모리에 있는 포인트 먼저 수집
+        val memoryPoints = sessionTrackPoints.toList()
+
+        // 2. DB에 저장된 포인트도 가져옴
+        val dbPoints = gpxDao.getTrackPointsBySession(sessionId).map { entity ->
+            GpxTrackPoint(
+                latitude = entity.latitude,
+                longitude = entity.longitude,
+                elevation = entity.elevation,
+                time = Date(entity.time),
+                heartRate = entity.heartRate,
+                cadence = entity.cadence,
+                pace = entity.pace
+            )
+        }
+
+        // 3. 두 목록을 합쳐서 시간순으로 정렬
+        val allPoints = (memoryPoints + dbPoints).sortedBy { it.time }
+        Log.d("GpxTracking", "총 ${allPoints.size}개의 트랙 포인트 로드 (메모리: ${memoryPoints.size}, DB: ${dbPoints.size})")
+
+        return allPoints
     }
 }

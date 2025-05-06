@@ -78,11 +78,7 @@ class LocationTrackingService : Service() {
         override fun onLocationResult(locationResult: LocationResult) {
             locationResult.lastLocation?.let { location ->
 
-                val now = Calendar.getInstance().apply {
-                    timeInMillis = System.currentTimeMillis()
-                    // 시간대를 한국 시간으로 설정
-                    timeZone = TimeZone.getTimeZone("Asia/Seoul")
-                }.time
+                val now = Date()
 
                 // 위치 데이터 수집 (5초마다 호출됨)
                 val trackPoint = GpxTrackPoint(

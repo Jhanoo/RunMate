@@ -28,4 +28,13 @@ interface GpxDao {
 
     @Query("DELETE FROM gpx_files WHERE id = :id")
     suspend fun deleteFile(id: Long)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTrackPoints(points: List<TrackPointEntity>)
+
+    @Query("SELECT * FROM track_points WHERE sessionId = :sessionId ORDER BY time ASC")
+    suspend fun getTrackPointsBySession(sessionId: String): List<TrackPointEntity>
+
+    @Query("DELETE FROM track_points WHERE sessionId = :sessionId")
+    suspend fun deleteTrackPointsBySession(sessionId: String): Int
 }

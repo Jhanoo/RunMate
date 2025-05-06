@@ -7,8 +7,8 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
 @Database(
-    entities = [GpxEntity::class],
-    version = 1,
+    entities = [GpxEntity::class, TrackPointEntity::class],
+    version = 2,
     exportSchema = false
 )
 abstract class GpxDatabase : RoomDatabase() {
