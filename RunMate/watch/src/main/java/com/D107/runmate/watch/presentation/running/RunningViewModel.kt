@@ -21,6 +21,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import android.content.Context
+import android.content.Intent
+import com.D107.runmate.watch.domain.usecase.gpx.CreateGpxFileUseCase
+import com.D107.runmate.watch.presentation.service.LocationTrackingService
+import kotlinx.coroutines.runBlocking
+
 
 @HiltViewModel
 class RunningViewModel @Inject constructor(
@@ -82,6 +88,10 @@ class RunningViewModel @Inject constructor(
     private val _avgHeartRate = MutableStateFlow(0)
     val avgHeartRate: StateFlow<Int> = _avgHeartRate.asStateFlow()
 
+    // GPX 파일 생성
+    @Inject
+    lateinit var createGpxFileUseCase: CreateGpxFileUseCase
+
     init {
 //        Log.d("sensor", "ViewModel init")
         viewModelScope.launch {
@@ -89,6 +99,43 @@ class RunningViewModel @Inject constructor(
             collectHeartRate()
             collectDistance() // 여기에 추가
             Log.d("pace", "ViewModel init: 거리 수집 시작")
+        }
+        observeHeartRateAndPaceForTracking()
+    }
+
+    // 위치 추적 서비스 시작
+    fun startLocationTracking(context: Context) {
+        // 현재 심박수와 페이스 정보를 서비스에 전달
+        LocationTrackingService.updateHeartRate(_heartRate.value)
+        LocationTrackingService.updatePace(_currentPace.value)
+
+        // 서비스 시작
+        val intent = Intent(context, LocationTrackingService::class.java)
+        intent.action = LocationTrackingService.ACTION_START
+        context.startService(intent)
+    }
+
+    // 위치 추적 서비스 중지
+    fun stopLocationTracking(context: Context) {
+        val intent = Intent(context, LocationTrackingService::class.java)
+        intent.action = LocationTrackingService.ACTION_STOP
+        context.startService(intent)
+    }
+
+    // 심박수와 페이스 업데이트를 위한 Observe 설정
+    private fun observeHeartRateAndPaceForTracking() {
+        viewModelScope.launch {
+            // 심박수 변경 감지 및 서비스에 전달
+            heartRate.collect { bpm ->
+                LocationTrackingService.updateHeartRate(bpm)
+            }
+        }
+
+        viewModelScope.launch {
+            // 페이스 변경 감지 및 서비스에 전달
+            currentPace.collect { pace ->
+                LocationTrackingService.updatePace(pace)
+            }
         }
     }
 
@@ -319,6 +366,23 @@ class RunningViewModel @Inject constructor(
         heartRateRecords.clear()
         paceRecords.clear()
         distanceRepository.resetDistance()
+    }
+
+    // 러닝 종료 시 GPX 파일 생성
+    fun createGpxFile(context: Context, runName: String): Result<Long> {
+        // 위치 추적 서비스 중지
+        stopLocationTracking(context)
+
+        // GPX 파일 생성
+        return runBlocking {
+            createGpxFileUseCase(
+                runName = runName,
+                totalDistance = _distance.value,
+                totalTime = _runningTime.value,
+                avgHeartRate = _avgHeartRate.value,
+                maxHeartRate = _maxHeartRate.value
+            )
+        }
     }
 
 }

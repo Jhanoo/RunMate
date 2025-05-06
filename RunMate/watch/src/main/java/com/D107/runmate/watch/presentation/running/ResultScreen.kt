@@ -1,5 +1,6 @@
 package com.D107.runmate.watch.presentation.running
 
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -19,11 +20,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
@@ -31,8 +34,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.wear.compose.material.Text
 import com.D107.runmate.watch.R
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun ResultScreen(
@@ -41,8 +48,23 @@ fun ResultScreen(
     avgPace: String = "--'--\"",
     maxHeartRate: Int = 0,
     avgHeartRate: Int = 0,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
+    viewModel: RunningViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
+
+    // 화면 진입 시 GPX 파일 생성
+    LaunchedEffect(Unit) {
+        val runName = "RunMate_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(
+            Date()
+        )}"
+        viewModel.createGpxFile(context, runName).onSuccess { fileId ->
+            Log.d("GPX", "GPX 파일 생성 성공: ID=$fileId")
+        }.onFailure { error ->
+            Log.e("GPX", "GPX 파일 생성 실패: ${error.message}")
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize(),
@@ -100,7 +122,7 @@ fun ResultScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 25.dp)
-                    .offset(y=(-5).dp),
+                    .offset(y = (-5).dp),
                 verticalArrangement = Arrangement.spacedBy(3.dp)
             ) {
 
