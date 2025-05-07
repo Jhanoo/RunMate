@@ -66,13 +66,4 @@ public class JwtProvider {
         // 현재는 클라이언트 측에서 토큰을 삭제하는 방식으로 처리
     }
 
-    // 토큰에서 userId 반환하는 함수 만들어감,, 총총,,
-    public String getUserIdFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.getSubject();
-    }
 } 
