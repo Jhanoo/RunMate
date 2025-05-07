@@ -11,42 +11,42 @@ pipeline {
         stage('Checkout') {
             steps {
                 git(
-                  url: 'https://lab.ssafy.com/s12-final/S12P31D107.git',
-                  branch: 'develop/back',
-                  credentialsId: 'gitlab-https'
+                    url: 'https://lab.ssafy.com/s12-final/S12P31D107.git',
+                    branch: 'develop/back',
+                    credentialsId: 'gitlab-https'
                 )
             }
         }
 
         stage('Grant Permissions') {
             steps {
-                // gradlew 파일에 실행 권한 추가
-                sh 'chmod +x gradlew'
+                // gradlew 실행 권한 추가
+                sh 'chmod +x backend/spring-boot/gradlew'
             }
         }
 
         stage('Build JAR') {
             steps {
-                // 이제 실행 권한 있으니 빌드 가능
-                sh './gradlew clean bootJar -x test'
+                // spring-boot 디렉토리로 이동해서 빌드
+                sh 'cd backend/spring-boot && ./gradlew clean bootJar -x test'
             }
         }
 
         stage('Deploy to EC2') {
             steps {
                 sshagent(['ec2-ssh']) {
-                    // 1) 빌드된 JAR 전송
+                    // 빌드된 JAR 파일을 EC2로 전송
                     sh """
-                      scp -o StrictHostKeyChecking=no build/libs/*.jar \
-                          ${REMOTE}:${APPDIR}/${JAR_NAME}
+                        scp -o StrictHostKeyChecking=no backend/spring-boot/build/libs/*.jar \
+                            ${REMOTE}:${APPDIR}/${JAR_NAME}
                     """
-                    // 2) EC2에서 docker-compose 재시작
+                    // EC2에서 docker-compose 재시작
                     sh """
-                      ssh -o StrictHostKeyChecking=no ${REMOTE} \\
-                        'cd ${APPDIR} &&
-                         docker-compose down &&
-                         docker-compose up -d
-                        '
+                        ssh -o StrictHostKeyChecking=no ${REMOTE} \\
+                            'cd ${APPDIR} &&
+                             docker-compose down &&
+                             docker-compose up -d
+                            '
                     """
                 }
             }
@@ -84,8 +84,11 @@ pipeline {
     }
 
     post {
-        success { echo '✅ Deploy succeeded' }
-        failure { echo '❌ Deploy failed' }
+        success {
+            echo '✅ Deploy succeeded'
+        }
+        failure {
+            echo '❌ Deploy failed'
+        }
     }
 }
-
