@@ -13,10 +13,15 @@
 
 # 3) Gradle, Maven 캐시
 .gradle/
-/**/gradle-wrapper.jar
+
 .mvn/
 !gradlew
 !gradlew.bat
+.gradle
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
 
 # 4) IDE 설정
 .idea/
