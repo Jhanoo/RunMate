@@ -14,7 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.parameters.P;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -34,21 +36,18 @@ import java.util.UUID;
 public class CourseController implements CourseControllerDocs {
 
     private final CourseService courseService;
-    private final JwtProvider jwtProvider;
 
     @Override
     public ResponseEntity<CommonResponse<UUID>> createCourse(
+            @AuthenticationPrincipal UserDetails principal,
             @RequestPart("courseData") CourseRequest courseData,
             @RequestPart(value = "gpxFile", required = false) MultipartFile gpxFile
     ) {
         // ---여기선 이미 courseData가 파싱된 상태입니다---
         log.debug("GPX File name: {}", gpxFile != null ? gpxFile.getOriginalFilename() : "null");
 
-//        UUID userId = UUID.fromString("19caf646-e6b5-496a-90d9-25e8a84f2646");
-//        UUID userId = UUID.fromString("bea9fb62-db6b-457d-b65f-340357f83f65");
-//        UUID newCourseId;
 
-        UUID userId = resolveUserId();
+        UUID userId = UUID.fromString(principal.getUsername());
 
         try {
             UUID newCourseId = courseService.createCourse(courseData, gpxFile, userId);
@@ -66,9 +65,10 @@ public class CourseController implements CourseControllerDocs {
 
     @Override
     public ResponseEntity<CommonResponse<Void>> deleteCourse(
+            @AuthenticationPrincipal UserDetails principal,
             @PathVariable UUID courseId
     ) {
-        UUID userId = resolveUserId();
+        UUID userId = UUID.fromString(principal.getUsername());
         try {
             courseService.deleteCourse(courseId, userId);
             return ResponseEntity.ok(CommonResponse.ok(null));
@@ -88,32 +88,5 @@ public class CourseController implements CourseControllerDocs {
     }
 
 
-    // userId 가져오는 함수 하나 만듦
-    private UUID resolveUserId() {
-        ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (attrs == null) {
-            throw new CustomException(ErrorCode.INVALID_TOKEN);
-        }
-
-        HttpServletRequest request = attrs.getRequest();
-        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (!StringUtils.hasText(header) || !header.startsWith("Bearer ")) {
-            throw new CustomException(ErrorCode.INVALID_TOKEN);
-        }
-
-        String token = header.substring(7);
-        String userIdStr;
-        try {
-            userIdStr = jwtProvider.getUserIdFromToken(token);
-        } catch (Exception e) {
-            throw new CustomException(ErrorCode.INVALID_TOKEN);
-        }
-
-        try{
-            return UUID.fromString(userIdStr);
-        } catch (IllegalArgumentException e) {
-            throw new CustomException(ErrorCode.INVALID_TOKEN);
-        }
-    }
 
 }
