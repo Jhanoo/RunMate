@@ -13,7 +13,8 @@ public enum ErrorCode {
     DATA_CONFLICT(HttpStatus.CONFLICT, "CONFLICT-001", "이미 존재하는 데이터입니다. 중복을 확인해주세요."),
     INVALID_DATA(HttpStatus.UNPROCESSABLE_ENTITY, "VALIDATION-002", "요청 데이터를 처리할 수 없습니다. 입력 값을 확인해주세요."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "SERVER-001", "서버 내부 오류가 발생했습니다. 관리자에게 문의하세요."),
-    
+    ENTITY_NOT_FOUND(HttpStatus.NOT_FOUND, "ENTITY-001", "해당 엔티티를 찾을 수 없습니다."),
+
     // 로그인 관련 에러
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "LOGIN-001", "잘못된 이메일 또는 비밀번호입니다."),
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "LOGIN-002", "해당 이메일을 가진 사용자가 없습니다."),
@@ -32,6 +33,7 @@ public enum ErrorCode {
     // 로그아웃 관련 에러
     LOGOUT_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "LOGOUT-001", "로그아웃 처리 중 서버 오류가 발생했습니다."),
     INVALID_TOKEN(HttpStatus.BAD_REQUEST, "LOGOUT-002", "유효하지 않은 토큰입니다.");
+
 
     private final HttpStatus status;
     private final String errorCode;
