@@ -72,6 +72,7 @@ dependencies {
     implementation(libs.androidx.material3.android)
     implementation(libs.androidx.junit.ktx)
     implementation(libs.androidx.ui.test.junit4.android)
+    implementation(libs.androidx.hilt.common)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
@@ -97,6 +98,24 @@ dependencies {
     // Android Health Services API
     implementation(libs.androidx.health.services.client)
     implementation(libs.play.services.location)
+
+    // GPX
+    implementation("com.github.ticofab:android-gpx-parser:2.3.1")
+
+    // WorkManager
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+
+    // Room
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
+
+    // Retrofit Core
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+
+    // Gson Converter (JSON 파싱용)
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
 
     // 테스트 의존성
     testImplementation("junit:junit:4.13.2")
