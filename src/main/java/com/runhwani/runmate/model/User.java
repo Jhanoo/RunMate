@@ -1,8 +1,12 @@
 package com.runhwani.runmate.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.OffsetDateTime;
 import java.util.UUID;
-import java.time.LocalDateTime;
 
 /**
  * 사용자 정보
@@ -25,5 +29,5 @@ public class User {
     /** 평균 페이스 */
     private Double avgPace;
     /** 생성 시각 */
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
 }

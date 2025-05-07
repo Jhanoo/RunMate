@@ -1,8 +1,12 @@
 package com.runhwani.runmate.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.OffsetDateTime;
 import java.util.UUID;
-import java.time.LocalDateTime;
 
 /**
  * 마라톤 대회 정보
@@ -17,9 +21,9 @@ public class Marathon {
     /** 대회 이름 */
     private String name;
     /** 대회 일시 */
-    private LocalDateTime date;
+    private OffsetDateTime date;
     /** 대회 장소 */
     private String location;
     /** 생성 시각 */
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
 }

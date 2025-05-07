@@ -1,8 +1,12 @@
 package com.runhwani.runmate.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.OffsetDateTime;
 import java.util.UUID;
-import java.time.LocalDateTime;
 
 /**
  * 코스 좋아요 기록
@@ -19,5 +23,5 @@ public class CourseLike {
     /** 코스 (courses.course_id FK) */
     private UUID courseId;
     /** 좋아요 시각 */
-    private LocalDateTime likedAt;
+    private OffsetDateTime likedAt;
 }

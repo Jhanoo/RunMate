@@ -66,12 +66,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public TokenResponse login(LoginRequest request) {
         User user = userDao.findByEmail(request.getEmail());
-        log.debug("user: {}", user);
+
         if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new CustomException(ErrorCode.INVALID_PASSWORD);
         }
 
-        log.debug("userId = {}", user.getUserId());
         String token = jwtProvider.generateToken(String.valueOf(user.getUserId()));
         return new TokenResponse(token);
     }

@@ -1,8 +1,12 @@
 package com.runhwani.runmate.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.OffsetDateTime;
 import java.util.UUID;
-import java.time.LocalDateTime;
 
 /**
  * 코스 정보
@@ -29,5 +33,5 @@ public class Course {
     /** 작성자 (users.user_id FK) */
     private UUID createdBy;
     /** 생성 시각 */
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
 }

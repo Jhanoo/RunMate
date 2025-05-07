@@ -1,8 +1,12 @@
 package com.runhwani.runmate.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.OffsetDateTime;
 import java.util.UUID;
-import java.time.LocalDateTime;
 
 /**
  * 그룹 정보
@@ -19,7 +23,7 @@ public class Group {
     /** 연관 코스 (courses.course_id FK) */
     private UUID courseId;
     /** 시작 시각 */
-    private LocalDateTime startTime;
+    private OffsetDateTime startTime;
     /** 시작 위치(주소) */
     private String startLocation;
     /** 시작 지점 위도 */

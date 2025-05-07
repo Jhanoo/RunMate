@@ -1,8 +1,12 @@
 package com.runhwani.runmate.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.OffsetDateTime;
 import java.util.UUID;
-import java.time.LocalDateTime;
 
 /**
  * 달리기 기록
@@ -25,9 +29,11 @@ public class History {
     /** 시작 위치(주소) */
     private String startLocation;
     /** 시작 시각 */
-    private LocalDateTime startTime;
+    private OffsetDateTime startTime;
     /** 종료 시각 */
-    private LocalDateTime endTime;
+    private OffsetDateTime endTime;
+    /** 달린 거리 */
+    private Double distance;
     /** 평균 심박수 */
     private Double avgBpm;
     /** 평균 페이스 */
@@ -39,5 +45,5 @@ public class History {
     /** 소모 칼로리 */
     private Double calories;
     /** 생성 시각 */
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
 }

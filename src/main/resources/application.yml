@@ -84,13 +84,8 @@ springdoc:
 logging:
   level:
     root: INFO
-    com.runhwani.runmate: INFO
+    com.runhwani.runmate: DEBUG
 
 server:
   port: 8080
-
-course:
-  gpx:
-    # gpt 추천 경로 : EC2 실제 저장 경로로 들어가야 한다.
-    dir: ./gpx
 

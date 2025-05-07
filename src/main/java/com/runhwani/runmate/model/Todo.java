@@ -1,8 +1,12 @@
 package com.runhwani.runmate.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.OffsetDateTime;
 import java.util.UUID;
-import java.time.LocalDateTime;
 
 /**
  * 커리큘럼 내 할 일 항목
@@ -21,5 +25,5 @@ public class Todo {
     /** 완료 여부 */
     private Boolean isDone;
     /** 수행 날짜 */
-    private LocalDateTime date;
+    private OffsetDateTime date;
 }
