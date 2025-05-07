@@ -17,7 +17,8 @@ data class GaitAnalysisResult(
     val totalRightSteps: Int = 0,
     val analysisDurationMs: Long? = null,
 
-    val overallGaitPattern: GaitPatternType = GaitPatternType.UNKNOWN
+    val overallGaitPattern: GaitPatternType = GaitPatternType.UNKNOWN,
+    val timestamp:Long = System.currentTimeMillis()
 )
 
 @Serializable

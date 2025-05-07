@@ -368,7 +368,12 @@ class GaitAnalyzerUtil @Inject constructor() {
             return GaitPatternType.UNKNOWN // 데이터 부족
         }
 
-        val yawDifference = avgRightYaw - avgLeftYaw
+
+        var yawDifference =
+            if(avgLeftYaw>avgRightYaw)
+                avgRightYaw-avgLeftYaw
+            else
+                Math.abs(avgRightYaw - avgLeftYaw)
 
         // println("Yaw Difference (R-L): $yawDifference, Left: $avgLeftYaw, Right: $avgRightYaw") // 디버깅 로그
 

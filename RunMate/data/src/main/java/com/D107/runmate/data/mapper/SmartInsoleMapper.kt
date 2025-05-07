@@ -2,6 +2,7 @@ package com.D107.runmate.data.mapper
 
 import android.annotation.SuppressLint
 import android.bluetooth.le.ScanResult
+import android.location.Location
 import com.D107.runmate.domain.model.smartinsole.InsoleSide
 import com.D107.runmate.domain.model.smartinsole.SmartInsole
 import javax.inject.Inject
@@ -27,6 +28,7 @@ class SmartInsoleMapper @Inject constructor() {
     }
 
     private fun determineSideFromName(name: String?): InsoleSide {
+
         return when {
             name == null -> InsoleSide.UNKNOWN
             name.contains("_L", ignoreCase = true) || name.startsWith(
