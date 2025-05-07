@@ -3,6 +3,7 @@ package com.runhwani.runmate.controller.docs;
 import com.runhwani.runmate.dto.common.CommonResponse;
 import com.runhwani.runmate.dto.request.course.CourseRequest;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.StringToClassMapItem;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Encoding;
@@ -12,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -63,6 +65,7 @@ public interface CourseControllerDocs {
     )
     @PostMapping("/create")
     ResponseEntity<CommonResponse<UUID>> createCourse(
+            @Parameter(hidden = true) UserDetails principal,
             @RequestPart("courseData") CourseRequest courseData,
             @RequestPart(value = "gpxFile", required = false) MultipartFile gpxFile
     );
@@ -76,6 +79,7 @@ public interface CourseControllerDocs {
     )
     @DeleteMapping("/{courseId}")
     ResponseEntity<CommonResponse<Void>> deleteCourse(
+            @Parameter(hidden = true) UserDetails principal,
             @PathVariable("courseId") UUID courseId
     );
 }
