@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingHorizontal="26dp"
+    tools:context=".login.JoinFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/left_arrow" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_marginLeft="8dp"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@drawable/join_profile" />
+
+            <ImageView
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_gravity="bottom|end"
+                android:layout_marginLeft="-30dp"
+                android:src="@drawable/join_profile_upload" />
+        </FrameLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:orientation="vertical">
+
+        <TextView
+            style="@style/mediumTextStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="아이디(이메일)"
+            android:textSize="16sp" />
+
+        <EditText
+            style="@style/customEditTextFontStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/round_gray"
+            android:hint="example@gamil.com"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="14dp"
+            android:textColorHint="#BBBAB9"
+            android:textSize="14sp"
+            tools:ignore="HardcodedText" />
+
+        <TextView
+            style="@style/mediumTextStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="비밀번호"
+            android:textSize="16sp" />
+
+        <EditText
+            style="@style/customEditTextFontStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/round_gray"
+            android:hint="비밀번호를 입력해주세요"
+            android:inputType="textPassword"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="14dp"
+            android:textColorHint="#BBBAB9"
+            android:textSize="14sp"
+            tools:ignore="HardcodedText" />
+
+        <TextView
+            style="@style/mediumTextStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="비밀번호 확인"
+            android:textSize="16sp" />
+
+        <EditText
+            style="@style/customEditTextFontStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/round_gray"
+            android:hint="확인을 위해 비밀번호를 입력해주세요"
+            android:inputType="textPassword"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="14dp"
+            android:textColorHint="#BBBAB9"
+            android:textSize="14sp"
+            tools:ignore="HardcodedText" />
+
+    </LinearLayout>
+
+    <Button
+        style="@style/boldTextStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="124dp"
+        android:background="@drawable/round_green"
+        android:text="회원가입"
+        android:textColor="@color/white"
+        android:textSize="16sp" />
+
+
+</LinearLayout>

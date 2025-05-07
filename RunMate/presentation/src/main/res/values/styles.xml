@@ -20,6 +20,14 @@
         <item name="android:fontFamily">@font/pretendard_regular</item>
     </style>
 
+    <style name="mediumTextStyle" parent="@android:style/Widget.DeviceDefault.TextView">
+        <item name="android:fontFamily">@font/pretendard_medium</item>
+    </style>
+
+    <style name="boldTextStyle" parent="@android:style/Widget.DeviceDefault.TextView">
+        <item name="android:fontFamily">@font/pretendard_bold</item>
+    </style>
+
     <style name="FABCircleShape" parent="ShapeAppearanceOverlay.Material3.FloatingActionButton">
         <item name="cornerSize">50%</item>
     </style>
