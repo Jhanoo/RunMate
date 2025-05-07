@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.AccessDeniedException;
 import java.util.UUID;
 
 @Service
@@ -61,11 +61,7 @@ public class CourseServiceImpl implements CourseService {
 
         // 3. gpx 파일 삭제
         String gpxFileName = course.getGpxFile();
-        if (gpxFileName != null && !gpxFileName.isBlank()) {
-            Path path = Paths.get(gpxStoragePath).resolve(gpxFileName);
-            log.debug("gpx 파일 삭제 시도 : {}", path);
-            Files.deleteIfExists(path);
-        }
+        GpxStorageUtil.deleteGpxFile(gpxFileName);
 
         // 4. db 레코드 삭제
         courseDao.deleteCourse(courseId);
