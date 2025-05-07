@@ -2,8 +2,9 @@
 package com.runhwani.runmate.dto.response.group;
 
 import lombok.*;
+
+import java.time.OffsetDateTime;
 import java.util.UUID;
-import java.time.LocalDateTime;
 
 /**
  * 그룹 생성 응답용 DTO
@@ -23,7 +24,7 @@ public class GroupResponse {
     /** 연관 코스 ID */
     private UUID courseId;
     /** 시작 일시 */
-    private LocalDateTime startTime;
+    private OffsetDateTime startTime;
     /** 시작 위치 */
     private String startLocation;
     /** 시작 지점 위도 */

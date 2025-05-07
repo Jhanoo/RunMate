@@ -1,8 +1,12 @@
 package com.runhwani.runmate.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.OffsetDateTime;
 import java.util.UUID;
-import java.time.LocalDateTime;
 
 /**
  * 사용자별 마라톤 커리큘럼
@@ -21,7 +25,7 @@ public class Curriculum {
     /** 목표 거리 */
     private String goalDist;
     /** 목표 날짜 */
-    private LocalDateTime goalDate;
+    private OffsetDateTime goalDate;
     /** 달리기 경험 여부 */
     private Boolean runExp;
     /** 경험 거리(예: "10km") */

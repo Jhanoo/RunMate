@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.util.UUID;
 
-@Tag(name = "3. 코스", description = "코스 생성 및 조회 API")
+@Tag(name = "코스", description = "코스 생성 및 조회 API")
 @RequestMapping("/api/courses/create")
 public interface CourseControllerDocs {
 
@@ -44,7 +44,7 @@ public interface CourseControllerDocs {
                                     contentType = MediaType.APPLICATION_JSON_VALUE),
                             @Encoding(name = "gpxFile",
                                     contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-                    }
+                            }
                     )
             ),
             responses = {

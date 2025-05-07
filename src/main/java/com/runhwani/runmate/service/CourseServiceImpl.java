@@ -3,17 +3,13 @@ package com.runhwani.runmate.service;
 import com.runhwani.runmate.dao.CourseDao;
 import com.runhwani.runmate.dto.request.course.CourseRequest;
 import com.runhwani.runmate.model.Course;
+import com.runhwani.runmate.utils.GpxStorageUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 @Service
@@ -21,9 +17,6 @@ import java.util.UUID;
 @Slf4j
 public class CourseServiceImpl implements CourseService {
     private final CourseDao courseDao;
-
-    @Value("${course.gpx.dir}") // 파일 저장 경로 application.yml에 명시
-    private String gpxStoragePath;
 
     @Override
     public UUID createCourse(CourseRequest request, MultipartFile gpxFile, UUID userId) throws IOException {
@@ -39,31 +32,11 @@ public class CourseServiceImpl implements CourseService {
         course.setStartLocation(request.getStartLocation());
         course.setCreatedBy(userId);
 
-        // 2. GPX 파일 처리 (있는 경우에만)
-        String gpxFileName = null;
-        if (gpxFile != null && !gpxFile.isEmpty()) {
-            UUID fileUUID = UUID.randomUUID();
-            gpxFileName = fileUUID + ".gpx";
-
-            log.debug("경로 확인");
-
-            // 디렉토리 존재 확인 및 생성
-            Path dirPath = Paths.get(gpxStoragePath);
-            if (!Files.exists(dirPath)) {
-                log.debug("폴더 없음: {}", dirPath.toAbsolutePath());
-                Files.createDirectories(dirPath);
-                log.debug("폴더 생성");
-            }
-
-            log.debug("저장 시작");
-            // 파일 저장 경로 구성
-            Path gpxPath = Paths.get(gpxStoragePath, gpxFileName);
-            log.debug("경로 불러오기 성공");
-            Files.copy(gpxFile.getInputStream(), gpxPath, StandardCopyOption.REPLACE_EXISTING);
-            log.debug("GPX 파일 저장 완료: {}", gpxPath);
-        }
+        // 2. GPX 파일 처리: 유틸 호출
+        String gpxFileName = GpxStorageUtil.saveGpxFile(gpxFile);
         course.setGpxFile(gpxFileName);
-        log.debug(course.toString());
+        log.debug("저장된 GPX 파일명: {}", gpxFileName);
+
         // 3. DB에 저장
         courseDao.insertCourse(course);
         log.debug("코스 DB 저장 완료: {}", course.getCourseId());
