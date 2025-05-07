@@ -50,4 +50,19 @@ public class GpxStorageUtil {
         log.debug("파일 생성 완료");
         return fileName;
     }
+
+    /**
+     * 저장된 GPX 파일을 삭제한다.
+     *
+     * @param gpxFileName 삭제할 GPX 파일명
+     * @throws IOException 삭제 중 오류 발생 시
+     */
+    public static void deleteGpxFile(String gpxFileName) throws IOException {
+        if (gpxFileName == null || gpxFileName.isBlank()) {
+            return;
+        }
+        Path path = Paths.get(gpxStoragePath).resolve(gpxFileName);
+        log.debug("gpx 파일 삭제 시도 : {}", path);
+        Files.deleteIfExists(path);
+    }
 }
