@@ -2,6 +2,7 @@ package com.runhwani.runmate.service;
 
 import com.runhwani.runmate.dao.CourseDao;
 import com.runhwani.runmate.dto.request.course.CourseRequest;
+import com.runhwani.runmate.exception.EntityNotFoundException;
 import com.runhwani.runmate.model.Course;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,10 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.util.UUID;
 
 @Service
@@ -69,5 +67,31 @@ public class CourseServiceImpl implements CourseService {
         log.debug("코스 DB 저장 완료: {}", course.getCourseId());
 
         return course.getCourseId();
+    }
+
+    @Override
+    public void deleteCourse(UUID courseId, UUID userId) throws IOException {
+        // 1. DB 코스 조회
+        Course course = courseDao.selectCourseById(courseId);
+        if (course == null) {
+            throw new EntityNotFoundException("코스를 찾을 수 없습니다. : " + courseId);
+        }
+
+        // 2. 소유자 검증
+        if (!course.getCreatedBy().equals(userId)) {
+            throw new AccessDeniedException("삭제 권한이 없습니다.");
+        }
+
+        // 3. gpx 파일 삭제
+        String gpxFileName = course.getGpxFile();
+        if (gpxFileName != null && !gpxFileName.isBlank()) {
+            Path path = Paths.get(gpxStoragePath).resolve(gpxFileName);
+            log.debug("gpx 파일 삭제 시도 : {}", path);
+            Files.deleteIfExists(path);
+        }
+
+        // 4. db 레코드 삭제
+        courseDao.deleteCourse(courseId);
+        log.debug("코스 db 삭제 완료: {}", courseId);
     }
 }
