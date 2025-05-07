@@ -1,0 +1,44 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.runhwani.runmate.dao.HistoryDao">
+
+    <resultMap id="HistoryMap" type="com.runhwani.runmate.model.History">
+        <id column="history_id" property="historyId" javaType="java.util.UUID"/>
+        <id column="user_id" property="userId" javaType="java.util.UUID"/>
+        <id column="course_id" property="courseId" javaType="java.util.UUID"/>
+        <id column="group_id" property="groupId" javaType="java.util.UUID"/>
+        <result column="gpx_file" property="gpxFile"/>
+        <result column="start_location" property="startLocation"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="distance" property="distance"/>
+        <result column="avg_bpm" property="avgBpm"/>
+        <result column="avg_pace" property="avgPace"/>
+        <result column="avg_cadence" property="avgCadence"/>
+        <result column="avg_elevation" property="avgElevation"/>
+        <result column="calories" property="calories"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.runhwani.runmate.model.History">
+        INSERT INTO histories (history_id, user_id, course_id, group_id, gpx_file, start_location,
+                               start_time, end_time, distance, avg_bpm, avg_pace, avg_cadence,
+                               avg_elevation, calories, created_at)
+        VALUES (#{historyId}, #{userId}, #{courseId}, #{groupId}, #{gpxFile}, #{startLocation},
+                #{startTime}, #{endTime}, #{distance}, #{avgBpm}, #{avgPace}, #{avgCadence},
+                #{avgElevation}, #{calories}, #{createdAt})
+    </insert>
+
+    <select id="findById" resultMap="HistoryMap" parameterType="java.util.UUID">
+        SELECT *
+        FROM histories
+        WHERE history_id = #{historyId}
+    </select>
+
+    <select id="findByUserId" resultMap="HistoryMap" parameterType="java.util.UUID">
+        SELECT * FROM histories
+        WHERE user_id = #{userId}
+        ORDER BY created_at DESC
+    </select>
+</mapper>
