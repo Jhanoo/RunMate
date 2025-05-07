@@ -27,4 +27,23 @@
                  )
     </insert>
 
+<!--    코스 삭제시 단일 코스 조회 -->
+    <select id="selectCourseById" parameterType="java.util.UUID" resultType="com.runhwani.runmate.model.Course">
+        SELECT course_id       AS courseId,
+               course_name     AS courseName,
+               is_shared       AS isShared,
+               distance        AS distance,
+               avg_elevation   AS avgElevation,
+               start_location  AS startLocation,
+               gpx_file        AS gpxFile,
+               created_by      AS createdBy
+        FROM courses
+        WHERE course_id = #{courseId}
+    </select>
+
+    <delete id="deleteCourse" parameterType="java.util.UUID">
+        DELETE FROM courses
+        WHERE course_id = #{courseId}
+    </delete>
+
 </mapper>

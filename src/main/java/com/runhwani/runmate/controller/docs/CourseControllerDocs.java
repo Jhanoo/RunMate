@@ -12,18 +12,17 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.util.UUID;
 
 @Tag(name = "3. 코스", description = "코스 생성 및 조회 API")
-@RequestMapping("/api/courses/create")
+@RequestMapping("/api/courses")
 public interface CourseControllerDocs {
 
+    // 1. 코스 생성
     @Operation(
             summary = "코스 생성",
             description = "코스 정보(JSON)와 GPX 파일을 multipart/form-data로 업로드해 새 러닝 코스를 생성합니다.",
@@ -62,9 +61,21 @@ public interface CourseControllerDocs {
                     )
             }
     )
-    @PostMapping
+    @PostMapping("/create")
     ResponseEntity<CommonResponse<UUID>> createCourse(
             @RequestPart("courseData") CourseRequest courseData,
             @RequestPart(value = "gpxFile", required = false) MultipartFile gpxFile
+    );
+
+    @Operation(
+            summary = "코스 삭제",
+            description = "경로 ID로 코스를 삭제합니다. DB 레코드를 제거하고, 연관된 GPX 파일을 EC2에서 삭제합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "삭제 성공")
+            }
+    )
+    @DeleteMapping("/{courseId}")
+    ResponseEntity<CommonResponse<Void>> deleteCourse(
+            @PathVariable("courseId") UUID courseId
     );
 }
