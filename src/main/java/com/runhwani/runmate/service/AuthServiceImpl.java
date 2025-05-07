@@ -9,18 +9,20 @@ import com.runhwani.runmate.exception.CustomException;
 import com.runhwani.runmate.exception.ErrorCode;
 import com.runhwani.runmate.model.User;
 import com.runhwani.runmate.security.jwt.JwtProvider;
-
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 
 /**
  * 인증 관련 서비스 구현 클래스
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -49,7 +51,7 @@ public class AuthServiceImpl implements AuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .nickname(request.getNickname())
-                .createdAt(LocalDateTime.now())
+                .createdAt(OffsetDateTime.now(ZoneId.of("Asia/Seoul")))
                 .build();
         
         userDao.insert(user);
@@ -64,11 +66,13 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public TokenResponse login(LoginRequest request) {
         User user = userDao.findByEmail(request.getEmail());
+        log.debug("user: {}", user);
         if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new CustomException(ErrorCode.INVALID_PASSWORD);
         }
 
-        String token = jwtProvider.generateToken(user.getEmail());
+        log.debug("userId = {}", user.getUserId());
+        String token = jwtProvider.generateToken(String.valueOf(user.getUserId()));
         return new TokenResponse(token);
     }
 
