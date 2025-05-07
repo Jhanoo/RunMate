@@ -1,6 +1,9 @@
 package com.runhwani.runmate.security.jwt;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,9 +32,9 @@ public class JwtProvider {
         this.tokenValidityInSeconds = tokenValidityInSeconds;
     }
 
-    public String generateToken(String email) {
+    public String generateToken(String userId) {
         return Jwts.builder()
-                .setSubject(email)
+                .setSubject(userId)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + tokenValidityInSeconds * 1000))
                 .signWith(secretKey, SignatureAlgorithm.HS256)
