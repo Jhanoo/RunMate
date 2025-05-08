@@ -2,16 +2,21 @@ package com.runhwani.runmate.service;
 
 import com.runhwani.runmate.dao.CourseDao;
 import com.runhwani.runmate.dto.request.course.CourseRequest;
+import com.runhwani.runmate.dto.response.course.CourseResponse;
 import com.runhwani.runmate.exception.EntityNotFoundException;
 import com.runhwani.runmate.model.Course;
 import com.runhwani.runmate.utils.GpxStorageUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -19,6 +24,7 @@ import java.util.UUID;
 @Slf4j
 public class CourseServiceImpl implements CourseService {
     private final CourseDao courseDao;
+    private final SqlSessionTemplate sqlSession;
 
     @Override
     public UUID createCourse(CourseRequest request, MultipartFile gpxFile, UUID userId) throws IOException {
@@ -67,4 +73,19 @@ public class CourseServiceImpl implements CourseService {
         courseDao.deleteCourse(courseId);
         log.debug("코스 db 삭제 완료: {}", courseId);
     }
+
+    @Override
+    public List<CourseResponse> searchCourses(String keyword) {
+        String pattern = "%" + keyword + "%";
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", pattern);
+        params.put("nickname", pattern);
+        params.put("location", pattern);
+
+        return sqlSession.selectList(
+                "com.runhwani.runmate.dao.CourseDao.searchCourses",
+                params
+        );
+    }
+
 }
