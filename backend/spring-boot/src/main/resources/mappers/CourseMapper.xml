@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.runhwani.runmate.dao.CourseDao">
-
+<!-- 1. 코스 생성 논리-->
     <insert id="insertCourse" parameterType="com.runhwani.runmate.model.Course">
         INSERT INTO courses (
             course_id,
@@ -27,7 +27,7 @@
                  )
     </insert>
 
-<!--    코스 삭제시 단일 코스 조회 -->
+<!--   2. 코스 삭제시 단일 코스 조회 -->
     <select id="selectCourseById" parameterType="java.util.UUID" resultType="com.runhwani.runmate.model.Course">
         SELECT course_id       AS courseId,
                course_name     AS courseName,
@@ -41,9 +41,50 @@
         WHERE course_id = #{courseId}
     </select>
 
+<!--    2. 코스 삭제 논리 -->
     <delete id="deleteCourse" parameterType="java.util.UUID">
         DELETE FROM courses
         WHERE course_id = #{courseId}
     </delete>
-
+    
+<!--    CourseResponse 결과 매핑 -->
+    <resultMap id="CourseResultMap" type="com.runhwani.runmate.dto.response.course.CourseResponse">
+        <id     property="courseId"         column="course_id"/>
+        <result property="courseName"       column="course_name"/>
+        <result property="isShared"         column="is_shared"/>
+        <result property="distance"         column="distance"/>
+        <result property="avgElevation"     column="avg_elevation"/>
+        <result property="startLocation"    column="start_location"/>
+        <result property="creator.nickname"      column="nickname"/>
+        <result property="creator.profileImage"  column="profile_image"/>
+        <result property="likeCount"        column="like_count"/>
+    </resultMap>
+<!--    3. 코스 검색 논리 -->
+    <select id="searchCourses" parameterType="map" resultMap="CourseResultMap">
+        SELECT
+            c.course_id,
+            c.course_name,
+            c.is_shared,
+            c.distance,
+            c.avg_elevation,
+            c.start_location,
+            u.nickname,
+            u.profile_image,
+            COALESCE(l.like_count, 0) AS like_count
+        FROM courses C
+        JOIN users u
+        ON c.created_by = u.user_id
+        LEFT JOIN (
+            SELECT course_id, COUNT(*) AS like_count
+            FROM course_likes
+            GROUP BY course_id
+        ) l ON c.course_id = l.course_id
+        WHERE c.is_shared = TRUE
+        AND(
+            c.course_name ILIKE #{name}
+            OR u.nickname ILIKE #{nickname}
+            OR c.start_location ILIKE #{location}
+            )
+    </select>
+    
 </mapper>

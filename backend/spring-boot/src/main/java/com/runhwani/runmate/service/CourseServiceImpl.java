@@ -2,6 +2,7 @@ package com.runhwani.runmate.service;
 
 import com.runhwani.runmate.dao.CourseDao;
 import com.runhwani.runmate.dto.request.course.CourseRequest;
+import com.runhwani.runmate.dto.response.course.CourseResponse;
 import com.runhwani.runmate.exception.EntityNotFoundException;
 import com.runhwani.runmate.model.Course;
 import com.runhwani.runmate.utils.GpxStorageUtil;
@@ -12,6 +13,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -67,4 +71,21 @@ public class CourseServiceImpl implements CourseService {
         courseDao.deleteCourse(courseId);
         log.debug("코스 db 삭제 완료: {}", courseId);
     }
+
+    @Override
+    public List<CourseResponse> searchCourses(String keyword) {
+        // 빈 검색어 방지 로직
+        if (keyword == null || keyword.trim().isEmpty()) {
+            throw new IllegalArgumentException("검색어가 공백입니다.");
+        }
+
+        String pattern = "%" + keyword + "%";
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", pattern);
+        params.put("nickname", pattern);
+        params.put("location", pattern);
+
+        return courseDao.searchCourses(params);
+    }
+
 }

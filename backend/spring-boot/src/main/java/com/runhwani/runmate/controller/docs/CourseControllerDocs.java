@@ -2,6 +2,7 @@ package com.runhwani.runmate.controller.docs;
 
 import com.runhwani.runmate.dto.common.CommonResponse;
 import com.runhwani.runmate.dto.request.course.CourseRequest;
+import com.runhwani.runmate.dto.response.course.CourseResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.StringToClassMapItem;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "코스", description = "코스 생성 및 조회 API")
@@ -70,6 +72,7 @@ public interface CourseControllerDocs {
             @RequestPart(value = "gpxFile", required = false) MultipartFile gpxFile
     );
 
+    // 2. 코스 삭제
     @Operation(
             summary = "코스 삭제",
             description = "경로 ID로 코스를 삭제합니다. DB 레코드를 제거하고, 연관된 GPX 파일을 EC2에서 삭제합니다.",
@@ -81,5 +84,17 @@ public interface CourseControllerDocs {
     ResponseEntity<CommonResponse<Void>> deleteCourse(
             @Parameter(hidden = true) UserDetails principal,
             @PathVariable("courseId") UUID courseId
+    );
+
+    // 3. 코스 검색
+    @Operation(
+            summary = "코스 검색",
+            description = "키워드로 코스 이름, 작성자 닉네임, 출발지역을 검색합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "검색 결과 반환")
+    })
+    @GetMapping(value = "/search")
+    CommonResponse<List<CourseResponse>> searchCourses(
+            @RequestParam("keyword") String keyword
     );
 }
