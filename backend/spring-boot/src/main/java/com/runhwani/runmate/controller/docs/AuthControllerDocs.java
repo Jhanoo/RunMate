@@ -36,7 +36,9 @@ public interface AuthControllerDocs {
                                     {
                                         "email": "user@example.com",
                                         "password": "Password123!",
-                                        "nickname": "runner1"
+                                        "nickname": "runner1",
+                                        "birthday": "1990-01-01",
+                                        "gender": "MALE"
                                     }
                                     """
                             )
@@ -58,8 +60,8 @@ public interface AuthControllerDocs {
                                                     "userId": "123e4567-e89b-12d3-a456-426614174000",
                                                     "email": "user@example.com",
                                                     "nickname": "runner1",
-                                                    "profileImage": null,
-                                                    "avgPace": null
+                                                    "birthday": "1990-01-01",
+                                                    "gender": "MALE"
                                                 }
                                             }
                                             """

@@ -51,6 +51,8 @@ public class AuthServiceImpl implements AuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .nickname(request.getNickname())
+                .birthday(request.getBirthday())
+                .gender(request.getGender())
                 .createdAt(OffsetDateTime.now(ZoneId.of("Asia/Seoul")))
                 .build();
         
@@ -60,6 +62,8 @@ public class AuthServiceImpl implements AuthService {
                 .userId(user.getUserId())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
+                .birthday(user.getBirthday())
+                .gender(user.getGender())
                 .build();
     }
 
