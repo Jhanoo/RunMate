@@ -2,6 +2,8 @@ package com.runhwani.runmate.controller.docs;
 
 import com.runhwani.runmate.dto.common.CommonResponse;
 import com.runhwani.runmate.dto.request.course.CourseRequest;
+import com.runhwani.runmate.dto.response.course.CourseCreateResponse;
+import com.runhwani.runmate.dto.response.course.CourseDetailResponse;
 import com.runhwani.runmate.dto.response.course.CourseResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -67,7 +69,7 @@ public interface CourseControllerDocs {
             }
     )
     @PostMapping("/create")
-    ResponseEntity<CommonResponse<UUID>> createCourse(
+    ResponseEntity<CommonResponse<CourseCreateResponse>> createCourse(
             @Parameter(hidden = true) UserDetails principal,
             @RequestPart("courseData") CourseRequest courseData,
             @RequestPart(value = "gpxFile", required = false) MultipartFile gpxFile
@@ -144,4 +146,21 @@ public interface CourseControllerDocs {
     )
     @GetMapping("/all")
     ResponseEntity<CommonResponse<List<CourseResponse>>> getAllCourses();
+
+    // 7. 코스 상세 조회
+    @Operation(
+            summary = "코스 상세 조회",
+            description = "코스 ID를 통해 상세 정보를 조회합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "코스 상세 조회 성공"
+                    )
+            }
+    )
+    @GetMapping("/{id}")
+    ResponseEntity<CommonResponse<CourseDetailResponse>> getCourseDetail(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails principal,
+            @PathVariable("id") UUID courseId
+    );
 }

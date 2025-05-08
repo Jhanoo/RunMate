@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Mapper
@@ -25,4 +26,9 @@ public interface CourseDao {
     List<CourseResponse> findCoursesCreatedByUser(@Param("userId") UUID userId);
     // 6. 전체 코스 조회
     List<CourseResponse> findAllCourses();
+    // 7. 코스 상세 조회
+    Optional<Course> findCourseById(@Param("courseId") UUID courseId);
+    int countLikesByCourseId(@Param("courseId") UUID courseId);
+    Double getAverageUserPace(); // 전체 사용자 페이스
+    Double getUserPace(@Param("userId") UUID userId); // 특정 사용자 페이스
 }
