@@ -8,28 +8,100 @@
     <resultMap id="GroupResult" type="com.runhwani.runmate.model.Group">
         <id column="group_id" property="groupId" javaType="java.util.UUID"/>
         <result column="group_name" property="groupName"/>
+        <result column="leader_id" property="leaderId" javaType="java.util.UUID"/>
         <result column="course_id" property="courseId" javaType="java.util.UUID"/>
         <result column="start_time" property="startTime"/>
         <result column="start_location" property="startLocation"/>
         <result column="latitude" property="latitude"/>
         <result column="longitude" property="longitude"/>
         <result column="invite_code" property="inviteCode"/>
+        <result column="is_finished" property="isFinished"/>
     </resultMap>
 
     <!-- insert 구문 -->
-    <insert id="insert" parameterType="com.runhwani.runmate.model.Group">
-        INSERT INTO groups (group_id, group_name, course_id,
-                            start_time, start_location,
-                            latitude, longitude, invite_code)
-        VALUES (#{groupId}, #{groupName}, #{courseId},
-                #{startTime}, #{startLocation},
-                #{latitude}, #{longitude}, #{inviteCode})
+    <insert id="insertGroup" parameterType="com.runhwani.runmate.model.Group">
+        INSERT INTO groups (group_id,
+                            group_name,
+                            leader_id,
+                            course_id,
+                            start_time,
+                            start_location,
+                            latitude,
+                            longitude,
+                            invite_code,
+                            is_finished)
+        VALUES (#{groupId},
+                #{groupName},
+                #{leaderId},
+                #{courseId},
+                #{startTime},
+                #{startLocation},
+                #{latitude},
+                #{longitude},
+                #{inviteCode},
+                #{isFinished})
     </insert>
 
-    <!-- (선택) findById -->
-    <select id="findById" resultMap="GroupResult" parameterType="java.util.UUID">
+    <insert id="insertGroupMember" parameterType="com.runhwani.runmate.model.GroupMember">
+        INSERT INTO group_members (member_id, group_id, user_id, joined_at)
+        VALUES (gen_random_uuid(),
+                #{groupId},
+                #{userId},
+                now())
+    </insert>
+
+    <select id="selectGroupByUserId" resultType="com.runhwani.runmate.model.Group">
+        SELECT g.group_id       AS groupId,
+               g.group_name     AS groupName,
+               g.leader_id      AS leaderId,
+               g.course_id      AS courseId,
+               g.start_time     AS startTime,
+               g.start_location AS startLocation,
+               g.latitude       AS latitude,
+               g.longitude      AS longitude,
+               g.invite_code    AS inviteCode,
+               g.is_finished    AS isFinished
+        FROM groups g
+                 JOIN group_members gm ON g.group_id = gm.group_id
+        WHERE gm.user_id = #{userId}
+        LIMIT 1
+    </select>
+
+    <!-- 해당 그룹의 그룹원들 조회 -->
+    <select id="selectMembersByGroupId"
+            parameterType="java.util.UUID"
+            resultType="com.runhwani.runmate.dto.response.group.GroupMemberResponse">
+        SELECT gm.member_id    AS memberId,
+               u.nickname      AS nickname,
+               u.profile_image AS profileImage
+        FROM group_members gm
+                 JOIN users u
+                      ON gm.user_id = u.user_id
+        WHERE gm.group_id = #{groupId}
+    </select>
+
+    <!-- 초대코드로 그룹 조회 -->
+    <select id="selectByInviteCode"
+            parameterType="string"
+            resultMap="GroupResult">
         SELECT *
         FROM groups
-        WHERE group_id = #{groupId}
+        WHERE invite_code = #{inviteCode}
+          AND is_finished = FALSE
+        LIMIT 1
     </select>
+
+    <!-- 그룹 탈퇴: 레코드 삭제 -->
+    <delete id="deleteLatestByUserId" parameterType="java.util.UUID">
+        DELETE FROM group_members
+        WHERE member_id IN (
+            SELECT member_id
+            FROM group_members
+            WHERE user_id    = #{userId}
+              AND is_leaved = FALSE
+            ORDER BY joined_at DESC
+            LIMIT 1
+        )
+    </delete>
+
 </mapper>
