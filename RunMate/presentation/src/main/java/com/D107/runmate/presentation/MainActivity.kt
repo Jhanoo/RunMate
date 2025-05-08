@@ -1,5 +1,6 @@
 package com.D107.runmate.presentation
 
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -18,6 +19,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import com.D107.runmate.presentation.databinding.ActivityMainBinding
 import com.D107.runmate.presentation.databinding.DrawerHeaderBinding
+import com.D107.runmate.presentation.login.SplashFragment
 import com.google.android.material.navigation.NavigationView
 import com.ssafy.locket.presentation.base.BaseActivity
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,6 +30,7 @@ import java.security.NoSuchAlgorithmException
 class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::inflate),
     NavigationView.OnNavigationItemSelectedListener {
 
+    @SuppressLint("CommitTransaction")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -62,7 +65,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
             R.id.drawer_group to R.id.groupFragment,
             R.id.drawer_history to R.id.historyFragment,
             R.id.drawer_wearable to R.id.wearableFragment,
-            R.id.drawer_manager to R.id.AIManagerFragment
+            R.id.drawer_manager to R.id.AIManagerFragment,
         )
 
         val navHostFragment =

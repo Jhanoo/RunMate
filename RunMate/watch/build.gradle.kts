@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.D107.runmate.watch"
-    compileSdk = 35
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.D107.runmate.watch"

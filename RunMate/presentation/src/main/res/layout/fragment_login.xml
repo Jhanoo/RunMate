@@ -83,14 +83,15 @@
     </LinearLayout>
 
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/loginBtn"
         style="@style/boldTextStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="26dp"
-        android:layout_marginBottom="110dp"
-        android:background="@drawable/round_green"
+        android:layout_marginBottom="169dp"
+        app:cornerRadius="8dp"
+        android:background="#298E60"
         android:text="로그인"
         android:textColor="@color/white"
         android:textSize="16sp"

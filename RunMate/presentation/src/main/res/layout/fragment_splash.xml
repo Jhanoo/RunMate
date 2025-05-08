@@ -1,16 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".login.SplashFragment"
+    android:id="@+id/fragment_splash"
     android:background="@color/login_background">
 
     <ImageView
-        android:layout_width="wrap_content"
+        android:id="@+id/gifImageView"
+        android:layout_width="450dp"
         android:layout_height="wrap_content"
-        android:src="@drawable/tonie"
-        tools:ignore="MissingConstraints" />
+        android:adjustViewBounds="true"
+        android:layout_marginBottom="-150dp"
+        app:layout_constraintBottom_toTopOf="@+id/runmateTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.512"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/runmateTitle"
+        android:layout_width="344dp"
+        android:layout_height="wrap_content"
+        android:src="@drawable/runmate"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="200dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

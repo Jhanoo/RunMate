@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         minSdk = 24
-
+        multiDexEnabled = true
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
@@ -60,4 +60,10 @@ dependencies {
     // Hilt
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
+
+    //GIF
+    implementation (libs.glide.v4132)
+    annotationProcessor (libs.compiler)
+    implementation (libs.androidx.emoji2)
+    implementation (libs.androidx.emoji2.views)
 }
