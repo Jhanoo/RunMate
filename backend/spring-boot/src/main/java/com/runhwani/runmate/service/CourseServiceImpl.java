@@ -95,4 +95,10 @@ public class CourseServiceImpl implements CourseService {
         // 코스 상세 정보 조회
         return courseDao.findCoursesByIds(recentCourseIds);
     }
+
+    // 5. 내가 등록한 코스 조회
+    @Override
+    public List<CourseResponse> getCoursesCreatedBy(UUID userId) {
+        return courseDao.findCoursesCreatedByUser(userId);
+    }
 }

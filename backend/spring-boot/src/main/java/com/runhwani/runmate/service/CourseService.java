@@ -19,4 +19,6 @@ public interface CourseService {
     List<CourseResponse> searchCourses(String keyword);
     // 4. 최근 코스 조회
     List<CourseResponse> getRecentCourses(UUID userId);
+    // 5. 내가 등록한 코스 조회
+    List<CourseResponse> getCoursesCreatedBy(UUID userId);
 }

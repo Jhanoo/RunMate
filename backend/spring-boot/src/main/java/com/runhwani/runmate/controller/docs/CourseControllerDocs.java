@@ -114,4 +114,20 @@ public interface CourseControllerDocs {
     ResponseEntity<CommonResponse<List<CourseResponse>>> getRecentCourses(
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetails principal
     );
+
+    // 5. 내가 만든 코스 조회
+    @Operation(
+            summary = "내가 만든 코스 조회",
+            description = "JWT 인증된 사용자의 user_id로, 자신이 생성한 모든 코스를 조회합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "내가 만든 코스 목록 조회 성공"
+                    )
+            }
+    )
+    @GetMapping("/my")
+    ResponseEntity<CommonResponse<List<CourseResponse>>> getMyCourses(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails principal
+    );
 }
