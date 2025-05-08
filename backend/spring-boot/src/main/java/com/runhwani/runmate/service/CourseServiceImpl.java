@@ -74,6 +74,11 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public List<CourseResponse> searchCourses(String keyword) {
+        // 빈 검색어 방지 로직
+        if (keyword == null || keyword.trim().isEmpty()) {
+            throw new IllegalArgumentException("검색어가 공백입니다.");
+        }
+
         String pattern = "%" + keyword + "%";
         Map<String, Object> params = new HashMap<>();
         params.put("name", pattern);
