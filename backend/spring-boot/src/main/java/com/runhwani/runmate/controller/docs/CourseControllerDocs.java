@@ -4,6 +4,7 @@ import com.runhwani.runmate.dto.common.CommonResponse;
 import com.runhwani.runmate.dto.request.course.CourseRequest;
 import com.runhwani.runmate.dto.response.course.CourseCreateResponse;
 import com.runhwani.runmate.dto.response.course.CourseDetailResponse;
+import com.runhwani.runmate.dto.response.course.CourseLikeResponse;
 import com.runhwani.runmate.dto.response.course.CourseResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -158,9 +159,26 @@ public interface CourseControllerDocs {
                     )
             }
     )
-    @GetMapping("/{id}")
+    @GetMapping("/{courseId}")
     ResponseEntity<CommonResponse<CourseDetailResponse>> getCourseDetail(
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetails principal,
-            @PathVariable("id") UUID courseId
+            @PathVariable("courseId") UUID courseId
+    );
+
+    // 8. 코스 좋아요 업데이트
+    @Operation(
+            summary     = "코스 좋아요 업데이트",
+            description = "로그인한 사용자가 해당 코스에 좋아요를 누르거나 취소합니다.",
+            responses   = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description  = "좋아요 상태 및 전체 좋아요 수 반환"
+                    )
+            }
+    )
+    @PatchMapping("/{courseId}/like")
+    ResponseEntity<CommonResponse<CourseLikeResponse>> updateCourseLike(
+            @Parameter(hidden = true) UserDetails principal,
+            @PathVariable("courseId") UUID courseId
     );
 }

@@ -31,4 +31,8 @@ public interface CourseDao {
     int countLikesByCourseId(@Param("courseId") UUID courseId);
     Double getAverageUserPace(); // 전체 사용자 페이스
     Double getUserPace(@Param("userId") UUID userId); // 특정 사용자 페이스
+    // 8. 코스 좋아요 업데이트
+    boolean existsCourseLike(@Param("userId") UUID userId, @Param("courseId") UUID courseId);
+    void insertCourseLike(@Param("userId") UUID userId, @Param("courseId") UUID courseId);
+    int deleteCourseLike(@Param("userId") UUID userId, @Param("courseId") UUID courseId);
 }

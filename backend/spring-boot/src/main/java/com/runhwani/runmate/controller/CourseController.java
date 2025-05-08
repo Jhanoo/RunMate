@@ -5,6 +5,7 @@ import com.runhwani.runmate.dto.common.CommonResponse;
 import com.runhwani.runmate.dto.request.course.CourseRequest;
 import com.runhwani.runmate.dto.response.course.CourseCreateResponse;
 import com.runhwani.runmate.dto.response.course.CourseDetailResponse;
+import com.runhwani.runmate.dto.response.course.CourseLikeResponse;
 import com.runhwani.runmate.dto.response.course.CourseResponse;
 import com.runhwani.runmate.exception.EntityNotFoundException;
 import com.runhwani.runmate.service.CourseService;
@@ -130,6 +131,17 @@ public class CourseController implements CourseControllerDocs {
         UUID userId = UUID.fromString(principal.getUsername());
         CourseDetailResponse detail = courseService.getCourseDetail(courseId, userId);
         return ResponseEntity.ok(CommonResponse.ok(detail));
+    }
+
+    // 8. 코스 좋아요 업데이트
+    @Override
+    public ResponseEntity<CommonResponse<CourseLikeResponse>> updateCourseLike(
+            @AuthenticationPrincipal UserDetails principal,
+            UUID courseId
+    ) {
+        UUID userId = UUID.fromString(principal.getUsername());
+        CourseLikeResponse body = courseService.updateCourseLike(userId, courseId);
+        return ResponseEntity.ok(CommonResponse.ok(body));
     }
 
 }
