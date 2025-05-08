@@ -13,10 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -88,4 +85,14 @@ public class CourseServiceImpl implements CourseService {
         return courseDao.searchCourses(params);
     }
 
+    // 4. 최근 코스 조회
+    @Override
+    public List<CourseResponse> getRecentCourses(UUID userId) {
+        // 1달 이내 코스 ID 조회
+        List<UUID> recentCourseIds = courseDao.findRecentCourseIds(userId);
+        if (recentCourseIds.isEmpty()) return Collections.emptyList();
+
+        // 코스 상세 정보 조회
+        return courseDao.findCoursesByIds(recentCourseIds);
+    }
 }

@@ -86,5 +86,33 @@
             OR c.start_location ILIKE #{location}
             )
     </select>
+
+<!--    4. 최근 코스 조회 논리-->
+    <select id="findRecentCourseIds" resultType="java.util.UUID">
+        SELECT DISTINCT course_id
+        FROM histories
+        WHERE user_id = #{userId}
+        AND course_id IS NOT NULL
+        AND created_at >= NOW() - INTERVAL '1 month'
+    </select>
+
+    <select id="findCoursesByIds" resultType="com.runhwani.runmate.dto.response.course.CourseResponse">
+        SELECT
+        c.course_id AS courseId,
+        c.course_name AS courseName,
+        c.is_shared AS isShared,
+        c.distance AS distance,
+        c.avg_elevation AS avgElevation,
+        c.start_location AS startLocation,
+        u.nickname AS creatorNickname,
+        u.profile_image AS creatorProfileImage,
+        (SELECT COUNT(*) FROM course_likes cl WHERE cl.course_id = c.course_id) AS likeCount
+        FROM courses c
+        JOIN users u ON c.created_by = u.user_id
+        WHERE c.course_id IN
+        <foreach item="id" collection="courseIds" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
     
 </mapper>

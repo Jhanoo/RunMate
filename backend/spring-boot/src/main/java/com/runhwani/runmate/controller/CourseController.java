@@ -32,6 +32,7 @@ public class CourseController implements CourseControllerDocs {
 
     private final CourseService courseService;
 
+    // 1. 코스 생성
     @Override
     public ResponseEntity<CommonResponse<UUID>> createCourse(
             @AuthenticationPrincipal UserDetails principal,
@@ -58,6 +59,7 @@ public class CourseController implements CourseControllerDocs {
         }
     }
 
+    // 2. 코스 삭제
     @Override
     public ResponseEntity<CommonResponse<Void>> deleteCourse(
             @AuthenticationPrincipal UserDetails principal,
@@ -82,11 +84,20 @@ public class CourseController implements CourseControllerDocs {
         }
     }
 
+    // 3. 코스 검색
     @Override
     public CommonResponse<List<CourseResponse>> searchCourses(String keyword) {
         List<CourseResponse> result = courseService.searchCourses(keyword);
         return CommonResponse.ok(result);
     }
 
+    // 4. 최근 코스 조회
+    @Override
+    public ResponseEntity<CommonResponse<List<CourseResponse>>> getRecentCourses(
+            @AuthenticationPrincipal UserDetails principal) {
+        UUID userId = UUID.fromString(principal.getUsername());
+        List<CourseResponse> responseList = courseService.getRecentCourses(userId);
+        return ResponseEntity.ok(CommonResponse.ok(responseList));
+    }
 
 }
