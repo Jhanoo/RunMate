@@ -32,8 +32,10 @@ public enum ErrorCode {
 
     // 로그아웃 관련 에러
     LOGOUT_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "LOGOUT-001", "로그아웃 처리 중 서버 오류가 발생했습니다."),
-    INVALID_TOKEN(HttpStatus.BAD_REQUEST, "LOGOUT-002", "유효하지 않은 토큰입니다.");
+    INVALID_TOKEN(HttpStatus.BAD_REQUEST, "LOGOUT-002", "유효하지 않은 토큰입니다."),
 
+    // 파일 업로드 에러
+    FILE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "FILE_001", "파일 업로드 중 오류가 발생했습니다.");
 
     private final HttpStatus status;
     private final String errorCode;

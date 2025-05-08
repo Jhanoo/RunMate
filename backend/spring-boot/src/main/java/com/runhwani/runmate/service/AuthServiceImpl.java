@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.UUID;
@@ -31,6 +32,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserDao userDao;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final FileStorageService fileStorageService;
 
     @Override
     @Transactional
@@ -45,12 +47,26 @@ public class AuthServiceImpl implements AuthService {
             throw new CustomException(ErrorCode.DUPLICATE_NICKNAME);
         }
         
+        // 프로필 이미지 저장
+        String profileImageUrl = null;
+        try {
+            if (request.getProfileImage() != null && !request.getProfileImage().isEmpty()) {
+                profileImageUrl = fileStorageService.storeFile(request.getProfileImage());
+            }
+        } catch (IOException e) {
+            log.error("프로필 이미지 저장 중 오류 발생", e);
+            throw new CustomException(ErrorCode.FILE_UPLOAD_ERROR);
+        }
+        
         // 사용자 생성
         User user = User.builder()
                 .userId(UUID.randomUUID())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .nickname(request.getNickname())
+                .profileImage(profileImageUrl)
+                .birthday(request.getBirthday())
+                .gender(request.getGender())
                 .createdAt(OffsetDateTime.now(ZoneId.of("Asia/Seoul")))
                 .build();
         
@@ -60,6 +76,9 @@ public class AuthServiceImpl implements AuthService {
                 .userId(user.getUserId())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
+                .profileImage(user.getProfileImage())
+                .birthday(user.getBirthday())
+                .gender(user.getGender())
                 .build();
     }
 

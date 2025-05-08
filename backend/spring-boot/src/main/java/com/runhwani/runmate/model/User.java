@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -28,6 +29,10 @@ public class User {
     private String profileImage;
     /** 평균 페이스 */
     private Double avgPace;
+    /** 생일 */
+    private LocalDate birthday;
+    /** 성별 */
+    private Gender gender;
     /** 생성 시각 */
     private OffsetDateTime createdAt;
 }

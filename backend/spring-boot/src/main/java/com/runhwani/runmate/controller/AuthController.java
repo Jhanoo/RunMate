@@ -11,10 +11,10 @@ import com.runhwani.runmate.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RestController
@@ -36,9 +36,28 @@ public class AuthController implements AuthControllerDocs {
     }
 
     @Override
-    public ResponseEntity<CommonResponse<SignupResponse>> signup(@RequestBody SignupRequest request) {
+    @PostMapping(value = "/api/auth/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<CommonResponse<SignupResponse>> signup(
+            @RequestPart("data") SignupRequest data,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
+        
         try {
-            SignupResponse response = authService.signup(request);
+            // profileImage가 별도로 전달되면 DTO에 설정
+            if (profileImage != null) {
+                // SignupRequest에 profileImage 설정 로직 필요
+                // 리플렉션이나 새 객체 생성 방식으로 처리 가능
+                // 여기서는 간단히 새 객체 생성 방식 사용
+                data = new SignupRequest(
+                    data.getEmail(),
+                    data.getPassword(),
+                    data.getNickname(),
+                    data.getBirthday(),
+                    data.getGender(),
+                    profileImage
+                );
+            }
+            
+            SignupResponse response = authService.signup(data);
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(new CommonResponse<>("회원가입 성공", response));

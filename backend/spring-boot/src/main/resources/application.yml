@@ -89,3 +89,9 @@ logging:
 server:
   port: 8080
 
+file:
+  upload-dir: ./uploads
+
+app:
+  base-url: ${APP_BASE_URL:https://k12d107.p.ssafy.io}
+

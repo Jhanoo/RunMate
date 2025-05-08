@@ -9,12 +9,15 @@ services:
       - ./app.jar:/app/app.jar     # 호스트의 app.jar를 컨테이너에 마운트
       - runmate-logs:/app/logs     # 로그 데이터를 위한 볼륨 추가
       - runmate-gpx:/app/gpx       # GPX 데이터를 위한 볼륨 추가
+      - runmate-uploads:/app/uploads  # 업로드 파일을 위한 볼륨 추가
     restart: always
     ports:
       - "8080:8080"
     command: ["java","-jar","/app/app.jar"]
     env_file:
       - .env
+    environment:
+      - APP_BASE_URL=https://k12d107.p.ssafy.io  # 기본 URL 설정
     depends_on:
       - postgres
       - redis
@@ -64,6 +67,7 @@ services:
       - certbot-etc:/etc/letsencrypt
       - web-root:/var/www/html
       - nginx-logs:/var/log/nginx  # Nginx 로그를 위한 볼륨 추가
+      - runmate-uploads:/app/uploads:ro  # 업로드 파일을 읽기 전용으로 마운트
     depends_on:
       - springboot
     networks:
@@ -94,3 +98,4 @@ volumes:
   runmate-logs:   # 애플리케이션 로그 볼륨 정의
   nginx-logs:     # Nginx 로그 볼륨 정의
   runmate-gpx:    # GPX 데이터 볼륨 정의
+  runmate-uploads:   # 업로드 파일 볼륨 정의
