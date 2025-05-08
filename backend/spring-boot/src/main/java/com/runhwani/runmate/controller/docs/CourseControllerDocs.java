@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -96,5 +97,21 @@ public interface CourseControllerDocs {
     @GetMapping(value = "/search")
     CommonResponse<List<CourseResponse>> searchCourses(
             @RequestParam("keyword") String keyword
+    );
+
+    // 4. 최근 코스 조회
+    @Operation(
+            summary = "최근 코스 조회",
+            description = "JWT 인증된 사용자의 최근 1달 내 러닝 기록을 기반으로, 중복되지 않은 course_id로 코스 목록을 조회합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "최근 코스 목록 조회 성공"
+                    ),
+            }
+    )
+    @GetMapping("/recent")
+    ResponseEntity<CommonResponse<List<CourseResponse>>> getRecentCourses(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails principal
     );
 }

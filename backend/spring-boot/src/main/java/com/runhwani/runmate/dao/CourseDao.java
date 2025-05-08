@@ -18,4 +18,7 @@ public interface CourseDao {
     void deleteCourse(@Param("courseId") UUID courseId);
     // 코스 검색
     List<CourseResponse> searchCourses(Map<String, Object> params);
+    // 최근 코스 조회
+    List<UUID> findRecentCourseIds(@Param("userId") UUID userId);
+    List<CourseResponse> findCoursesByIds(@Param("courseIds") List<UUID> courseIds);
 }
