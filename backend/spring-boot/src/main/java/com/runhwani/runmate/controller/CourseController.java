@@ -3,30 +3,28 @@ package com.runhwani.runmate.controller;
 import com.runhwani.runmate.controller.docs.CourseControllerDocs;
 import com.runhwani.runmate.dto.common.CommonResponse;
 import com.runhwani.runmate.dto.request.course.CourseRequest;
-import com.runhwani.runmate.exception.CustomException;
+import com.runhwani.runmate.dto.response.course.CourseCreateResponse;
+import com.runhwani.runmate.dto.response.course.CourseDetailResponse;
+import com.runhwani.runmate.dto.response.course.CourseLikeResponse;
+import com.runhwani.runmate.dto.response.course.CourseResponse;
 import com.runhwani.runmate.exception.EntityNotFoundException;
-import com.runhwani.runmate.exception.ErrorCode;
-import com.runhwani.runmate.security.jwt.JwtProvider;
 import com.runhwani.runmate.service.CourseService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -37,8 +35,9 @@ public class CourseController implements CourseControllerDocs {
 
     private final CourseService courseService;
 
+    // 1. 코스 생성
     @Override
-    public ResponseEntity<CommonResponse<UUID>> createCourse(
+    public ResponseEntity<CommonResponse<CourseCreateResponse>> createCourse(
             @AuthenticationPrincipal UserDetails principal,
             @RequestPart("courseData") CourseRequest courseData,
             @RequestPart(value = "gpxFile", required = false) MultipartFile gpxFile
@@ -51,9 +50,12 @@ public class CourseController implements CourseControllerDocs {
 
         try {
             UUID newCourseId = courseService.createCourse(courseData, gpxFile, userId);
+            CourseCreateResponse body = CourseCreateResponse.builder()
+                    .courseId(newCourseId)
+                    .build();
             return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .body(CommonResponse.ok(newCourseId));
+                    .body(CommonResponse.ok(body));
         } catch (IOException e) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
@@ -63,6 +65,7 @@ public class CourseController implements CourseControllerDocs {
         }
     }
 
+    // 2. 코스 삭제
     @Override
     public ResponseEntity<CommonResponse<Void>> deleteCourse(
             @AuthenticationPrincipal UserDetails principal,
@@ -87,6 +90,58 @@ public class CourseController implements CourseControllerDocs {
         }
     }
 
+    // 3. 코스 검색
+    @Override
+    public CommonResponse<List<CourseResponse>> searchCourses(String keyword) {
+        List<CourseResponse> result = courseService.searchCourses(keyword);
+        return CommonResponse.ok(result);
+    }
 
+    // 4. 최근 코스 조회
+    @Override
+    public ResponseEntity<CommonResponse<List<CourseResponse>>> getRecentCourses(
+            @AuthenticationPrincipal UserDetails principal) {
+        UUID userId = UUID.fromString(principal.getUsername());
+        List<CourseResponse> responseList = courseService.getRecentCourses(userId);
+        return ResponseEntity.ok(CommonResponse.ok(responseList));
+    }
+
+    // 5. 내가 만든 코스 조회
+    @Override
+    public ResponseEntity<CommonResponse<List<CourseResponse>>> getMyCourses(
+        @AuthenticationPrincipal UserDetails principal) {
+    UUID userId = UUID.fromString(principal.getUsername());
+    List<CourseResponse> responseList = courseService.getCoursesCreatedBy(userId);
+    return ResponseEntity.ok(CommonResponse.ok(responseList));
+    }
+
+    // 6. 전체 코스 조회
+    @Override
+    public ResponseEntity<CommonResponse<List<CourseResponse>>> getAllCourses() {
+        List<CourseResponse> responseList = courseService.getAllCourses();
+        return ResponseEntity.ok(CommonResponse.ok(responseList));
+    }
+
+    // 7. 코스 상세 조회
+    @Override
+    public ResponseEntity<CommonResponse<CourseDetailResponse>> getCourseDetail(
+            @AuthenticationPrincipal UserDetails principal,
+            @PathVariable("id") UUID courseId
+    ) {
+        UUID userId = UUID.fromString(principal.getUsername());
+        CourseDetailResponse detail = courseService.getCourseDetail(courseId, userId);
+        return ResponseEntity.ok(CommonResponse.ok(detail));
+    }
+
+    // 8. 코스 좋아요 업데이트
+    @Override
+    public ResponseEntity<CommonResponse<CourseLikeResponse>> updateCourseLike(
+            @AuthenticationPrincipal UserDetails principal,
+            UUID courseId
+    ) {
+        UUID userId = UUID.fromString(principal.getUsername());
+        CourseLikeResponse body = courseService.updateCourseLike(userId, courseId);
+        return ResponseEntity.ok(CommonResponse.ok(body));
+    }
 
 }

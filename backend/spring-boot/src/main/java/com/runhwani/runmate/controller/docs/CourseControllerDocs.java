@@ -2,6 +2,10 @@ package com.runhwani.runmate.controller.docs;
 
 import com.runhwani.runmate.dto.common.CommonResponse;
 import com.runhwani.runmate.dto.request.course.CourseRequest;
+import com.runhwani.runmate.dto.response.course.CourseCreateResponse;
+import com.runhwani.runmate.dto.response.course.CourseDetailResponse;
+import com.runhwani.runmate.dto.response.course.CourseLikeResponse;
+import com.runhwani.runmate.dto.response.course.CourseResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.StringToClassMapItem;
@@ -13,11 +17,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "코스", description = "코스 생성 및 조회 API")
@@ -64,12 +70,13 @@ public interface CourseControllerDocs {
             }
     )
     @PostMapping("/create")
-    ResponseEntity<CommonResponse<UUID>> createCourse(
+    ResponseEntity<CommonResponse<CourseCreateResponse>> createCourse(
             @Parameter(hidden = true) UserDetails principal,
             @RequestPart("courseData") CourseRequest courseData,
             @RequestPart(value = "gpxFile", required = false) MultipartFile gpxFile
     );
 
+    // 2. 코스 삭제
     @Operation(
             summary = "코스 삭제",
             description = "경로 ID로 코스를 삭제합니다. DB 레코드를 제거하고, 연관된 GPX 파일을 EC2에서 삭제합니다.",
@@ -79,6 +86,98 @@ public interface CourseControllerDocs {
     )
     @DeleteMapping("/{courseId}")
     ResponseEntity<CommonResponse<Void>> deleteCourse(
+            @Parameter(hidden = true) UserDetails principal,
+            @PathVariable("courseId") UUID courseId
+    );
+
+    // 3. 코스 검색
+    @Operation(
+            summary = "코스 검색",
+            description = "키워드로 코스 이름, 작성자 닉네임, 출발지역을 검색합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "검색 결과 반환")
+    })
+    @GetMapping(value = "/search")
+    CommonResponse<List<CourseResponse>> searchCourses(
+            @RequestParam("keyword") String keyword
+    );
+
+    // 4. 최근 코스 조회
+    @Operation(
+            summary = "최근 코스 조회",
+            description = "JWT 인증된 사용자의 최근 1달 내 러닝 기록을 기반으로, 중복되지 않은 course_id로 코스 목록을 조회합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "최근 코스 목록 조회 성공"
+                    ),
+            }
+    )
+    @GetMapping("/recent")
+    ResponseEntity<CommonResponse<List<CourseResponse>>> getRecentCourses(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails principal
+    );
+
+    // 5. 내가 만든 코스 조회
+    @Operation(
+            summary = "내가 만든 코스 조회",
+            description = "JWT 인증된 사용자의 user_id로, 자신이 생성한 모든 코스를 조회합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "내가 만든 코스 목록 조회 성공"
+                    )
+            }
+    )
+    @GetMapping("/my")
+    ResponseEntity<CommonResponse<List<CourseResponse>>> getMyCourses(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails principal
+    );
+
+    // 6. 전체 코스 조회
+    @Operation(
+            summary = "전체 코스 조회",
+            description = "모든 코스를 조회합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "전체 코스 목록 조회 성공"
+                    )
+            }
+    )
+    @GetMapping("/all")
+    ResponseEntity<CommonResponse<List<CourseResponse>>> getAllCourses();
+
+    // 7. 코스 상세 조회
+    @Operation(
+            summary = "코스 상세 조회",
+            description = "코스 ID를 통해 상세 정보를 조회합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "코스 상세 조회 성공"
+                    )
+            }
+    )
+    @GetMapping("/{courseId}")
+    ResponseEntity<CommonResponse<CourseDetailResponse>> getCourseDetail(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails principal,
+            @PathVariable("courseId") UUID courseId
+    );
+
+    // 8. 코스 좋아요 업데이트
+    @Operation(
+            summary     = "코스 좋아요 업데이트",
+            description = "로그인한 사용자가 해당 코스에 좋아요를 누르거나 취소합니다.",
+            responses   = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description  = "좋아요 상태 및 전체 좋아요 수 반환"
+                    )
+            }
+    )
+    @PatchMapping("/{courseId}/like")
+    ResponseEntity<CommonResponse<CourseLikeResponse>> updateCourseLike(
             @Parameter(hidden = true) UserDetails principal,
             @PathVariable("courseId") UUID courseId
     );
