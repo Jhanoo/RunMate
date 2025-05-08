@@ -12,7 +12,7 @@
         tools:layout="@layout/fragment_a_i_manager" />
     <fragment
         android:id="@+id/runningFragment"
-        android:name="com.D107.runmate.presentation.running.RunningFragment"
+        android:name="com.D107.runmate.presentation.running.view.RunningFragment"
         android:label="fragment_running"
         tools:layout="@layout/fragment_running" >
         <action
@@ -23,6 +23,9 @@
             app:destination="@id/runningEndFragment"
             app:popUpTo="@id/runningFragment"
             app:popUpToInclusive="true"/>
+        <action
+            android:id="@+id/action_runningFragment_to_courseSettingFragment"
+            app:destination="@id/courseSettingFragment" />
     </fragment>
     <fragment
         android:id="@+id/groupFragment"
@@ -46,7 +49,7 @@
         tools:layout="@layout/fragment_goal_setting" />
     <fragment
         android:id="@+id/runningRecordFragment"
-        android:name="com.D107.runmate.presentation.running.RunningRecordFragment"
+        android:name="com.D107.runmate.presentation.running.view.RunningRecordFragment"
         android:label="fragment_running_record"
         tools:layout="@layout/fragment_running_record" >
         <action
@@ -57,8 +60,13 @@
     </fragment>
     <fragment
         android:id="@+id/runningEndFragment"
-        android:name="com.D107.runmate.presentation.running.RunningEndFragment"
+        android:name="com.D107.runmate.presentation.running.view.RunningEndFragment"
         android:label="fragment_running_end"
         tools:layout="@layout/fragment_running_end" />
+    <fragment
+        android:id="@+id/courseSettingFragment"
+        android:name="com.D107.runmate.presentation.running.view.CourseSettingFragment"
+        android:label="fragment_course_setting"
+        tools:layout="@layout/fragment_course_setting" />
 
 </navigation>

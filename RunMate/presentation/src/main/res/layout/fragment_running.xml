@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".running.RunningFragment">
+    tools:context=".running.view.RunningFragment">
 
     <com.kakao.vectormap.MapView
         android:id="@+id/map_view"

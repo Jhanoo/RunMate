@@ -1,7 +1,6 @@
-package com.D107.runmate.presentation.running
+package com.D107.runmate.presentation.running.view
 
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
@@ -22,11 +21,8 @@ import com.D107.runmate.presentation.MainViewModel
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.RunningTrackingService
 import com.D107.runmate.presentation.databinding.FragmentRunningBinding
-import com.D107.runmate.presentation.utils.CommonUtils.dpToPx
-import com.D107.runmate.presentation.utils.CommonUtils.getActivityContext
-import com.D107.runmate.presentation.utils.LocationUtils.getFallbackLocation
-import com.D107.runmate.presentation.utils.LocationUtils.getPaceFromSpeed
-import com.D107.runmate.presentation.utils.LocationUtils.trackingLocation
+import com.D107.runmate.presentation.utils.CommonUtils
+import com.D107.runmate.presentation.utils.LocationUtils
 import com.kakao.vectormap.GestureType
 import com.kakao.vectormap.KakaoMap
 import com.kakao.vectormap.KakaoMapReadyCallback
@@ -39,14 +35,9 @@ import com.kakao.vectormap.label.LabelStyle
 import com.kakao.vectormap.label.LabelStyles
 import com.ssafy.locket.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.internal.managers.ViewComponentManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
@@ -55,7 +46,6 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 private const val TAG = "RunningFragment"
-
 @AndroidEntryPoint
 class RunningFragment : BaseFragment<FragmentRunningBinding>(
     FragmentRunningBinding::bind,
@@ -80,10 +70,14 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
             findNavController().navigate(R.id.action_runningFragment_to_runningRecordFragment)
         }
 
+        binding.btnSetCourse.setOnClickListener {
+            findNavController().navigate(R.id.action_runningFragment_to_courseSettingFragment)
+        }
+
         binding.btnStart.setOnClickListener {
             mContext?.let {
                 RunningTrackingService.startService(it)
-                (getActivityContext(requireContext()) as MainActivity).hideHamburgerBtn()
+                (CommonUtils.getActivityContext(requireContext()) as MainActivity).hideHamburgerBtn()
                 binding.groupBtnRunning.visibility = View.VISIBLE
                 binding.groupBtnStart.visibility = View.INVISIBLE
                 binding.groupRecord.visibility = View.VISIBLE
@@ -171,7 +165,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                         )
                     }
                 }
-                val fallbackLocation = getFallbackLocation()
+                val fallbackLocation = LocationUtils.getFallbackLocation()
                 return LatLng.from(fallbackLocation.latitude, fallbackLocation.longitude)
             }
         })
@@ -182,10 +176,11 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                     is UserLocationState.Exist -> {
                         val tmpUserLabel = userLabel
                         if (tmpUserLabel != null) {
-                            tmpUserLabel.moveTo(LatLng.from(
-                                state.locations.last().latitude,
-                                state.locations.last().longitude
-                            ), 500)
+                            tmpUserLabel.moveTo(
+                                LatLng.from(
+                                    state.locations.last().latitude,
+                                    state.locations.last().longitude
+                                ), 500)
 //                            kakaoMap?.trackingManager?.startTracking(userLabel)
 
                         } else {
@@ -219,7 +214,8 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                 if(state is RunningRecordState.Exist) {
                     Log.d(TAG, "onViewCreated: state ${state.runningRecords.last().distance}")
                     binding.tvDistance.text = getString(R.string.running_distance, state.runningRecords.last().distance)
-                    binding.tvPace.text = getPaceFromSpeed(state.runningRecords.last().currentSpeed)
+                    binding.tvPace.text =
+                        LocationUtils.getPaceFromSpeed(state.runningRecords.last().currentSpeed)
                 } else {
                     Log.d(TAG, "onViewCreated: state else")
                 }
@@ -239,7 +235,12 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                             R.drawable.bg_running_marker_blue
                         )
                     val resizedMarkerBg =
-                        Bitmap.createScaledBitmap(markerBg, dpToPx(it, 40f), dpToPx(it, 60f), true)
+                        Bitmap.createScaledBitmap(
+                            markerBg,
+                            CommonUtils.dpToPx(it, 40f),
+                            CommonUtils.dpToPx(it, 60f),
+                            true
+                        )
 
                     val combinedBitmap = createProfileMarker(resizedMarkerBg, bitmap)
                     val profilePng = bitmapToPng(combinedBitmap)

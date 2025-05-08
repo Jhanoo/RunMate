@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -5,6 +7,12 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("kotlin-parcelize")
 }
+
+val properties = Properties().apply {
+    load(rootProject.file("apikey.properties").inputStream())
+}
+
+val baseUrl: String = properties.getProperty("base_url") ?: ""
 
 android {
     namespace = "com.D107.runmate.domain"
@@ -20,6 +28,7 @@ android {
                 cppFlags("")
             }
         }
+        buildConfigField("String", "BASE_URL", baseUrl)
     }
 
     buildTypes {
@@ -43,6 +52,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+    }
+    buildFeatures {
+        buildConfig = true
     }
 }
 

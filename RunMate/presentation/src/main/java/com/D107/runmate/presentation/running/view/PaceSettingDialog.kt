@@ -1,4 +1,4 @@
-package com.D107.runmate.presentation.running
+package com.D107.runmate.presentation.running.view
 
 import android.content.Context
 import android.os.Bundle
@@ -11,7 +11,7 @@ import android.widget.NumberPicker
 import androidx.fragment.app.DialogFragment
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.DialogPaceSettingBinding
-import com.D107.runmate.presentation.utils.CommonUtils.getWindowSize
+import com.D107.runmate.presentation.utils.CommonUtils
 import dagger.hilt.android.AndroidEntryPoint
 
 private const val TAG = "PaceSettingDialog"
@@ -43,7 +43,7 @@ class PaceSettingDialog(private val setting: List<Int>, private val callback: (L
     override fun onResume() {
         super.onResume()
         val params: ViewGroup.LayoutParams? = dialog?.window?.attributes
-        val point = getWindowSize(mContext!!)
+        val point = CommonUtils.getWindowSize(mContext!!)
         val deviceWidth = point.x
         params?.width = (deviceWidth * 0.9).toInt()
         dialog?.window?.attributes = params as WindowManager.LayoutParams

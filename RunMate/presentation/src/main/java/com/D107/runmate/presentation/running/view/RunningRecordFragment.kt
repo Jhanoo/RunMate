@@ -1,23 +1,19 @@
-package com.D107.runmate.presentation.running
+package com.D107.runmate.presentation.running.view
 
 import CadenceTracker
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.D107.runmate.domain.model.running.RunningRecordState
 import com.D107.runmate.domain.model.running.TrackingStatus
-import com.D107.runmate.presentation.MainActivity
 import com.D107.runmate.presentation.MainViewModel
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.RunningTrackingService
 import com.D107.runmate.presentation.databinding.FragmentRunningRecordBinding
-import com.D107.runmate.presentation.utils.CommonUtils.getActivityContext
-import com.D107.runmate.presentation.utils.LocationUtils.getPaceFromSpeed
+import com.D107.runmate.presentation.utils.LocationUtils
 import com.ssafy.locket.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -44,8 +40,10 @@ class RunningRecordFragment : BaseFragment<FragmentRunningRecordBinding>(
             mainViewModel.runningRecord.collectLatest { state ->
                 if(state is RunningRecordState.Exist) {
                     binding.tvDistance.text = getString(R.string.running_distance, state.runningRecords.last().distance)
-                    binding.tvAvgPace.text = getPaceFromSpeed(state.runningRecords.last().avgSpeed)
-                    binding.tvCurrentPace.text = getPaceFromSpeed(state.runningRecords.last().currentSpeed)
+                    binding.tvAvgPace.text =
+                        LocationUtils.getPaceFromSpeed(state.runningRecords.last().avgSpeed)
+                    binding.tvCurrentPace.text =
+                        LocationUtils.getPaceFromSpeed(state.runningRecords.last().currentSpeed)
                     binding.tvCadence.text = CadenceTracker.cadence.toString()
                 }
             }
