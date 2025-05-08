@@ -23,7 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 
-@Tag(name = "달리기 API", description = "러닝 관련 API")
+@Tag(name = "달리기", description = "러닝 관련 API")
 @RequestMapping("/api/runs")
 public interface RunControllerDocs {
 

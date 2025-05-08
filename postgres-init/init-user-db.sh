@@ -84,6 +84,7 @@ CREATE TABLE	histories (
 	start_location	VARCHAR(300),
 	start_time		TIMESTAMPTZ			NOT NULL,
 	end_time		TIMESTAMPTZ			NOT NULL,
+	distance		DOUBLE PRECISION	NOT NULL,
 	avg_bpm			DOUBLE PRECISION,
 	avg_pace		DOUBLE PRECISION,
 	avg_cadence		DOUBLE PRECISION,

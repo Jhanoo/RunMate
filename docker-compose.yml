@@ -8,6 +8,7 @@ services:
     volumes:
       - ./app.jar:/app/app.jar     # 호스트의 app.jar를 컨테이너에 마운트
       - runmate-logs:/app/logs     # 로그 데이터를 위한 볼륨 추가
+      - runmate-gpx:/app/gpx       # GPX 데이터를 위한 볼륨 추가
     restart: always
     ports:
       - "8080:8080"
@@ -92,3 +93,4 @@ volumes:
   redis-data:     # Redis 데이터 볼륨 정의
   runmate-logs:   # 애플리케이션 로그 볼륨 정의
   nginx-logs:     # Nginx 로그 볼륨 정의
+  runmate-gpx:    # GPX 데이터 볼륨 정의
