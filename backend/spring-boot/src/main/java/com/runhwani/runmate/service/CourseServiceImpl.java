@@ -101,4 +101,10 @@ public class CourseServiceImpl implements CourseService {
     public List<CourseResponse> getCoursesCreatedBy(UUID userId) {
         return courseDao.findCoursesCreatedByUser(userId);
     }
+
+    // 6. 코스 전체 조회
+    @Override
+    public List<CourseResponse> getAllCourses() {
+        return courseDao.findAllCourses();
+    }
 }

@@ -131,5 +131,20 @@
                  JOIN users u ON c.created_by = u.user_id
         WHERE c.created_by = #{userId}
     </select>
-    
+
+<!--    6. 전체 코스 조회-->
+    <select id="findAllCourses" resultType="com.runhwani.runmate.dto.response.course.CourseResponse">
+        SELECT
+            c.course_id AS courseId,
+            c.course_name AS courseName,
+            c.is_shared AS isShared,
+            c.distance AS distance,
+            c.avg_elevation AS avgElevation,
+            c.start_location AS startLocation,
+            u.nickname AS creatorNickname,
+            u.profile_image AS creatorProfileImage,
+            (SELECT COUNT(*) FROM course_likes cl WHERE cl.course_id = c.course_id) AS likeCount
+        FROM courses c
+                 JOIN users u ON c.created_by = u.user_id
+    </select>
 </mapper>

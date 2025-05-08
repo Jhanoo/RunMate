@@ -130,4 +130,18 @@ public interface CourseControllerDocs {
     ResponseEntity<CommonResponse<List<CourseResponse>>> getMyCourses(
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetails principal
     );
+
+    // 6. 전체 코스 조회
+    @Operation(
+            summary = "전체 코스 조회",
+            description = "모든 코스를 조회합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "전체 코스 목록 조회 성공"
+                    )
+            }
+    )
+    @GetMapping("/all")
+    ResponseEntity<CommonResponse<List<CourseResponse>>> getAllCourses();
 }
