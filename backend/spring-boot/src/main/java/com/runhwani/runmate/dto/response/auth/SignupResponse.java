@@ -25,6 +25,9 @@ public class SignupResponse {
     @Schema(description = "닉네임")
     private String nickname;
     
+    @Schema(description = "프로필 이미지 URL")
+    private String profileImage;
+    
     @Schema(description = "생일")
     private LocalDate birthday;
     

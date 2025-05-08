@@ -11,10 +11,10 @@ import com.runhwani.runmate.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RestController
@@ -36,8 +36,17 @@ public class AuthController implements AuthControllerDocs {
     }
 
     @Override
-    public ResponseEntity<CommonResponse<SignupResponse>> signup(@RequestBody SignupRequest request) {
+    @PostMapping(value = "/api/auth/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<CommonResponse<SignupResponse>> signup(
+            @RequestPart("email") String email,
+            @RequestPart("password") String password,
+            @RequestPart("nickname") String nickname,
+            @RequestPart(value = "birthday", required = false) String birthday,
+            @RequestPart(value = "gender", required = false) String gender,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
+        
         try {
+            SignupRequest request = new SignupRequest(email, password, nickname, birthday, gender, profileImage);
             SignupResponse response = authService.signup(request);
             return ResponseEntity
                     .status(HttpStatus.CREATED)
