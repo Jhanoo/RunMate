@@ -14,6 +14,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
+import com.D107.runmate.domain.model.running.LocationModel
+import com.D107.runmate.domain.model.running.UserLocationState
 import com.D107.runmate.presentation.databinding.ActivityMainBinding
 import com.D107.runmate.presentation.databinding.DrawerHeaderBinding
 import com.D107.runmate.presentation.utils.LocationUtils.getLocation
@@ -136,7 +138,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     private val runtimePermissions =
         arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.POST_NOTIFICATIONS,
+            Manifest.permission.ACTIVITY_RECOGNITION
         )
 
     private val backgroundPermission = arrayOf(
@@ -175,7 +179,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                 mContext?.let {
                     if(isEnableLocationSystem(it)) {
                         val location = getLocation(it)
-                        viewModel.setUserLocation(UserLocationState.Exist(location))
+                        viewModel.setUserLocation(UserLocationState.Exist(listOf(LocationModel(location.latitude, location.longitude, location.altitude, location.speed))))
                     } else {
                         showLocationEnableDialog(it)
                     }
@@ -226,6 +230,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                 else -> View.GONE
             }
         }
+    }
+
+    fun hideHamburgerBtn() {
+        binding.btnMenu.visibility = View.GONE
     }
 
     override fun onResume() {

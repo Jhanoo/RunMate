@@ -1,0 +1,295 @@
+package com.D107.runmate.presentation
+
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import android.os.IBinder
+import android.util.Log
+import androidx.core.app.NotificationCompat
+import com.D107.runmate.domain.model.running.LocationModel
+import com.D107.runmate.domain.model.running.TrackingStatus
+import com.D107.runmate.domain.repository.running.RunningTrackingRepository
+import com.D107.runmate.presentation.utils.LocationUtils.trackingLocation
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@AndroidEntryPoint
+class RunningTrackingService : Service() {
+    private val TAG = "RunningService"
+    private val NOTIFICATION_ID = 1001
+    private val CHANNEL_ID = "running_tracker_channel"
+
+    @Inject
+    lateinit var repository: RunningTrackingRepository
+
+    private val serviceScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    var runningJob: RunningJobState = RunningJobState.Initial
+    private var timeTrackingJob: Job? = null
+
+    override fun onCreate() {
+        super.onCreate()
+        createNotificationChannel()
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
+
+        when (intent?.action) {
+            ACTION_START_SERVICE -> startForegroundService()
+            ACTION_PAUSE_SERVICE -> pauseService()
+            ACTION_STOP_SERVICE -> stopService()
+        }
+
+        return START_STICKY
+    }
+
+    private fun startForegroundService() {
+        val notification = createNotification()
+        startForeground(NOTIFICATION_ID, notification)
+
+        startLocationTracking()
+
+        startTimeTracking()
+
+        CadenceTracker.startTracking(this)
+    }
+
+    private fun stopService() {
+        stopTimeTracking()
+        stopLocationTracking()
+        CadenceTracker.stopTracking()
+
+        stopForeground(true)
+        stopSelf()
+    }
+
+    private fun pauseService() {
+        stopTimeTracking()
+        stopLocationTracking()
+        CadenceTracker.stopTracking()
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "Running Tracker"
+            val descriptionText = "Tracks your running activity"
+            val importance = NotificationManager.IMPORTANCE_LOW
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+                description = descriptionText
+                setShowBadge(false)
+            }
+
+            val notificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
+    private fun createNotification(): Notification {
+        return NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("러닝 준비 중")
+            .setSmallIcon(R.drawable.ic_drawer_menu)
+            .setOngoing(true)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .build()
+    }
+
+    private fun startTimeTracking() {
+        if (timeTrackingJob?.isActive == true) return
+
+        timeTrackingJob = serviceScope.launch {
+            while (isActive) {
+                delay(1000)
+                repository.incrementTime()
+            }
+        }
+    }
+
+    private fun stopTimeTracking() {
+        timeTrackingJob?.cancel()
+        timeTrackingJob = null
+    }
+
+    private fun startLocationTracking() {
+        if (runningJob is RunningJobState.Active) return
+
+        val job = serviceScope.launch {
+            try {
+                trackingLocation(this@RunningTrackingService)
+                    .catch { e ->
+                        Log.e(TAG, "Error in location tracking: ${e.message}", e)
+                        runningJob = RunningJobState.Error("위치 추적 중 오류 발생: ${e.message}")
+                        repository.setTrackingStatus(TrackingStatus.PAUSED)
+                    }
+                    .collect { location ->
+                        val locationModel = LocationModel(
+                            location.latitude,
+                            location.longitude,
+                            location.altitude,
+                            location.speed
+                        )
+                        repository.processLocationUpdate(locationModel)
+                        repository.setTrackingStatus(TrackingStatus.RUNNING)
+                    }
+            } catch (e: Exception) {
+                runningJob = RunningJobState.Error("위치 추적 작업 중 오류 발생: ${e.message}")
+                repository.setTrackingStatus(TrackingStatus.PAUSED)
+            }
+        }
+
+        runningJob = RunningJobState.Active(job)
+        updateNotification(runningJob)
+    }
+
+    private fun stopLocationTracking() {
+        if (runningJob is RunningJobState.Active) {
+            (runningJob as RunningJobState.Active).job.cancel()
+            runningJob = RunningJobState.None
+            repository.setTrackingStatus(TrackingStatus.PAUSED)
+            updateNotification(runningJob)
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        serviceScope.cancel()
+        runningJob = RunningJobState.None
+        repository.setTrackingStatus(TrackingStatus.STOPPED)
+    }
+
+    override fun onBind(intent: Intent?): IBinder? {
+        return null
+    }
+
+
+    sealed class RunningJobState {
+        object Initial : RunningJobState()
+        data class Active(val job: Job) : RunningJobState()
+        data class Error(val message: String) : RunningJobState()
+        object None : RunningJobState()
+    }
+
+    companion object {
+        const val ACTION_START_SERVICE = "action_start_service"
+        const val ACTION_STOP_SERVICE = "action_stop_service"
+        const val ACTION_PAUSE_SERVICE = "action_pause_service"
+
+        const val ACTION_VIBRATE = "ACTION_VIBRATE"
+        const val ACTION_SOUND = "ACTION_SOUND"
+        const val ACTION_START = "ACTION_START"
+        const val ACTION_PAUSE = "ACTION_PAUSE"
+        const val ACTION_STOP = "ACTION_STOP"
+
+        fun startService(context: Context) {
+            val intent = Intent(context, RunningTrackingService::class.java).apply {
+                action = ACTION_START_SERVICE
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(intent)
+            } else {
+                context.startService(intent)
+            }
+        }
+
+        fun stopService(context: Context) {
+            val intent = Intent(context, RunningTrackingService::class.java).apply {
+                action = ACTION_STOP_SERVICE
+            }
+            context.startService(intent)
+        }
+
+        fun pauseService(context: Context) {
+            val intent = Intent(context, RunningTrackingService::class.java).apply {
+                action = ACTION_PAUSE_SERVICE
+            }
+            context.startService(intent)
+        }
+    }
+
+    private fun createPendingIntent(action: String, requestCode: Int): PendingIntent {
+        val intent = Intent(this, NotificationReceiver::class.java).apply {
+            this.action = action
+        }
+        return PendingIntent.getBroadcast(
+            this,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
+    private fun getNotificationBuilder(state: RunningJobState): NotificationCompat.Builder {
+        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_drawer_menu)
+            .setOngoing(true)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+
+        return when (state) {
+            is RunningJobState.Active -> {
+                builder.setContentTitle("달리기 진행 중")
+                    .addAction(
+                        R.drawable.ic_action_vibrate,
+                        "진동",
+                        createPendingIntent(ACTION_VIBRATE, 0)
+                    )
+                    .addAction(
+                        R.drawable.ic_action_running,
+                        "러닝중",
+                        createPendingIntent(ACTION_PAUSE, 1)
+                    )
+                    .addAction(
+                        R.drawable.ic_action_sound,
+                        "소리",
+                        createPendingIntent(ACTION_SOUND, 2)
+                    )
+                    .setStyle(getMediaStyle(0, 1, 2))
+            }
+
+            is RunningJobState.None -> {
+                builder.setContentTitle("달리기 일시정지")
+                    .addAction(
+                        R.drawable.ic_action_start,
+                        "일시정지",
+                        createPendingIntent(ACTION_START, 3)
+                    )
+                    .addAction(R.drawable.ic_action_stop, "종료", createPendingIntent(ACTION_STOP, 4))
+                    .setStyle(getMediaStyle(0, 1))
+            }
+
+            else -> {
+                builder.setContentTitle("달리기 트래킹 오류 발생")
+                    .addAction(R.drawable.ic_action_stop, "종료", createPendingIntent(ACTION_STOP, 5))
+                    .setStyle(getMediaStyle(0))
+            }
+        }
+    }
+
+    private fun getMediaStyle(vararg indices: Int): NotificationCompat.Style {
+        return androidx.media.app.NotificationCompat.MediaStyle()
+            .setShowActionsInCompactView(*indices)
+    }
+
+    fun updateNotification(state: RunningJobState) {
+        val notification = getNotificationBuilder(state).build()
+        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+            .notify(NOTIFICATION_ID, notification)
+    }
+
+}

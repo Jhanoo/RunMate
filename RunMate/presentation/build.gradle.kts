@@ -38,6 +38,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":domain"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -70,8 +72,13 @@ dependencies {
     // Google Location
     implementation(libs.play.services.location)
 
-    // CircleImageView
-    implementation(libs.circleimageview)
+    // GPX parser
+    implementation(libs.android.gpx.parser)
+
+    // LifecycleService
+    implementation(libs.androidx.lifecycle.service)
+
+    implementation(libs.androidx.media)
 }
 
 kapt {

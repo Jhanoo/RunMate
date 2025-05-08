@@ -2,11 +2,14 @@ package com.D107.runmate.presentation.utils
 
 import android.content.Context
 import android.content.res.Resources
+import android.graphics.Point
 import android.graphics.Rect
 import android.util.TypedValue
 import android.view.TouchDelegate
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
+import dagger.hilt.android.internal.managers.ViewComponentManager
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.DecimalFormat
@@ -88,6 +91,22 @@ object CommonUtils {
         return TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP, dp, context.resources.displayMetrics
         ).toInt()
+    }
+
+    fun getActivityContext(context: Context): Context {
+        return if (context is ViewComponentManager.FragmentContextWrapper) {
+            context.baseContext
+        } else {
+            context
+        }
+    }
+    fun getWindowSize(context: Context): Point {
+        val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val display = windowManager.defaultDisplay
+        val size = Point()
+        display.getSize(size)
+
+        return size
     }
 }
 

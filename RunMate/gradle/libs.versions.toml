@@ -1,6 +1,7 @@
 [versions]
 agp = "8.5.0"
 android = "2.12.8"
+androidGpxParser = "2.3.1"
 circleimageview = "3.1.0"
 converterMoshi = "2.9.0"
 dotlottieAndroid = "0.5.0"
@@ -12,9 +13,11 @@ junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
 appcompat = "1.6.1"
+lifecycleService = "2.8.7"
 material = "1.10.0"
 activity = "1.8.0"
 constraintlayout = "2.1.4"
+media = "1.7.0"
 moshi = "1.13.0"
 mpandroidchart = "v3.1.0"
 navigationFragment = "2.8.9"
@@ -25,7 +28,10 @@ jetbrainsKotlinJvm = "1.9.0"
 
 [libraries]
 android = { module = "com.kakao.maps.open:android", version.ref = "android" }
+android-gpx-parser = { module = "com.github.ticofab:android-gpx-parser", version.ref = "androidGpxParser" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-lifecycle-service = { module = "androidx.lifecycle:lifecycle-service", version.ref = "lifecycleService" }
+androidx-media = { module = "androidx.media:media", version.ref = "media" }
 androidx-navigation-fragment = { module = "androidx.navigation:navigation-fragment", version.ref = "navigationFragment" }
 androidx-navigation-safe-args-gradle-plugin = { module = "androidx.navigation:navigation-safe-args-gradle-plugin", version.ref = "navVersion" }
 androidx-navigation-ui = { module = "androidx.navigation:navigation-ui", version.ref = "navigationFragment" }

@@ -6,14 +6,24 @@ import android.content.Intent
 import android.location.Location
 import android.location.LocationManager
 import android.os.Build
+import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.location.Priority
 import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -76,6 +86,25 @@ object LocationUtils {
             }
     }
 
+    fun trackingLocation(context: Context): Flow<Location> = callbackFlow {
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+
+        val locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                locationResult.locations.forEach { location ->
+                    trySend(location)
+                }
+            }
+        }
+
+        val request = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000).build()
+        fusedLocationClient.requestLocationUpdates(request, locationCallback, Looper.getMainLooper())
+
+        awaitClose {
+            fusedLocationClient.removeLocationUpdates(locationCallback)
+        }
+    }
+
     fun isEnableLocationSystem(context: Context): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
@@ -86,7 +115,7 @@ object LocationUtils {
         }
     }
 
-    private fun getFallbackLocation(): Location {
+    fun getFallbackLocation(): Location {
         val fallbackLocation = Location("fallback")
         fallbackLocation.latitude = 37.406960
         fallbackLocation.longitude = 127.115587
@@ -116,5 +145,13 @@ object LocationUtils {
         } else {
             Toast.makeText(context, "설정 화면을 열 수 없습니다", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    fun getPaceFromSpeed(speed: Float): String {
+        val minPerMs = 16.6667 / speed
+        val min = minPerMs.toInt()
+        val sec = ((minPerMs - min) * 60).toInt()
+        Log.d(TAG, "startLocationTracking getPaceFromSpeed: $speed $minPerMs $sec")
+        return "%d'%02d\"".format(min, sec)
     }
 }
