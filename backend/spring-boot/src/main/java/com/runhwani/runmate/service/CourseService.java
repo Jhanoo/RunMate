@@ -2,6 +2,7 @@ package com.runhwani.runmate.service;
 
 import com.runhwani.runmate.dto.request.course.CourseRequest;
 import com.runhwani.runmate.dto.response.course.CourseDetailResponse;
+import com.runhwani.runmate.dto.response.course.CourseLikeResponse;
 import com.runhwani.runmate.dto.response.course.CourseResponse;
 import com.runhwani.runmate.exception.EntityNotFoundException;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,4 +27,6 @@ public interface CourseService {
     List<CourseResponse> getAllCourses();
     // 7. 코스 상세 조회
     CourseDetailResponse getCourseDetail(UUID courseId, UUID userId);
+    // 8. 코스 좋아요 업데이트
+    CourseLikeResponse updateCourseLike(UUID userId, UUID courseId);
 }

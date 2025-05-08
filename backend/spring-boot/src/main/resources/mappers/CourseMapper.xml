@@ -182,4 +182,26 @@
         SELECT avg_pace FROM users
         WHERE user_id = #{userId}
     </select>
+
+<!--    8. 코스 좋아요 업데이트-->
+    <!-- 좋아요 존재 여부 -->
+    <select id="existsCourseLike" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM course_likes
+        WHERE user_id = #{userId}
+          AND course_id = #{courseId}
+    </select>
+
+    <!-- 좋아요 삽입 -->
+    <insert id="insertCourseLike">
+        INSERT INTO course_likes (user_id, course_id)
+        VALUES (#{userId}, #{courseId})
+    </insert>
+
+    <!-- 좋아요 삭제 -->
+    <delete id="deleteCourseLike">
+        DELETE FROM course_likes
+        WHERE user_id = #{userId}
+          AND course_id = #{courseId}
+    </delete>
 </mapper>

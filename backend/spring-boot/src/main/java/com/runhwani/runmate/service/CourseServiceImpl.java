@@ -3,6 +3,7 @@ package com.runhwani.runmate.service;
 import com.runhwani.runmate.dao.CourseDao;
 import com.runhwani.runmate.dto.request.course.CourseRequest;
 import com.runhwani.runmate.dto.response.course.CourseDetailResponse;
+import com.runhwani.runmate.dto.response.course.CourseLikeResponse;
 import com.runhwani.runmate.dto.response.course.CourseResponse;
 import com.runhwani.runmate.exception.EntityNotFoundException;
 import com.runhwani.runmate.model.Course;
@@ -10,6 +11,7 @@ import com.runhwani.runmate.utils.GpxStorageUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -146,6 +148,30 @@ public class CourseServiceImpl implements CourseService {
                 .avgEstimatedTime(avgEstimatedTime)
                 .userEstimatedTime(userEstimatedTime)
                 .likes(likeCount)
+                .build();
+    }
+
+    // 8. 코스 좋아요 업데이트
+    @Override
+    @Transactional
+    public CourseLikeResponse updateCourseLike(UUID userId, UUID courseId) {
+        // 1. 코스 존재 확인
+        Course course = courseDao.findCourseById(courseId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 코스가 존재하지 않습니다."));
+        // 2. 기존 좋아요 여부 확인
+        boolean exists = courseDao.existsCourseLike(userId, courseId);
+        // 3. 좋아요 있 -> 삭제, 없 -> 삽입
+        if (exists) {
+            courseDao.deleteCourseLike(userId, courseId);
+        } else {
+            courseDao.insertCourseLike(userId, courseId);
+        }
+        // 4. 최종 좋아요 개수
+        int total = courseDao.countLikesByCourseId(courseId);
+        // 5. 응답 반환
+        return CourseLikeResponse.builder()
+                .liked(!exists)
+                .totalLikes(total)
                 .build();
     }
 }
