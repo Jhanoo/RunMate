@@ -1,5 +1,6 @@
 package com.runhwani.runmate.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,20 +17,33 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class Group {
-    /** PK (groups.group_id) */
+    @Schema(description = "생성된 그룹 ID", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
     private UUID groupId;
-    /** 그룹 이름 */
+
+    @Schema(description = "그룹명", example = "한강 러닝 모임")
     private String groupName;
-    /** 연관 코스 (courses.course_id FK) */
+
+    @Schema(description = "그룹장 ID", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
+    private UUID leaderId;
+
+    @Schema(description = "선택한 코스 ID", example = "4f5a6b7c-8d9e-0f1a-2b3c-4d5e6f7a8b9c")
     private UUID courseId;
-    /** 시작 시각 */
+
+    @Schema(description = "시작 일시 (ISO-8601, Offset 포함)", example = "2025-05-10T08:00:00+09:00")
     private OffsetDateTime startTime;
-    /** 시작 위치(주소) */
+
+    @Schema(description = "시작 위치(주소)", example = "여의도 한강공원")
     private String startLocation;
-    /** 시작 지점 위도 */
+
+    @Schema(description = "시작 지점 위도", example = "37.533422")
     private Double latitude;
-    /** 시작 지점 경도 */
+
+    @Schema(description = "시작 지점 경도", example = "126.896495")
     private Double longitude;
-    /** 초대 코드 */
+
+    @Schema(description = "발급된 초대 코드", example = "a1b2c3d4")
     private String inviteCode;
+
+    @Schema(description = "그룹 종료 여부", example = "false")
+    private Boolean isFinished;
 }
