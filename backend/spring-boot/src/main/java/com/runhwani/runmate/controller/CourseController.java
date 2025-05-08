@@ -109,4 +109,11 @@ public class CourseController implements CourseControllerDocs {
     return ResponseEntity.ok(CommonResponse.ok(responseList));
     }
 
+    // 6. 전체 코스 조회
+    @Override
+    public ResponseEntity<CommonResponse<List<CourseResponse>>> getAllCourses() {
+        List<CourseResponse> responseList = courseService.getAllCourses();
+        return ResponseEntity.ok(CommonResponse.ok(responseList));
+    }
+
 }
