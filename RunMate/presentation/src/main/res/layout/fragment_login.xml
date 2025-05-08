@@ -15,7 +15,7 @@
         android:layout_marginTop="90dp"
         android:src="@drawable/login_title"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/loginImg"
         tools:ignore="MissingConstraints" />
 
     <ImageView
@@ -35,7 +35,11 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingHorizontal="26dp"
+        android:layout_marginBottom="49dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/loginImg"
+        app:layout_constraintBottom_toTopOf="@+id/loginBtn"
         tools:ignore="MissingConstraints">
 
         <TextView

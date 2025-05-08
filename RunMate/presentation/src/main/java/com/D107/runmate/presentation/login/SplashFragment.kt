@@ -1,60 +1,60 @@
 package com.D107.runmate.presentation.login
 
+import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentSplashBinding
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.ssafy.locket.presentation.base.BaseFragment
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class SplashFragment : BaseFragment<FragmentSplashBinding>(
     FragmentSplashBinding::bind,
     R.layout.fragment_splash
 ) {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-//        lifecycleScope.launch(Dispatchers.IO) {
-//            // 백그라운드에서 로드
-//            val gifDrawable = Glide.with(this@SplashFragment)
-//                .asGif()
-//                .load(R.raw.tonie)
-//                .submit()
-//                .get()
-//
-//            // UI 스레드에서 이미지뷰에 설정
-//            withContext(Dispatchers.Main) {
-//                binding.gifImageView.setImageDrawable(gifDrawable)
-//            }
-//        }
-    }
+    private lateinit var tonieAnimation: AnimationDrawable
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        Glide.with(this)
-            .asGif()
-            .load(R.raw.tonie)
-//            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-            .into(binding.gifImageView)
+        // 애니메이션 설정
+        setupFrameAnimation()
 
-//        Glide.with(this)
-//            .asGif()
-//            .load(R.raw.tonie)
-//            .diskCacheStrategy(DiskCacheStrategy.ALL)
-//            .into(binding.gifImageView)
-
+        // 3초 후 로그인 화면으로 이동
         Handler(Looper.getMainLooper()).postDelayed({
-            findNavController().navigate(R.id.action_splashFragment_to_loginFragment)
+            if (isAdded && !isDetached) {
+                findNavController().navigate(
+                    R.id.loginFragment,
+                    null,
+                    androidx.navigation.NavOptions.Builder()
+                        .setPopUpTo(R.id.splashFragment, true)
+                        .build()
+                )
+            }
         }, 3000)
+    }
 
+    private fun setupFrameAnimation() {
+        // 이미지뷰에 배경 설정
+        binding.gifImageView.setBackgroundResource(R.drawable.tonie_animation)
+
+        // 배경에서 애니메이션 가져오기
+        tonieAnimation = binding.gifImageView.background as AnimationDrawable
+
+        // 애니메이션 파라미터 설정
+        tonieAnimation.isOneShot = false  // 반복 애니메이션
+
+        // 애니메이션 시작
+        tonieAnimation.start()
+    }
+
+    override fun onDestroy() {
+        // 애니메이션 정지
+        if (::tonieAnimation.isInitialized) {
+            tonieAnimation.stop()
+        }
+        super.onDestroy()
     }
 }
