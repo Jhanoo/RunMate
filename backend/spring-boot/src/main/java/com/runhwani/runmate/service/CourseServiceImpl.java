@@ -8,7 +8,6 @@ import com.runhwani.runmate.model.Course;
 import com.runhwani.runmate.utils.GpxStorageUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,7 +23,6 @@ import java.util.UUID;
 @Slf4j
 public class CourseServiceImpl implements CourseService {
     private final CourseDao courseDao;
-    private final SqlSessionTemplate sqlSession;
 
     @Override
     public UUID createCourse(CourseRequest request, MultipartFile gpxFile, UUID userId) throws IOException {
@@ -82,10 +80,7 @@ public class CourseServiceImpl implements CourseService {
         params.put("nickname", pattern);
         params.put("location", pattern);
 
-        return sqlSession.selectList(
-                "com.runhwani.runmate.dao.CourseDao.searchCourses",
-                params
-        );
+        return courseDao.searchCourses(params);
     }
 
 }
