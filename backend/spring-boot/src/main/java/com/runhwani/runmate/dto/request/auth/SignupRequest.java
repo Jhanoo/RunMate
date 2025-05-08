@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import org.springframework.web.multipart.MultipartFile;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Getter
 @NoArgsConstructor
@@ -23,19 +24,13 @@ public class SignupRequest {
     private String nickname;
     
     @Schema(description = "생일", example = "1990-01-01")
-    private String birthdayStr;
+    private LocalDate birthday;
     
     @Schema(description = "성별", example = "MALE")
-    private String genderStr;
+    private Gender gender;
     
-    @Schema(description = "프로필 이미지", type = "string", format = "binary")
+    @Schema(hidden = true)
     private MultipartFile profileImage;
     
-    public LocalDate getBirthday() {
-        return birthdayStr != null && !birthdayStr.isEmpty() ? LocalDate.parse(birthdayStr) : null;
-    }
-    
-    public Gender getGender() {
-        return genderStr != null && !genderStr.isEmpty() ? Gender.valueOf(genderStr) : null;
-    }
+
 } 

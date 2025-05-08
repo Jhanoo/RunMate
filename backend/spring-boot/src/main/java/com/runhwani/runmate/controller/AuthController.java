@@ -51,8 +51,8 @@ public class AuthController implements AuthControllerDocs {
                     data.getEmail(),
                     data.getPassword(),
                     data.getNickname(),
-                    data.getBirthdayStr(),
-                    data.getGenderStr(),
+                    data.getBirthday(),
+                    data.getGender(),
                     profileImage
                 );
             }
