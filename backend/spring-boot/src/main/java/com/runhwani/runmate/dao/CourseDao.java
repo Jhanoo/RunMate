@@ -21,4 +21,6 @@ public interface CourseDao {
     // 최근 코스 조회
     List<UUID> findRecentCourseIds(@Param("userId") UUID userId);
     List<CourseResponse> findCoursesByIds(@Param("courseIds") List<UUID> courseIds);
+    // 내가 등록한 코스 조회
+    List<CourseResponse> findCoursesCreatedByUser(@Param("userId") UUID userId);
 }

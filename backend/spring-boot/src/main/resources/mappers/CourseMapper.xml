@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.runhwani.runmate.dao.CourseDao">
-<!-- 1. 코스 생성 논리-->
+<!-- 1. 코스 생성-->
     <insert id="insertCourse" parameterType="com.runhwani.runmate.model.Course">
         INSERT INTO courses (
             course_id,
@@ -41,7 +41,7 @@
         WHERE course_id = #{courseId}
     </select>
 
-<!--    2. 코스 삭제 논리 -->
+<!--    2. 코스 삭제-->
     <delete id="deleteCourse" parameterType="java.util.UUID">
         DELETE FROM courses
         WHERE course_id = #{courseId}
@@ -59,7 +59,7 @@
         <result property="creator.profileImage"  column="profile_image"/>
         <result property="likeCount"        column="like_count"/>
     </resultMap>
-<!--    3. 코스 검색 논리 -->
+<!--    3. 코스 검색-->
     <select id="searchCourses" parameterType="map" resultMap="CourseResultMap">
         SELECT
             c.course_id,
@@ -87,7 +87,7 @@
             )
     </select>
 
-<!--    4. 최근 코스 조회 논리-->
+<!--    4. 최근 코스 조회-->
     <select id="findRecentCourseIds" resultType="java.util.UUID">
         SELECT DISTINCT course_id
         FROM histories
@@ -113,6 +113,23 @@
         <foreach item="id" collection="courseIds" open="(" separator="," close=")">
             #{id}
         </foreach>
+    </select>
+
+<!--    5. 내가 만든 코스 조회-->
+    <select id="findCoursesCreatedByUser" resultType="com.runhwani.runmate.dto.response.course.CourseResponse">
+        SELECT
+            c.course_id AS courseId,
+            c.course_name AS courseName,
+            c.is_shared AS isShared,
+            c.distance AS distance,
+            c.avg_elevation AS avgElevation,
+            c.start_location AS startLocation,
+            u.nickname AS creatorNickname,
+            u.profile_image AS creatorProfileImage,
+            (SELECT COUNT(*) FROM course_likes cl WHERE cl.course_id = c.course_id) AS likeCount
+        FROM courses c
+                 JOIN users u ON c.created_by = u.user_id
+        WHERE c.created_by = #{userId}
     </select>
     
 </mapper>

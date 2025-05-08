@@ -100,4 +100,13 @@ public class CourseController implements CourseControllerDocs {
         return ResponseEntity.ok(CommonResponse.ok(responseList));
     }
 
+    // 5. 내가 만든 코스 조회
+    @Override
+    public ResponseEntity<CommonResponse<List<CourseResponse>>> getMyCourses(
+        @AuthenticationPrincipal UserDetails principal) {
+    UUID userId = UUID.fromString(principal.getUsername());
+    List<CourseResponse> responseList = courseService.getCoursesCreatedBy(userId);
+    return ResponseEntity.ok(CommonResponse.ok(responseList));
+    }
+
 }
