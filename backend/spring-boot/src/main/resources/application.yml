@@ -90,8 +90,8 @@ server:
   port: 8080
 
 file:
-  upload-dir: uploads
+  upload-dir: ./uploads
 
 app:
-  base-url: ${APP_BASE_URL:http://localhost:8080}
+  base-url: ${APP_BASE_URL:https://k12d107.p.ssafy.io}
 

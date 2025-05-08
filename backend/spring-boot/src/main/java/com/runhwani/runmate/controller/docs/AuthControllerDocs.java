@@ -99,21 +99,13 @@ public interface AuthControllerDocs {
                             schema = @Schema(
                                     type = "object",
                                     properties = {
-                                            @StringToClassMapItem(key = "email", value = String.class),
-                                            @StringToClassMapItem(key = "password", value = String.class),
-                                            @StringToClassMapItem(key = "nickname", value = String.class),
-                                            @StringToClassMapItem(key = "birthday", value = String.class),
-                                            @StringToClassMapItem(key = "gender", value = String.class),
+                                            @StringToClassMapItem(key = "data", value = SignupRequest.class),
                                             @StringToClassMapItem(key = "profileImage", value = File.class)
                                     },
-                                    requiredProperties = {"email", "password", "nickname"}
+                                    requiredProperties = {"data"}
                             ),
                             encoding = {
-                                    @Encoding(name = "email", contentType = "text/plain"),
-                                    @Encoding(name = "password", contentType = "text/plain"),
-                                    @Encoding(name = "nickname", contentType = "text/plain"),
-                                    @Encoding(name = "birthday", contentType = "text/plain"),
-                                    @Encoding(name = "gender", contentType = "text/plain"),
+                                    @Encoding(name = "data", contentType = MediaType.APPLICATION_JSON_VALUE),
                                     @Encoding(name = "profileImage", contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE)
                             }
                     )
@@ -125,7 +117,8 @@ public interface AuthControllerDocs {
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     schema = @Schema(implementation = CommonResponse.class),
-                                    examples = @ExampleObject(
+                                    examples = {
+                                        @ExampleObject(
                                             name = "회원가입 성공 응답 예시",
                                             value = """
                                             {
@@ -140,7 +133,8 @@ public interface AuthControllerDocs {
                                                 }
                                             }
                                             """
-                                    )
+                                        )
+                                    }
                             )
                     ),
                     @ApiResponse(
@@ -157,15 +151,6 @@ public interface AuthControllerDocs {
                                                     "data": null
                                                 }
                                                 """
-                                        ),
-                                        @ExampleObject(
-                                                name = "닉네임 중복",
-                                                value = """
-                                                {
-                                                    "message": "이미 사용 중인 닉네임입니다.",
-                                                    "data": null
-                                                }
-                                                """
                                         )
                                     }
                             )
@@ -174,63 +159,7 @@ public interface AuthControllerDocs {
     )
     @PostMapping(value = "/api/auth/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ResponseEntity<CommonResponse<SignupResponse>> signup(
-            @Parameter(
-                    in = ParameterIn.DEFAULT,
-                    name = "email",
-                    description = "이메일",
-                    required = true,
-                    schema = @Schema(type = "user@example.com", example = "user@example.com", defaultValue = "user@example.com"),
-                    content = @Content(mediaType = "text/plain")
-            )
-            @RequestPart("email") String email,
-            
-            @Parameter(
-                    in = ParameterIn.DEFAULT,
-                    name = "password",
-                    description = "비밀번호",
-                    required = true,
-                    schema = @Schema(type = "string", example = "Password123!", defaultValue = "Password123!"),
-                    content = @Content(mediaType = "text/plain")
-            )
-            @RequestPart("password") String password,
-            
-            @Parameter(
-                    in = ParameterIn.DEFAULT,
-                    name = "nickname",
-                    description = "닉네임",
-                    required = true,
-                    schema = @Schema(type = "string", example = "러너1", defaultValue = "러너1"),
-                    content = @Content(mediaType = "text/plain")
-            )
-            @RequestPart("nickname") String nickname,
-            
-            @Parameter(
-                    in = ParameterIn.DEFAULT,
-                    name = "birthday",
-                    description = "생일 (YYYY-MM-DD 형식)",
-                    required = false,
-                    schema = @Schema(type = "string", example = "1990-01-01", defaultValue = "1990-01-01"),
-                    content = @Content(mediaType = "text/plain")
-            )
-            @RequestPart(value = "birthday", required = false) String birthday,
-            
-            @Parameter(
-                    in = ParameterIn.DEFAULT,
-                    name = "gender",
-                    description = "성별 (MALE, FEMALE)",
-                    required = false,
-                    schema = @Schema(type = "string", example = "MALE", defaultValue = "MALE"),
-                    content = @Content(mediaType = "text/plain")
-            )
-            @RequestPart(value = "gender", required = false) String gender,
-            
-            @Parameter(
-                    in = ParameterIn.DEFAULT,
-                    name = "profileImage",
-                    description = "프로필 이미지 파일 (JPG, PNG)",
-                    required = false,
-                    content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-            )
+            @RequestPart("data") SignupRequest data,
             @RequestPart(value = "profileImage", required = false) MultipartFile profileImage
     );
 

@@ -44,6 +44,12 @@ public class FileStorageServiceImpl implements FileStorageService {
         Path targetLocation = uploadPath.resolve(fileName);
         Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
+        // 디버깅 로그 추가
+        System.out.println("Upload path: " + uploadPath.toString());
+        System.out.println("File name: " + fileName);
+        System.out.println("Target location: " + targetLocation.toString());
+        System.out.println("File URL: " + baseUrl + "/uploads/" + fileName);
+
         // 파일 접근 URL 생성 (절대 경로로 반환)
         return baseUrl + "/uploads/" + fileName;
     }
