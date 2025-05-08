@@ -91,8 +91,7 @@ public interface CourseControllerDocs {
             summary = "코스 검색",
             description = "키워드로 코스 이름, 작성자 닉네임, 출발지역을 검색합니다.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "검색 결과 반환"),
-                    @ApiResponse(responseCode = "400", description = "잘못된 요청")
+                    @ApiResponse(responseCode = "200", description = "검색 결과 반환")
     })
     @GetMapping(value = "/search")
     CommonResponse<List<CourseResponse>> searchCourses(
