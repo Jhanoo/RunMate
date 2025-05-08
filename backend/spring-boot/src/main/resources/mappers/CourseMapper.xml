@@ -147,4 +147,39 @@
         FROM courses c
                  JOIN users u ON c.created_by = u.user_id
     </select>
+
+<!--    7. 코스 상세 조회-->
+    <!-- 코스 상세 조회 -->
+    <select id="findCourseById" resultType="com.runhwani.runmate.model.Course">
+        SELECT
+            course_id    AS courseId,
+            course_name  AS courseName,
+            is_shared    AS isShared,
+            distance,
+            avg_elevation AS avgElevation,
+            start_location AS startLocation,
+            gpx_file     AS gpxFile,
+            created_by   AS createdBy,
+            created_at   AS createdAt
+        FROM courses
+        WHERE course_id = #{courseId}
+    </select>
+
+    <!-- 좋아요 개수 -->
+    <select id="countLikesByCourseId" resultType="int">
+        SELECT COUNT(*) FROM course_likes
+        WHERE course_id = #{courseId}
+    </select>
+
+    <!-- 전체 사용자 평균 페이스 -->
+    <select id="getAverageUserPace" resultType="double">
+        SELECT AVG(avg_pace) FROM users
+        WHERE avg_pace IS NOT NULL
+    </select>
+
+    <!-- 특정 사용자 페이스 -->
+    <select id="getUserPace" resultType="double">
+        SELECT avg_pace FROM users
+        WHERE user_id = #{userId}
+    </select>
 </mapper>

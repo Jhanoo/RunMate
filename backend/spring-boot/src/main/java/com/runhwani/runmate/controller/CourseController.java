@@ -3,6 +3,8 @@ package com.runhwani.runmate.controller;
 import com.runhwani.runmate.controller.docs.CourseControllerDocs;
 import com.runhwani.runmate.dto.common.CommonResponse;
 import com.runhwani.runmate.dto.request.course.CourseRequest;
+import com.runhwani.runmate.dto.response.course.CourseCreateResponse;
+import com.runhwani.runmate.dto.response.course.CourseDetailResponse;
 import com.runhwani.runmate.dto.response.course.CourseResponse;
 import com.runhwani.runmate.exception.EntityNotFoundException;
 import com.runhwani.runmate.service.CourseService;
@@ -34,7 +36,7 @@ public class CourseController implements CourseControllerDocs {
 
     // 1. 코스 생성
     @Override
-    public ResponseEntity<CommonResponse<UUID>> createCourse(
+    public ResponseEntity<CommonResponse<CourseCreateResponse>> createCourse(
             @AuthenticationPrincipal UserDetails principal,
             @RequestPart("courseData") CourseRequest courseData,
             @RequestPart(value = "gpxFile", required = false) MultipartFile gpxFile
@@ -47,9 +49,12 @@ public class CourseController implements CourseControllerDocs {
 
         try {
             UUID newCourseId = courseService.createCourse(courseData, gpxFile, userId);
+            CourseCreateResponse body = CourseCreateResponse.builder()
+                    .courseId(newCourseId)
+                    .build();
             return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .body(CommonResponse.ok(newCourseId));
+                    .body(CommonResponse.ok(body));
         } catch (IOException e) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
@@ -114,6 +119,17 @@ public class CourseController implements CourseControllerDocs {
     public ResponseEntity<CommonResponse<List<CourseResponse>>> getAllCourses() {
         List<CourseResponse> responseList = courseService.getAllCourses();
         return ResponseEntity.ok(CommonResponse.ok(responseList));
+    }
+
+    // 7. 코스 상세 조회
+    @Override
+    public ResponseEntity<CommonResponse<CourseDetailResponse>> getCourseDetail(
+            @AuthenticationPrincipal UserDetails principal,
+            @PathVariable("id") UUID courseId
+    ) {
+        UUID userId = UUID.fromString(principal.getUsername());
+        CourseDetailResponse detail = courseService.getCourseDetail(courseId, userId);
+        return ResponseEntity.ok(CommonResponse.ok(detail));
     }
 
 }

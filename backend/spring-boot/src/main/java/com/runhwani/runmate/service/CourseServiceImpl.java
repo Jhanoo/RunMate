@@ -2,6 +2,7 @@ package com.runhwani.runmate.service;
 
 import com.runhwani.runmate.dao.CourseDao;
 import com.runhwani.runmate.dto.request.course.CourseRequest;
+import com.runhwani.runmate.dto.response.course.CourseDetailResponse;
 import com.runhwani.runmate.dto.response.course.CourseResponse;
 import com.runhwani.runmate.exception.EntityNotFoundException;
 import com.runhwani.runmate.model.Course;
@@ -106,5 +107,45 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public List<CourseResponse> getAllCourses() {
         return courseDao.findAllCourses();
+    }
+
+    // 7. 코스 상세 조회
+    @Override
+    public CourseDetailResponse getCourseDetail(UUID courseId, UUID userId) {
+        // 1. 코스 정보 + GPX + 좋아요 수 조회
+        Course course = courseDao.findCourseById(courseId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 코스가 존재하지 않습니다."));
+
+        int likeCount = courseDao.countLikesByCourseId(courseId);
+
+        // 2. 평균 페이스 조회
+        Double avgPace = courseDao.getAverageUserPace(); // 전체 사용자
+        Double userPace = courseDao.getUserPace(userId); // 로그인 사용자
+
+        Integer avgEstimatedTime = (avgPace != null && course.getDistance() != null)
+                ? (int) (avgPace * course.getDistance() * 60)
+                : null;
+        Integer userEstimatedTime = (userPace != null && course.getDistance() != null)
+                ? (int) (userPace * course.getDistance() * 60)
+                : null;
+
+        double safeDistance = (course.getDistance() != null) ? course.getDistance() : 0.0;
+        double safeElevation = (course.getAvgElevation() != null) ? course.getAvgElevation() : 0.0;
+
+        boolean isShared = Boolean.TRUE.equals(course.getIsShared());
+
+        // 3. 응답 객체 생성
+        return CourseDetailResponse.builder()
+                .id(course.getCourseId())
+                .name(course.getCourseName())
+                .isShared(isShared)
+                .distance(safeDistance)
+                .avgElevation(safeElevation)
+                .startLocation(course.getStartLocation())
+                .gpxFile(course.getGpxFile())
+                .avgEstimatedTime(avgEstimatedTime)
+                .userEstimatedTime(userEstimatedTime)
+                .likes(likeCount)
+                .build();
     }
 }
