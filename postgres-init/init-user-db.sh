@@ -25,10 +25,10 @@ SET TIME ZONE				'Asia/Seoul';
 -- 사용자 테이블
 CREATE TABLE	users (
 	user_id			UUID				PRIMARY KEY DEFAULT gen_random_uuid(),
-	email			VARCHAR(255)		NOT NULL,
-	password		VARCHAR(30)			NOT NULL,
-	nickname		VARCHAR(30)			NOT NULL,
-	profile_image	VARCHAR(500),
+	email			VARCHAR(255)		UNIQUE NOT NULL,
+	password		VARCHAR(100)		NOT NULL,
+	nickname		VARCHAR(8)			UNIQUE NOT NULL,
+	profile_image	VARCHAR(50),
 	avg_pace		DOUBLE PRECISION,
 	created_at		TIMESTAMPTZ			NOT NULL DEFAULT now()
 );
@@ -36,12 +36,12 @@ CREATE TABLE	users (
 -- 코스 테이블
 CREATE TABLE	courses (
 	course_id		UUID				PRIMARY KEY DEFAULT gen_random_uuid(),
-	course_name		VARCHAR(200)		NOT NULL,
+	course_name		VARCHAR(15)			NOT NULL,
 	is_shared		BOOLEAN				NOT NULL DEFAULT FALSE,
 	distance		DOUBLE PRECISION	NOT NULL,
 	avg_elevation	DOUBLE PRECISION	NOT NULL,
-	start_location	VARCHAR(300),
-	gpx_file		VARCHAR(500),
+	start_location	VARCHAR(30),
+	gpx_file		VARCHAR(50),
 	created_by		UUID				NOT NULL REFERENCES users(user_id),
 	created_at		TIMESTAMPTZ			NOT NULL DEFAULT now()
 );
@@ -57,13 +57,15 @@ CREATE TABLE	course_likes (
 -- 그룹 테이블
 CREATE TABLE	groups (
 	group_id		UUID				PRIMARY KEY DEFAULT gen_random_uuid(),
-	group_name		VARCHAR(200)		NOT NULL,
+	group_name		VARCHAR(20)			NOT NULL,
+	leader_id		UUID				NOT NULL REFERENCES users(user_id),
 	course_id		UUID				REFERENCES courses(course_id),
 	start_time		TIMESTAMPTZ			NOT NULL,
-	start_location	VARCHAR(300),
+	start_location	VARCHAR(30),
 	latitude		DOUBLE PRECISION,
 	longitude		DOUBLE PRECISION,
-	invite_code		VARCHAR(50)			NOT NULL
+	invite_code		VARCHAR(10)			NOT NULL,
+	is_finished		BOOLEAN				NOT NULL DEFAULT FALSE
 );
 
 -- 그룹 멤버 테이블
@@ -71,7 +73,8 @@ CREATE TABLE	group_members (
 	member_id		UUID				PRIMARY KEY DEFAULT gen_random_uuid(),
 	group_id		UUID				NOT NULL REFERENCES groups(group_id),
 	user_id			UUID				NOT NULL REFERENCES users(user_id),
-	is_leader		BOOLEAN				NOT NULL DEFAULT FALSE
+	joined_at		TIMESTAMPTZ			NOT NULL DEFAULT now(),
+	is_leaved		BOOLEAN				NOT NULL DEFAULT FALSE
 );
 
 -- 달리기 기록 테이블
@@ -80,8 +83,8 @@ CREATE TABLE	histories (
 	user_id			UUID				NOT NULL REFERENCES users(user_id),
 	course_id		UUID				REFERENCES courses(course_id),
 	group_id		UUID				REFERENCES groups(group_id),
-	gpx_file		VARCHAR(500)		NOT NULL,
-	start_location	VARCHAR(300),
+	gpx_file		VARCHAR(50)			NOT NULL,
+	start_location	VARCHAR(30),
 	start_time		TIMESTAMPTZ			NOT NULL,
 	end_time		TIMESTAMPTZ			NOT NULL,
 	distance		DOUBLE PRECISION	NOT NULL,
@@ -96,9 +99,9 @@ CREATE TABLE	histories (
 -- 마라톤 테이블
 CREATE TABLE	marathons (
 	marathon_id		UUID				PRIMARY KEY DEFAULT gen_random_uuid(),
-	name			VARCHAR(255)		NOT NULL,
+	name			VARCHAR(30)			NOT NULL,
 	date			TIMESTAMPTZ			NOT NULL,
-	location		VARCHAR(300)		NOT NULL,
+	location		VARCHAR(30)			NOT NULL,
 	created_at		TIMESTAMPTZ			NOT NULL DEFAULT now()
 );
 
