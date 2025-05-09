@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar_group_create"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@drawable/ic_back"
+        android:fontFamily="@font/pretendard_medium"
+        app:title="그룹 생성하기"
+        app:titleCentered="true"
+        app:titleTextAppearance="@style/ToolbarTitleFont"
+        app:titleTextColor="@android:color/black" />
+
+    <!-- 그룹명 -->
+    <TextView
+        android:id="@+id/tv_group_name_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:text="그룹명"
+        android:fontFamily="@font/pretendard_medium"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_group_create" />
+
+    <EditText
+        android:id="@+id/et_group_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:background="@android:color/darker_gray"
+        android:backgroundTint="#F5F5F5"
+        android:hint="런메이트"
+        android:inputType="text"
+        android:padding="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_group_name_label" />
+
+    <TextView
+        android:id="@+id/tv_course_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:text="코스"
+        android:textColor="@android:color/black"
+        android:fontFamily="@font/pretendard_medium"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/et_group_name" />
+
+    <TextView
+        android:id="@+id/tv_course_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="원하는 코스가 있을 경우, 선택해주세요"
+        android:textColor="#757575"
+        android:textSize="12sp"
+        android:fontFamily="@font/pretendard_regular"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_course_label"
+        app:layout_constraintStart_toEndOf="@+id/tv_course_label"
+        app:layout_constraintTop_toTopOf="@+id/tv_course_label" />
+
+    <EditText
+        android:id="@+id/et_course"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:background="@android:color/darker_gray"
+        android:backgroundTint="#F5F5F5"
+        android:hint="달리러닝 코스"
+        android:inputType="text"
+        android:padding="12dp"
+        android:cursorVisible="false"
+        android:focusable="false"
+        android:clickable="true"
+        android:focusableInTouchMode="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_course_label" />
+
+    <!-- 일시 -->
+    <TextView
+        android:id="@+id/tv_date_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:text="일시"
+        android:textColor="@android:color/black"
+        android:fontFamily="@font/pretendard_medium"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/et_course" />
+
+    <TextView
+        android:id="@+id/tv_date_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="코스를 선택하지 않은 경우, 입력해주세요"
+        android:textColor="#757575"
+        android:textSize="12sp"
+        android:fontFamily="@font/pretendard_regular"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_date_label"
+        app:layout_constraintStart_toEndOf="@+id/tv_date_label"
+        app:layout_constraintTop_toTopOf="@+id/tv_date_label" />
+
+    <EditText
+        android:id="@+id/et_date"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:background="@color/color_edit_text"
+        android:backgroundTint="#F5F5F5"
+        android:hint="2025.05.01 09:00"
+        android:inputType="datetime"
+        android:padding="12dp"
+        android:cursorVisible="false"
+        android:focusable="false"
+        android:clickable="true"
+        android:fontFamily="@font/pretendard_regular"
+        android:focusableInTouchMode="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_date_label" />
+
+    <!-- 시작장소 -->
+    <TextView
+        android:id="@+id/tv_location_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:text="시작장소"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:fontFamily="@font/pretendard_medium"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/et_date" />
+
+    <TextView
+        android:id="@+id/tv_location_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="코스를 선택하지 않은 경우, 입력해주세요"
+        android:textColor="@color/description_text"
+        android:textSize="12sp"
+        android:fontFamily="@font/pretendard_regular"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_location_label"
+        app:layout_constraintStart_toEndOf="@+id/tv_location_label"
+        app:layout_constraintTop_toTopOf="@+id/tv_location_label" />
+
+    <EditText
+        android:id="@+id/et_location"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:background="@color/color_edit_text"
+        android:backgroundTint="#F5F5F5"
+        android:hint="경상북도 구미시 진평동 13-2"
+        android:inputType="none"
+        android:padding="12dp"
+        android:focusable="false"
+        android:clickable="true"
+        android:focusableInTouchMode="false"
+        android:cursorVisible="false"
+        android:fontFamily="@font/pretendard_regular"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_location_label" />
+
+    <!-- 생성하기 버튼 -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_create_group"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="24dp"
+        android:backgroundTint="@color/primary"
+        android:padding="12dp"
+        android:text="생성하기"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        app:cornerRadius="8dp"
+        android:fontFamily="@font/pretendard_bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

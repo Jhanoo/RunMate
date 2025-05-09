@@ -1,6 +1,8 @@
 package com.D107.runmate.data.di
 
 import com.D107.runmate.data.local.UserDataStoreSource
+import com.D107.runmate.data.remote.api.KakaoLocalService
+import com.D107.runmate.data.remote.interceptor.KakaoRequestInterceptor
 import com.D107.runmate.data.remote.interceptor.RequestInterceptor
 import com.D107.runmate.data.remote.logger.RunMateApiLogger
 import com.D107.runmate.domain.BuildConfig
@@ -21,6 +23,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
     private const val SERVER_URL = BuildConfig.BASE_URL // 찐서버 url
+    private const val KAKAO_API_URL = BuildConfig.KAKAO_API_URL // 카카오 API url
 //    private const val SERVER_URL = "서버url"
 
     @Provides
@@ -75,8 +78,46 @@ object NetworkModule {
             .build()
     }
 
+    @KakaoApiOkHttpClient
+    @Singleton
+    @Provides
+    fun provideExternalApiOkHttpClient(
+         kakaoRequestInterceptor: KakaoRequestInterceptor
+    ): OkHttpClient {
+        return OkHttpClient.Builder().apply {
+            connectTimeout(30, TimeUnit.SECONDS)
+            readTimeout(30, TimeUnit.SECONDS)
+            writeTimeout(30, TimeUnit.SECONDS)
+            addInterceptor(kakaoRequestInterceptor)
+            addInterceptor(
+                HttpLoggingInterceptor(RunMateApiLogger())
+                    .apply { setLevel(HttpLoggingInterceptor.Level.BODY) }
+            )
+        }.build()
+    }
+
+    @KakaoApiRetrofit
+    @Provides
+    @Singleton
+    fun provideExternalApiRetrofit(
+        @KakaoApiOkHttpClient okHttpClient: OkHttpClient,
+        moshi: Moshi
+    ): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(KAKAO_API_URL)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .client(okHttpClient)
+            .build()
+    }
+
     @Provides
     fun provideRequestInterceptor(userDataStoreSource: UserDataStoreSource): RequestInterceptor {
         return RequestInterceptor(userDataStoreSource)
     }
+
+    @Provides
+    fun provideKakaoRequestInterceptor(): KakaoRequestInterceptor {
+        return KakaoRequestInterceptor()
+    }
+
 }

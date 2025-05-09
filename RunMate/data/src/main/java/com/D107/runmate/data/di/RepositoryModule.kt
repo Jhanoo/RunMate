@@ -1,5 +1,9 @@
 package com.D107.runmate.data.di
 
+import com.D107.runmate.data.repository.DataStoreRepositoryImpl
+import com.D107.runmate.data.repository.KakaoApiRepositoryImpl
+import com.D107.runmate.domain.repository.DataStoreRepository
+import com.D107.runmate.domain.repository.KakaoApiRepository
 import com.D107.runmate.data.repository.RunningTrackingRepositoryImpl
 import com.D107.runmate.domain.repository.running.RunningTrackingRepository
 import com.D107.runmate.data.repository.DataStoreRepositoryImpl
@@ -29,6 +33,12 @@ internal abstract class RepositoryModule {
 
     @Binds
     @Singleton
+    abstract fun bindKakaoApiRepository(
+    kakaoApiRepositoryImpl: KakaoApiRepositoryImpl): KakaoApiRepository
+    
+    @Binds
+    @Singleton
     abstract fun bindSmartInsoleRepository(impl: SmartInsoleRepositoryImpl): SmartInsoleRepository
+>>>>>>> RunMate/data/src/main/java/com/D107/runmate/data/di/RepositoryModule.kt
 
 }

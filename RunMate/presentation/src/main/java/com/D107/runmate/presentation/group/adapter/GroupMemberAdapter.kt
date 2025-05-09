@@ -1,0 +1,68 @@
+package com.D107.runmate.presentation.group.adapter
+
+
+import android.os.Parcel
+import android.os.Parcelable
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
+import com.D107.runmate.domain.model.common.User
+import com.D107.runmate.presentation.R
+import com.D107.runmate.presentation.databinding.ItemGroupMemberBinding
+import com.bumptech.glide.Glide
+
+
+class GroupMemberAdapter() :
+    ListAdapter<User, GroupMemberAdapter.ViewHolder>(GroupMemberDiffCallback()){
+
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        return ViewHolder(
+            ItemGroupMemberBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
+        )
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.bind(getItem(position))
+    }
+
+    inner class ViewHolder(
+        private val binding: ItemGroupMemberBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
+
+        fun bind(member: User) {
+            binding.tvMemberName.text = member.nickname
+
+            if (!member.userProfileImg.isNullOrEmpty()) {
+                Glide.with(binding.root.context)
+                    .load(member.userProfileImg)
+                    .placeholder(R.drawable.ic_user_profile)
+                    .into(binding.ivMemberProfile)
+            }else{
+                binding.ivMemberProfile.setImageResource(R.drawable.ic_user_profile)
+            }
+
+//            binding.imgMemberBadge.visibility = if (member.isLeader) View.VISIBLE else View.GONE
+        }
+    }
+
+    class GroupMemberDiffCallback : DiffUtil.ItemCallback<User>() {
+        override fun areItemsTheSame(oldItem: User, newItem: User): Boolean {
+            return oldItem.userId == newItem.userId
+        }
+
+        override fun areContentsTheSame(oldItem: User, newItem: User): Boolean {
+            return oldItem == newItem
+        }
+    }
+
+}
