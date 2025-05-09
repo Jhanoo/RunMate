@@ -15,4 +15,6 @@ public interface HistoryDao {
 
     // course 생성시 사용
     Optional<History> selectHistoryById(@Param("historyId") UUID historyId);
+    // course 생성 후 history에 course_id 추가
+    void updateHistoryCourseId(@Param("historyId") UUID historyId,@Param("courseId") UUID courseId);
 }

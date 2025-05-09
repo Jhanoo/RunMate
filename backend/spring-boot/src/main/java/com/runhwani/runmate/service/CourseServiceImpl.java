@@ -48,9 +48,14 @@ public class CourseServiceImpl implements CourseService {
         course.setGpxFile(gpxFileName);
         log.debug("히스토리에서 가져온 GPX 파일명: {}", gpxFileName);
 
-        // 3. DB에 저장
+        // 3. Course DB에 저장
         courseDao.insertCourse(course);
         log.debug("코스 DB 저장 완료: {}", course.getCourseId());
+
+        // 4. 생성된 코스 ID로 해당 히스토리의 course_id 업데이트
+        historyDao.updateHistoryCourseId(request.getHistoryId(), course.getCourseId());
+        log.debug("히스토리 업데이트 완료: historyId={}, courseId={}",
+                request.getHistoryId(), course.getCourseId());
 
         return course.getCourseId();
     }
