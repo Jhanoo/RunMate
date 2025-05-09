@@ -7,9 +7,9 @@ import retrofit2.http.POST
 
 
 interface GroupService {
-    @POST("/groups/create")
-    suspend fun createGroup(
-        @Body createGroupRequest: CreateGroupRequest
-    ): Response<CreateGroupResponse>
+//    @POST("/groups/create")
+//    suspend fun createGroup(
+//        @Body createGroupRequest: CreateGroupRequest
+//    ): Response<CreateGroupResponse>
 
 }
