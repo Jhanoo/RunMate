@@ -31,4 +31,28 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <EditText
+        android:id="@+id/et_search"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_all_search"
+        android:drawableStart="@drawable/ic_course_search"
+        android:paddingStart="12dp"
+        android:layout_marginHorizontal="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_back" />
+
+<!--    <com.google.android.material.button.MaterialButton-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:backgroundTint="@color/primary"-->
+<!--        android:textColor="@color/white"-->
+<!--        app:cornerRadius="8dp"-->
+<!--        android:text="필터"-->
+<!--        android:gravity="center"-->
+<!--        android:drawableStart="@drawable/ic_course_filter"-->
+<!--        app:layout_constraintEnd_toEndOf="@+id/et_search"-->
+<!--        app:layout_constraintTop_toBottomOf="@+id/et_search" />-->
+
 </androidx.constraintlayout.widget.ConstraintLayout>
