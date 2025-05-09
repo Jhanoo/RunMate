@@ -18,6 +18,7 @@ public class CourseResponse {
     private String startLocation;
     private Creator creator;
     private int likeCount;
+    private boolean liked;
 
     @Getter
     @Setter

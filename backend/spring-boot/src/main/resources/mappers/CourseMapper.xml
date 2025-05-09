@@ -58,33 +58,42 @@
         <result property="creator.nickname"      column="nickname"/>
         <result property="creator.profileImage"  column="profile_image"/>
         <result property="likeCount"        column="like_count"/>
+        <result property="liked"        column="liked"/>
     </resultMap>
 <!--    3. 코스 검색-->
     <select id="searchCourses" parameterType="map" resultMap="CourseResultMap">
         SELECT
-            c.course_id,
-            c.course_name,
-            c.is_shared,
-            c.distance,
-            c.avg_elevation,
-            c.start_location,
-            u.nickname,
-            u.profile_image,
-            COALESCE(l.like_count, 0) AS like_count
-        FROM courses C
+        c.course_id,
+        c.course_name,
+        c.is_shared,
+        c.distance,
+        c.avg_elevation,
+        c.start_location,
+        u.nickname,
+        u.profile_image,
+        COALESCE(l.like_count, 0) AS like_count,
+        EXISTS(
+        SELECT 1
+        FROM course_likes cl2
+        WHERE cl2.course_id = c.course_id
+        AND cl2.user_id = #{userId}
+        ) AS liked
+        FROM courses c
         JOIN users u
         ON c.created_by = u.user_id
         LEFT JOIN (
-            SELECT course_id, COUNT(*) AS like_count
-            FROM course_likes
-            GROUP BY course_id
-        ) l ON c.course_id = l.course_id
+        SELECT course_id, COUNT(*) AS like_count
+        FROM course_likes
+        GROUP BY course_id
+        ) l
+        ON c.course_id = l.course_id
         WHERE c.is_shared = TRUE
-        AND(
-            c.course_name ILIKE #{name}
-            OR u.nickname ILIKE #{nickname}
-            OR c.start_location ILIKE #{location}
-            )
+        AND (
+        c.course_name ILIKE #{name}
+        OR u.nickname    ILIKE #{nickname}
+        OR c.start_location ILIKE #{location}
+        )
+        ORDER BY c.created_at DESC
     </select>
 
 <!--    4. 최근 코스 조회-->
@@ -98,54 +107,81 @@
 
     <select id="findCoursesByIds" resultType="com.runhwani.runmate.dto.response.course.CourseResponse">
         SELECT
-        c.course_id AS courseId,
-        c.course_name AS courseName,
-        c.is_shared AS isShared,
-        c.distance AS distance,
-        c.avg_elevation AS avgElevation,
-        c.start_location AS startLocation,
-        u.nickname AS creatorNickname,
-        u.profile_image AS creatorProfileImage,
-        (SELECT COUNT(*) FROM course_likes cl WHERE cl.course_id = c.course_id) AS likeCount
+        c.course_id        AS courseId,
+        c.course_name      AS courseName,
+        c.is_shared        AS isShared,
+        c.distance         AS distance,
+        c.avg_elevation    AS avgElevation,
+        c.start_location   AS startLocation,
+        u.nickname         AS creator_nickname,
+        u.profile_image    AS creator_profile_image,
+        (SELECT COUNT(*)
+        FROM course_likes cl
+        WHERE cl.course_id = c.course_id)         AS likeCount,
+        EXISTS(
+        SELECT 1
+        FROM course_likes cl2
+        WHERE cl2.course_id = c.course_id
+        AND cl2.user_id = #{userId}
+        )                                           AS liked
         FROM courses c
         JOIN users u ON c.created_by = u.user_id
         WHERE c.course_id IN
         <foreach item="id" collection="courseIds" open="(" separator="," close=")">
             #{id}
         </foreach>
+        ORDER BY c.created_at DESC
     </select>
 
 <!--    5. 내가 만든 코스 조회-->
     <select id="findCoursesCreatedByUser" resultType="com.runhwani.runmate.dto.response.course.CourseResponse">
         SELECT
-            c.course_id AS courseId,
-            c.course_name AS courseName,
-            c.is_shared AS isShared,
-            c.distance AS distance,
-            c.avg_elevation AS avgElevation,
-            c.start_location AS startLocation,
-            u.nickname AS creatorNickname,
-            u.profile_image AS creatorProfileImage,
-            (SELECT COUNT(*) FROM course_likes cl WHERE cl.course_id = c.course_id) AS likeCount
+            c.course_id        AS courseId,
+            c.course_name      AS courseName,
+            c.is_shared        AS isShared,
+            c.distance         AS distance,
+            c.avg_elevation    AS avgElevation,
+            c.start_location   AS startLocation,
+            u.nickname         AS creator_nickname,
+            u.profile_image    AS creator_profile_image,
+            (SELECT COUNT(*)
+             FROM course_likes cl
+             WHERE cl.course_id = c.course_id)       AS likeCount,
+            EXISTS(
+                SELECT 1
+                FROM course_likes cl2
+                WHERE cl2.course_id = c.course_id
+                  AND cl2.user_id = #{userId}
+            )                                         AS liked
         FROM courses c
                  JOIN users u ON c.created_by = u.user_id
         WHERE c.created_by = #{userId}
+        ORDER BY c.created_at DESC
     </select>
 
 <!--    6. 전체 코스 조회-->
     <select id="findAllCourses" resultType="com.runhwani.runmate.dto.response.course.CourseResponse">
         SELECT
-            c.course_id AS courseId,
-            c.course_name AS courseName,
-            c.is_shared AS isShared,
-            c.distance AS distance,
-            c.avg_elevation AS avgElevation,
-            c.start_location AS startLocation,
-            u.nickname AS creatorNickname,
-            u.profile_image AS creatorProfileImage,
-            (SELECT COUNT(*) FROM course_likes cl WHERE cl.course_id = c.course_id) AS likeCount
+            c.course_id        AS courseId,
+            c.course_name      AS courseName,
+            c.is_shared        AS isShared,
+            c.distance         AS distance,
+            c.avg_elevation    AS avgElevation,
+            c.start_location   AS startLocation,
+            u.nickname         AS creator_nickname,
+            u.profile_image    AS creator_profile_image,
+            (SELECT COUNT(*)
+             FROM course_likes cl
+             WHERE cl.course_id = c.course_id)       AS likeCount,
+            EXISTS(
+                SELECT 1
+                FROM course_likes cl2
+                WHERE cl2.course_id = c.course_id
+                  AND cl2.user_id = #{userId}
+            )                                         AS liked
         FROM courses c
-                 JOIN users u ON c.created_by = u.user_id
+        JOIN users u ON c.created_by = u.user_id
+        ORDER BY c.created_at DESC
     </select>
 
 <!--    7. 코스 상세 조회-->

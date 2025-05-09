@@ -1,18 +1,19 @@
 package com.runhwani.runmate.service;
 
 import com.runhwani.runmate.dao.CourseDao;
+import com.runhwani.runmate.dao.HistoryDao;
 import com.runhwani.runmate.dto.request.course.CourseRequest;
 import com.runhwani.runmate.dto.response.course.CourseDetailResponse;
 import com.runhwani.runmate.dto.response.course.CourseLikeResponse;
 import com.runhwani.runmate.dto.response.course.CourseResponse;
 import com.runhwani.runmate.exception.EntityNotFoundException;
 import com.runhwani.runmate.model.Course;
+import com.runhwani.runmate.model.History;
 import com.runhwani.runmate.utils.GpxStorageUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
@@ -23,9 +24,11 @@ import java.util.*;
 @Slf4j
 public class CourseServiceImpl implements CourseService {
     private final CourseDao courseDao;
+    private final HistoryDao historyDao;
 
     @Override
-    public UUID createCourse(CourseRequest request, MultipartFile gpxFile, UUID userId) throws IOException {
+    @Transactional
+    public UUID createCourse(CourseRequest request, UUID userId) throws IOException {
         log.debug("코스 생성 요청: {}", request);
 
         // 1. Course 객체 생성
@@ -38,14 +41,21 @@ public class CourseServiceImpl implements CourseService {
         course.setStartLocation(request.getStartLocation());
         course.setCreatedBy(userId);
 
-        // 2. GPX 파일 처리: 유틸 호출
-        String gpxFileName = GpxStorageUtil.saveGpxFile(gpxFile);
+        // 2. GPX 파일 처리: 유틸 호출 -> history 조회 후 가져오기
+        History history = historyDao.selectHistoryById(request.getHistoryId())
+                .orElseThrow(() -> new EntityNotFoundException("헤당 히스토리를 찾을 수 없습니다."));
+        String gpxFileName = history.getGpxFile();
         course.setGpxFile(gpxFileName);
-        log.debug("저장된 GPX 파일명: {}", gpxFileName);
+        log.debug("히스토리에서 가져온 GPX 파일명: {}", gpxFileName);
 
-        // 3. DB에 저장
+        // 3. Course DB에 저장
         courseDao.insertCourse(course);
         log.debug("코스 DB 저장 완료: {}", course.getCourseId());
+
+        // 4. 생성된 코스 ID로 해당 히스토리의 course_id 업데이트
+        historyDao.updateHistoryCourseId(request.getHistoryId(), course.getCourseId());
+        log.debug("히스토리 업데이트 완료: historyId={}, courseId={}",
+                request.getHistoryId(), course.getCourseId());
 
         return course.getCourseId();
     }
@@ -73,7 +83,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public List<CourseResponse> searchCourses(String keyword) {
+    public List<CourseResponse> searchCourses(UUID userId, String keyword) {
         // 빈 검색어 방지 로직
         if (keyword == null || keyword.trim().isEmpty()) {
             throw new IllegalArgumentException("검색어가 공백입니다.");
@@ -84,6 +94,7 @@ public class CourseServiceImpl implements CourseService {
         params.put("name", pattern);
         params.put("nickname", pattern);
         params.put("location", pattern);
+        params.put("userId", userId);
 
         return courseDao.searchCourses(params);
     }
@@ -96,7 +107,7 @@ public class CourseServiceImpl implements CourseService {
         if (recentCourseIds.isEmpty()) return Collections.emptyList();
 
         // 코스 상세 정보 조회
-        return courseDao.findCoursesByIds(recentCourseIds);
+        return courseDao.findCoursesByIds(recentCourseIds, userId);
     }
 
     // 5. 내가 등록한 코스 조회
@@ -107,18 +118,19 @@ public class CourseServiceImpl implements CourseService {
 
     // 6. 코스 전체 조회
     @Override
-    public List<CourseResponse> getAllCourses() {
-        return courseDao.findAllCourses();
+    public List<CourseResponse> getAllCourses(UUID userId) {
+        return courseDao.findAllCourses(userId);
     }
 
     // 7. 코스 상세 조회
     @Override
-    public CourseDetailResponse getCourseDetail(UUID courseId, UUID userId) {
+    public CourseDetailResponse getCourseDetail(UUID userId, UUID courseId) {
         // 1. 코스 정보 + GPX + 좋아요 수 조회
         Course course = courseDao.findCourseById(courseId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 코스가 존재하지 않습니다."));
 
         int likeCount = courseDao.countLikesByCourseId(courseId);
+        boolean liked = courseDao.existsCourseLike(userId, courseId);
 
         // 2. 평균 페이스 조회
         Double avgPace = courseDao.getAverageUserPace(); // 전체 사용자
@@ -148,6 +160,7 @@ public class CourseServiceImpl implements CourseService {
                 .avgEstimatedTime(avgEstimatedTime)
                 .userEstimatedTime(userEstimatedTime)
                 .likes(likeCount)
+                .liked(liked)
                 .build();
     }
 

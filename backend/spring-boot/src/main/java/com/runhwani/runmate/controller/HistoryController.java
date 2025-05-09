@@ -21,10 +21,10 @@ public class HistoryController implements HistoryControllerDocs {
     private final HistoryService historyService;
 
     @Override
-    @GetMapping
+    @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<CommonResponse<HistoryListResponse>> getHistoryList(
-            @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "10") int size) {
+            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         
         // 서비스 호출
         HistoryListResponse response = historyService.getHistoryList(page, size);
@@ -33,9 +33,9 @@ public class HistoryController implements HistoryControllerDocs {
     }
     
     @Override
-    @GetMapping("/{historyId}")
+    @RequestMapping(value = "/{historyId}", method = RequestMethod.GET)
     public ResponseEntity<CommonResponse<HistoryDetailResponse>> getHistoryDetail(
-            @PathVariable UUID historyId) {
+            @PathVariable(value = "historyId") UUID historyId) {
         
         // 서비스 호출
         HistoryDetailResponse response = historyService.getHistoryDetail(historyId);

@@ -1,8 +1,11 @@
 // src/main/java/com/runhwani/runmate/dto/request/course/CourseRequest.java
 package com.runhwani.runmate.dto.request.course;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import jakarta.validation.constraints.*;
+
+import java.util.UUID;
 
 /**
  * 코스 생성 요청 DTO
@@ -32,4 +35,8 @@ public class CourseRequest {
     /** 시작 위치 (필수) */
     @NotBlank(message = "startLocation은 필수입니다")
     private String startLocation;
+
+    /** history ID (필수) */
+    @NotNull(message = "historyId가 필요합니다")
+    private UUID historyId; // 수정: historyId 필드 추가
 }

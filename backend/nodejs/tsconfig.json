@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "ES2020", // 컴파일된 JS 버전
+    "module": "commonjs", // 모듈 시스템
+    "outDir": "./dist", // 컴파일 결과
+    "rootDir": "./src", // 소스 루트
+    "strict": true, // 엄격 모드
+    "esModuleInterop": true, // ES 모듈 호환
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}

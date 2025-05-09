@@ -32,6 +32,7 @@ public class RunServiceImpl implements RunService {
         History history = History.builder()
                 .historyId(UUID.randomUUID())
                 .userId(userId)
+                .courseId(req.getCourseId())
                 .gpxFile(gpxFileName)
                 .startLocation(req.getStartLocation())
                 .startTime(req.getStartTime())
@@ -44,6 +45,7 @@ public class RunServiceImpl implements RunService {
                 .calories(req.getCalories())
                 .createdAt(OffsetDateTime.now(ZoneId.of("Asia/Seoul")))
                 .build();
+
         historyDao.insert(history);
     }
 }

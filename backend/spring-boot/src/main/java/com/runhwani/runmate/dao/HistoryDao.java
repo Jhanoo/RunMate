@@ -7,6 +7,10 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.Optional;
+import java.util.UUID;
 
 @Mapper
 public interface HistoryDao {
@@ -24,6 +28,11 @@ public interface HistoryDao {
      * 사용자 ID로 달리기 기록 목록 조회
      */
     List<History> findByUserId(UUID userId);
+    
+    /**
+     * 사용자 ID로 가장 최근 달리기 기록 조회
+     */
+    Optional<History> findLatestByUserId(UUID userId);
     
     /**
      * 페이징 처리된 사용자 기록 조회 (코스명, 그룹명 포함)
@@ -61,4 +70,14 @@ public interface HistoryDao {
      * 코스 ID와 사용자 ID로 코스 추가 여부 확인
      */
     boolean isAddedToCourse(@Param("courseId") UUID courseId, @Param("userId") UUID userId);
+
+    /**
+     * 히스토리 ID로 상세 정보 조회 (Optional 반환)
+     */
+    Optional<History> selectHistoryById(@Param("historyId") UUID historyId);
+    
+    /**
+     * 코스 생성 후 히스토리에 코스 ID 추가
+     */
+    void updateHistoryCourseId(@Param("historyId") UUID historyId, @Param("courseId") UUID courseId);
 }

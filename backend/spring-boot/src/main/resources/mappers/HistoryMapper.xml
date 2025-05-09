@@ -22,19 +22,18 @@
     </resultMap>
 
     <insert id="insert" parameterType="com.runhwani.runmate.model.History">
-        INSERT INTO histories (history_id, user_id, course_id, group_id, gpx_file, start_location,
-                               start_time, end_time, distance, avg_bpm, avg_pace, avg_cadence,
-                               avg_elevation, calories, created_at)
-        VALUES (#{historyId}, #{userId}, #{courseId}, #{groupId}, #{gpxFile}, #{startLocation},
-                #{startTime}, #{endTime}, #{distance}, #{avgBpm}, #{avgPace}, #{avgCadence},
-                #{avgElevation}, #{calories}, #{createdAt})
+        INSERT INTO histories (history_id, user_id,
+            <if test="courseId != null">course_id,</if>
+            group_id, gpx_file, start_location,
+            start_time, end_time, distance, avg_bpm, avg_pace, avg_cadence,
+            avg_elevation, calories, created_at)
+        VALUES (#{historyId}, #{userId},
+            <if test="courseId != null">#{courseId},</if>
+            #{groupId}, #{gpxFile}, #{startLocation},
+            #{startTime}, #{endTime}, #{distance}, #{avgBpm}, #{avgPace}, #{avgCadence},
+            #{avgElevation}, #{calories}, #{createdAt})
     </insert>
 
-    <select id="findById" resultMap="HistoryMap" parameterType="java.util.UUID">
-        SELECT *
-        FROM histories
-        WHERE history_id = #{historyId}
-    </select>
 
     <select id="findByUserId" resultMap="HistoryMap" parameterType="java.util.UUID">
         SELECT * FROM histories
@@ -156,4 +155,18 @@
             course_id = #{courseId}
             AND created_by = #{userId}
     </select>
+
+    <select id="selectHistoryById" resultMap="HistoryMap" parameterType="java.util.UUID">
+        SELECT *
+        FROM histories
+        WHERE history_id = #{historyId}
+    </select>
+
+<!--    histories에 courseId 업데이트 합니다 총총-->
+    <update id="updateHistoryCourseId">
+        UPDATE histories
+        SET course_id = #{courseId}
+        WHERE history_id = #{historyId}
+    </update>
+
 </mapper>
