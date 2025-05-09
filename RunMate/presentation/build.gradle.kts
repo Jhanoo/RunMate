@@ -63,6 +63,28 @@ dependencies {
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
 
+    // DotLottie
+    implementation(libs.dotlottie.android)
+
+    // KakaoMap
+    implementation(libs.android)
+
+    // Google Location
+    implementation(libs.play.services.location)
+
+    // GPX parser
+    implementation(libs.android.gpx.parser)
+
+    // LifecycleService
+    implementation(libs.androidx.lifecycle.service)
+
+    implementation(libs.androidx.media)
+
     //Timber
     implementation("com.jakewharton.timber:timber:5.0.1")
+}
+
+kapt {
+    correctErrorTypes = true
+
 }

@@ -1,51 +1,58 @@
 package com.D107.runmate.presentation
 
-import android.content.pm.PackageManager
+import android.Manifest
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.content.pm.PackageManager
 import android.util.Base64
 import android.util.Log
 import android.view.MenuItem
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.appcompat.app.AppCompatActivity
+import android.view.View
+import androidx.activity.viewModels
 import androidx.core.view.GravityCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
+import com.D107.runmate.domain.model.running.LocationModel
+import com.D107.runmate.domain.model.running.UserLocationState
 import com.D107.runmate.presentation.databinding.ActivityMainBinding
 import com.D107.runmate.presentation.databinding.DrawerHeaderBinding
+import com.D107.runmate.presentation.utils.LocationUtils.getLocation
+import com.D107.runmate.presentation.utils.LocationUtils.isEnableLocationSystem
+import com.D107.runmate.presentation.utils.LocationUtils.showLocationEnableDialog
+import com.D107.runmate.presentation.utils.PermissionChecker
 import com.google.android.material.navigation.NavigationView
 import com.ssafy.locket.presentation.base.BaseActivity
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
+
+private const val TAG = "MainActivity"
 
 @AndroidEntryPoint
 class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::inflate),
     NavigationView.OnNavigationItemSelectedListener {
 
+    private var mContext: Context? = null
+    private val viewModel: MainViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        mContext = this
+
+        initDrawerHeader()
 
         getKeyHash()
 
         // TODO 앱 초기 실행 시, 사용자 정보 서버로부터 가져와서 MainActivity의 ViewModel에 저장하기
         setDrawerWidth()
 
-        binding.navView.setNavigationItemSelectedListener(this)
-
-        // 초기 메뉴 아이템(달리기) 선택 상태로 설정
-        binding.navView.menu.findItem(R.id.drawer_running).isChecked = true
-
-        val headerView = binding.navView.getHeaderView(0)
-        val headerBinding = DrawerHeaderBinding.bind(headerView)
-
-        headerBinding.ivProfile.setImageResource(R.drawable.ic_drawer_profile) // TODO 사용자 프로필로 변경, 없을 경우 ic_drawer_profile 사용
-        headerBinding.tvName.text = "한아영"
+        checkPermission()
 
         binding.btnMenu.setOnClickListener {
             if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
@@ -128,9 +135,81 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
             }
         }
         true
-
+        hideHamburgerBtn(navController)
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    private val checker = PermissionChecker(this)
+
+    private val runtimePermissions =
+        arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.POST_NOTIFICATIONS,
+            Manifest.permission.ACTIVITY_RECOGNITION
+        )
+
+    private val backgroundPermission = arrayOf(
+        Manifest.permission.ACCESS_BACKGROUND_LOCATION
+    )
+
+    private fun checkPermission() {
+        if (!checker.checkPermission(this, runtimePermissions)) {
+            checker.setOnGrantedListener {
+                Log.d(TAG, "checkPermission: checkBack")
+                checkBackgroundPermission()
+            }
+            checker.requestPermissionLauncher.launch(runtimePermissions)
+            return
+        }
+        Log.d(TAG, "checkPermission: checkBack2")
+        checkBackgroundPermission()
+    }
+
+    private fun checkBackgroundPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (!checker.checkPermission(this, backgroundPermission)) {
+                checker.setOnGrantedListener {
+                    onAllPermissionsGranted()
+                }
+                checker.requestPermissionLauncher.launch(backgroundPermission)
+                return
+            }
+        }
+        onAllPermissionsGranted()
+    }
+
+    private fun onAllPermissionsGranted() {
+        lifecycleScope.launch {
+            try {
+                mContext?.let {
+                    if(isEnableLocationSystem(it)) {
+                        val location = getLocation(it)
+                        viewModel.setUserLocation(UserLocationState.Exist(listOf(LocationModel(location.latitude, location.longitude, location.altitude, location.speed))))
+                    } else {
+                        showLocationEnableDialog(it)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.d(TAG, "onAllPermissionsGranted: ${e.message}")
+            }
+        }
+    }
+
+    private fun initDrawerHeader() {
+        binding.navView.setNavigationItemSelectedListener(this)
+        binding.navView.menu.findItem(R.id.drawer_running).isChecked = true
+
+        // 초기 메뉴 아이템(달리기) 선택 상태로 설정
+        onNavigationItemSelected(binding.navView.menu.findItem(R.id.drawer_running))
+        binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+
+        val headerView = binding.navView.getHeaderView(0)
+        val headerBinding = DrawerHeaderBinding.bind(headerView)
+
+        headerBinding.ivProfile.setImageResource(R.drawable.ic_drawer_profile) // TODO 사용자 프로필로 변경, 없을 경우 ic_drawer_profile 사용
+        headerBinding.tvName.text = "한아영"
     }
 
     private fun setDrawerWidth() {
@@ -144,6 +223,29 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         params.width = drawerWidth
 
         binding.navView.layoutParams = params
+    }
+
+    private fun hideHamburgerBtn(navController: NavController) {
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            binding.btnMenu.visibility = when (destination.id) {
+                R.id.goalSettingFragment -> View.VISIBLE
+                R.id.runningFragment -> View.VISIBLE
+                R.id.groupFragment -> View.VISIBLE
+                R.id.historyFragment -> View.VISIBLE
+                R.id.wearableFragment -> View.VISIBLE
+                R.id.AIManagerFragment -> View.VISIBLE
+                else -> View.GONE
+            }
+        }
+    }
+
+    fun hideHamburgerBtn() {
+        binding.btnMenu.visibility = View.GONE
+    }
+
+    override fun onResume() {
+        super.onResume()
+        checkPermission()
     }
 
     fun getKeyHash() {

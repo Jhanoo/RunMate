@@ -3,6 +3,7 @@ package com.D107.runmate.data.di
 import com.D107.runmate.data.local.UserDataStoreSource
 import com.D107.runmate.data.remote.interceptor.RequestInterceptor
 import com.D107.runmate.data.remote.logger.RunMateApiLogger
+import com.D107.runmate.domain.BuildConfig
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -19,8 +20,8 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-//    private const val SERVER_URL = BuildConfig.BASE_URL // 찐서버 url
-    private const val SERVER_URL = "서버url"
+    private const val SERVER_URL = BuildConfig.BASE_URL // 찐서버 url
+//    private const val SERVER_URL = "서버url"
 
     @Provides
     @Singleton

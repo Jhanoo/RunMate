@@ -27,5 +27,13 @@
         <item name="android:backgroundDimEnabled">true</item>
     </style>
 
+    <style name="AppTheme.NumberPicker" parent="Theme.AppCompat.Light">
+        <item name="android:textColorPrimary">@color/black</item>
+        <item name="android:textColorHighlight">@color/gray_stroke</item>
+        <item name="android:textSize">20sp</item>
+        <item name="selectableItemBackground">@color/black</item>
+        <item name="colorControlNormal">@color/primary</item>
+    </style>
+
     <style name="Theme.RunMate" parent="Base.Theme.RunMate" />
 </resources>

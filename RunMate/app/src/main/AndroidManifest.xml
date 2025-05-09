@@ -4,15 +4,23 @@
     package="com.D107.runmate">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
 
     <!-- BLE 권한들-->
     <!--Android 11 이하 -->
     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
 
-    <!-- 위치 권한 (BLE 스캔에 필요 - Android 11 이하) -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30"/>
-     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+<!--    &lt;!&ndash; 위치 권한 (BLE 스캔에 필요 - Android 11 이하) &ndash;&gt;-->
+<!--    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30"/>-->
+<!--     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />-->
 
     <!-- Android 12이상 -->
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" />
@@ -39,6 +47,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <meta-data
+            android:name="com.kakao.vectormap.KAKAO_MAP_KEY"
+            android:value="${NATIVE_API_KEY}" />
+
+        <service
+            android:name=".presentation.RunningTrackingService"
+            android:exported="false"
+            android:foregroundServiceType="location" />
+
+        <receiver android:name=".presentation.NotificationReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="ACTION_1"/>
+                <action android:name="ACTION_2"/>
+                <action android:name="ACTION_3"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

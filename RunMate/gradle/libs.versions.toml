@@ -1,27 +1,32 @@
 [versions]
 agp = "8.5.0"
 android = "2.12.8"
+androidGpxParser = "2.3.1"
+circleimageview = "3.1.0"
 coilCompose = "2.5.0"
 coilGif = "2.6.0"
 composeFoundationVersion = "1.3.0"
 composeMaterialVersion = "1.3.0"
 composeNavigation = "1.2.0"
 converterMoshi = "2.9.0"
+dotlottieAndroid = "0.5.0"
 glide = "4.16.0"
 healthServicesClient = "1.0.0-rc02"
 hiltAndroidCompiler = "2.51.1"
+kotlin = "1.9.22"
 hiltNavigationCompose = "1.2.0"
-kotlin = "1.9.0"
 coreKtx = "1.10.1"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
 appcompat = "1.6.1"
+lifecycleService = "2.8.7"
 kotlinxCoroutinesGuava = "1.7.3"
 landscapistGlide = "2.2.13"
 material = "1.10.0"
 activity = "1.8.0"
 constraintlayout = "2.1.4"
+media = "1.7.0"
 moshi = "1.13.0"
 mpandroidchart = "v3.1.0"
 navigationFragment = "2.8.9"
@@ -30,7 +35,7 @@ playServicesLocation = "21.3.0"
 runtimeAndroid = "1.7.8"
 jetbrainsKotlinJvm = "1.9.0"
 playServicesWearable = "19.0.0"
-composeBom = "2024.04.01"
+composeBom = "2023.08.00"
 composeMaterial = "1.2.1"
 composeFoundation = "1.2.1"
 activityCompose = "1.7.2"
@@ -40,22 +45,28 @@ material3Android = "1.3.2"
 junitKtx = "1.2.1"
 uiTestJunit4Android = "1.8.0"
 hiltCommon = "1.2.0"
+uiTestJunit4 = "1.4.3"
 
 [libraries]
 android = { module = "com.kakao.maps.open:android", version.ref = "android" }
+android-gpx-parser = { module = "com.github.ticofab:android-gpx-parser", version.ref = "androidGpxParser" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-lifecycle-service = { module = "androidx.lifecycle:lifecycle-service", version.ref = "lifecycleService" }
+androidx-media = { module = "androidx.media:media", version.ref = "media" }
+androidx-navigation-fragment = { module = "androidx.navigation:navigation-fragment", version.ref = "navigationFragment" }
+androidx-navigation-safe-args-gradle-plugin = { module = "androidx.navigation:navigation-safe-args-gradle-plugin", version.ref = "navVersion" }
+androidx-navigation-ui = { module = "androidx.navigation:navigation-ui", version.ref = "navigationFragment" }
+circleimageview = { module = "de.hdodenhof:circleimageview", version.ref = "circleimageview" }
 androidx-compose-foundation-v130 = { module = "androidx.wear.compose:compose-foundation", version.ref = "composeFoundationVersion" }
 androidx-compose-material-v130 = { module = "androidx.wear.compose:compose-material", version.ref = "composeMaterialVersion" }
 androidx-compose-navigation = { module = "androidx.wear.compose:compose-navigation", version.ref = "composeFoundationVersion" }
 androidx-compose-navigation-v120 = { module = "androidx.wear.compose:compose-navigation", version.ref = "composeNavigation" }
-androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-health-services-client = { module = "androidx.health:health-services-client", version.ref = "healthServicesClient" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
-androidx-navigation-fragment = { module = "androidx.navigation:navigation-fragment", version.ref = "navigationFragment" }
-androidx-navigation-safe-args-gradle-plugin = { module = "androidx.navigation:navigation-safe-args-gradle-plugin", version.ref = "navVersion" }
-androidx-navigation-ui = { module = "androidx.navigation:navigation-ui", version.ref = "navigationFragment" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 coil-gif = { module = "io.coil-kt:coil-gif", version.ref = "coilGif" }
 converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "converterMoshi" }
+dotlottie-android = { module = "com.github.LottieFiles:dotlottie-android", version.ref = "dotlottieAndroid" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroidCompiler" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompiler" }
@@ -78,7 +89,7 @@ androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
-androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4", version.ref = "uiTestJunit4" }
 androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
 androidx-compose-foundation = { group = "androidx.wear.compose", name = "compose-foundation", version.ref = "composeFoundation" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }

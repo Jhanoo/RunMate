@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -6,6 +8,12 @@ plugins {
     id("kotlin-parcelize")
     id("org.jetbrains.kotlin.plugin.serialization")
 }
+
+val properties = Properties().apply {
+    load(rootProject.file("apikey.properties").inputStream())
+}
+
+val baseUrl: String = properties.getProperty("base_url") ?: ""
 
 android {
     namespace = "com.D107.runmate.domain"
@@ -21,6 +29,7 @@ android {
                 cppFlags("")
             }
         }
+        buildConfigField("String", "BASE_URL", baseUrl)
     }
 
     buildTypes {
@@ -44,6 +53,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+    }
+    buildFeatures {
+        buildConfig = true
     }
 }
 
@@ -82,4 +94,8 @@ dependencies {
 
     //Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+}
+
+kapt {
+    correctErrorTypes = true  // Hilt 오류 방지[6]
 }
