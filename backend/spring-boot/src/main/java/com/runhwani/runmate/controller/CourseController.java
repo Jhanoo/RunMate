@@ -17,6 +17,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -92,9 +93,13 @@ public class CourseController implements CourseControllerDocs {
 
     // 3. 코스 검색
     @Override
-    public CommonResponse<List<CourseResponse>> searchCourses(String keyword) {
-        List<CourseResponse> result = courseService.searchCourses(keyword);
-        return CommonResponse.ok(result);
+    public ResponseEntity<CommonResponse<List<CourseResponse>>> searchCourses(
+            @AuthenticationPrincipal UserDetails principal,
+            @RequestParam("keyword") String keyword
+    ) {
+        UUID userId = UUID.fromString(principal.getUsername());
+        List<CourseResponse> result = courseService.searchCourses(userId, keyword);
+        return ResponseEntity.ok(CommonResponse.ok(result));
     }
 
     // 4. 최근 코스 조회
@@ -117,19 +122,22 @@ public class CourseController implements CourseControllerDocs {
 
     // 6. 전체 코스 조회
     @Override
-    public ResponseEntity<CommonResponse<List<CourseResponse>>> getAllCourses() {
-        List<CourseResponse> responseList = courseService.getAllCourses();
-        return ResponseEntity.ok(CommonResponse.ok(responseList));
+    public ResponseEntity<CommonResponse<List<CourseResponse>>> getAllCourses(
+            @AuthenticationPrincipal UserDetails principal) {
+        UUID userId = UUID.fromString(principal.getUsername());
+        return ResponseEntity.ok(CommonResponse.ok(
+                courseService.getAllCourses(userId)
+        ));
     }
 
     // 7. 코스 상세 조회
     @Override
     public ResponseEntity<CommonResponse<CourseDetailResponse>> getCourseDetail(
             @AuthenticationPrincipal UserDetails principal,
-            @PathVariable("id") UUID courseId
+            @PathVariable("courseId") UUID courseId
     ) {
         UUID userId = UUID.fromString(principal.getUsername());
-        CourseDetailResponse detail = courseService.getCourseDetail(courseId, userId);
+        CourseDetailResponse detail = courseService.getCourseDetail(userId, courseId);
         return ResponseEntity.ok(CommonResponse.ok(detail));
     }
 
@@ -137,7 +145,7 @@ public class CourseController implements CourseControllerDocs {
     @Override
     public ResponseEntity<CommonResponse<CourseLikeResponse>> updateCourseLike(
             @AuthenticationPrincipal UserDetails principal,
-            UUID courseId
+            @PathVariable("courseId") UUID courseId
     ) {
         UUID userId = UUID.fromString(principal.getUsername());
         CourseLikeResponse body = courseService.updateCourseLike(userId, courseId);
