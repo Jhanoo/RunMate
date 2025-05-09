@@ -48,7 +48,7 @@ public class GroupController implements GroupControllerDocs {
         Group myGroup = groupService.getMyGroup(userId);
         if (myGroup == null) {
             // 가입된 그룹이 없으면 null 반환
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.ok(null));
+            return ResponseEntity.ok(CommonResponse.error("가입된 그룹이 없습니다."));
         }
 
         // 2) 조회한 그룹의 ID 로 멤버 리스트 조회
@@ -81,6 +81,14 @@ public class GroupController implements GroupControllerDocs {
     public ResponseEntity<CommonResponse<Void>> leaveGroup(UserDetails principal) {
         UUID userId = UUID.fromString(principal.getUsername());
         groupService.leaveGroup(userId);
+
+        return ResponseEntity.ok(CommonResponse.ok(null));
+    }
+
+
+    public ResponseEntity<CommonResponse<Void>> finishGroup(UserDetails principal) {
+        UUID userId = UUID.fromString(principal.getUsername());
+        groupService.finishGroup(userId);
 
         return ResponseEntity.ok(CommonResponse.ok(null));
     }

@@ -98,10 +98,24 @@
             SELECT member_id
             FROM group_members
             WHERE user_id    = #{userId}
-              AND is_leaved = FALSE
+              AND is_finished = FALSE
             ORDER BY joined_at DESC
             LIMIT 1
         )
     </delete>
+
+    <!-- 완주 후 그룹 나가기 isFinished=true로 변경 -->
+    <update id="updateIsFinished" parameterType="java.util.UUID">
+        UPDATE group_members
+        SET is_finished = TRUE
+        WHERE member_id IN (
+            SELECT member_id
+            FROM group_members
+            WHERE user_id    = #{userId}
+              AND is_finished = FALSE
+            ORDER BY joined_at DESC
+            LIMIT 1
+        )
+    </update>
 
 </mapper>
