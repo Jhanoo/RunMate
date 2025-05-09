@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.runhwani.runmate.dao.MarathonDao">
+
+    <select id="findUpcomingMarathons"
+            parameterType="java.time.OffsetDateTime"
+            resultType="com.runhwani.runmate.model.Marathon">
+        SELECT
+        marathon_id   AS marathonId,
+        name,
+        date,
+        location,
+        created_at    AS createdAt
+        FROM marathons
+        WHERE date >= #{now}
+        ORDER BY date
+    </select>
+
+</mapper>
