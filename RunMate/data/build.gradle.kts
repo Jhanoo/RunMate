@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -5,6 +7,15 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("kotlin-parcelize")
 }
+val properties = Properties().apply {
+    load(rootProject.file("apikey.properties").inputStream())
+}
+
+val restApiKey: String = properties.getProperty("rest_api_key") ?: ""
+val nativeApiKey: String = properties.getProperty("native_api_key") ?: ""
+val serverUrl: String = properties.getProperty("base_url") ?: ""
+val kakaoApiUrl: String = properties.getProperty("kakao_url") ?: ""
+
 
 android {
     namespace = "com.D107.runmate.domain"
@@ -14,6 +25,10 @@ android {
         minSdk = 24
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "REST_API_KEY", restApiKey)
+        buildConfigField("String", "NATIVE_API_KEY", nativeApiKey)
+        buildConfigField("String", "BASE_URL", serverUrl)
+        buildConfigField("String", "KAKAO_API_URL", kakaoApiUrl)
         consumerProguardFiles("consumer-rules.pro")
         externalNativeBuild {
             cmake {
@@ -43,6 +58,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+    }
+    buildFeatures {
+        buildConfig = true
     }
 }
 
@@ -75,4 +93,7 @@ dependencies {
     // Moshi
     implementation(libs.moshi)
     implementation(libs.converter.moshi)
+
+    //Timber
+    implementation("com.jakewharton.timber:timber:5.0.1")
 }

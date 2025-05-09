@@ -18,6 +18,8 @@
     <color name="finance_budget_under">#4C8077</color>
     <color name="colorButtonActive">#00CBBF</color>
     <color name="colorButtonInactive">#C9C9C9</color>
+    <color name="color_button_secondary">#D6EFE4</color>
     <color name="finance_budget_over_text">#F7726D</color>
+    <color name="color_edit_text">#F4F4F4</color>
 
 </resources>
