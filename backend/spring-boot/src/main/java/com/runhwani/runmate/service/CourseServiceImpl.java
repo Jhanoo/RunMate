@@ -1,18 +1,19 @@
 package com.runhwani.runmate.service;
 
 import com.runhwani.runmate.dao.CourseDao;
+import com.runhwani.runmate.dao.HistoryDao;
 import com.runhwani.runmate.dto.request.course.CourseRequest;
 import com.runhwani.runmate.dto.response.course.CourseDetailResponse;
 import com.runhwani.runmate.dto.response.course.CourseLikeResponse;
 import com.runhwani.runmate.dto.response.course.CourseResponse;
 import com.runhwani.runmate.exception.EntityNotFoundException;
 import com.runhwani.runmate.model.Course;
+import com.runhwani.runmate.model.History;
 import com.runhwani.runmate.utils.GpxStorageUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
@@ -23,9 +24,11 @@ import java.util.*;
 @Slf4j
 public class CourseServiceImpl implements CourseService {
     private final CourseDao courseDao;
+    private final HistoryDao historyDao;
 
     @Override
-    public UUID createCourse(CourseRequest request, MultipartFile gpxFile, UUID userId) throws IOException {
+    @Transactional
+    public UUID createCourse(CourseRequest request, UUID userId) throws IOException {
         log.debug("코스 생성 요청: {}", request);
 
         // 1. Course 객체 생성
@@ -38,10 +41,12 @@ public class CourseServiceImpl implements CourseService {
         course.setStartLocation(request.getStartLocation());
         course.setCreatedBy(userId);
 
-        // 2. GPX 파일 처리: 유틸 호출
-        String gpxFileName = GpxStorageUtil.saveGpxFile(gpxFile);
+        // 2. GPX 파일 처리: 유틸 호출 -> history 조회 후 가져오기
+        History history = historyDao.selectHistoryById(request.getHistoryId())
+                .orElseThrow(() -> new EntityNotFoundException("헤당 히스토리를 찾을 수 없습니다."));
+        String gpxFileName = history.getGpxFile();
         course.setGpxFile(gpxFileName);
-        log.debug("저장된 GPX 파일명: {}", gpxFileName);
+        log.debug("히스토리에서 가져온 GPX 파일명: {}", gpxFileName);
 
         // 3. DB에 저장
         courseDao.insertCourse(course);

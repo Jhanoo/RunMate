@@ -17,10 +17,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
@@ -40,17 +39,15 @@ public class CourseController implements CourseControllerDocs {
     @Override
     public ResponseEntity<CommonResponse<CourseCreateResponse>> createCourse(
             @AuthenticationPrincipal UserDetails principal,
-            @RequestPart("courseData") CourseRequest courseData,
-            @RequestPart(value = "gpxFile", required = false) MultipartFile gpxFile
+            @RequestBody CourseRequest courseData
     ) {
-        // ---여기선 이미 courseData가 파싱된 상태입니다---
-        log.debug("GPX File name: {}", gpxFile != null ? gpxFile.getOriginalFilename() : "null");
 
 
         UUID userId = UUID.fromString(principal.getUsername());
+        UUID historyId = courseData.getHistoryId();
 
         try {
-            UUID newCourseId = courseService.createCourse(courseData, gpxFile, userId);
+            UUID newCourseId = courseService.createCourse(courseData, userId);
             CourseCreateResponse body = CourseCreateResponse.builder()
                     .courseId(newCourseId)
                     .build();
