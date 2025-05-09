@@ -4,6 +4,8 @@ import android.Manifest
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.content.pm.PackageManager
+import android.util.Base64
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
@@ -26,6 +28,8 @@ import com.google.android.material.navigation.NavigationView
 import com.ssafy.locket.presentation.base.BaseActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
 
 private const val TAG = "MainActivity"
 
@@ -42,6 +46,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         mContext = this
 
         initDrawerHeader()
+
+        getKeyHash()
+
         // TODO 앱 초기 실행 시, 사용자 정보 서버로부터 가져와서 MainActivity의 ViewModel에 저장하기
         setDrawerWidth()
 
@@ -239,5 +246,20 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     override fun onResume() {
         super.onResume()
         checkPermission()
+    }
+
+    fun getKeyHash() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val packageInfo = this.packageManager.getPackageInfo(this.packageName, PackageManager.GET_SIGNING_CERTIFICATES)
+            for (signature in packageInfo.signingInfo!!.apkContentsSigners) {
+                try {
+                    val md = MessageDigest.getInstance("SHA")
+                    md.update(signature.toByteArray())
+                    Log.d("getKeyHash", "key hash: ${Base64.encodeToString(md.digest(), Base64.NO_WRAP)}")
+                } catch (e: NoSuchAlgorithmException) {
+                    Log.w("getKeyHash", "Unable to get MessageDigest. signature=$signature", e)
+                }
+            }
+        }
     }
 }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="primary">#53D357</color>
+    <color name="secondary">#233223</color>
+    <color name="gray_text">#BBBAB9</color>
+    <color name="gray_text2">#2C2C2D</color>
+    <color name="description_text">#4A4845</color>
+    <color name="point_red">#EB655A</color>
+    <color name="btn_red">#5E2824</color>
+    <color name="background_notice">#202124</color>
+
+</resources>

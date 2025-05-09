@@ -79,8 +79,12 @@ dependencies {
     implementation(libs.androidx.lifecycle.service)
 
     implementation(libs.androidx.media)
+
+    //Timber
+    implementation("com.jakewharton.timber:timber:5.0.1")
 }
 
 kapt {
     correctErrorTypes = true
+
 }

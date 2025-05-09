@@ -11,6 +11,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.serialization.json.Json
 import javax.inject.Singleton
 
 const val USER_PREFERENCES = "user_preferences"
@@ -29,9 +30,18 @@ object DataStoreModule {
 
     @Provides
     @Singleton
+    fun provideJson(): Json {
+        return Json {
+            ignoreUnknownKeys = true
+        }
+    }
+
+    @Provides
+    @Singleton
     fun provideUserDataSource(
-        dataStore: DataStore<Preferences>
+        dataStore: DataStore<Preferences>,
+        json: Json
     ): UserDataStoreSource {
-        return UserDataStoreSource(dataStore)
+        return UserDataStoreSource(dataStore,json)
     }
 }
