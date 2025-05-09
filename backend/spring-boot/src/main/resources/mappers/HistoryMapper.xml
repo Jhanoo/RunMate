@@ -30,15 +30,17 @@
                 #{avgElevation}, #{calories}, #{createdAt})
     </insert>
 
-    <select id="findById" resultMap="HistoryMap" parameterType="java.util.UUID">
-        SELECT *
-        FROM histories
-        WHERE history_id = #{historyId}
-    </select>
 
     <select id="findByUserId" resultMap="HistoryMap" parameterType="java.util.UUID">
         SELECT * FROM histories
         WHERE user_id = #{userId}
         ORDER BY created_at DESC
     </select>
+
+    <select id="selectHistoryById" resultMap="HistoryMap" parameterType="java.util.UUID">
+        SELECT *
+        FROM histories
+        WHERE history_id = #{historyId}
+    </select>
+
 </mapper>
