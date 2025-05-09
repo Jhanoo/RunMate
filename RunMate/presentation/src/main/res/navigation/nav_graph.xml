@@ -3,7 +3,60 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/runningFragment">
+    app:startDestination="@id/splashFragment">
+
+    <fragment
+        android:id="@+id/splashFragment"
+        android:name="com.D107.runmate.presentation.login.SplashFragment"
+        android:label="fragment_splash"
+        tools:layout="@layout/fragment_splash">
+        <action
+            android:id="@+id/action_splashFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.D107.runmate.presentation.login.LoginFragment"
+        android:label="fragment_login"
+        tools:layout="@layout/fragment_login">
+
+        <action
+            android:id="@+id/action_loginFragment_to_runningFragment"
+            app:destination="@id/runningFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+
+        <action
+            android:id="@+id/action_loginFragment_to_joinFragment"
+            app:destination="@id/JoinFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/JoinFragment"
+        android:name="com.D107.runmate.presentation.login.JoinFragment"
+        android:label="fragment_join"
+        tools:layout="@layout/fragment_id_pw_join">
+
+        <action
+            android:id="@+id/action_joinFragment_to_join2Fragment"
+            app:destination="@id/Join2Fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/Join2Fragment"
+        android:name="com.D107.runmate.presentation.login.Join2Fragment"
+        android:label="fragment_join2"
+        tools:layout="@layout/fragment_personal_join">
+
+        <action
+            android:id="@+id/action_join2Fragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/Join2Fragment"
+            app:popUpToInclusive="true" />
+    </fragment>
 
     <fragment
         android:id="@+id/AIManagerFragment"

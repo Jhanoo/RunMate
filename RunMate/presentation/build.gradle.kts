@@ -82,9 +82,13 @@ dependencies {
 
     //Timber
     implementation("com.jakewharton.timber:timber:5.0.1")
+
+    //GIF
+    implementation(libs.glide.v4132)
+    implementation(libs.androidx.emoji2)
+    implementation(libs.androidx.emoji2.views)
 }
 
 kapt {
     correctErrorTypes = true
-
 }
