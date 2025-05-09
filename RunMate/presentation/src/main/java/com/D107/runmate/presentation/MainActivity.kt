@@ -21,8 +21,6 @@ import com.D107.runmate.domain.model.running.UserLocationState
 import com.D107.runmate.presentation.databinding.ActivityMainBinding
 import com.D107.runmate.presentation.databinding.DrawerHeaderBinding
 import com.D107.runmate.presentation.utils.LocationUtils.getLocation
-import com.D107.runmate.presentation.utils.LocationUtils.isEnableLocationSystem
-import com.D107.runmate.presentation.utils.LocationUtils.showLocationEnableDialog
 import com.D107.runmate.presentation.utils.PermissionChecker
 import com.google.android.material.navigation.NavigationView
 import com.ssafy.locket.presentation.base.BaseActivity
@@ -157,13 +155,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     private fun checkPermission() {
         if (!checker.checkPermission(this, runtimePermissions)) {
             checker.setOnGrantedListener {
-                Log.d(TAG, "checkPermission: checkBack")
                 checkBackgroundPermission()
             }
             checker.requestPermissionLauncher.launch(runtimePermissions)
             return
         }
-        Log.d(TAG, "checkPermission: checkBack2")
         checkBackgroundPermission()
     }
 
@@ -184,16 +180,25 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         lifecycleScope.launch {
             try {
                 mContext?.let {
-                    if(isEnableLocationSystem(it)) {
-                        val location = getLocation(it)
-                        viewModel.setUserLocation(UserLocationState.Exist(listOf(LocationModel(location.latitude, location.longitude, location.altitude, location.speed))))
-                    } else {
-                        showLocationEnableDialog(it)
-                    }
+                    val location = getLocation(it, this@MainActivity)
+                    viewModel.setUserLocation(
+                        UserLocationState.Exist(
+                            listOf(
+                                LocationModel(
+                                    location.latitude,
+                                    location.longitude,
+                                    location.altitude,
+                                    location.speed
+                                )
+                            )
+                        )
+                    )
+                    Log.d(TAG, "onAllPermissionsGranted: location ${location}")
                 }
             } catch (e: Exception) {
                 Log.d(TAG, "onAllPermissionsGranted: ${e.message}")
             }
+
         }
     }
 
@@ -243,19 +248,20 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         binding.btnMenu.visibility = View.GONE
     }
 
-    override fun onResume() {
-        super.onResume()
-        checkPermission()
-    }
-
     fun getKeyHash() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            val packageInfo = this.packageManager.getPackageInfo(this.packageName, PackageManager.GET_SIGNING_CERTIFICATES)
+            val packageInfo = this.packageManager.getPackageInfo(
+                this.packageName,
+                PackageManager.GET_SIGNING_CERTIFICATES
+            )
             for (signature in packageInfo.signingInfo!!.apkContentsSigners) {
                 try {
                     val md = MessageDigest.getInstance("SHA")
                     md.update(signature.toByteArray())
-                    Log.d("getKeyHash", "key hash: ${Base64.encodeToString(md.digest(), Base64.NO_WRAP)}")
+                    Log.d(
+                        "getKeyHash",
+                        "key hash: ${Base64.encodeToString(md.digest(), Base64.NO_WRAP)}"
+                    )
                 } catch (e: NoSuchAlgorithmException) {
                     Log.w("getKeyHash", "Unable to get MessageDigest. signature=$signature", e)
                 }

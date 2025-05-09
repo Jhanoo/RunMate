@@ -181,8 +181,6 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                                     state.locations.last().latitude,
                                     state.locations.last().longitude
                                 ), 500)
-//                            kakaoMap?.trackingManager?.startTracking(userLabel)
-
                         } else {
                             addMarker(state.locations.last().latitude, state.locations.last().longitude)
                         }
@@ -212,7 +210,6 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
         viewLifecycleOwner.lifecycleScope.launch {
             mainViewModel.runningRecord.collectLatest { state ->
                 if(state is RunningRecordState.Exist) {
-                    Log.d(TAG, "onViewCreated: state ${state.runningRecords.last().distance}")
                     binding.tvDistance.text = getString(R.string.running_distance, state.runningRecords.last().distance)
                     binding.tvPace.text =
                         LocationUtils.getPaceFromSpeed(state.runningRecords.last().currentSpeed)
