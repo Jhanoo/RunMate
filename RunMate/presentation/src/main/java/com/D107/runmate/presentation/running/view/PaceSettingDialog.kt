@@ -1,5 +1,6 @@
 package com.D107.runmate.presentation.running.view
 
+import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
@@ -28,6 +29,13 @@ class PaceSettingDialog(private val setting: List<Int>, private val callback: (L
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(STYLE_NORMAL, R.style.CustomDialog)
+        isCancelable = true
+    }
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val dialog = super.onCreateDialog(savedInstanceState)
+        dialog.setCanceledOnTouchOutside(true)
+        return dialog
     }
 
     override fun onCreateView(
@@ -36,7 +44,6 @@ class PaceSettingDialog(private val setting: List<Int>, private val callback: (L
         savedInstanceState: Bundle?
     ): View {
         binding = DialogPaceSettingBinding.inflate(inflater, container, false)
-        isCancelable = true
         return binding.root
     }
 
@@ -51,7 +58,6 @@ class PaceSettingDialog(private val setting: List<Int>, private val callback: (L
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
 
         val secValues = Array(12) { (it * 5).toString() } // 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55
 

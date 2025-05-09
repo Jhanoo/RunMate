@@ -67,6 +67,15 @@
         android:id="@+id/courseSettingFragment"
         android:name="com.D107.runmate.presentation.running.view.CourseSettingFragment"
         android:label="fragment_course_setting"
-        tools:layout="@layout/fragment_course_setting" />
+        tools:layout="@layout/fragment_course_setting" >
+        <action
+            android:id="@+id/action_courseSettingFragment_to_courseSearchFragment"
+            app:destination="@id/courseSearchFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/courseSearchFragment"
+        android:name="com.D107.runmate.presentation.running.view.CourseSearchFragment"
+        android:label="fragment_course_search"
+        tools:layout="@layout/fragment_course_search" />
 
 </navigation>

@@ -22,6 +22,7 @@ import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.RunningTrackingService
 import com.D107.runmate.presentation.databinding.FragmentRunningBinding
 import com.D107.runmate.presentation.utils.CommonUtils
+import com.D107.runmate.presentation.utils.CommonUtils.getActivityContext
 import com.D107.runmate.presentation.utils.LocationUtils
 import com.kakao.vectormap.GestureType
 import com.kakao.vectormap.KakaoMap
@@ -66,6 +67,86 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        initEvent()
+
+        binding.mapView.start(object : MapLifeCycleCallback() {
+            override fun onMapDestroy() {
+            }
+
+            override fun onMapError(p0: Exception?) {
+                Log.d(TAG, "onMapError: ${p0?.message}")
+            }
+
+        }, object : KakaoMapReadyCallback() {
+            override fun onMapReady(p0: KakaoMap) {
+                kakaoMap = p0
+            }
+
+            override fun getPosition(): LatLng {
+                mainViewModel.userLocation.value?.let {
+                    if (it is UserLocationState.Exist) {
+                        return LatLng.from(
+                            it.locations.last().latitude,
+                            it.locations.last().longitude
+                        )
+                    }
+                }
+                val fallbackLocation = LocationUtils.getFallbackLocation()
+                return LatLng.from(fallbackLocation.latitude, fallbackLocation.longitude)
+            }
+        })
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            mainViewModel.userLocation.collect { state ->
+                when (state) {
+                    is UserLocationState.Exist -> {
+                        val tmpUserLabel = userLabel
+                        if (tmpUserLabel != null) {
+                            tmpUserLabel.moveTo(
+                                LatLng.from(
+                                    state.locations.last().latitude,
+                                    state.locations.last().longitude
+                                ), 500)
+                        } else {
+                            addMarker(state.locations.last().latitude, state.locations.last().longitude)
+                        }
+                        val cameraUpdate = CameraUpdateFactory.newCenterPosition(
+                            LatLng.from(
+                                state.locations.last().latitude,
+                                state.locations.last().longitude
+                            )
+                        )
+                        kakaoMap?.moveCamera(cameraUpdate)
+                    }
+
+                    is UserLocationState.Initial -> {
+                        Log.d(TAG, "onViewCreated: initial")
+                    }
+                }
+            }
+        }
+
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            mainViewModel.time.collectLatest { it ->
+                binding.tvTime.text = getString(R.string.running_time, it / 60, it % 60)
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            mainViewModel.runningRecord.collectLatest { state ->
+                if(state is RunningRecordState.Exist) {
+                    binding.tvDistance.text = getString(R.string.running_distance, state.runningRecords.last().distance)
+                    binding.tvPace.text =
+                        LocationUtils.getPaceFromSpeed(state.runningRecords.last().currentSpeed)
+                } else {
+                    Log.d(TAG, "onViewCreated: state else")
+                }
+            }
+        }
+    }
+
+    private fun initEvent() {
         binding.bgRunningRecord.setOnClickListener {
             findNavController().navigate(R.id.action_runningFragment_to_runningRecordFragment)
         }
@@ -136,88 +217,6 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
             }
             dialog.show(requireActivity().supportFragmentManager, "pace")
         }
-
-
-        binding.mapView.start(object : MapLifeCycleCallback() {
-            override fun onMapDestroy() {
-            }
-
-            override fun onMapError(p0: Exception?) {
-                Log.d(TAG, "onMapError: ${p0?.message}")
-            }
-
-        }, object : KakaoMapReadyCallback() {
-            override fun onMapReady(p0: KakaoMap) {
-                kakaoMap = p0
-                p0.setOnCameraMoveStartListener { map, gestureType ->
-                    if (gestureType == GestureType.Pan) {
-//                        map.trackingManager?.stopTracking()
-                    }
-                }
-            }
-
-            override fun getPosition(): LatLng {
-                mainViewModel.userLocation.value?.let {
-                    if (it is UserLocationState.Exist) {
-                        return LatLng.from(
-                            it.locations.last().latitude,
-                            it.locations.last().longitude
-                        )
-                    }
-                }
-                val fallbackLocation = LocationUtils.getFallbackLocation()
-                return LatLng.from(fallbackLocation.latitude, fallbackLocation.longitude)
-            }
-        })
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            mainViewModel.userLocation.collect { state ->
-                when (state) {
-                    is UserLocationState.Exist -> {
-                        val tmpUserLabel = userLabel
-                        if (tmpUserLabel != null) {
-                            tmpUserLabel.moveTo(
-                                LatLng.from(
-                                    state.locations.last().latitude,
-                                    state.locations.last().longitude
-                                ), 500)
-                        } else {
-                            addMarker(state.locations.last().latitude, state.locations.last().longitude)
-                        }
-                        val cameraUpdate = CameraUpdateFactory.newCenterPosition(
-                            LatLng.from(
-                                state.locations.last().latitude,
-                                state.locations.last().longitude
-                            )
-                        )
-                        kakaoMap?.moveCamera(cameraUpdate)
-                    }
-
-                    is UserLocationState.Initial -> {
-                        Log.d(TAG, "onViewCreated: initial")
-                    }
-                }
-            }
-        }
-
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            mainViewModel.time.collectLatest { it ->
-                binding.tvTime.text = getString(R.string.running_time, it / 60, it % 60)
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            mainViewModel.runningRecord.collectLatest { state ->
-                if(state is RunningRecordState.Exist) {
-                    binding.tvDistance.text = getString(R.string.running_distance, state.runningRecords.last().distance)
-                    binding.tvPace.text =
-                        LocationUtils.getPaceFromSpeed(state.runningRecords.last().currentSpeed)
-                } else {
-                    Log.d(TAG, "onViewCreated: state else")
-                }
-            }
-        }
     }
 
     private fun addMarker(latitude: Double, longitude: Double) {
@@ -258,10 +257,13 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
     override fun onResume() {
         super.onResume()
         binding.mapView.resume()
+        mContext?.let {
+            (getActivityContext(it) as MainActivity).showHamburgerBtn()
+        }
 
         when (mainViewModel.trackingStatus.value) {
             TrackingStatus.STOPPED -> {
-                // 종료
+                findNavController().navigate(R.id.runningEndFragment)
             }
 
             TrackingStatus.RUNNING -> {

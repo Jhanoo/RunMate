@@ -24,7 +24,7 @@
         <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
         <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
         <item name="android:background">@android:color/transparent</item>
-        <item name="android:backgroundDimEnabled">true</item>
+<!--        <item name="android:backgroundDimEnabled">true</item>-->
     </style>
 
     <style name="AppTheme.NumberPicker" parent="Theme.AppCompat.Light">

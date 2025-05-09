@@ -133,7 +133,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
             }
         }
         true
-        hideHamburgerBtn(navController)
+        showHamburgerBtn(navController)
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
@@ -198,7 +198,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
             } catch (e: Exception) {
                 Log.d(TAG, "onAllPermissionsGranted: ${e.message}")
             }
-
         }
     }
 
@@ -230,10 +229,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         binding.navView.layoutParams = params
     }
 
-    private fun hideHamburgerBtn(navController: NavController) {
+    private fun showHamburgerBtn(navController: NavController) {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             binding.btnMenu.visibility = when (destination.id) {
-                R.id.goalSettingFragment -> View.VISIBLE
                 R.id.runningFragment -> View.VISIBLE
                 R.id.groupFragment -> View.VISIBLE
                 R.id.historyFragment -> View.VISIBLE
@@ -246,6 +244,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
 
     fun hideHamburgerBtn() {
         binding.btnMenu.visibility = View.GONE
+    }
+
+    fun showHamburgerBtn() {
+        binding.btnMenu.visibility = View.VISIBLE
     }
 
     fun getKeyHash() {
