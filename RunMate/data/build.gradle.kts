@@ -17,11 +17,6 @@ val nativeApiKey: String = properties.getProperty("native_api_key") ?: ""
 val serverUrl: String = properties.getProperty("base_url") ?: ""
 val kakaoApiUrl: String = properties.getProperty("kakao_url") ?: ""
 
-
-val properties = Properties().apply {
-    load(rootProject.file("apikey.properties").inputStream())
-}
-
 val baseUrl: String = properties.getProperty("base_url") ?: ""
 
 android {

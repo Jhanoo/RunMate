@@ -29,10 +29,23 @@
         android:textColor="@color/text"
         android:textSize="24sp"
         android:fontFamily="@font/pretendard_bold"
-        app:layout_constraintBottom_toTopOf="@+id/btn_create_group"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_no_group_message_group" />
+    <TextView
+        android:id="@+id/tv_no_group_message_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:text="현제 가입된 그룹이 없습니다."
+        android:textColor="@color/text"
+        android:textSize="24sp"
+        android:fontFamily="@font/pretendard_bold"
+        app:layout_constraintBottom_toTopOf="@+id/btn_create_group"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/img_sad_emoji_group" />
 
     <!-- Create Group Button -->
     <com.google.android.material.button.MaterialButton
