@@ -98,7 +98,8 @@ public interface CourseControllerDocs {
                     @ApiResponse(responseCode = "200", description = "검색 결과 반환")
     })
     @GetMapping(value = "/search")
-    CommonResponse<List<CourseResponse>> searchCourses(
+    ResponseEntity<CommonResponse<List<CourseResponse>>> searchCourses(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails principal,
             @RequestParam("keyword") String keyword
     );
 
@@ -146,7 +147,9 @@ public interface CourseControllerDocs {
             }
     )
     @GetMapping("/all")
-    ResponseEntity<CommonResponse<List<CourseResponse>>> getAllCourses();
+    ResponseEntity<CommonResponse<List<CourseResponse>>> getAllCourses(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails principal
+    );
 
     // 7. 코스 상세 조회
     @Operation(

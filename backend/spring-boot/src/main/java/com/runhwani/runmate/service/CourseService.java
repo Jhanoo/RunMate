@@ -18,15 +18,15 @@ public interface CourseService {
     void deleteCourse(UUID courseId, UUID userId)
         throws EntityNotFoundException, IOException;
     // 3. 코스 검색
-    List<CourseResponse> searchCourses(String keyword);
+    List<CourseResponse> searchCourses(UUID userId, String keyword);
     // 4. 최근 코스 조회
     List<CourseResponse> getRecentCourses(UUID userId);
     // 5. 내가 등록한 코스 조회
     List<CourseResponse> getCoursesCreatedBy(UUID userId);
     // 6. 모든 코스 조회
-    List<CourseResponse> getAllCourses();
+    List<CourseResponse> getAllCourses(UUID userId);
     // 7. 코스 상세 조회
-    CourseDetailResponse getCourseDetail(UUID courseId, UUID userId);
+    CourseDetailResponse getCourseDetail(UUID userId, UUID courseId);
     // 8. 코스 좋아요 업데이트
     CourseLikeResponse updateCourseLike(UUID userId, UUID courseId);
 }

@@ -21,11 +21,11 @@ public interface CourseDao {
     List<CourseResponse> searchCourses(Map<String, Object> params);
     // 4. 최근 코스 조회
     List<UUID> findRecentCourseIds(@Param("userId") UUID userId);
-    List<CourseResponse> findCoursesByIds(@Param("courseIds") List<UUID> courseIds);
+    List<CourseResponse> findCoursesByIds(@Param("courseIds") List<UUID> courseIds, @Param("userId") UUID userId);
     // 5. 내가 등록한 코스 조회
     List<CourseResponse> findCoursesCreatedByUser(@Param("userId") UUID userId);
     // 6. 전체 코스 조회
-    List<CourseResponse> findAllCourses();
+    List<CourseResponse> findAllCourses(@Param("userId") UUID userId);
     // 7. 코스 상세 조회
     Optional<Course> findCourseById(@Param("courseId") UUID courseId);
     int countLikesByCourseId(@Param("courseId") UUID courseId);

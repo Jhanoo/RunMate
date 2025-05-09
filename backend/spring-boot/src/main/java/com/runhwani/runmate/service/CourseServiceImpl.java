@@ -73,7 +73,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public List<CourseResponse> searchCourses(String keyword) {
+    public List<CourseResponse> searchCourses(UUID userId, String keyword) {
         // 빈 검색어 방지 로직
         if (keyword == null || keyword.trim().isEmpty()) {
             throw new IllegalArgumentException("검색어가 공백입니다.");
@@ -84,6 +84,7 @@ public class CourseServiceImpl implements CourseService {
         params.put("name", pattern);
         params.put("nickname", pattern);
         params.put("location", pattern);
+        params.put("userId", userId);
 
         return courseDao.searchCourses(params);
     }
@@ -96,7 +97,7 @@ public class CourseServiceImpl implements CourseService {
         if (recentCourseIds.isEmpty()) return Collections.emptyList();
 
         // 코스 상세 정보 조회
-        return courseDao.findCoursesByIds(recentCourseIds);
+        return courseDao.findCoursesByIds(recentCourseIds, userId);
     }
 
     // 5. 내가 등록한 코스 조회
@@ -107,18 +108,19 @@ public class CourseServiceImpl implements CourseService {
 
     // 6. 코스 전체 조회
     @Override
-    public List<CourseResponse> getAllCourses() {
-        return courseDao.findAllCourses();
+    public List<CourseResponse> getAllCourses(UUID userId) {
+        return courseDao.findAllCourses(userId);
     }
 
     // 7. 코스 상세 조회
     @Override
-    public CourseDetailResponse getCourseDetail(UUID courseId, UUID userId) {
+    public CourseDetailResponse getCourseDetail(UUID userId, UUID courseId) {
         // 1. 코스 정보 + GPX + 좋아요 수 조회
         Course course = courseDao.findCourseById(courseId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 코스가 존재하지 않습니다."));
 
         int likeCount = courseDao.countLikesByCourseId(courseId);
+        boolean liked = courseDao.existsCourseLike(userId, courseId);
 
         // 2. 평균 페이스 조회
         Double avgPace = courseDao.getAverageUserPace(); // 전체 사용자
@@ -148,6 +150,7 @@ public class CourseServiceImpl implements CourseService {
                 .avgEstimatedTime(avgEstimatedTime)
                 .userEstimatedTime(userEstimatedTime)
                 .likes(likeCount)
+                .liked(liked)
                 .build();
     }
 

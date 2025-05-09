@@ -20,4 +20,5 @@ public class CourseDetailResponse {
     private Integer avgEstimatedTime;   // 초 단위
     private Integer userEstimatedTime;  // 초 단위
     private int likes;
+    private boolean liked;
 }
