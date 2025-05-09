@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/api/users")
 public interface UserControllerDocs {
 
-    @Operation(summary = "현재 로그인한 사용자 프로필 조회", description = "JWT 토큰을 통해 현재 로그인한 사용자의 프로필 정보를 조회합니다.")
+    @Operation(summary = "사용자 프로필 조회", description = "JWT 토큰을 통해 현재 로그인한 사용자의 프로필 정보를 조회합니다.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "프로필 조회 성공", 
                     content = @Content(mediaType = "application/json",
