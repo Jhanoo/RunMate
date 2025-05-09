@@ -9,13 +9,14 @@
         android:id="@+id/toolbar_place_search"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
+        android:fontFamily="@font/pretendard_medium"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="@drawable/ic_back"
         app:title="그룹 생성하기"
         app:titleCentered="true"
-        app:titleTextAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+        app:titleTextAppearance="@style/ToolbarTitleFont"
         app:titleTextColor="@android:color/black" />
 
     <androidx.cardview.widget.CardView
@@ -54,6 +55,7 @@
                 android:layout_weight="1"
                 android:background="@null"
                 android:hint="검색어를 입력해주세요"
+                android:fontFamily="@font/pretendard_medium"
                 android:imeOptions="actionSearch"
                 android:inputType="text"
                 android:paddingStart="16dp"

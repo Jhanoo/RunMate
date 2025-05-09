@@ -13,9 +13,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="@drawable/ic_back"
+        android:fontFamily="@font/pretendard_medium"
         app:title="그룹 생성하기"
         app:titleCentered="true"
-        app:titleTextAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+        app:titleTextAppearance="@style/ToolbarTitleFont"
         app:titleTextColor="@android:color/black" />
 
     <!-- 그룹명 -->
@@ -26,6 +27,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="24dp"
         android:text="그룹명"
+        android:fontFamily="@font/pretendard_medium"
         android:textColor="@android:color/black"
         android:textSize="16sp"
         app:layout_constraintStart_toStartOf="parent"
@@ -55,6 +57,7 @@
         android:layout_marginTop="24dp"
         android:text="코스"
         android:textColor="@android:color/black"
+        android:fontFamily="@font/pretendard_medium"
         android:textSize="16sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/et_group_name" />
@@ -67,6 +70,7 @@
         android:text="원하는 코스가 있을 경우, 선택해주세요"
         android:textColor="#757575"
         android:textSize="12sp"
+        android:fontFamily="@font/pretendard_regular"
         app:layout_constraintBottom_toBottomOf="@+id/tv_course_label"
         app:layout_constraintStart_toEndOf="@+id/tv_course_label"
         app:layout_constraintTop_toTopOf="@+id/tv_course_label" />
@@ -100,6 +104,7 @@
         android:layout_marginTop="24dp"
         android:text="일시"
         android:textColor="@android:color/black"
+        android:fontFamily="@font/pretendard_medium"
         android:textSize="16sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/et_course" />
@@ -112,6 +117,7 @@
         android:text="코스를 선택하지 않은 경우, 입력해주세요"
         android:textColor="#757575"
         android:textSize="12sp"
+        android:fontFamily="@font/pretendard_regular"
         app:layout_constraintBottom_toBottomOf="@+id/tv_date_label"
         app:layout_constraintStart_toEndOf="@+id/tv_date_label"
         app:layout_constraintTop_toTopOf="@+id/tv_date_label" />
@@ -131,6 +137,7 @@
         android:cursorVisible="false"
         android:focusable="false"
         android:clickable="true"
+        android:fontFamily="@font/pretendard_regular"
         android:focusableInTouchMode="false"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -146,6 +153,7 @@
         android:text="시작장소"
         android:textColor="@android:color/black"
         android:textSize="16sp"
+        android:fontFamily="@font/pretendard_medium"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/et_date" />
 
@@ -157,6 +165,7 @@
         android:text="코스를 선택하지 않은 경우, 입력해주세요"
         android:textColor="@color/description_text"
         android:textSize="12sp"
+        android:fontFamily="@font/pretendard_regular"
         app:layout_constraintBottom_toBottomOf="@+id/tv_location_label"
         app:layout_constraintStart_toEndOf="@+id/tv_location_label"
         app:layout_constraintTop_toTopOf="@+id/tv_location_label" />
@@ -177,6 +186,7 @@
         android:clickable="true"
         android:focusableInTouchMode="false"
         android:cursorVisible="false"
+        android:fontFamily="@font/pretendard_regular"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_location_label" />
@@ -195,6 +205,7 @@
         android:textColor="@android:color/white"
         android:textSize="16sp"
         app:cornerRadius="8dp"
+        android:fontFamily="@font/pretendard_bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
