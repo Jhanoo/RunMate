@@ -78,4 +78,14 @@ public class GroupServiceImpl implements GroupService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "현재 가입한 그룹이 없습니다.");
         }
     }
+
+    @Override
+    @Transactional
+    public void finishGroup(UUID userId) {
+        int updated = groupDao.updateIsFinished(userId);
+        if (updated == 0) {
+            // 해당 그룹 참여 기록이 없으면 404
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "현재 가입한 그룹이 없습니다.");
+        }
+    }
 }

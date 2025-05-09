@@ -107,4 +107,25 @@ public interface GroupControllerDocs {
     )
     @DeleteMapping("/leave")
     ResponseEntity<CommonResponse<Void>> leaveGroup(@AuthenticationPrincipal UserDetails principal);
+
+    @Operation(
+            summary = "완주 후 그룹 나가기",
+            description = "사용자가 완주 후 그룹 나가기를 눌러 isFinished=true로 갱신",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "갱신 성공"),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "그룹 멤버 정보가 없습니다.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(
+                                            name = "NotFound",
+                                            value = "{\"message\": \"그룹 멤버 정보가 없습니다.\", \"data\": null}"
+                                    )
+                            )
+                    )
+            }
+    )
+    @PostMapping("/finish")
+    ResponseEntity<CommonResponse<Void>> finishGroup(@AuthenticationPrincipal UserDetails principal);
 }

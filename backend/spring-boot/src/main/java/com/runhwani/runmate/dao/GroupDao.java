@@ -51,4 +51,9 @@ public interface GroupDao {
      * */
     int deleteMember(@Param("userId") UUID userId);
 
+    /**
+     * 완주 후 isFinished를 true로 변경
+     * @param userId 나의 ID
+     * */
+    int updateIsFinished(UUID userId);
 }

@@ -36,4 +36,9 @@ public interface GroupService {
      * 현재 가입한 그룹 나가기(탈퇴)
      */
     void leaveGroup(UUID userId);
+
+    /**
+     * 완주 후 그룹 나가기(isfinished = true)
+     * */
+    void finishGroup(UUID userId);
 }

@@ -74,7 +74,7 @@ CREATE TABLE	group_members (
 	group_id		UUID				NOT NULL REFERENCES groups(group_id),
 	user_id			UUID				NOT NULL REFERENCES users(user_id),
 	joined_at		TIMESTAMPTZ			NOT NULL DEFAULT now(),
-	is_leaved		BOOLEAN				NOT NULL DEFAULT FALSE
+	is_finished		BOOLEAN				NOT NULL DEFAULT FALSE
 );
 
 -- 달리기 기록 테이블
