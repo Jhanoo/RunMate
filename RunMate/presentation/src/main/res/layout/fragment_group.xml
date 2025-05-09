@@ -17,20 +17,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed" />
 
-    <TextView
-        android:id="@+id/tv_no_group_message_group"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:gravity="center"
-        android:fontFamily="@font/pretendard_bold"
-        android:text="현재 가입한 그룹이 없습니다"
-        android:textColor="@color/text"
-        android:textSize="24sp"
-        app:layout_constraintBottom_toTopOf="@+id/tv_create_join_group_group"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/img_sad_emoji_group" />
 
 
     <TextView

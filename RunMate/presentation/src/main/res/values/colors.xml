@@ -21,5 +21,6 @@
     <color name="color_button_secondary">#D6EFE4</color>
     <color name="finance_budget_over_text">#F7726D</color>
     <color name="color_edit_text">#F4F4F4</color>
+    <color name="caption">#BBBAB9</color>
 
 </resources>

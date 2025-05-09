@@ -14,6 +14,7 @@ val restApiKey: String = properties.getProperty("rest_api_key") ?: ""
 val nativeApiKey: String = properties.getProperty("native_api_key") ?: ""
 val serverUrl: String = properties.getProperty("base_url") ?: ""
 val kakaoApiUrl: String = properties.getProperty("kakao_url") ?: ""
+val manifestNativeAppKey: String = properties.getProperty("manifest_native_app_key") ?: ""
 
 android {
     namespace = "com.D107.runmate"
@@ -40,6 +41,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            manifestPlaceholders["NATIVE_API_KEY"] = manifestNativeAppKey
+        }
+        debug {
+            isMinifyEnabled = false
+            manifestPlaceholders["NATIVE_API_KEY"] = manifestNativeAppKey
         }
     }
     compileOptions {
@@ -77,4 +83,8 @@ dependencies {
 
     //Timber
     implementation("com.jakewharton.timber:timber:5.0.1")
+}
+
+kapt {
+    correctErrorTypes = true
 }

@@ -12,11 +12,26 @@ class ApiResponseHandler {
         .build()
     private val errorAdapter = moshi.adapter(ErrorResponse::class.java)
 
-    suspend fun <T> handle(call: suspend () -> Response<T>): Flow<ApiResponse<T>> {
+    suspend fun <T> handle(call: suspend () -> Response<ApiBaseResponse<T>>): Flow<ApiResponse<T>> {
         return flow {
             val response = call.invoke()
-            if (response.isSuccessful && response.body() != null) {
-                emit(ApiResponse.Success(response.body()!!))
+            if (response.isSuccessful) {
+                val body = response.body()
+                if(body?.data != null) {
+                    emit(ApiResponse.Success(body.data))
+                } else {
+                    emit(
+                        ApiResponse.Error(
+                            ErrorResponse(
+                                status = response.code().toString(),
+                                error = "NO_DATA",
+                                code = "NO_DATA",
+                                message = body?.message ?: "데이터가 없습니다."
+                            )
+                        )
+                    )
+                }
+
             } else {
                 val errorBody = response.errorBody()?.string()
                 val errorResponse: ErrorResponse? = errorBody?.let { errorAdapter.fromJson(it) }

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".running.view.CourseSearchFragment">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="코스 검색하기"
+        android:gravity="center"
+        android:textColor="@color/text"
+        android:textSize="20sp"
+        android:fontFamily="@font/pretendard_medium"
+        android:letterSpacing="-0.02"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_back"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/btn_back" />
+
+    <ImageView
+        android:id="@+id/btn_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_all_arrow"
+        android:padding="16dp"
+        android:layout_marginStart="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/et_search"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_all_search"
+        android:drawableStart="@drawable/ic_course_search"
+        android:paddingStart="12dp"
+        android:layout_marginHorizontal="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_back" />
+
+<!--    <com.google.android.material.button.MaterialButton-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:backgroundTint="@color/primary"-->
+<!--        android:textColor="@color/white"-->
+<!--        app:cornerRadius="8dp"-->
+<!--        android:text="필터"-->
+<!--        android:gravity="center"-->
+<!--        android:drawableStart="@drawable/ic_course_filter"-->
+<!--        app:layout_constraintEnd_toEndOf="@+id/et_search"-->
+<!--        app:layout_constraintTop_toBottomOf="@+id/et_search" />-->
+
+</androidx.constraintlayout.widget.ConstraintLayout>
