@@ -41,4 +41,24 @@ public interface HistoryDao {
      * 그룹 멤버 프로필 이미지 조회
      */
     List<String> findGroupMemberProfilesByGroupId(@Param("groupId") UUID groupId);
+
+    /**
+     * 히스토리 ID로 상세 정보 조회
+     */
+    Map<String, Object> findHistoryDetailById(@Param("historyId") UUID historyId);
+    
+    /**
+     * 그룹 ID로 그룹 러닝 참여자 기록 조회
+     */
+    List<Map<String, Object>> findGroupRunnersByGroupId(@Param("groupId") UUID groupId);
+    
+    /**
+     * 히스토리 ID와 사용자 ID로 내 기록 조회
+     */
+    Map<String, Object> findMyRunDetail(@Param("historyId") UUID historyId, @Param("userId") UUID userId);
+    
+    /**
+     * 코스 ID와 사용자 ID로 코스 추가 여부 확인
+     */
+    boolean isAddedToCourse(@Param("courseId") UUID courseId, @Param("userId") UUID userId);
 }

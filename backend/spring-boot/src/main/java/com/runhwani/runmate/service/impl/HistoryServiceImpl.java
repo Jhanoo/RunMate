@@ -1,8 +1,7 @@
 package com.runhwani.runmate.service.impl;
 
 import com.runhwani.runmate.dao.HistoryDao;
-import com.runhwani.runmate.dto.response.history.HistoryListResponse;
-import com.runhwani.runmate.dto.response.history.HistoryResponse;
+import com.runhwani.runmate.dto.response.history.*;
 import com.runhwani.runmate.exception.CustomException;
 import com.runhwani.runmate.exception.ErrorCode;
 import com.runhwani.runmate.security.SecurityUtil;
@@ -67,6 +66,63 @@ public class HistoryServiceImpl implements HistoryService {
                 .build();
     }
     
+    @Override
+    @Transactional(readOnly = true)
+    public HistoryDetailResponse getHistoryDetail(UUID historyId) {
+        // 현재 인증된 사용자의 ID 가져오기
+        String userIdStr = SecurityUtil.getCurrentUserEmail()
+                .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED_USER));
+        
+        // UUID로 변환
+        UUID userId;
+        try {
+            userId = UUID.fromString(userIdStr);
+        } catch (IllegalArgumentException e) {
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
+        }
+        
+        // 히스토리 상세 정보 조회
+        Map<String, Object> historyDetail = historyDao.findHistoryDetailById(historyId);
+        if (historyDetail == null) {
+            throw new CustomException(ErrorCode.ENTITY_NOT_FOUND, "히스토리 정보를 찾을 수 없습니다: " + historyId);
+        }
+        
+        // 그룹 ID 가져오기
+        UUID groupId = convertToUUID(historyDetail.get("group_id"));
+        if (groupId == null) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST, "그룹 러닝 기록이 아닙니다.");
+        }
+        
+        // 그룹 러닝 참여자 기록 조회
+        List<Map<String, Object>> groupRunners = historyDao.findGroupRunnersByGroupId(groupId);
+        List<GroupRunnerResponse> groupRunResponses = groupRunners.stream()
+                .map(this::convertToGroupRunnerResponse)
+                .collect(Collectors.toList());
+        
+        // 내 상세 기록 조회
+        Map<String, Object> myRunDetail = historyDao.findMyRunDetail(historyId, userId);
+        if (myRunDetail == null) {
+            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS, "해당 기록에 접근 권한이 없습니다.");
+        }
+        
+        // 코스 추가 여부 확인
+        UUID courseId = convertToUUID(myRunDetail.get("course_id"));
+        boolean addedToCourse = false;
+        if (courseId != null) {
+            addedToCourse = historyDao.isAddedToCourse(courseId, userId);
+        }
+        
+        // 내 상세 기록 변환
+        MyRunDetailResponse myRunResponse = convertToMyRunDetailResponse(myRunDetail, addedToCourse);
+        
+        // 응답 객체 생성
+        return HistoryDetailResponse.builder()
+                .historyId(historyId)
+                .groupRun(groupRunResponses)
+                .myRun(myRunResponse)
+                .build();
+    }
+    
     /**
      * Map 형태의 히스토리 데이터를 HistoryResponse DTO로 변환
      */
@@ -103,6 +159,33 @@ public class HistoryServiceImpl implements HistoryService {
                 .duration(duration)
                 .members(members)
                 .myDistance(distance)
+                .build();
+    }
+    
+    /**
+     * 그룹 러닝 참여자 기록 변환
+     */
+    private GroupRunnerResponse convertToGroupRunnerResponse(Map<String, Object> runner) {
+        return GroupRunnerResponse.builder()
+                .userId(convertToUUID(runner.get("user_id")))
+                .nickname((String) runner.get("nickname"))
+                .distance(convertToDouble(runner.get("distance")))
+                .time(convertToLong(runner.get("time")))
+                .avgPace(convertToDouble(runner.get("avg_pace")))
+                .build();
+    }
+    
+    /**
+     * 내 상세 기록 변환
+     */
+    private MyRunDetailResponse convertToMyRunDetailResponse(Map<String, Object> myRun, boolean addedToCourse) {
+        return MyRunDetailResponse.builder()
+                .distance(convertToDouble(myRun.get("distance")))
+                .time(convertToLong(myRun.get("time")))
+                .avgPace(convertToDouble(myRun.get("avg_pace")))
+                .avgBpm(convertToDouble(myRun.get("avg_bpm")))
+                .calories(convertToDouble(myRun.get("calories")))
+                .addedToCourse(addedToCourse)
                 .build();
     }
     
@@ -150,5 +233,21 @@ public class HistoryServiceImpl implements HistoryService {
             return ((Number) obj).doubleValue();
         }
         return Double.parseDouble(obj.toString());
+    }
+    
+    /**
+     * Object를 Long으로 변환 (null 처리 포함)
+     */
+    private long convertToLong(Object obj) {
+        if (obj == null) {
+            return 0;
+        }
+        if (obj instanceof Long) {
+            return (Long) obj;
+        }
+        if (obj instanceof Number) {
+            return ((Number) obj).longValue();
+        }
+        return Long.parseLong(obj.toString());
     }
 } 

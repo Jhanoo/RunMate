@@ -85,4 +85,75 @@
         JOIN group_members gm ON u.user_id = gm.user_id
         WHERE gm.group_id = #{groupId}
     </select>
+
+    <select id="findHistoryDetailById" resultType="map">
+        SELECT 
+            h.history_id,
+            h.user_id,
+            h.course_id,
+            h.group_id,
+            h.gpx_file,
+            h.start_location,
+            h.start_time,
+            h.end_time,
+            h.distance,
+            h.avg_bpm,
+            h.avg_pace,
+            h.avg_cadence,
+            h.avg_elevation,
+            h.calories,
+            h.created_at,
+            c.course_name,
+            g.group_name
+        FROM 
+            histories h
+        LEFT JOIN 
+            courses c ON h.course_id = c.course_id
+        LEFT JOIN 
+            groups g ON h.group_id = g.group_id
+        WHERE 
+            h.history_id = #{historyId}
+    </select>
+    
+    <select id="findGroupRunnersByGroupId" resultType="map">
+        SELECT 
+            h.user_id,
+            u.nickname,
+            h.distance,
+            EXTRACT(EPOCH FROM (h.end_time - h.start_time)) AS time,
+            h.avg_pace
+        FROM 
+            histories h
+        JOIN 
+            users u ON h.user_id = u.user_id
+        WHERE 
+            h.group_id = #{groupId}
+        ORDER BY 
+            h.distance DESC, time ASC
+    </select>
+    
+    <select id="findMyRunDetail" resultType="map">
+        SELECT 
+            h.distance,
+            EXTRACT(EPOCH FROM (h.end_time - h.start_time)) AS time,
+            h.avg_pace,
+            h.avg_bpm,
+            h.calories,
+            h.course_id
+        FROM 
+            histories h
+        WHERE 
+            h.history_id = #{historyId}
+            AND h.user_id = #{userId}
+    </select>
+    
+    <select id="isAddedToCourse" resultType="boolean">
+        SELECT 
+            CASE WHEN COUNT(*) > 0 THEN true ELSE false END
+        FROM 
+            courses
+        WHERE 
+            course_id = #{courseId}
+            AND created_by = #{userId}
+    </select>
 </mapper>
