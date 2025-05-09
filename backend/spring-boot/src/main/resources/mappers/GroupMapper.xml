@@ -92,17 +92,37 @@
     </select>
 
     <!-- 그룹 탈퇴: 레코드 삭제 -->
-    <delete id="deleteLatestByUserId" parameterType="java.util.UUID">
-        DELETE FROM group_members
-        WHERE member_id IN (
-            SELECT member_id
-            FROM group_members
-            WHERE user_id    = #{userId}
-              AND is_finished = FALSE
-            ORDER BY joined_at DESC
-            LIMIT 1
-        )
-    </delete>
+    <update id="deleteMember" parameterType="java.util.UUID">
+        WITH target AS (
+            -- ① 해당 사용자의 활성(가장 최근) 그룹 멤버 정보
+            SELECT gm.group_id,
+                   gm.user_id,
+                   g.leader_id
+            FROM group_members gm
+                     JOIN groups g ON g.group_id = gm.group_id
+            WHERE gm.user_id = #{userId}
+              AND gm.is_finished = FALSE
+            ORDER BY gm.joined_at DESC
+            LIMIT 1),
+             del_group AS (
+                 -- ② 그룹장이면 groups 테이블에서 그룹 삭제
+                 DELETE FROM groups
+                     WHERE group_id = (SELECT group_id
+                                       FROM target
+                                       WHERE leader_id = #{userId})
+                     RETURNING group_id)
+        -- ③ 나머지: 그룹장일 때는 del_group.group_id(=전체 멤버), 아니면 target.group_id(=나만)
+        DELETE
+        FROM group_members
+        WHERE
+           -- 리더인 경우: 그룹에 속한 모든 멤버 삭제
+            (EXISTS (SELECT 1 FROM del_group)
+                AND group_id = (SELECT group_id FROM del_group))
+           OR
+           -- 일반 멤버인 경우: 해당 멤버 레코드만 삭제
+            (NOT EXISTS (SELECT 1 FROM del_group)
+                AND user_id = (SELECT target.user_id FROM target));
+    </update>
 
     <!-- 완주 후 그룹 나가기 isFinished=true로 변경 -->
     <update id="updateIsFinished" parameterType="java.util.UUID">
