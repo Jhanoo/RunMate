@@ -35,7 +35,7 @@ playServicesLocation = "21.3.0"
 runtimeAndroid = "1.7.8"
 jetbrainsKotlinJvm = "1.9.0"
 playServicesWearable = "19.0.0"
-composeBom = "2024.04.01"
+composeBom = "2023.08.00"
 composeMaterial = "1.2.1"
 composeFoundation = "1.2.1"
 activityCompose = "1.7.2"
@@ -45,6 +45,7 @@ material3Android = "1.3.2"
 junitKtx = "1.2.1"
 uiTestJunit4Android = "1.8.0"
 hiltCommon = "1.2.0"
+uiTestJunit4 = "1.4.3"
 
 [libraries]
 android = { module = "com.kakao.maps.open:android", version.ref = "android" }
@@ -88,7 +89,7 @@ androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
-androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4", version.ref = "uiTestJunit4" }
 androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
 androidx-compose-foundation = { group = "androidx.wear.compose", name = "compose-foundation", version.ref = "composeFoundation" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }

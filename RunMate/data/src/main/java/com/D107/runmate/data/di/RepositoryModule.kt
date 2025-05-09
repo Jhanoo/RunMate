@@ -17,7 +17,7 @@ import javax.inject.Singleton
 internal abstract class RepositoryModule {
     @Binds
     @Singleton
-    abstract fun bindDataStoreRepository(
+    abstract fun bindRunningTrackingRepository(
         runningTrackingRepositoryImpl: RunningTrackingRepositoryImpl
     ): RunningTrackingRepository
 
