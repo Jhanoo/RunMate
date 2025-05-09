@@ -9,12 +9,12 @@ import androidx.navigation.fragment.findNavController
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.components.CustomDatePicker
 import com.D107.runmate.presentation.components.CustomGenderPicker
-import com.D107.runmate.presentation.databinding.FragmentJoin2Binding
+import com.D107.runmate.presentation.databinding.FragmentPersonalJoinBinding
 import com.ssafy.locket.presentation.base.BaseFragment
 
-class Join2Fragment : BaseFragment<FragmentJoin2Binding>(
-    FragmentJoin2Binding::bind,
-    R.layout.fragment_join2
+class Join2Fragment : BaseFragment<FragmentPersonalJoinBinding>(
+    FragmentPersonalJoinBinding::bind,
+    R.layout.fragment_personal_join
 ) {
     private var selectedYear = 0
     private var selectedMonth = 0
@@ -29,28 +29,12 @@ class Join2Fragment : BaseFragment<FragmentJoin2Binding>(
             findNavController().popBackStack()
         }
 
-        binding.birthDateButton.apply {
-            setOnTouchListener { v, event ->
-                when (event.action) {
-                    MotionEvent.ACTION_UP -> {
-                        showDatePicker()
-                        true
-                    }
-                    else -> false
-                }
-            }
+        binding.birthDateButton.setOnClickListener{
+            showDatePicker()
         }
 
-        binding.genderButton.apply {
-            setOnTouchListener { v, event ->
-                when (event.action) {
-                    MotionEvent.ACTION_UP -> {
-                        showGenderPicker()
-                        true
-                    }
-                    else -> false
-                }
-            }
+        binding.genderButton.setOnClickListener {
+            showGenderPicker()
         }
 
         binding.signupButton.setOnClickListener {

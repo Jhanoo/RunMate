@@ -44,7 +44,7 @@
 
         <TextView
             android:id="@+id/emailTextView"
-            style="@style/mediumTextStyle"
+            android:fontFamily="@font/pretendard_medium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="이메일"
@@ -65,7 +65,7 @@
             tools:layout_editor_absoluteX="0dp" />
 
         <TextView
-            style="@style/mediumTextStyle"
+            android:fontFamily="@font/pretendard_medium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
@@ -89,7 +89,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/loginBtn"
-        style="@style/boldTextStyle"
+        android:textStyle="bold"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="26dp"
@@ -103,7 +103,7 @@
 
     <TextView
         android:id="@+id/joinBtn"
-        style="@style/boldTextStyle"
+        android:textStyle="bold"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"

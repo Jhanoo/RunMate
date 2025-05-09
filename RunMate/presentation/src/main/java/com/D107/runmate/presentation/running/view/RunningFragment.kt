@@ -262,6 +262,8 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
         super.onResume()
         binding.mapView.resume()
 
+        (activity as? MainActivity)?.showHamburgerBtn()
+
         when (mainViewModel.trackingStatus.value) {
             TrackingStatus.STOPPED -> {
                 // 종료

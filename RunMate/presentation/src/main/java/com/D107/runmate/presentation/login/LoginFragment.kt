@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.D107.runmate.presentation.MainActivity
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentHistoryBinding
 import com.D107.runmate.presentation.databinding.FragmentLoginBinding

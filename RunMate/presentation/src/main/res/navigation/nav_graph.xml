@@ -38,7 +38,7 @@
         android:id="@+id/JoinFragment"
         android:name="com.D107.runmate.presentation.login.JoinFragment"
         android:label="fragment_join"
-        tools:layout="@layout/fragment_join">
+        tools:layout="@layout/fragment_id_pw_join">
 
         <action
             android:id="@+id/action_joinFragment_to_join2Fragment"
@@ -49,7 +49,7 @@
         android:id="@+id/Join2Fragment"
         android:name="com.D107.runmate.presentation.login.Join2Fragment"
         android:label="fragment_join2"
-        tools:layout="@layout/fragment_join2">
+        tools:layout="@layout/fragment_personal_join">
 
         <action
             android:id="@+id/action_join2Fragment_to_loginFragment"
