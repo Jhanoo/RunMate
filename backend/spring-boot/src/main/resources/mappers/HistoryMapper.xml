@@ -41,4 +41,48 @@
         WHERE user_id = #{userId}
         ORDER BY created_at DESC
     </select>
+    
+    <select id="findHistoryDetailsWithPaging" resultType="map">
+        SELECT 
+            h.history_id,
+            h.user_id,
+            h.course_id,
+            h.group_id,
+            h.gpx_file,
+            h.start_location,
+            h.start_time,
+            h.end_time,
+            h.distance,
+            h.avg_bpm,
+            h.avg_pace,
+            h.avg_cadence,
+            h.avg_elevation,
+            h.calories,
+            h.created_at,
+            c.course_name,
+            g.group_name
+        FROM 
+            histories h
+        LEFT JOIN 
+            courses c ON h.course_id = c.course_id
+        LEFT JOIN 
+            groups g ON h.group_id = g.group_id
+        WHERE 
+            h.user_id = #{userId}
+        ORDER BY 
+            h.start_time DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+    
+    <select id="countByUserId" resultType="long">
+        SELECT COUNT(*) FROM histories
+        WHERE user_id = #{userId}
+    </select>
+    
+    <select id="findGroupMemberProfilesByGroupId" resultType="string">
+        SELECT u.profile_image
+        FROM users u
+        JOIN group_members gm ON u.user_id = gm.user_id
+        WHERE gm.group_id = #{groupId}
+    </select>
 </mapper>

@@ -1,0 +1,31 @@
+package com.runhwani.runmate.controller;
+
+import com.runhwani.runmate.controller.docs.HistoryControllerDocs;
+import com.runhwani.runmate.dto.common.CommonResponse;
+import com.runhwani.runmate.dto.response.history.HistoryListResponse;
+import com.runhwani.runmate.service.HistoryService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/histories")
+@RequiredArgsConstructor
+@Slf4j
+public class HistoryController implements HistoryControllerDocs {
+
+    private final HistoryService historyService;
+
+    @Override
+    @GetMapping
+    public ResponseEntity<CommonResponse<HistoryListResponse>> getHistoryList(
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int size) {
+        
+        // 서비스 호출
+        HistoryListResponse response = historyService.getHistoryList(page, size);
+        
+        return ResponseEntity.ok(new CommonResponse<>("히스토리 목록 조회 성공", response));
+    }
+} 
