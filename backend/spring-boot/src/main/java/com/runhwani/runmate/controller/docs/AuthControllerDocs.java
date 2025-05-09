@@ -61,7 +61,6 @@ public interface AuthControllerDocs {
                                                 "message": "로그인 성공",
                                                 "data": {
                                                     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-                                                    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
                                                 }
                                             }
                                             """
