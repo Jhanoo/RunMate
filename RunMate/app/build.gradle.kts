@@ -72,4 +72,7 @@ dependencies {
 
     // KakaoMap
     implementation(libs.android)
+
+    //Timber
+    implementation("com.jakewharton.timber:timber:5.0.1")
 }
