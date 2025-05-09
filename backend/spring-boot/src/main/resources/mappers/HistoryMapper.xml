@@ -22,12 +22,16 @@
     </resultMap>
 
     <insert id="insert" parameterType="com.runhwani.runmate.model.History">
-        INSERT INTO histories (history_id, user_id, course_id, group_id, gpx_file, start_location,
-                               start_time, end_time, distance, avg_bpm, avg_pace, avg_cadence,
-                               avg_elevation, calories, created_at)
-        VALUES (#{historyId}, #{userId}, #{courseId}, #{groupId}, #{gpxFile}, #{startLocation},
-                #{startTime}, #{endTime}, #{distance}, #{avgBpm}, #{avgPace}, #{avgCadence},
-                #{avgElevation}, #{calories}, #{createdAt})
+        INSERT INTO histories (history_id, user_id,
+            <if test="courseId != null">course_id,</if>
+            group_id, gpx_file, start_location,
+            start_time, end_time, distance, avg_bpm, avg_pace, avg_cadence,
+            avg_elevation, calories, created_at)
+        VALUES (#{historyId}, #{userId},
+            <if test="courseId != null">#{courseId},</if>
+            #{groupId}, #{gpxFile}, #{startLocation},
+            #{startTime}, #{endTime}, #{distance}, #{avgBpm}, #{avgPace}, #{avgCadence},
+            #{avgElevation}, #{calories}, #{createdAt})
     </insert>
 
 
