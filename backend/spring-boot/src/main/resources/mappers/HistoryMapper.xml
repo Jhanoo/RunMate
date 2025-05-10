@@ -169,4 +169,29 @@
         WHERE history_id = #{historyId}
     </update>
 
+    <select id="findByUserIdSinceDate"
+            parameterType="map"
+            resultType="com.runhwani.runmate.model.History">
+        SELECT
+            history_id       AS historyId,
+            user_id          AS userId,
+            course_id        AS courseId,
+            group_id         AS groupId,
+            gpx_file         AS gpxFile,
+            start_location   AS startLocation,
+            start_time       AS startTime,
+            end_time         AS endTime,
+            distance,
+            avg_bpm          AS avgBpm,
+            avg_pace         AS avgPace,
+            avg_cadence      AS avgCadence,
+            avg_elevation    AS avgElevation,
+            calories,
+            created_at       AS createdAt
+        FROM histories
+        WHERE user_id = #{userId}
+          AND created_at >= #{date}
+        ORDER BY created_at
+    </select>
+
 </mapper>

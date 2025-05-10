@@ -95,3 +95,5 @@ file:
 app:
   base-url: ${APP_BASE_URL:https://k12d107.p.ssafy.io}
 
+openai:
+  api-key: ${OPENAI_API_KEY}

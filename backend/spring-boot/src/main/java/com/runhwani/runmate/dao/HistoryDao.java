@@ -4,13 +4,12 @@ import com.runhwani.runmate.model.History;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.apache.ibatis.annotations.Param;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Mapper
 public interface HistoryDao {
@@ -80,4 +79,17 @@ public interface HistoryDao {
      * 코스 생성 후 히스토리에 코스 ID 추가
      */
     void updateHistoryCourseId(@Param("historyId") UUID historyId, @Param("courseId") UUID courseId);
+
+    /**
+     * 지정한 사용자(userId)가 date 이후에(1달 동안) 기록한 history 리스트를
+     * created_at 오름차순으로 조회합니다.
+     *
+     * @param userId    조회할 사용자 ID
+     * @param date 이 시각 이후의 기록만 포함 (>=)
+     * @return history 목록
+     */
+    List<History> findByUserIdSinceDate(
+            @Param("userId") UUID userId,
+            @Param("date") OffsetDateTime date
+    );
 }
