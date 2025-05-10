@@ -82,7 +82,7 @@
         app:layout_constraintTop_toBottomOf="@+id/idEditText"
         tools:ignore="MissingConstraints" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/birthDateButton"
         style="@style/GrayLineButtonStyle"
         android:layout_width="match_parent"
@@ -115,12 +115,12 @@
         app:layout_constraintTop_toBottomOf="@+id/pwCheckTextView"
         tools:ignore="HardcodedText,MissingConstraints" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/signupButton"
         style="@style/DarkGreenButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="110dp"
+        android:layout_marginBottom="50dp"
         android:text="회원가입"
         app:layout_constraintBottom_toBottomOf="parent" />
 
