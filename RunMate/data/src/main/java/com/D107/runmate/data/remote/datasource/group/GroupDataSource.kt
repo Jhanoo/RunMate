@@ -6,5 +6,5 @@ import com.D107.runmate.data.remote.request.group.GroupCreateRequest
 import retrofit2.Response
 
 interface GroupDataSource  {
-    suspend fun createGroup(createGroupRequest: GroupCreateRequest): Response<ApiResponse<GroupResponse>>
+    suspend fun createGroup(createGroupRequest: GroupCreateRequest): ApiResponse<GroupResponse>
 }

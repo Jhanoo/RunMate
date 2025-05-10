@@ -10,6 +10,6 @@ import javax.inject.Inject
 class GroupDataSourceImpl @Inject constructor(
     private val groupService: GroupService
 ) : GroupDataSource {
-    override suspend fun createGroup(createGroupRequest: GroupCreateRequest): Response<ApiResponse<GroupResponse>> = groupService.createGroup(createGroupRequest)
+    override suspend fun createGroup(createGroupRequest: GroupCreateRequest): ApiResponse<GroupResponse> = groupService.createGroup(createGroupRequest)
 
 }

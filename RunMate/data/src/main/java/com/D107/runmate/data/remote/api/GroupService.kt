@@ -12,5 +12,5 @@ interface GroupService {
     @POST("groups/create")
     suspend fun createGroup(
         @Body createGroupRequest: GroupCreateRequest
-    ): Response<ApiResponse<GroupResponse>>
+    ): ApiResponse<GroupResponse>
 }

@@ -27,15 +27,8 @@ class GroupRepositoryImpl @Inject constructor(
                     longitude = groupCreateInfo.longitude
                 )
             )
-
-            val body = response.body()
-            Timber.d("$body")
-            if (response.isSuccessful && body != null) {
-                if (body is ApiResponse.Success) {
-                    return(body.data.toDomainModel())
-                } else {
-
-                }
+            if(response is ApiResponse.Success){
+                return response.data.toDomainModel()
             }
         } catch (e: Exception) {
             Timber.e("${e.message}")
