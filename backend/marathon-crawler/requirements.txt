@@ -1,0 +1,8 @@
+requests==2.30.0
+beautifulsoup4==4.12.2
+SQLAlchemy==2.0.20
+pandas==2.1.0
+python-dotenv==1.0.0
+psycopg2-binary==2.9.9
+lxml==4.9.3
+apscheduler==3.10.1
