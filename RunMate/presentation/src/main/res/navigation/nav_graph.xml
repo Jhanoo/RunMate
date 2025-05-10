@@ -63,6 +63,13 @@
         android:name="com.D107.runmate.presentation.manager.AIManagerFragment"
         android:label="fragment_a_i_manager"
         tools:layout="@layout/fragment_a_i_manager" />
+
+    <fragment
+        android:id="@+id/AIManagerIntroFragment"
+        android:name="com.D107.runmate.presentation.manager.AIManagerIntroFragment"
+        android:label="fragment_a_i_manager_intro"
+        tools:layout="@layout/fragment_a_i_manager_intro" />
+
     <fragment
         android:id="@+id/runningFragment"
         android:name="com.D107.runmate.presentation.running.view.RunningFragment"

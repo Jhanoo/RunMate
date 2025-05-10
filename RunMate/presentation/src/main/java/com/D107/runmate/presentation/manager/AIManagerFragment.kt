@@ -13,5 +13,14 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
     FragmentAIManagerBinding::bind,
     R.layout.fragment_a_i_manager
 ) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
+        binding.calendar.setTitleFormatter { day ->
+            val year = day.year
+            val month = day.month + 1 // month는 0부터 시작하므로 +1
+            "%04d.%02d".format(year, month)
+        }
+
+    }
 }

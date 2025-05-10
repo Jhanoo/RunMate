@@ -87,6 +87,8 @@ dependencies {
     implementation(libs.glide.v4132)
     implementation(libs.androidx.emoji2)
     implementation(libs.androidx.emoji2.views)
+
+    implementation("com.prolificinteractive:material-calendarview:1.4.3")
 }
 
 kapt {
