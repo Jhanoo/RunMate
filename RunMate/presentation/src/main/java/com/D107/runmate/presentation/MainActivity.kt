@@ -253,7 +253,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
 
     override fun onResume() {
         super.onResume()
-        checkPermission()
+//        checkPermission()
     }
 
     fun getKeyHash() {

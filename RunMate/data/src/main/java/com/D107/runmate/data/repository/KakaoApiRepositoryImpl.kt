@@ -1,6 +1,6 @@
 package com.D107.runmate.data.repository
 
-import com.D107.runmate.data.remote.datasource.KakaoLocalDataSource
+import com.D107.runmate.data.remote.datasource.group.KakaoLocalDataSource
 import com.D107.runmate.data.remote.response.kakaolocal.PlaceResponse.Companion.toDomainModel
 import com.D107.runmate.domain.model.base.ResponseStatus
 import com.D107.runmate.domain.model.group.Place

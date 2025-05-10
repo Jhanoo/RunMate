@@ -30,8 +30,8 @@ data class PlaceResponse(
                 id = id,
                 name = placeName,
                 address = addressName,
-                x = x,
-                y = y
+                x = x.toDouble(),
+                y = y.toDouble()
             )
         }
 

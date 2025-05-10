@@ -1,5 +1,6 @@
 package com.D107.runmate.data.di
 
+import com.D107.runmate.data.remote.api.GroupService
 import com.D107.runmate.data.remote.api.KakaoLocalService
 import dagger.Module
 import dagger.Provides
@@ -16,6 +17,12 @@ class ApiModule {
     @Singleton
     fun kakaoLocalService(@KakaoApiRetrofit retrofit: Retrofit): KakaoLocalService {
         return retrofit.create(KakaoLocalService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun groupService(@InterceptorRetrofit retrofit: Retrofit): GroupService {
+        return retrofit.create(GroupService::class.java)
     }
 
 }
