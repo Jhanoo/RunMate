@@ -5,15 +5,15 @@ import com.squareup.moshi.JsonClass
 import java.time.OffsetDateTime
 
 @JsonClass(generateAdapter = true)
-data class CreateGroupRequest(
+data class GroupCreateRequest(
     @Json(name = "groupName")
     val groupName: String,
 
     @Json(name = "courseId")
-    val courseId: String,
+    val courseId: String?,
 
     @Json(name = "startTime")
-    val startTime: OffsetDateTime,
+    val startTime: String,
 
     @Json(name = "startLocation")
     val startLocation: String,

@@ -11,8 +11,10 @@ class RequestInterceptor constructor(private val dataStore: UserDataStoreSource)
         val token = runBlocking {
             dataStore.accessToken.firstOrNull() ?: ""
         }
+        val authHeaderValue = "Bearer $token"
+
         val requestWithToken = chain.request().newBuilder()
-            .addHeader("Authorization", token)
+            .addHeader("Authorization", authHeaderValue)
             .build()
 
         return chain.proceed(requestWithToken)

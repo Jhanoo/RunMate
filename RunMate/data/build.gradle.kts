@@ -16,8 +16,8 @@ val restApiKey: String = properties.getProperty("rest_api_key") ?: ""
 val nativeApiKey: String = properties.getProperty("native_api_key") ?: ""
 val serverUrl: String = properties.getProperty("base_url") ?: ""
 val kakaoApiUrl: String = properties.getProperty("kakao_url") ?: ""
-
 val baseUrl: String = properties.getProperty("base_url") ?: ""
+val tmpToken: String = properties.getProperty("")?:""
 
 android {
     namespace = "com.D107.runmate.domain"
