@@ -55,6 +55,22 @@ services:
     networks:
       - project-net
 
+  nodejs:
+    build: ./backend/nodejs
+    container_name: runmate-realtime
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - runmate-logs:/app/logs
+    env_file:
+      - .env
+    environment:
+      - PORT=3000
+      - CORS_ORIGIN=*
+    networks:
+      - project-net
+
   nginx:
     image: nginx:stable
     container_name: nginx
