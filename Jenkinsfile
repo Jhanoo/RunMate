@@ -32,6 +32,17 @@ pipeline {
             }
         }
 
+        stage('Build Node.js') {
+            steps {
+                // Node.js 애플리케이션 의존성 설치 및 빌드
+                sh '''
+                    cd backend/nodejs
+                    npm ci
+                    npm run build
+                '''
+            }
+        }
+
         stage('Deploy to EC2') {
             steps {
                 sshagent(['ec2-ssh']) {
@@ -40,6 +51,18 @@ pipeline {
                         scp -o StrictHostKeyChecking=no backend/spring-boot/build/libs/*.jar \
                             ${REMOTE}:${APPDIR}/${JAR_NAME}
                     """
+                    
+                    // Node.js 애플리케이션 디렉토리 복사
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ${REMOTE} 'mkdir -p ${APPDIR}/backend/nodejs'
+                        
+                        scp -o StrictHostKeyChecking=no -r backend/nodejs/package*.json \
+                            backend/nodejs/tsconfig.json \
+                            backend/nodejs/src \
+                            backend/nodejs/Dockerfile \
+                            ${REMOTE}:${APPDIR}/backend/nodejs/
+                    """
+                    
                     // EC2에서 docker-compose 재시작
                     sh """
                         ssh -o StrictHostKeyChecking=no ${REMOTE} \\
