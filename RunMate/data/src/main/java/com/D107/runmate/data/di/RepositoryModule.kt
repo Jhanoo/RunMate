@@ -1,5 +1,6 @@
 package com.D107.runmate.data.di
 
+import com.D107.runmate.data.repository.AuthRepositoryImpl
 import com.D107.runmate.data.repository.DataStoreRepositoryImpl
 import com.D107.runmate.data.repository.GroupRepositoryImpl
 import com.D107.runmate.data.repository.KakaoApiRepositoryImpl
@@ -10,6 +11,7 @@ import com.D107.runmate.domain.repository.running.RunningTrackingRepository
 import com.D107.runmate.data.repository.SmartInsoleRepositoryImpl
 import com.D107.runmate.domain.repository.SmartInsoleRepository
 import com.D107.runmate.domain.repository.group.GroupRepository
+import com.D107.runmate.domain.repository.user.AuthRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -44,5 +46,10 @@ internal abstract class RepositoryModule {
     @Singleton
     abstract fun bindGroupRepository(impl: GroupRepositoryImpl): GroupRepository
 
-
+    // RepositoryModule.kt에 추가할 코드
+    @Binds
+    @Singleton
+    abstract fun bindAuthRepository(
+        authRepositoryImpl: AuthRepositoryImpl
+    ): AuthRepository
 }

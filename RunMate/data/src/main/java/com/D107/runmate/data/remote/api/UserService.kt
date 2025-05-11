@@ -1,17 +1,26 @@
 package com.D107.runmate.data.remote.api
 
-import com.D107.runmate.data.remote.common.ApiBaseResponse
-import retrofit2.Response
+import com.D107.runmate.data.remote.common.ApiResponse
+import com.D107.runmate.data.remote.request.user.LoginRequest
+import com.D107.runmate.data.remote.response.user.LoginResponse
+import com.D107.runmate.data.remote.response.user.SignupResponse
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.http.Body
-import retrofit2.http.DELETE
-import retrofit2.http.GET
-import retrofit2.http.PATCH
-import retrofit2.http.Path
-import retrofit2.http.Query
-
+import retrofit2.http.Multipart
+import retrofit2.http.POST
+import retrofit2.http.Part
 
 interface UserService {
-    // 예시
-//    @GET("users/notifications/all")
-//    suspend fun getNotificationAll(@Query("userId") userId: Int) : Response<ApiBaseResponse<NotificationResponse>>
+    @POST("auth/login")
+    suspend fun login(
+        @Body loginRequest: LoginRequest
+    ): ApiResponse<LoginResponse>
+
+    @Multipart
+    @POST("auth/signup")
+    suspend fun signup(
+        @Part("data") signupRequest: RequestBody,
+        @Part profileImage: MultipartBody.Part?
+    ): ApiResponse<SignupResponse>
 }

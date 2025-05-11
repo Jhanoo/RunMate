@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/splashFragment"
-        android:name="com.D107.runmate.presentation.login.SplashFragment"
+        android:name="com.D107.runmate.presentation.user.view.SplashFragment"
         android:label="fragment_splash"
         tools:layout="@layout/fragment_splash">
         <action
@@ -19,7 +19,7 @@
 
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.D107.runmate.presentation.login.LoginFragment"
+        android:name="com.D107.runmate.presentation.user.view.LoginFragment"
         android:label="fragment_login"
         tools:layout="@layout/fragment_login">
 
@@ -36,7 +36,7 @@
 
     <fragment
         android:id="@+id/JoinFragment"
-        android:name="com.D107.runmate.presentation.login.JoinFragment"
+        android:name="com.D107.runmate.presentation.user.view.JoinFragment"
         android:label="fragment_join"
         tools:layout="@layout/fragment_id_pw_join">
 
@@ -47,7 +47,7 @@
 
     <fragment
         android:id="@+id/Join2Fragment"
-        android:name="com.D107.runmate.presentation.login.Join2Fragment"
+        android:name="com.D107.runmate.presentation.user.view.Join2Fragment"
         android:label="fragment_join2"
         tools:layout="@layout/fragment_personal_join">
 
