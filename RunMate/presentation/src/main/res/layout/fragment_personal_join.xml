@@ -8,7 +8,7 @@
     android:layout_height="match_parent"
     android:paddingHorizontal="26dp"
     android:paddingTop="16dp"
-    tools:context=".login.Join2Fragment">
+    tools:context=".user.view.Join2Fragment">
 
     <ImageView
         android:id="@+id/leftArrow"

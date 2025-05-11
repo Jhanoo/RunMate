@@ -87,6 +87,9 @@ dependencies {
     implementation(libs.glide.v4132)
     implementation(libs.androidx.emoji2)
     implementation(libs.androidx.emoji2.views)
+
+    implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
+    implementation("com.squareup.okhttp3:okhttp-urlconnection:4.10.0")
 }
 
 kapt {

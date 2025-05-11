@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:paddingHorizontal="26dp"
     android:paddingTop="16dp"
-    tools:context=".login.JoinFragment">
+    tools:context=".user.view.JoinFragment">
 
     <ImageView
         android:id="@+id/leftArrow"

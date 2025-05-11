@@ -11,7 +11,7 @@ import java.io.File
 
 interface GpxApiService {
     @Multipart
-    @POST("api/gpx/upload")
+    @POST("api/runs/end")
     suspend fun uploadGpxFile(
         @Part file: MultipartBody.Part
     ): Response<UploadResponse>

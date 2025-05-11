@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/login_background"
-    tools:context=".login.LoginFragment">
+    tools:context=".user.view.LoginFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -53,16 +53,12 @@
 
             <EditText
                 android:id="@+id/emailInputText"
-                style="@style/customEditTextFontStyle"
+                style="@style/WhiteEditTextStyle"
+                android:inputType="textEmailAddress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:background="@drawable/round_white"
-                android:hint="ID"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="14dp"
-                android:textSize="14sp"
-                tools:layout_editor_absoluteX="0dp" />
+                android:hint="ID" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -74,15 +70,13 @@
                 android:textSize="16sp" />
 
             <EditText
-                style="@style/customEditTextFontStyle"
+                android:id="@+id/passwordInputText"
+                style="@style/WhiteEditTextStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:background="@drawable/round_white"
                 android:hint="PW"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="14dp"
-                android:textSize="14sp"
+                android:inputType="textPassword"
                 tools:ignore="HardcodedText" />
 
             <com.google.android.material.button.MaterialButton
