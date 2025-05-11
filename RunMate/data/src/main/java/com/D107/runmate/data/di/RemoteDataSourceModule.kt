@@ -1,5 +1,6 @@
 package com.D107.runmate.data.di
 
+import android.content.Context
 import com.D107.runmate.data.remote.api.GroupService
 import com.D107.runmate.data.remote.api.KakaoLocalService
 import com.D107.runmate.data.remote.api.UserService
@@ -13,6 +14,7 @@ import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -33,7 +35,11 @@ object RemoteDataSourceModule {
 
     @Provides
     @Singleton
-    fun provideAuthDataSource(userService: UserService, moshi:Moshi): AuthDataSource {
-        return AuthDataSourceImpl(userService, moshi)
+    fun provideAuthDataSource(
+        userService: UserService,
+        moshi: Moshi,
+        @ApplicationContext context: Context
+    ): AuthDataSource {
+        return AuthDataSourceImpl(userService, moshi, context)
     }
 }

@@ -1,6 +1,7 @@
 package com.D107.runmate.presentation.user.viewmodel
 
 import android.graphics.Bitmap
+import android.net.Uri
 import android.util.Base64
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -8,6 +9,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.D107.runmate.domain.model.base.ResponseStatus
+import com.D107.runmate.domain.model.user.ProfileImageSource
 import com.D107.runmate.domain.model.user.SignupData
 import com.D107.runmate.domain.model.user.UserInfo
 import com.D107.runmate.domain.usecase.user.SaveUserInfoUseCase
@@ -66,8 +68,8 @@ class JoinViewModel @Inject constructor(
     private val _gender = MutableLiveData<String>()
     val gender: LiveData<String> = _gender
 
-    private val _profileImage = MutableLiveData<Bitmap?>()
-    val profileImage: LiveData<Bitmap?> = _profileImage
+    private val _profileImageUri = MutableLiveData<Uri?>()
+    val profileImageUri: LiveData<Uri?> = _profileImageUri
 
     fun setEmail(email: String) {
         _email.value = email
@@ -94,8 +96,8 @@ class JoinViewModel @Inject constructor(
         }
     }
 
-    fun setProfileImage(bitmap: Bitmap?) {
-        _profileImage.value = bitmap
+    fun setProfileImage(uri: Uri?) {
+        _profileImageUri.value = uri
     }
 
     private fun validateEmail(email: String): Boolean {
@@ -133,18 +135,14 @@ class JoinViewModel @Inject constructor(
         val nickname = _nickname.value ?: return
         val birthday = _birthday.value ?: return
         val gender = _gender.value ?: return
-        val profileBitmap = _profileImage.value
+        val profileUri = _profileImageUri.value
+
+        // Uri를 ProfileImageSource로 변환
+        val profileImageSource = profileUri?.let {
+            ProfileImageSource(it.toString())
+        }
 
         Log.d("JoinViewModel", "Signup attempt: email=$email, password=${password?.take(3)}..., nickname=$nickname, birthday=$birthday, gender=$gender")
-
-        val profileImageBase64 = if (profileBitmap != null) {
-            val byteArrayOutputStream = ByteArrayOutputStream()
-            profileBitmap.compress(Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream)
-            val byteArray = byteArrayOutputStream.toByteArray()
-            Base64.encodeToString(byteArray, Base64.DEFAULT)
-        } else {
-            null
-        }
 
         val signupData = SignupData(
             email = email,
@@ -152,7 +150,7 @@ class JoinViewModel @Inject constructor(
             nickname = nickname,
             birthday = birthday,
             gender = gender,
-            profileImage = profileImageBase64
+            profileImageSource = profileImageSource
         )
 
         viewModelScope.launch {
@@ -195,7 +193,7 @@ class JoinViewModel @Inject constructor(
         _nickname.value = ""
         _birthday.value = ""
         _gender.value = ""
-        _profileImage.value = null
+        _profileImageUri.value = null
     }
 
     fun goToNextStep() {

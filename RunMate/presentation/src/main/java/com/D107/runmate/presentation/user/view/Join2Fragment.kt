@@ -86,9 +86,9 @@ class Join2Fragment : BaseFragment<FragmentPersonalJoinBinding>(
         }
 
         // 프로필 이미지 관찰
-        viewModel.profileImage.observe(viewLifecycleOwner) { bitmap ->
-            if (bitmap != null) {
-                binding.profileImg.setImageBitmap(bitmap)
+        viewModel.profileImageUri.observe(viewLifecycleOwner) { uri ->
+            if (uri != null) {
+                binding.profileImg.setImageURI(uri)
             }
         }
     }
@@ -170,9 +170,10 @@ class Join2Fragment : BaseFragment<FragmentPersonalJoinBinding>(
 
     private fun setProfileImage(uri: Uri) {
         try {
-            val inputStream: InputStream? = requireContext().contentResolver.openInputStream(uri)
-            val bitmap = BitmapFactory.decodeStream(inputStream)
-            viewModel.setProfileImage(bitmap)
+            // 이미지 URI를 ViewModel에 직접 전달
+            viewModel.setProfileImage(uri)
+            // UI에 이미지 표시
+            binding.profileImg.setImageURI(uri)
         } catch (e: Exception) {
             e.printStackTrace()
             showToast("이미지를 불러오는데 실패했습니다.")

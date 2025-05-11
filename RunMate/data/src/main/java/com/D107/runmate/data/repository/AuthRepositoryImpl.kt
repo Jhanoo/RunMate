@@ -52,7 +52,7 @@ class AuthRepositoryImpl @Inject constructor(
         )
 
         try {
-            when (val response = authDataSource.signup(request, signupData.profileImage)) {
+            when (val response = authDataSource.signup(request, signupData.profileImageSource)) {
                 is ApiResponse.Success -> {
                     emit(ResponseStatus.Success(response.data.toDomainModel()))
                 }
