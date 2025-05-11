@@ -54,7 +54,8 @@ class AuthRepositoryImpl @Inject constructor(
         try {
             when (val response = authDataSource.signup(request, signupData.profileImageSource)) {
                 is ApiResponse.Success -> {
-                    emit(ResponseStatus.Success(response.data.toDomainModel()))
+                    val userInfo = response.data.toDomainModel()
+                    emit(ResponseStatus.Success(userInfo))
                 }
                 is ApiResponse.Error -> {
                     emit(ResponseStatus.Error(

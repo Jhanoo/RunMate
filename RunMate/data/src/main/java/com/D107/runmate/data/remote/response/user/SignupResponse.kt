@@ -18,10 +18,12 @@ data class SignupResponse(
     companion object : DataMapper<SignupResponse, UserInfo> {
         override fun SignupResponse.toDomainModel(): UserInfo {
             return UserInfo(
-                userId = userId.hashCode(), // 임시로 Int로 변환
+                userId = userId,
+                email = email,
                 nickname = nickname,
-                birthYear = birthday.split("-")[0].toInt(),
-                userJob = gender // 임시로 userJob 필드에 gender 저장
+                profileImage = profileImage,
+                birthday = birthday,
+                gender = gender
             )
         }
     }
