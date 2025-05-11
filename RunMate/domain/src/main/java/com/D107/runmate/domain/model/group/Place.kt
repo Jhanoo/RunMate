@@ -6,6 +6,6 @@ data class Place(
     val id:String,
     val name: String,
     val address: String,
-    val x: String,
-    val y: String
+    val x: Double,
+    val y: Double
 ):BaseModel
