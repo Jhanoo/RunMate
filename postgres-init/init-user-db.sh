@@ -122,13 +122,15 @@ CREATE TABLE	curricula (
 	goal_date		TIMESTAMPTZ			NOT NULL,
 	run_exp			BOOLEAN,
 	dist_exp		VARCHAR(10),
-	freq_exp		VARCHAR(10)
+	freq_exp		VARCHAR(10),
+	is_finished		BOOLEAN				NOT NULL DEFAULT FALSE
 );
 
 -- 커리큘럼 ToDo 테이블
 CREATE TABLE	todos (
 	todo_id			UUID				PRIMARY KEY DEFAULT gen_random_uuid(),
 	curriculum_id	UUID				NOT NULL REFERENCES curricula(curriculum_id),
+	user_id			UUID				NOT NULL REFERENCES users(user_id),
 	content			VARCHAR(500)		NOT NULL,
 	is_done			BOOLEAN				NOT NULL DEFAULT FALSE,
 	date			TIMESTAMPTZ			NOT NULL

@@ -12,6 +12,7 @@ import com.openai.models.chat.completions.ChatCompletionCreateParams;
 import com.runhwani.runmate.dao.CurriculumDao;
 import com.runhwani.runmate.dao.HistoryDao;
 import com.runhwani.runmate.dto.request.curriculum.CurriculumCreateRequest;
+import com.runhwani.runmate.exception.EntityNotFoundException;
 import com.runhwani.runmate.model.Curriculum;
 import com.runhwani.runmate.model.Todo;
 import lombok.RequiredArgsConstructor;
@@ -68,6 +69,7 @@ public class CurriculumServiceImpl implements CurriculumService {
         Curriculum curriculum = Curriculum.builder()
                 .curriculumId(curriculumId)
                 .userId(userId)
+                .marathonId(req.getMarathonId())
                 .goalDist(req.getGoalDist())
                 .goalDate(req.getGoalDate())
                 .runExp(req.isRunExp())
@@ -82,6 +84,7 @@ public class CurriculumServiceImpl implements CurriculumService {
                 Todo todo = Todo.builder()
                         .todoId(UUID.randomUUID())
                         .curriculumId(curriculumId)
+                        .userId(userId)
                         .content(content)
                         .date(date.atStartOfDay(ZoneId.of("Asia/Seoul"))
                                 .toOffsetDateTime())
@@ -92,6 +95,23 @@ public class CurriculumServiceImpl implements CurriculumService {
 
         return curriculumId;
     }
+
+    /**
+     * 커리큘럼 조회
+     * 1) 커리큘럼 테이블에서 사용자 ID로 조회
+     * 2) todo 테이블에서 curriculumId로 모든 할 일 불러오기
+     * 3) 날짜별로 그룹핑 후 도메인 객체로 반환
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Curriculum getMyCurriculum(UUID userId) {
+        Curriculum curriculum = curriculumDao.selectByUserId(userId);
+        if (curriculum == null) {
+            throw new EntityNotFoundException("생성된 커리큘럼이 없습니다.");
+        }
+        return curriculum;
+    }
+
 
     /**
      * 프롬프트 작성부
