@@ -42,11 +42,6 @@ public class AuthServiceImpl implements AuthService {
             throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
         
-        // 닉네임 중복 검사
-        if (userDao.existsByNickname(request.getNickname())) {
-            throw new CustomException(ErrorCode.DUPLICATE_NICKNAME);
-        }
-        
         // 프로필 이미지 저장
         String profileImageUrl = null;
         try {
@@ -91,7 +86,17 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String token = jwtProvider.generateToken(String.valueOf(user.getUserId()));
-        return new TokenResponse(token);
+        
+        // 사용자 정보를 포함한 응답 생성
+        return TokenResponse.builder()
+                .accessToken(token)
+                .userId(user.getUserId())
+                .email(user.getEmail())
+                .nickname(user.getNickname())
+                .birthday(user.getBirthday())
+                .gender(user.getGender())
+                .profileImageUrl(user.getProfileImage())
+                .build();
     }
 
     @Override

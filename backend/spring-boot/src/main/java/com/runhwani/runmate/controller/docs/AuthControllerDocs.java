@@ -61,6 +61,12 @@ public interface AuthControllerDocs {
                                                 "message": "로그인 성공",
                                                 "data": {
                                                     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                                                    "userId": "123e4567-e89b-12d3-a456-426614174000",
+                                                    "email": "user@example.com",
+                                                    "nickname": "러너1",
+                                                    "birthday": "1990-01-01",
+                                                    "gender": "MALE",
+                                                    "profileImageUrl": "http://localhost:8080/uploads/12345.jpg"
                                                 }
                                             }
                                             """
@@ -138,7 +144,7 @@ public interface AuthControllerDocs {
                     ),
                     @ApiResponse(
                             responseCode = "409",
-                            description = "중복된 이메일 또는 닉네임",
+                            description = "중복된 이메일",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     examples = {

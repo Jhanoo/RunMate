@@ -110,6 +110,9 @@ services:
     volumes:
       - ./backend/marathon-crawler/logs:/app/logs
       - ./backend/marathon-crawler/.env:/app/.env
+      - runmate-logs:/app/logs/shared  # 공유 로그 볼륨 추가
+    env_file:
+      - .env  # 공통 환경 변수 파일 사용
     environment:
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
@@ -123,7 +126,7 @@ services:
     depends_on:
       - postgres
     networks:
-      - runmate-network
+      - project-net  # runmate-network에서 project-net으로 변경
 
 networks:
   project-net:
