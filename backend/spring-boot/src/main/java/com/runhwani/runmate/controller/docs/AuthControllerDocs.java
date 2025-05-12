@@ -138,7 +138,7 @@ public interface AuthControllerDocs {
                     ),
                     @ApiResponse(
                             responseCode = "409",
-                            description = "중복된 이메일 또는 닉네임",
+                            description = "중복된 이메일",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                                     examples = {

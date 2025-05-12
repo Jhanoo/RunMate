@@ -42,11 +42,6 @@ public class AuthServiceImpl implements AuthService {
             throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
         
-        // 닉네임 중복 검사
-        if (userDao.existsByNickname(request.getNickname())) {
-            throw new CustomException(ErrorCode.DUPLICATE_NICKNAME);
-        }
-        
         // 프로필 이미지 저장
         String profileImageUrl = null;
         try {

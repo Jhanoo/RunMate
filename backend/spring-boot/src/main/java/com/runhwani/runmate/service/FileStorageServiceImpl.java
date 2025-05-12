@@ -19,12 +19,19 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     @Value("${app.base-url:http://localhost:8080}")
     private String baseUrl;
+    
+    @Value("${spring.servlet.multipart.max-file-size:10MB}")
+    private String maxFileSize;
 
     @Override
     public String storeFile(MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) {
             return null;
         }
+
+        // 파일 크기 검증 로그 (디버깅용)
+        System.out.println("File size: " + file.getSize() + " bytes");
+        System.out.println("Max file size configured: " + maxFileSize);
 
         // 디렉토리 생성
         Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
