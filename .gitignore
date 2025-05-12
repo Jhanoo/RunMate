@@ -91,4 +91,7 @@ ehthumbs.db
 Thumbs.db
 
 ### gpx ###
-*.gpx
+backend/spring-boot/gpx/*
+
+### uploads ###
+backend/spring-boot/uploads/*
