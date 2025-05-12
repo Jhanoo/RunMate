@@ -26,4 +26,13 @@ public interface CurriculumService {
      */
     Curriculum getMyCurriculum(UUID userId);
 
+
+    /**
+     * 특정 연·월의 Todo 리스트 조회
+     * @param userId 사용자 ID
+     * @param year 조회 연도
+     * @param month 조회 월 (1~12)
+     * @return 해당 월의 Todo 리스트
+     */
+    List<Todo> getTodoListByMonth(UUID userId, int year, int month);
 }

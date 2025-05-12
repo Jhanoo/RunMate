@@ -20,6 +20,8 @@ public class Todo {
     private UUID todoId;
     /** 커리큘럼 (curricula.curriculum_id FK) */
     private UUID curriculumId;
+    /** 유저 ID */
+    private UUID userId;
     /** 할 일 내용 */
     private String content;
     /** 완료 여부 */

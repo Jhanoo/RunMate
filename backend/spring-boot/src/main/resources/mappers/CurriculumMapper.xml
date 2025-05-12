@@ -55,5 +55,15 @@
         LIMIT 1
     </select>
 
+    <select id="selectByPeriod"
+            resultMap="TodoResultMap"
+            parameterType="map">
+        SELECT *
+        FROM todos
+        WHERE user_id = #{userId}
+          AND date &gt;= #{start}
+          AND date &lt; #{end}
+        ORDER BY date
+    </select>
 
 </mapper>

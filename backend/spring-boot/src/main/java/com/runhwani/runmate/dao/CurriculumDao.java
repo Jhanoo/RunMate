@@ -32,4 +32,13 @@ public interface CurriculumDao {
      * @param userId 조회할 유저 ID
      */
     Curriculum selectByUserId(UUID userId);
+
+    /**
+     * 주어진 기간(period) 내의 Todo 조회
+     *
+     * @param userId User ID
+     * @param start  조회 시작 시각 (inclusive)
+     * @param end    조회 종료 시각 (exclusive)
+     */
+    List<Todo> selectByPeriod(UUID userId, OffsetDateTime start, OffsetDateTime end);
 }

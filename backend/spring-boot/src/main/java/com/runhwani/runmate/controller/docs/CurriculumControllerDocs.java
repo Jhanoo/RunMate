@@ -47,7 +47,7 @@ public interface CurriculumControllerDocs {
 
     @Operation(
             summary = "커리큘럼 조회",
-            description = "로그인한 사용자의 커리큘럼과 ToDo 리스트를 반환",
+            description = "사용자의 커리큘럼 반환",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -68,6 +68,30 @@ public interface CurriculumControllerDocs {
     )
     @GetMapping("/my")
     ResponseEntity<CommonResponse<Curriculum>> getCurriculum(
+            @AuthenticationPrincipal UserDetails principal
+    );
+
+    @Operation(
+            summary = "월별 ToDo 조회",
+            description = "로그인한 사용자의 커리큘럼에서, 요청한 연·월에 해당하는 ToDo 목록을 반환합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "조회 성공",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = TodoResponse.class)
+                            )
+                    ),
+                    @ApiResponse(responseCode = "404", description = "커리큘럼 또는 ToDo가 존재하지 않음")
+            }
+    )
+    @GetMapping("/todoList")
+    ResponseEntity<CommonResponse<List<TodoResponse>>> getTodosByMonth(
+            @Parameter(description = "조회할 연도", example = "2025")
+            @RequestParam("year") int year,
+            @Parameter(description = "조회할 월 (1~12)", example = "5")
+            @RequestParam("month") int month,
             @AuthenticationPrincipal UserDetails principal
     );
 }
