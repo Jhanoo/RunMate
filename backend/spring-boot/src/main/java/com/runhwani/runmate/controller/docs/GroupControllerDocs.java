@@ -94,12 +94,12 @@ public interface GroupControllerDocs {
                     @ApiResponse(responseCode = "200", description = "탈퇴 성공"),
                     @ApiResponse(
                             responseCode = "404",
-                            description = "삭제할 그룹 멤버 정보가 없습니다.",
+                            description = "현재 가입한 그룹이 없습니다.",
                             content = @Content(
                                     mediaType = "application/json",
                                     examples = @ExampleObject(
                                             name = "NotFound",
-                                            value = "{\"message\": \"그룹 멤버 정보가 없습니다 or 이미 탈퇴한 상태입니다.\", \"data\": null}"
+                                            value = "{\"message\": \"현재 가입한 그룹이 없습니다.\", \"data\": null}"
                                     )
                             )
                     )
@@ -110,17 +110,18 @@ public interface GroupControllerDocs {
 
     @Operation(
             summary = "완주 후 그룹 나가기",
-            description = "사용자가 완주 후 그룹 나가기를 눌러 isFinished=true로 갱신",
+            description = "사용자가 완주 후 그룹 나가기를 눌러 isFinished=true로 갱신" +
+                    "\n그룹장이 그룹 나가기를 누를 경우 isFinished=true 뿐 아니라 그룹의 status=2 (완료) 갱신",
             responses = {
                     @ApiResponse(responseCode = "200", description = "갱신 성공"),
                     @ApiResponse(
                             responseCode = "404",
-                            description = "그룹 멤버 정보가 없습니다.",
+                            description = "현재 가입한 그룹이 없습니다.",
                             content = @Content(
                                     mediaType = "application/json",
                                     examples = @ExampleObject(
                                             name = "NotFound",
-                                            value = "{\"message\": \"그룹 멤버 정보가 없습니다.\", \"data\": null}"
+                                            value = "{\"message\": \"현재 가입한 그룹이 없습니다.\", \"data\": null}"
                                     )
                             )
                     )
@@ -128,4 +129,36 @@ public interface GroupControllerDocs {
     )
     @PostMapping("/finish")
     ResponseEntity<CommonResponse<Void>> finishGroup(@AuthenticationPrincipal UserDetails principal);
+
+    @Operation(
+            summary = "그룹 달리기 시작하기",
+            description = "그룹장이 시작 버튼을 눌러 그룹 달리기 시작, status=1 로 갱신",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "갱신 성공"),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "그룹장이 아닙니다.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(
+                                            name = "UnAuthorized",
+                                            value = "{\"message\": \"그룹장이 아닙니다.\", \"data\": null}"
+                                    )
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "현재 가입한 그룹이 없습니다.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(
+                                            name = "NotFound",
+                                            value = "{\"message\": \"현재 가입한 그룹이 없습니다.\", \"data\": null}"
+                                    )
+                            )
+                    )
+            }
+    )
+    @PostMapping("/start")
+    ResponseEntity<CommonResponse<Void>> startGroup(@AuthenticationPrincipal UserDetails principal);
 }

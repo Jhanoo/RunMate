@@ -28,6 +28,9 @@ public class GroupResponse {
     @Schema(description = "선택한 코스 ID", example = "4f5a6b7c-8d9e-0f1a-2b3c-4d5e6f7a8b9c")
     private UUID courseId;
 
+    @Schema(description = "코스 이름", example = "한강 코스")
+    private String courseName;
+
     @Schema(description = "시작 일시 (ISO-8601, Offset 포함)", example = "2025-05-10T08:00:00+09:00")
     private OffsetDateTime startTime;
 
@@ -42,6 +45,9 @@ public class GroupResponse {
 
     @Schema(description = "발급된 초대 코드", example = "a1b2c3d4")
     private String inviteCode;
+
+    @Schema(description = "그룹 상태", example = "0")
+    private int status;
 
     @ArraySchema(
             arraySchema = @Schema(description = "그룹 멤버 리스트"),

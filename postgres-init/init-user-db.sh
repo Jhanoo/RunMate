@@ -65,7 +65,8 @@ CREATE TABLE	groups (
 	latitude		DOUBLE PRECISION,
 	longitude		DOUBLE PRECISION,
 	invite_code		VARCHAR(10)			NOT NULL,
-	is_finished		BOOLEAN				NOT NULL DEFAULT FALSE
+	status          SMALLINT       NOT NULL DEFAULT 0,                  -- 상태: 0=시작 전, 1=진행 중, 2=완료
+	CONSTRAINT chk_group_status CHECK (status IN (0, 1, 2))              -- 유효 값 제한
 );
 
 -- 그룹 멤버 테이블

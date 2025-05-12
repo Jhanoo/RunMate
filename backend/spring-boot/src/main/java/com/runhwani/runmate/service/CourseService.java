@@ -5,6 +5,7 @@ import com.runhwani.runmate.dto.response.course.CourseDetailResponse;
 import com.runhwani.runmate.dto.response.course.CourseLikeResponse;
 import com.runhwani.runmate.dto.response.course.CourseResponse;
 import com.runhwani.runmate.exception.EntityNotFoundException;
+import com.runhwani.runmate.model.Course;
 
 import java.io.IOException;
 import java.util.List;
@@ -28,4 +29,6 @@ public interface CourseService {
     CourseDetailResponse getCourseDetail(UUID userId, UUID courseId);
     // 8. 코스 좋아요 업데이트
     CourseLikeResponse updateCourseLike(UUID userId, UUID courseId);
+    // 9. 코스 ID로 조회
+    Course getCourseByCourseId(UUID courseId);
 }

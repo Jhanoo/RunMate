@@ -5,7 +5,6 @@ import com.runhwani.runmate.dto.response.history.*;
 import com.runhwani.runmate.exception.CustomException;
 import com.runhwani.runmate.exception.ErrorCode;
 import com.runhwani.runmate.security.SecurityUtil;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
