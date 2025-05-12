@@ -122,6 +122,44 @@ public class HistoryServiceImpl implements HistoryService {
                 .build();
     }
     
+    @Override
+    @Transactional(readOnly = true)
+    public RunnerDetailResponse getRunnerDetail(UUID historyId, UUID userId) {
+        // 현재 인증된 사용자의 ID 가져오기
+        String currentUserIdStr = SecurityUtil.getCurrentUserEmail()
+                .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED_USER));
+        
+        // UUID로 변환
+        UUID currentUserId;
+        try {
+            currentUserId = UUID.fromString(currentUserIdStr);
+        } catch (IllegalArgumentException e) {
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
+        }
+        
+        // 히스토리 참여자 상세 정보 조회
+        Map<String, Object> runnerDetail = historyDao.findRunnerDetailByHistoryIdAndUserId(historyId, userId);
+        if (runnerDetail == null) {
+            throw new CustomException(ErrorCode.ENTITY_NOT_FOUND, "해당 사용자의 기록을 찾을 수 없습니다.");
+        }
+        
+        // 응답 객체 생성
+        return RunnerDetailResponse.builder()
+                .userId(convertToUUID(runnerDetail.get("user_id")))
+                .nickname((String) runnerDetail.get("nickname"))
+                .profileImage((String) runnerDetail.get("profileImage"))
+                .startTime(convertToOffsetDateTime(runnerDetail.get("start_time")))
+                .endTime(convertToOffsetDateTime(runnerDetail.get("end_time")))
+                .distance(convertToDouble(runnerDetail.get("distance")))
+                .gpxFile((String) runnerDetail.get("gpxFile"))
+                .calories(convertToDouble(runnerDetail.get("calories")))
+                .avgCadence(convertToDouble(runnerDetail.get("avgCadence")))
+                .avgPace(convertToDouble(runnerDetail.get("avgPace")))
+                .avgBpm(convertToDouble(runnerDetail.get("avgBpm")))
+                .avgElevation(convertToDouble(runnerDetail.get("avgElevation")))
+                .build();
+    }
+    
     /**
      * Map 형태의 히스토리 데이터를 HistoryResponse DTO로 변환
      */
