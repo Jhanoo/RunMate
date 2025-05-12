@@ -110,7 +110,8 @@ public interface GroupControllerDocs {
 
     @Operation(
             summary = "완주 후 그룹 나가기",
-            description = "사용자가 완주 후 그룹 나가기를 눌러 isFinished=true로 갱신",
+            description = "사용자가 완주 후 그룹 나가기를 눌러 isFinished=true로 갱신" +
+                    "\n그룹장이 그룹 나가기를 누를 경우 isFinished=true 뿐 아니라 그룹의 status=2 (완료) 갱신",
             responses = {
                     @ApiResponse(responseCode = "200", description = "갱신 성공"),
                     @ApiResponse(
