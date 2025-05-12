@@ -112,6 +112,19 @@ public class CurriculumServiceImpl implements CurriculumService {
         return curriculum;
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<Todo> getTodoListByMonth(UUID userId, int year, int month) {
+        // 조회 기간 계산 (Asia/Seoul 기준)
+        ZoneId zone = ZoneId.of("Asia/Seoul");
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.plusMonths(1);
+
+        OffsetDateTime start = startDate.atStartOfDay(zone).toOffsetDateTime();
+        OffsetDateTime end = endDate.atStartOfDay(zone).toOffsetDateTime();
+
+        return curriculumDao.selectByPeriod(userId, start, end);
+    }
 
     /**
      * 프롬프트 작성부

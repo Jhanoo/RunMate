@@ -48,5 +48,26 @@ public class CurriculumController implements CurriculumControllerDocs {
         return ResponseEntity.ok(CommonResponse.ok(curriculum));
     }
 
+    @Override
+    public ResponseEntity<CommonResponse<List<TodoResponse>>> getTodosByMonth(
+            int year,
+            int month,
+            UserDetails principal) {
+
+        UUID userId = UUID.fromString(principal.getUsername());
+
+        List<TodoResponse> todos = curriculumService.getTodoListByMonth(userId, year, month)
+                .stream()
+                .map(todo -> TodoResponse.builder()
+                        .todoId(todo.getTodoId())
+                        .content(todo.getContent())
+                        .isDone(todo.getIsDone())
+                        .date(todo.getDate())
+                        .build()
+                )
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(CommonResponse.ok(todos));
+    }
 
 }
