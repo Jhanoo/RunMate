@@ -4,6 +4,15 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.runhwani.runmate.dao.CurriculumDao">
 
+    <resultMap id="TodoResultMap" type="com.runhwani.runmate.model.Todo">
+        <id column="todo_id" property="todoId"/>
+        <result column="curriculum_id" property="curriculumId"/>
+        <result column="user_id" property="userId"/>
+        <result column="content" property="content"/>
+        <result column="is_done" property="isDone"/>
+        <result column="date" property="date"/>
+    </resultMap>
+
     <insert id="insertCurriculum" parameterType="com.runhwani.runmate.model.Curriculum">
         INSERT INTO curricula (curriculum_id,
                                user_id,
@@ -15,7 +24,7 @@
                                freq_exp)
         VALUES (#{curriculumId},
                 #{userId},
-                NULL,
+                #{marathonId},
                 #{goalDist},
                 #{goalDate},
                 #{runExp},
@@ -26,13 +35,25 @@
     <insert id="insertTodo" parameterType="com.runhwani.runmate.model.Todo">
         INSERT INTO todos (todo_id,
                            curriculum_id,
+                           user_id,
                            content,
                            date,
                            is_done)
         VALUES (#{todoId},
                 #{curriculumId},
+                #{userId},
                 #{content},
                 #{date},
                 FALSE)
     </insert>
+
+    <select id="selectByUserId" parameterType="java.util.UUID">
+        SELECT *
+        FROM curricula
+        WHERE user_id = #{userId}
+          AND is_finished = false
+        LIMIT 1
+    </select>
+
+
 </mapper>
