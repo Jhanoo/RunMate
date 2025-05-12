@@ -31,7 +31,17 @@ public class GroupServiceImpl implements GroupService {
         String inviteCode = UUID.randomUUID().toString().substring(0, 8);
 
         // 도메인 모델에 요청 데이터 셋팅
-        Group group = Group.builder().groupId(newGroupId).groupName(request.getGroupName()).leaderId(userId).courseId(request.getCourseId()).startTime(request.getStartTime()).startLocation(request.getStartLocation()).latitude(request.getLatitude()).longitude(request.getLongitude()).inviteCode(inviteCode).isFinished(false).build();
+        Group group = Group.builder()
+                .groupId(newGroupId)
+                .groupName(request.getGroupName())
+                .leaderId(userId)
+                .courseId(request.getCourseId())
+                .startTime(request.getStartTime())
+                .startLocation(request.getStartLocation())
+                .latitude(request.getLatitude())
+                .longitude(request.getLongitude())
+                .inviteCode(inviteCode)
+                .build();
 
         // DB에 insert
         groupDao.insertGroup(group);
@@ -87,5 +97,11 @@ public class GroupServiceImpl implements GroupService {
             // 해당 그룹 참여 기록이 없으면 404
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "현재 가입한 그룹이 없습니다.");
         }
+    }
+
+    @Override
+    @Transactional
+    public void updateStatus(UUID groupId, int status) {
+        groupDao.updateStatus(groupId, status);
     }
 }

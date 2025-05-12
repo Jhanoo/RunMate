@@ -15,7 +15,7 @@
         <result column="latitude" property="latitude"/>
         <result column="longitude" property="longitude"/>
         <result column="invite_code" property="inviteCode"/>
-        <result column="is_finished" property="isFinished"/>
+        <result column="status" property="status"/>
     </resultMap>
 
     <!-- insert 구문 -->
@@ -28,8 +28,7 @@
                             start_location,
                             latitude,
                             longitude,
-                            invite_code,
-                            is_finished)
+                            invite_code)
         VALUES (#{groupId},
                 #{groupName},
                 #{leaderId},
@@ -38,8 +37,7 @@
                 #{startLocation},
                 #{latitude},
                 #{longitude},
-                #{inviteCode},
-                #{isFinished})
+                #{inviteCode})
     </insert>
 
     <insert id="insertGroupMember" parameterType="com.runhwani.runmate.model.GroupMember">
@@ -60,10 +58,11 @@
                g.latitude       AS latitude,
                g.longitude      AS longitude,
                g.invite_code    AS inviteCode,
-               g.is_finished    AS isFinished
+               g.status         AS status
         FROM groups g
                  JOIN group_members gm ON g.group_id = gm.group_id
         WHERE gm.user_id = #{userId}
+        AND g.status != 2
         LIMIT 1
     </select>
 
@@ -87,7 +86,7 @@
         SELECT *
         FROM groups
         WHERE invite_code = #{inviteCode}
-          AND is_finished = FALSE
+          AND status = 0
         LIMIT 1
     </select>
 
@@ -136,6 +135,12 @@
             ORDER BY joined_at DESC
             LIMIT 1
         )
+    </update>
+
+    <update id="updateStatus" parameterType="map">
+        UPDATE groups
+        SET status = #{status}
+        WHERE group_id = #{groupId}
     </update>
 
 </mapper>

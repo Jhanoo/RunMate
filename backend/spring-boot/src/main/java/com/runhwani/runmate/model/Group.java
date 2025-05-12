@@ -44,6 +44,6 @@ public class Group {
     @Schema(description = "발급된 초대 코드", example = "a1b2c3d4")
     private String inviteCode;
 
-    @Schema(description = "그룹 종료 여부", example = "false")
-    private Boolean isFinished;
+    @Schema(description = "그룹 상태", example = "0")
+    private int status;
 }

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @RequestMapping("/api/curricula")
-@Tag(name = "Curriculum", description = "커리큘럼 관리 API")
+@Tag(name = "커리큘럼", description = "커리큘럼 관리 API")
 public interface CurriculumControllerDocs {
 
     @Operation(

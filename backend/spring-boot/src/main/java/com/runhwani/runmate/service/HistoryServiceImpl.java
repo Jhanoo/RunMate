@@ -1,11 +1,10 @@
-package com.runhwani.runmate.service.impl;
+package com.runhwani.runmate.service;
 
 import com.runhwani.runmate.dao.HistoryDao;
 import com.runhwani.runmate.dto.response.history.*;
 import com.runhwani.runmate.exception.CustomException;
 import com.runhwani.runmate.exception.ErrorCode;
 import com.runhwani.runmate.security.SecurityUtil;
-import com.runhwani.runmate.service.HistoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
