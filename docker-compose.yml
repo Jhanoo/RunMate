@@ -101,8 +101,34 @@ services:
     depends_on:
       - nginx
 
+  marathon-crawler:
+    build:
+      context: ./backend/marathon-crawler
+      dockerfile: Dockerfile
+    container_name: marathon-crawler
+    restart: always
+    volumes:
+      - ./backend/marathon-crawler/logs:/app/logs
+      - ./backend/marathon-crawler/.env:/app/.env
+    environment:
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME}
+      - CRAWL_HOUR=1
+      - CRAWL_MINUTE=0
+      - RUN_ON_START=false
+      - LOG_LEVEL=INFO
+    depends_on:
+      - postgres
+    networks:
+      - runmate-network
+
 networks:
   project-net:
+    driver: bridge
+  runmate-network:
     driver: bridge
 
 volumes:
