@@ -4,6 +4,8 @@ import com.runhwani.runmate.controller.docs.HistoryControllerDocs;
 import com.runhwani.runmate.dto.common.CommonResponse;
 import com.runhwani.runmate.dto.response.history.HistoryDetailResponse;
 import com.runhwani.runmate.dto.response.history.HistoryListResponse;
+import com.runhwani.runmate.dto.response.history.RunnerDetailResponse;
+import com.runhwani.runmate.exception.CustomException;
 import com.runhwani.runmate.service.HistoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,5 +43,20 @@ public class HistoryController implements HistoryControllerDocs {
         HistoryDetailResponse response = historyService.getHistoryDetail(historyId);
         
         return ResponseEntity.ok(new CommonResponse<>("히스토리 상세 조회 성공", response));
+    }
+
+    @Override
+    @RequestMapping(value = "/{historyId}/users/{userId}", method = RequestMethod.GET)
+    public ResponseEntity<CommonResponse<RunnerDetailResponse>> getRunnerDetail(
+            @PathVariable UUID historyId,
+            @PathVariable UUID userId) {
+        try {
+            RunnerDetailResponse response = historyService.getRunnerDetail(historyId, userId);
+            return ResponseEntity.ok(new CommonResponse<>("히스토리 참여자 기록 상세 조회 성공", response));
+        } catch (CustomException e) {
+            return ResponseEntity
+                    .status(e.getErrorCode().getStatus())
+                    .body(new CommonResponse<>(e.getErrorCode().getMessage(), null));
+        }
     }
 } 

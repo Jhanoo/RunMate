@@ -2,6 +2,7 @@ package com.runhwani.runmate.service;
 
 import com.runhwani.runmate.dto.response.history.HistoryDetailResponse;
 import com.runhwani.runmate.dto.response.history.HistoryListResponse;
+import com.runhwani.runmate.dto.response.history.RunnerDetailResponse;
 
 import java.util.UUID;
 
@@ -20,4 +21,6 @@ public interface HistoryService {
      * @return 달리기 기록 상세 정보
      */
     HistoryDetailResponse getHistoryDetail(UUID historyId);
+
+    RunnerDetailResponse getRunnerDetail(UUID historyId, UUID userId);
 } 
