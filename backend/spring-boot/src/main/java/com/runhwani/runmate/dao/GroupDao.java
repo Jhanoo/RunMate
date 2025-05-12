@@ -56,4 +56,12 @@ public interface GroupDao {
      * @param userId 나의 ID
      * */
     int updateIsFinished(UUID userId);
+
+    /**
+     * 그룹 상태 변경
+     *
+     * @param groupId 그룹 ID
+     * @param status  변경할 상태 코드 (0:시작 전, 1: 진행중, 2: 완료)
+     */
+    void updateStatus(@Param("groupId") UUID groupId, @Param("status") int status);
 }

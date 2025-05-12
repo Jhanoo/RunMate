@@ -187,4 +187,10 @@ public class CourseServiceImpl implements CourseService {
                 .totalLikes(total)
                 .build();
     }
+
+    @Override
+    @Transactional
+    public Course getCourseByCourseId(UUID courseId) {
+        return courseDao.selectCourseById(courseId);
+    }
 }

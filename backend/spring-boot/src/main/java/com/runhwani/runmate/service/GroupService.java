@@ -39,6 +39,12 @@ public interface GroupService {
 
     /**
      * 완주 후 그룹 나가기(isfinished = true)
-     * */
+     */
     void finishGroup(UUID userId);
+
+    /**
+     * 그룹 상태 변경하기(그룹장)
+     */
+    void updateStatus(UUID groupId, int status);
+
 }
