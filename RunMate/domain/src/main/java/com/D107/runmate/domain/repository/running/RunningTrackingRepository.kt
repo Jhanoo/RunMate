@@ -19,7 +19,6 @@ interface RunningTrackingRepository {
     fun processLocationUpdate(location: LocationModel, cadence: Int)
     fun setTrackingStatus(status: TrackingStatus)
     fun setInitialUserLocation(location: LocationModel)
-    fun addCadence(cadence: Int)
     fun finishTracking()
 
 }

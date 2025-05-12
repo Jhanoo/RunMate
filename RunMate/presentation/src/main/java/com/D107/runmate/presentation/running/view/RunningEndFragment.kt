@@ -1,5 +1,6 @@
 package com.D107.runmate.presentation.running.view
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -10,13 +11,20 @@ import com.D107.runmate.domain.model.running.UserLocationState
 import com.D107.runmate.presentation.MainViewModel
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentRunningEndBinding
+import com.D107.runmate.presentation.utils.CommonUtils.getGpxInputStream
+import com.D107.runmate.presentation.utils.GpxParser.parseGpx
+import com.D107.runmate.presentation.utils.KakaoMapUtil.addCourseLine
 import com.D107.runmate.presentation.utils.LocationUtils
-import com.kakao.vectormap.GestureType
 import com.kakao.vectormap.KakaoMap
 import com.kakao.vectormap.KakaoMapReadyCallback
 import com.kakao.vectormap.LatLng
 import com.kakao.vectormap.MapLifeCycleCallback
+import com.kakao.vectormap.camera.CameraUpdateFactory
 import com.ssafy.locket.presentation.base.BaseFragment
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
@@ -26,6 +34,12 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
     private var kakaoMap: KakaoMap? = null
     private val mainViewModel: MainViewModel by activityViewModels()
     private lateinit var dialog: CourseAddDialog
+    private var mContext: Context? = null
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        mContext = context
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -50,6 +64,15 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
             dialog = CourseAddDialog()
             dialog.show(requireActivity().supportFragmentManager, "course_add")
         }
+        
+        binding.ivLike.setOnClickListener { 
+            // TODO 사용자가 이미 좋아요한 경우
+            binding.ivLike.setImageResource(R.drawable.ic_course_like_inactive)
+
+            // TODO 사용자가 처음 좋아요하는 경우
+            binding.ivLike.setImageResource(R.drawable.ic_course_like)
+
+        }
     }
 
     private fun initMap() {
@@ -65,37 +88,59 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
             override fun onMapReady(p0: KakaoMap) {
                 kakaoMap = p0
             }
-
-            override fun getPosition(): LatLng {
-                // TODO 코스의 시작지점을 LatLng으로 반환
-                mainViewModel.userLocation.value?.let {
-                    if (it is UserLocationState.Exist) {
-                        return LatLng.from(
-                            it.locations.last().latitude,
-                            it.locations.last().longitude
-                        )
-                    }
-                }
-                val fallbackLocation = LocationUtils.getFallbackLocation()
-                return LatLng.from(fallbackLocation.latitude, fallbackLocation.longitude)
-            }
+//            override fun getPosition(): LatLng {
+//                // TODO 코스의 시작지점을 LatLng으로 반환
+//                mainViewModel.userLocation.value?.let {
+//                    if (it is UserLocationState.Exist) {
+//                        return LatLng.from(
+//                            it.locations.last().latitude,
+//                            it.locations.last().longitude
+//                        )
+//                    }
+//                }
+//                val fallbackLocation = LocationUtils.getFallbackLocation()
+//                return LatLng.from(fallbackLocation.latitude, fallbackLocation.longitude)
+//            }
         })
     }
 
     private fun initUI() {
-        // TODO 프리 모드인 경우
-        binding.btnAddCourse.visibility = View.VISIBLE
-        binding.ivLike.visibility = View.GONE
+        if (mainViewModel.courseId.value == null) {
+            // 프리 모드인 경우
+            binding.btnAddCourse.visibility = View.VISIBLE
+            binding.ivLike.visibility = View.GONE
+        } else {
+            // 코스 모드인 경우
+            binding.btnAddCourse.visibility = View.GONE
+            binding.ivLike.visibility = View.VISIBLE
 
-        // TODO 코스 모드인 경우
-//        binding.btnAddCourse.visibility = View.GONE
-//        binding.ivLike.visibility = View.VISIBLE
+            // TODO 사용자 좋아요 여부 좋아요 x
+            binding.ivLike.setImageResource(R.drawable.ic_course_like_inactive)
 
-        // TODO 코스 모드인 경우, 사용자 좋아요 여부 좋아요 x
-//        binding.ivLike.setImageResource(R.drawable.ic_course_like_inactive)
+            // TODO 사용자 좋아요 여부 좋아요 o
+            binding.ivLike.setImageResource(R.drawable.ic_course_like)
+        }
 
-        // TODO 코스 모드인 경우, 사용자 좋아요 여부 좋아요 o
-//        binding.ivLike.setImageResource(R.drawable.ic_course_like)
+        CoroutineScope(Dispatchers.IO).launch {
+            mContext?.let {
+                getGpxInputStream(it)?.let { inputStream ->
+                    val trackPoints = parseGpx(inputStream)
+                    withContext(Dispatchers.Main) {
+                        val startPoint = trackPoints[0]
+                        val cameraUpdate = CameraUpdateFactory.newCenterPosition(
+                            LatLng.from(
+                                startPoint.lat,
+                                startPoint.lon
+                            )
+                        )
+                        kakaoMap?.let { map ->
+                            map.moveCamera(cameraUpdate)
+                            addCourseLine(it, map, trackPoints)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     override fun onResume() {

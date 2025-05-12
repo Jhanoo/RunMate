@@ -13,6 +13,7 @@ import com.kakao.vectormap.route.RouteLineStylesSet
 
 object KakaoMapUtil {
     fun addCourseLine(context: Context, kakaoMap: KakaoMap, trackPoints: List<TrackPoint>) {
+
         val layer = kakaoMap.routeLineManager!!.layer
 
         val stylesSet = RouteLineStylesSet.from(
@@ -32,4 +33,22 @@ object KakaoMapUtil {
 
         val routeLine = layer.addRouteLine(options)
     }
+
+    fun addCoursePoint(context: Context, kakaoMap: KakaoMap, prevPoint: LatLng, currentPoint: LatLng) {
+        val layer = kakaoMap.routeLineManager!!.layer
+
+        val stylesSet = RouteLineStylesSet.from(
+            "runMateStyles_point",
+            RouteLineStyles.from(RouteLineStyle.from(12f, context.getColor(R.color.secondary)))
+        )
+        val segment = RouteLineSegment.from(listOf(prevPoint, currentPoint))
+            .setStyles(stylesSet.getStyles(0))
+
+        val options = RouteLineOptions.from(segment)
+            .setStylesSet(stylesSet)
+//        lastLatLng = point
+        val routeLine = layer.addRouteLine(options)
+    }
+
+
 }

@@ -21,9 +21,10 @@ import java.util.Locale
 import javax.inject.Inject
 
 private const val TAG = "RunningTrackingRepository"
+
 class RunningTrackingRepositoryImpl @Inject constructor(
     private val gpxWriter: GpxWriter
-): RunningTrackingRepository {
+) : RunningTrackingRepository {
     private val _time = MutableStateFlow<Int>(0)
     override val time = _time.asStateFlow()
 
@@ -50,18 +51,48 @@ class RunningTrackingRepositoryImpl @Inject constructor(
         _userLocation.value = UserLocationState.Exist(listOf(location))
     }
 
-    override fun addCadence(cadence: Int) {
-        Timber.d("addCadence: cadence ${cadence}")
-        if(_cadenceRecord.value is CadenceRecordState.Initial) {
-            _cadenceRecord.value = CadenceRecordState.Exist(listOf(cadence))
-        } else {
-            _cadenceRecord.value = CadenceRecordState.Exist((_cadenceRecord.value as CadenceRecordState.Exist).cadenceRecords + cadence)
-        }
-    }
-
     override fun finishTracking() {
-        if(gpxWriter.isFileExists() != null) {
-            gpxWriter.finishWriteGpxFile()
+        when (val record = _runningRecord.value) {
+            is RunningRecordState.Exist -> {
+                val trackPoints =
+                    record.runningRecords.zip((_userLocation.value as UserLocationState.Exist).locations)
+                        .map { (runningRecord, location) ->
+                            TrackPoint(
+                                lat = location.latitude,
+                                lon = location.longitude,
+                                ele = location.altitude,
+                                time = runningRecord.currentTime,
+                                hr = 0, // 워치로부터 데이터받아와서 넣기 (hr리스트 만들어도 될 듯)
+                                cadence = runningRecord.cadence,
+                                pace = (16.6667 / runningRecord.currentSpeed).toInt()
+                            )
+                        }
+                Timber.d("finishTracking trackPoints ${trackPoints.size} ${trackPoints.first().time} ${trackPoints[0].pace} ${trackPoints[0].lat}")
+                if (gpxWriter.isFileExists() != null) {
+                    gpxWriter.appendGpxFile(trackPoints)
+                } else {
+                    val metadata = GpxMetadata(
+                        name = "러닝 ${
+                            SimpleDateFormat(
+                                "yyyy-MM-dd HH:mm",
+                                Locale.getDefault()
+                            ).format(Date())
+                        }",
+                        desc = "RunMate - ${Date()}",
+                        time = trackPoints.first().time ?: SimpleDateFormat(
+                            "yyyy-MM-dd HH:mm:ss",
+                            Locale.KOREA
+                        ).format(Date())
+                    )
+                    gpxWriter.createGpxFile(trackPoints, metadata)
+                }
+                _runningRecord.value = RunningRecordState.Initial
+                _userLocation.value = UserLocationState.Initial
+                gpxWriter.finishWriteGpxFile()
+            }
+
+            else -> {}
+
         }
     }
 
@@ -80,48 +111,63 @@ class RunningTrackingRepositoryImpl @Inject constructor(
 
         when (_userLocation.value) {
             is UserLocationState.Initial -> {
-                val personalRunningInfo = PersonalRunningInfo(0f, location.speed, location.altitude, location.speed, location.altitude, cadence, cadence.toDouble(), formattedTime)
+                val personalRunningInfo = PersonalRunningInfo(
+                    0f,
+                    location.speed,
+                    location.altitude,
+                    location.speed,
+                    location.altitude,
+                    cadence,
+                    cadence.toDouble(),
+                    formattedTime
+                )
                 val tmpList = listOf(personalRunningInfo)
                 _runningRecord.value = RunningRecordState.Exist(tmpList)
                 _userLocation.value = UserLocationState.Exist(listOf(location))
             }
 
             is UserLocationState.Exist -> {
-                when(val record = _runningRecord.value) {
+                when (val record = _runningRecord.value) {
                     is RunningRecordState.Exist -> {
                         val prevRecord = record.runningRecords.last()
-                        val prevLocation = (_userLocation.value as UserLocationState.Exist).locations.last()
-                        val distanceDiff: Float = LocationMapper.toAndroid(location).distanceTo(LocationMapper.toAndroid(prevLocation))
+                        val prevLocation =
+                            (_userLocation.value as UserLocationState.Exist).locations.last()
+                        val distanceDiff: Float = LocationMapper.toAndroid(location)
+                            .distanceTo(LocationMapper.toAndroid(prevLocation))
                         val distance = (distanceDiff / 1000) + prevRecord.distance
 
                         val altitudeSum = record.runningRecords.last().altitude + location.altitude
                         val cadenceSum = record.runningRecords.last().cadenceSum + cadence
                         val currentTime = time.value.takeIf { it > 0 } ?: 1
-                        if(record.runningRecords.size == 120) {
-                            // 중간에서 쓰면 유실되는 값은 없으려나 --> 어차피 IO 스레드에서 할 거 아닌가? ..
-                            val trackPoints = record.runningRecords.zip((_userLocation.value as UserLocationState.Exist).locations).map { (runningRecord, location) ->
-                                TrackPoint(
-                                    lat = location.latitude,
-                                    lon = location.longitude,
-                                    ele = location.altitude,
-                                    time = runningRecord.currentTime,
-                                    hr = 0, // 워치로부터 데이터받아와서 넣기 (hr리스트 만들어도 될 듯)
-                                    cadence = runningRecord.cadence,
-                                    pace = (16.6667 / runningRecord.currentSpeed).toInt()
-                                )
-                            }
-                            if(gpxWriter.isFileExists() != null) {
+                        if (record.runningRecords.size == 120) {
+                            val trackPoints =
+                                record.runningRecords.zip((_userLocation.value as UserLocationState.Exist).locations)
+                                    .map { (runningRecord, location) ->
+                                        TrackPoint(
+                                            lat = location.latitude,
+                                            lon = location.longitude,
+                                            ele = location.altitude,
+                                            time = runningRecord.currentTime,
+                                            hr = 0, // 워치로부터 데이터받아와서 넣기 (hr리스트 만들어도 될 듯)
+                                            cadence = runningRecord.cadence,
+                                            pace = (16.6667 / runningRecord.currentSpeed).toInt()
+                                        )
+                                    }
+                            if (gpxWriter.isFileExists() != null) {
                                 gpxWriter.appendGpxFile(trackPoints)
                             } else {
                                 val metadata = GpxMetadata(
                                     name = "러닝 ${
-                                    SimpleDateFormat(
-                                        "yyyy-MM-dd HH:mm",
-                                        Locale.getDefault()
-                                    ).format(Date())
-                                }",
+                                        SimpleDateFormat(
+                                            "yyyy-MM-dd HH:mm",
+                                            Locale.getDefault()
+                                        ).format(Date())
+                                    }",
                                     desc = "RunMate - ${Date()}",
-                                    time = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.KOREA).format(trackPoints.first().time),
+                                    time = SimpleDateFormat(
+                                        "yyyy-MM-dd HH:mm:ss",
+                                        Locale.KOREA
+                                    ).format(trackPoints.first().time),
                                 )
                                 gpxWriter.createGpxFile(trackPoints, metadata)
                             }
@@ -131,7 +177,7 @@ class RunningTrackingRepositoryImpl @Inject constructor(
                         val tmpList: List<PersonalRunningInfo> = record.runningRecords +
                                 PersonalRunningInfo(
                                     distance,
-                                    distance / currentTime,
+                                    distance * 1000 / currentTime,
                                     location.altitude,
                                     location.speed,
                                     altitudeSum,
@@ -140,15 +186,21 @@ class RunningTrackingRepositoryImpl @Inject constructor(
                                     formattedTime
                                 )
                         _runningRecord.value = RunningRecordState.Exist(tmpList)
-                        _userLocation.value = UserLocationState.Exist((_userLocation.value as UserLocationState.Exist).locations + location)
-
-//                        _cadenceRecord.value = CadenceRecordState.Exist(_cadenceRecord.value as CadenceRecordState.Exist + )
-                        // GPX 파일에 언제 쓸건지?
-                        // _runningRecord와 _userLocation의 최신 value를 ui에서 사용중..
-                        // 120개가 쌓이면, record.runningRecords와 (_userLocation.value as UserLocationState.Exist).locations를 empty로 만들고, tmpList 생성해서 값 넣기?
+                        _userLocation.value =
+                            UserLocationState.Exist((_userLocation.value as UserLocationState.Exist).locations + location)
                     }
+
                     is RunningRecordState.Initial -> {
-                        val personalRunningInfo = PersonalRunningInfo(0f, location.speed, location.altitude, location.speed, location.altitude, cadence, cadence.toDouble(), formattedTime)
+                        val personalRunningInfo = PersonalRunningInfo(
+                            0f,
+                            location.speed,
+                            location.altitude,
+                            location.speed,
+                            location.altitude,
+                            cadence,
+                            cadence.toDouble(),
+                            formattedTime
+                        )
                         val tmpList = listOf(personalRunningInfo)
                         _runningRecord.value = RunningRecordState.Exist(tmpList)
                         _userLocation.value = UserLocationState.Exist(listOf(location))
@@ -157,6 +209,4 @@ class RunningTrackingRepositoryImpl @Inject constructor(
             }
         }
     }
-
-
 }

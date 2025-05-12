@@ -10,11 +10,13 @@ import java.io.InputStream
 
 object GpxParser {
     fun parseGpx(inputStream: InputStream): List<TrackPoint> {
-        val parser: XmlPullParser = Xml.newPullParser()
-        parser.setInput(inputStream, null)
-        return parseTrackPoints(parser)
+        inputStream.use {
+            val parser: XmlPullParser = Xml.newPullParser().apply {
+                setInput(it, null)
+            }
+            return parseTrackPoints(parser)
+        }
     }
-
     @Throws(XmlPullParserException::class, IOException::class)
     private fun parseTrackPoints(parser: XmlPullParser): List<TrackPoint> {
         val trackPoints = mutableListOf<TrackPoint>()

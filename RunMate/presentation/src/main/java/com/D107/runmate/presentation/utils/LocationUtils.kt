@@ -144,4 +144,9 @@ object LocationUtils {
         Log.d(TAG, "startLocationTracking getPaceFromSpeed: $speed $minPerMs $sec")
         return "%d'%02d\"".format(min, sec)
     }
+
+    fun calculateSpeedMs(distanceKm: Double, timeSeconds: Double): Double {
+        require(timeSeconds > 0) { "시간은 0보다 커야 합니다." }
+        return (distanceKm * 1000) / timeSeconds
+    }
 }

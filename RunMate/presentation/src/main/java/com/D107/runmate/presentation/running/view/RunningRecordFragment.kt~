@@ -49,7 +49,13 @@ class RunningRecordFragment : BaseFragment<FragmentRunningRecordBinding>(
                         LocationUtils.getPaceFromSpeed(state.runningRecords.last().avgSpeed)
                     binding.tvCurrentPace.text =
                         LocationUtils.getPaceFromSpeed(state.runningRecords.last().currentSpeed)
+//                    val cadenceRecord = mainViewModel.cadenceRecord.value
                     binding.tvCadence.text = state.runningRecords.last().cadence.toString()
+//                        if(cadenceRecord is CadenceRecordState.Exist) {
+//                        cadenceRecord.cadenceRecords.last().toString()
+//                    } else {
+//                        "0"
+//                    }
                 }
             }
         }

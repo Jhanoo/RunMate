@@ -32,7 +32,6 @@ class GpxWriter @Inject constructor(
 
     fun finishWriteGpxFile(): Boolean {
         val file = getFile()
-        Timber.d("finishTracking finishWriteGpxFile")
         return GpxGenerator.finishWriteGpxFile(file)
     }
 

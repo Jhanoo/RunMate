@@ -10,6 +10,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import dagger.hilt.android.internal.managers.ViewComponentManager
+import timber.log.Timber
+import java.io.File
+import java.io.FileInputStream
+import java.io.InputStream
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.DecimalFormat
@@ -31,7 +35,7 @@ object CommonUtils {
         return comma.format(num)
     }
 
-    fun dateformatYMDHMFromInt(year: Int, month: Int, day: Int):String{
+    fun dateformatYMDHMFromInt(year: Int, month: Int, day: Int): String {
 //        val format = SimpleDateFormat("yyyy.MM.dd. HH:mm", Locale.KOREA)
 //        format.timeZone = TimeZone.getTimeZone("Asia/Seoul")
 //        return format.format(time)
@@ -39,13 +43,13 @@ object CommonUtils {
     }
 
     //날짜 포맷 출력
-    fun dateformatYMDHM(time:Date):String{
+    fun dateformatYMDHM(time: Date): String {
         val format = SimpleDateFormat("yyyy.MM.dd. HH:mm", Locale.KOREA)
         format.timeZone = TimeZone.getTimeZone("Asia/Seoul")
         return format.format(time)
     }
 
-    fun dateformatYMD(time: Date):String{
+    fun dateformatYMD(time: Date): String {
         val format = SimpleDateFormat("yyyy.MM.dd", Locale.KOREA)
         format.timeZone = TimeZone.getTimeZone("Asia/Seoul")
         return format.format(time)
@@ -100,6 +104,7 @@ object CommonUtils {
             context
         }
     }
+
     fun getWindowSize(context: Context): Point {
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val display = windowManager.defaultDisplay
@@ -107,6 +112,19 @@ object CommonUtils {
         display.getSize(size)
 
         return size
+    }
+
+    fun getGpxInputStream(context: Context): InputStream? {
+        return try {
+//            val file = context.assets.open("test_3.gpx") // test용
+            //            file
+            val file = File(context.filesDir, "running_tracking.gpx") // 실제로 작성한 파일
+            FileInputStream(file)
+
+        } catch (e: Exception) {
+            Timber.e(e, "GPX 파일 읽기 실패")
+            null
+        }
     }
 }
 

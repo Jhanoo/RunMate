@@ -80,15 +80,13 @@ class RunningTrackingService : Service() {
 
         startTimeTracking()
         startTracking(this)
-
-//        cadenceTracker.startTracking(this)
     }
 
     private fun stopService() {
         stopTimeTracking()
         stopLocationTracking()
-//        cadenceTracker.stopTracking()
         stopTracking()
+        repository.finishTracking()
         stopForeground(true)
         stopSelf()
     }
@@ -96,7 +94,6 @@ class RunningTrackingService : Service() {
     private fun pauseService() {
         stopTimeTracking()
         stopLocationTracking()
-//        cadenceTracker.stopTracking()
         stopTracking()
     }
 
@@ -164,7 +161,6 @@ class RunningTrackingService : Service() {
                         if (currentTime - windowStartTime > timeWindow) {
                             cadence = 0
                         }
-//                        repository.addCadence(cadence)
                         repository.processLocationUpdate(locationModel, cadence)
                         repository.setTrackingStatus(TrackingStatus.RUNNING)
                     }

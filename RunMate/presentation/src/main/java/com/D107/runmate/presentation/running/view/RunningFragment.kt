@@ -25,8 +25,10 @@ import com.D107.runmate.presentation.RunningTrackingService
 import com.D107.runmate.presentation.databinding.FragmentRunningBinding
 import com.D107.runmate.presentation.utils.CommonUtils
 import com.D107.runmate.presentation.utils.CommonUtils.getActivityContext
+import com.D107.runmate.presentation.utils.CommonUtils.getGpxInputStream
 import com.D107.runmate.presentation.utils.GpxParser.parseGpx
 import com.D107.runmate.presentation.utils.KakaoMapUtil.addCourseLine
+import com.D107.runmate.presentation.utils.KakaoMapUtil.addCoursePoint
 import com.D107.runmate.presentation.utils.LocationUtils
 import com.kakao.vectormap.KakaoMap
 import com.kakao.vectormap.KakaoMapReadyCallback
@@ -72,20 +74,6 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initEvent()
-
-        CoroutineScope(Dispatchers.IO).launch {
-            mContext?.let {
-                val inputStream = it.assets.open("test_3.gpx")
-                val trackPoints = parseGpx(inputStream)
-                withContext(Dispatchers.Main) {
-                    kakaoMap?.let { map ->
-                        addCourseLine(it, map, trackPoints)
-                    }
-                }
-            }
-        }
-
         binding.mapView.start(object : MapLifeCycleCallback() {
             override fun onMapDestroy() {
             }
@@ -113,10 +101,31 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
             }
         })
 
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                mContext?.let {
+                    getGpxInputStream(it)?.let { inputStream ->
+                        val trackPoints = parseGpx(inputStream)
+                        withContext(Dispatchers.Main) {
+                            kakaoMap?.let { map ->
+                                addCourseLine(it, map, trackPoints)
+                            }
+                        }
+                    }
+                }
+            }catch (e: Exception) {
+                Timber.e("${e.message}")
+            }
+
+        }
+
+        initEvent()
+
         viewLifecycleOwner.lifecycleScope.launch {
             mainViewModel.userLocation.collectLatest { state ->
                 when (state) {
                     is UserLocationState.Exist -> {
+                        Timber.d("UserLocationState Exist")
                         val tmpUserLabel = userLabel
                         if (tmpUserLabel != null) {
                             tmpUserLabel.moveTo(
@@ -134,12 +143,19 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                             kakaoMap?.moveCamera(cameraUpdate)
                             addMarker(state.locations.last().latitude, state.locations.last().longitude)
                         }
+//                        mContext?.let { context ->
+//                            kakaoMap?.let { map ->
+//                                addCoursePoint(context, map, LatLng.from(state.locations.last().latitude, state.locations.last().longitude))
+//                            }
+//                        }
                     }
                     is UserLocationState.Initial -> {
-                        Log.d(TAG, "onViewCreated: initial")
+                        Timber.d("UserLocationState Initial ")
                     }
 
-                    else -> {}
+                    else -> {
+                        Timber.d("UserLocationState else ")
+                    }
                 }
             }
         }
@@ -159,7 +175,6 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                             findNavController().navigate(R.id.action_runningFragment_to_runningEndFragment)
                         }
                         TrackingStatus.RUNNING -> {
-                            Timber.d("onResume: TrackingStatus.RUNNING")
                             binding.groupBtnStart.visibility = View.INVISIBLE
                             binding.groupRecord.visibility = View.VISIBLE
                             binding.groupBtnPause.visibility = View.GONE
@@ -170,7 +185,6 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                         }
 
                         TrackingStatus.INITIAL -> {
-                            Timber.d("onResume: TrackingStatus.INITIAL")
                             binding.groupBtnStart.visibility = View.VISIBLE
                             binding.groupRecord.visibility = View.GONE
                             binding.groupBtnPause.visibility = View.GONE
@@ -181,7 +195,6 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                         }
 
                         TrackingStatus.PAUSED -> {
-                            Timber.d("onResume: TrackingStatus.PAUSED")
                             binding.groupBtnStart.visibility = View.INVISIBLE
                             binding.groupRecord.visibility = View.VISIBLE
                             binding.groupBtnPause.visibility = View.VISIBLE
@@ -198,6 +211,14 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
         viewLifecycleOwner.lifecycleScope.launch {
             mainViewModel.runningRecord.collectLatest { state ->
                 if(state is RunningRecordState.Exist) {
+                    if(state.runningRecords.size > 1) {
+                        val locationValue = mainViewModel.userLocation.value
+                        if(locationValue is UserLocationState.Exist) {
+                            val currentLocation = LatLng.from(locationValue.locations.last().latitude, locationValue.locations.last().longitude)
+                            val prevLocation = LatLng.from(locationValue.locations[locationValue.locations.size - 2].latitude, locationValue.locations[locationValue.locations.size - 2].longitude)
+                            addCoursePoint(mContext!!, kakaoMap!!, prevLocation, currentLocation)
+                        }
+                    }
                     binding.tvDistance.text = getString(R.string.running_distance, state.runningRecords.last().distance)
                     binding.tvPace.text =
                         LocationUtils.getPaceFromSpeed(state.runningRecords.last().currentSpeed)
