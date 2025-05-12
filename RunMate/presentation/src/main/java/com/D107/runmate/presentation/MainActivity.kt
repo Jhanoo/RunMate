@@ -26,6 +26,8 @@ import com.google.android.material.navigation.NavigationView
 import com.ssafy.locket.presentation.base.BaseActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import timber.log.Timber
+import java.io.File
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 

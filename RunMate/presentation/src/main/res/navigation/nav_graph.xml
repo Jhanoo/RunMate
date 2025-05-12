@@ -62,7 +62,16 @@
         android:id="@+id/runningEndFragment"
         android:name="com.D107.runmate.presentation.running.view.RunningEndFragment"
         android:label="fragment_running_end"
-        tools:layout="@layout/fragment_running_end" />
+        tools:layout="@layout/fragment_running_end" >
+        <action
+            android:id="@+id/action_runningEndFragment_to_runningFragment"
+            app:destination="@id/runningFragment"
+            app:popUpTo="@id/runningEndFragment"
+            app:popUpToInclusive="true"/>
+        <action
+            android:id="@+id/action_runningEndFragment_to_chartFragment"
+            app:destination="@id/chartFragment" />
+    </fragment>
     <fragment
         android:id="@+id/courseSettingFragment"
         android:name="com.D107.runmate.presentation.running.view.CourseSettingFragment"
@@ -71,11 +80,28 @@
         <action
             android:id="@+id/action_courseSettingFragment_to_courseSearchFragment"
             app:destination="@id/courseSearchFragment" />
+        <action
+            android:id="@+id/action_courseSettingFragment_to_courseDetailFragment"
+            app:destination="@id/courseDetailFragment" />
     </fragment>
     <fragment
         android:id="@+id/courseSearchFragment"
         android:name="com.D107.runmate.presentation.running.view.CourseSearchFragment"
         android:label="fragment_course_search"
-        tools:layout="@layout/fragment_course_search" />
+        tools:layout="@layout/fragment_course_search" >
+        <action
+            android:id="@+id/action_courseSearchFragment_to_courseDetailFragment"
+            app:destination="@id/courseDetailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/courseDetailFragment"
+        android:name="com.D107.runmate.presentation.running.view.CourseDetailFragment"
+        android:label="fragment_course_detail"
+        tools:layout="@layout/fragment_course_detail" />
+    <fragment
+        android:id="@+id/chartFragment"
+        android:name="com.D107.runmate.presentation.running.view.ChartFragment"
+        android:label="fragment_chart"
+        tools:layout="@layout/fragment_chart" />
 
 </navigation>

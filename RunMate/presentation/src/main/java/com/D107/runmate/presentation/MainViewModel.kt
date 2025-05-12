@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.D107.runmate.domain.model.running.PersonalRunningInfo
 import com.D107.runmate.domain.model.running.RunningRecordState
+import com.D107.runmate.domain.model.running.TrackingStatus
 import com.D107.runmate.domain.model.running.UserLocationState
 import com.D107.runmate.domain.repository.running.RunningTrackingRepository
 import com.D107.runmate.presentation.utils.LocationUtils.getPaceFromSpeed
@@ -48,10 +49,18 @@ class MainViewModel @Inject constructor(
     val recordSize = repository.recordSize
     val trackingStatus = repository.trackingStatus
 
+    // TODO 수정사항 trackingStatus를 set하는 함수 만들기
+
+    val cadenceRecord = repository.cadenceRecord
+
     fun setUserLocation(state: UserLocationState) {
         if (state is UserLocationState.Exist) {
             repository.setInitialUserLocation(state.locations.last())
         }
+    }
+
+    fun setTrackingStatus(status: TrackingStatus) {
+        repository.setTrackingStatus(status)
     }
 }
 
@@ -178,13 +187,13 @@ class MainViewModel @Inject constructor(
 //
 //    fun startCadenceTracking(context: Context) {
 //        if (runningJob is RunningJobState.None || runningJob is RunningJobState.Initial) {
-//            CadenceTracker.startTracking(context)
+//            com.D107.runmate.data.utils.CadenceTracker.startTracking(context)
 //        }
 //    }
 //
 //    fun stopCadenceTracking(context: Context) {
 //        if (runningJob is RunningJobState.Active) {
-//            CadenceTracker.stopTracking()
+//            com.D107.runmate.data.utils.CadenceTracker.stopTracking()
 //        }
 //    }
 //

@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
+import com.D107.runmate.domain.model.running.TrackingStatus
 import com.D107.runmate.domain.model.running.UserLocationState
 import com.D107.runmate.presentation.MainViewModel
 import com.D107.runmate.presentation.R
@@ -23,9 +25,34 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
 ) {
     private var kakaoMap: KakaoMap? = null
     private val mainViewModel: MainViewModel by activityViewModels()
+    private lateinit var dialog: CourseAddDialog
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        initUI()
+        initEvent()
+        initMap()
+
+    }
+
+    private fun initEvent() {
+        binding.btnNext.setOnClickListener {
+            mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
+            findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
+        }
+
+        binding.btnChart.setOnClickListener {
+            findNavController().navigate(R.id.action_runningEndFragment_to_chartFragment)
+        }
+
+        binding.btnAddCourse.setOnClickListener {
+            dialog = CourseAddDialog()
+            dialog.show(requireActivity().supportFragmentManager, "course_add")
+        }
+    }
+
+    private fun initMap() {
         binding.mapView.start(object : MapLifeCycleCallback() {
             override fun onMapDestroy() {
             }
@@ -37,14 +64,10 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
         }, object : KakaoMapReadyCallback() {
             override fun onMapReady(p0: KakaoMap) {
                 kakaoMap = p0
-                p0.setOnCameraMoveStartListener { map, gestureType ->
-                    if (gestureType == GestureType.Pan) {
-//                        map.trackingManager?.stopTracking()
-                    }
-                }
             }
 
             override fun getPosition(): LatLng {
+                // TODO 코스의 시작지점을 LatLng으로 반환
                 mainViewModel.userLocation.value?.let {
                     if (it is UserLocationState.Exist) {
                         return LatLng.from(
@@ -57,6 +80,32 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
                 return LatLng.from(fallbackLocation.latitude, fallbackLocation.longitude)
             }
         })
-
     }
+
+    private fun initUI() {
+        // TODO 프리 모드인 경우
+        binding.btnAddCourse.visibility = View.VISIBLE
+        binding.ivLike.visibility = View.GONE
+
+        // TODO 코스 모드인 경우
+//        binding.btnAddCourse.visibility = View.GONE
+//        binding.ivLike.visibility = View.VISIBLE
+
+        // TODO 코스 모드인 경우, 사용자 좋아요 여부 좋아요 x
+//        binding.ivLike.setImageResource(R.drawable.ic_course_like_inactive)
+
+        // TODO 코스 모드인 경우, 사용자 좋아요 여부 좋아요 o
+//        binding.ivLike.setImageResource(R.drawable.ic_course_like)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        binding.mapView.resume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        binding.mapView.pause()
+    }
+
 }

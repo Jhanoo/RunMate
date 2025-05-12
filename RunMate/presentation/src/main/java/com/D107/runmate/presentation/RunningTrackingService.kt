@@ -7,6 +7,10 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -23,8 +27,10 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -39,6 +45,15 @@ class RunningTrackingService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     var runningJob: RunningJobState = RunningJobState.Initial
     private var timeTrackingJob: Job? = null
+
+    private var sensorManager: SensorManager? = null
+    private var stepCountInWindow = 0 // 5초 동안의 걸음 수
+    private var windowStartTime = 0L
+    private val timeWindow = 5_000L
+    var cadence = 0
+        private set
+
+    private var isTracking = false
 
     override fun onCreate() {
         super.onCreate()
@@ -64,15 +79,16 @@ class RunningTrackingService : Service() {
         startLocationTracking()
 
         startTimeTracking()
+        startTracking(this)
 
-        CadenceTracker.startTracking(this)
+//        cadenceTracker.startTracking(this)
     }
 
     private fun stopService() {
         stopTimeTracking()
         stopLocationTracking()
-        CadenceTracker.stopTracking()
-
+//        cadenceTracker.stopTracking()
+        stopTracking()
         stopForeground(true)
         stopSelf()
     }
@@ -80,7 +96,8 @@ class RunningTrackingService : Service() {
     private fun pauseService() {
         stopTimeTracking()
         stopLocationTracking()
-        CadenceTracker.stopTracking()
+//        cadenceTracker.stopTracking()
+        stopTracking()
     }
 
     private fun createNotificationChannel() {
@@ -136,14 +153,19 @@ class RunningTrackingService : Service() {
                         runningJob = RunningJobState.Error("위치 추적 중 오류 발생: ${e.message}")
                         repository.setTrackingStatus(TrackingStatus.PAUSED)
                     }
-                    .collect { location ->
+                    .collectLatest { location ->
                         val locationModel = LocationModel(
                             location.latitude,
                             location.longitude,
                             location.altitude,
                             location.speed
                         )
-                        repository.processLocationUpdate(locationModel)
+                        val currentTime = System.currentTimeMillis()
+                        if (currentTime - windowStartTime > timeWindow) {
+                            cadence = 0
+                        }
+//                        repository.addCadence(cadence)
+                        repository.processLocationUpdate(locationModel, cadence)
                         repository.setTrackingStatus(TrackingStatus.RUNNING)
                     }
             } catch (e: Exception) {
@@ -175,7 +197,6 @@ class RunningTrackingService : Service() {
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
-
 
     sealed class RunningJobState {
         object Initial : RunningJobState()
@@ -290,6 +311,48 @@ class RunningTrackingService : Service() {
         val notification = getNotificationBuilder(state).build()
         (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
             .notify(NOTIFICATION_ID, notification)
+    }
+
+    fun startTracking(context: Context) {
+        if (isTracking) return
+        Timber.d("startTracking Cadence")
+        sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)?.let { sensor ->
+            sensorManager?.registerListener(stepListener, sensor, SensorManager.SENSOR_DELAY_UI)
+            isTracking = true
+            windowStartTime = System.currentTimeMillis()
+        }
+    }
+
+    fun stopTracking() {
+        Timber.d("stopTracking Cadence")
+        sensorManager?.unregisterListener(stepListener)
+        sensorManager = null
+        isTracking = false
+        stepCountInWindow = 0
+        cadence = 0
+    }
+
+    private val stepListener = object : SensorEventListener {
+        override fun onSensorChanged(event: SensorEvent) {
+            if (event.sensor.type == Sensor.TYPE_STEP_DETECTOR && event.values[0] == 1.0f) {
+                stepCountInWindow++
+                calculateCadence()
+            }
+        }
+        override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
+    }
+
+    private fun calculateCadence() {
+        val currentTime = System.currentTimeMillis()
+
+        // 5초마다 케이던스 계산
+        if (currentTime - windowStartTime >= timeWindow) {
+            cadence = (stepCountInWindow * 12) // 5초 걸음 수 → 분당 걸음 수(60/5=12)
+            stepCountInWindow = 0 // 윈도우 초기화
+            windowStartTime = currentTime // 다음 윈도우 시작 시간 업데이트
+            Log.d("Cadence", "Current Cadence: $cadence SPM")
+        }
     }
 
 }

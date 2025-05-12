@@ -38,6 +38,7 @@
         android:background="@drawable/bg_all_search"
         android:drawableStart="@drawable/ic_course_search"
         android:paddingStart="12dp"
+        android:drawablePadding="8dp"
         android:layout_marginHorizontal="24dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

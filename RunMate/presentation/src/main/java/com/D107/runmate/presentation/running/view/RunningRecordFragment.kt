@@ -1,23 +1,28 @@
 package com.D107.runmate.presentation.running.view
 
-import CadenceTracker
 import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.D107.runmate.domain.model.running.CadenceRecordState
 import com.D107.runmate.domain.model.running.RunningRecordState
 import com.D107.runmate.domain.model.running.TrackingStatus
+import com.D107.runmate.presentation.MainActivity
 import com.D107.runmate.presentation.MainViewModel
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.RunningTrackingService
 import com.D107.runmate.presentation.databinding.FragmentRunningRecordBinding
+import com.D107.runmate.presentation.utils.CommonUtils.getActivityContext
 import com.D107.runmate.presentation.utils.LocationUtils
 import com.ssafy.locket.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 private const val TAG = "RunningRecordFragment"
 @AndroidEntryPoint
@@ -44,7 +49,51 @@ class RunningRecordFragment : BaseFragment<FragmentRunningRecordBinding>(
                         LocationUtils.getPaceFromSpeed(state.runningRecords.last().avgSpeed)
                     binding.tvCurrentPace.text =
                         LocationUtils.getPaceFromSpeed(state.runningRecords.last().currentSpeed)
-                    binding.tvCadence.text = CadenceTracker.cadence.toString()
+//                    val cadenceRecord = mainViewModel.cadenceRecord.value
+                    binding.tvCadence.text = state.runningRecords.last().cadence.toString()
+//                        if(cadenceRecord is CadenceRecordState.Exist) {
+//                        cadenceRecord.cadenceRecords.last().toString()
+//                    } else {
+//                        "0"
+//                    }
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainViewModel.trackingStatus.collect { status ->
+                    when (mainViewModel.trackingStatus.value) {
+                        TrackingStatus.STOPPED -> {
+                            findNavController().navigate(R.id.action_runningRecordFragment_to_runningEndFragment)
+                        }
+                        TrackingStatus.RUNNING -> {
+                            Timber.d("onResume: TrackingStatus.RUNNING")
+                            binding.groupBtnPause.visibility = View.GONE
+                            binding.groupBtnRunning.visibility = View.VISIBLE
+                            mContext?.let {
+                                (getActivityContext(it) as MainActivity).hideHamburgerBtn()
+                            }
+                        }
+
+                        TrackingStatus.INITIAL -> {
+                            Timber.d("onResume: TrackingStatus.INITIAL")
+                            binding.groupBtnPause.visibility = View.GONE
+                            binding.groupBtnRunning.visibility = View.GONE
+                            mContext?.let {
+                                (getActivityContext(it) as MainActivity).showHamburgerBtn()
+                            }
+                        }
+
+                        TrackingStatus.PAUSED -> {
+                            Timber.d("onResume: TrackingStatus.PAUSED")
+                            binding.groupBtnPause.visibility = View.VISIBLE
+                            binding.groupBtnRunning.visibility = View.GONE
+                            mContext?.let {
+                                (getActivityContext(it) as MainActivity).hideHamburgerBtn()
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -94,30 +143,6 @@ class RunningRecordFragment : BaseFragment<FragmentRunningRecordBinding>(
                 binding.btnSound.setImageResource(R.drawable.ic_running_btn_sound_on)
             }
 //            mainViewModel.toggleSoundEnabled()
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        when (mainViewModel.trackingStatus.value) {
-            TrackingStatus.STOPPED -> {
-                // 종료
-            }
-
-            TrackingStatus.RUNNING -> {
-                binding.groupBtnPause.visibility = View.GONE
-                binding.groupBtnRunning.visibility = View.VISIBLE
-            }
-
-            TrackingStatus.INITIAL -> {
-                binding.groupBtnPause.visibility = View.GONE
-                binding.groupBtnRunning.visibility = View.GONE
-            }
-
-            TrackingStatus.PAUSED -> {
-                binding.groupBtnPause.visibility = View.VISIBLE
-                binding.groupBtnRunning.visibility = View.GONE
-            }
         }
     }
 }

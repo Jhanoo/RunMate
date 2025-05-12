@@ -60,6 +60,7 @@ class CourseSearchFragment : BaseFragment<FragmentCourseSearchBinding>(
             override fun onClick(view: View, data: CourseInfo, position: Int) {
                 // TODO 코스 상세 화면으로 이동
                 Timber.d("onClick: ${data.courseId} ${data.courseName}")
+                findNavController().navigate(R.id.action_courseSearchFragment_to_courseDetailFragment)
             }
         }
     }
