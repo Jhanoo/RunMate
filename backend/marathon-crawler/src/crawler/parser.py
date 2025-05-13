@@ -3,7 +3,6 @@
 """
 import random
 import logging
-import json
 import re
 from datetime import datetime
 from bs4 import BeautifulSoup
@@ -92,7 +91,6 @@ def get_marathon_list(page=1):
                     try:
                         date_cell = cells[0].text.strip()
                         name_cell = cells[1].text.strip()
-                        region_cell = cells[2].text.strip() if len(cells) > 2 else ""
                         location_cell = cells[3].text.strip() if len(cells) > 3 else ""
                         
                         # 날짜 추출 및 변환
@@ -120,34 +118,20 @@ def get_marathon_list(page=1):
                                 'url': url
                             }
                             
-                            # 상세 페이지가 있는 경우 거리 정보 추출 시도
+                            
                             if url:
                                 try:
+                                    # 상세 HTML 가져오기
                                     detail_html = get_marathon_detail(url)
-                                    detail_soup = BeautifulSoup(detail_html, 'html.parser')
                                     
-                                    # 거리 정보 추출
-                                    distance_keywords = ['풀코스', '42.195', '하프', '21.0975', '21K', '10K', '5K']
-                                    for p in detail_soup.find_all('p'):
-                                        for keyword in distance_keywords:
-                                            if keyword in p.text:
-                                                if '풀코스' in p.text or '42.195' in p.text:
-                                                    distances.append('풀코스 (42.195km)')
-                                                elif '하프' in p.text or '21' in p.text:
-                                                    distances.append('하프코스 (21.0975km)')
-                                                elif '10K' in p.text:
-                                                    distances.append('10km')
-                                                elif '5K' in p.text:
-                                                    distances.append('5km')
+                                    # ✅ parse_marathon_detail()로 통합 파싱
+                                    details = parse_marathon_detail(detail_html)
+                                    if 'distances' in details and details['distances']:
+                                        marathon['distances'] = details['distances']  # 3개 모두 잡아옴
                                     
-                                    # 중복 제거
-                                    distances = list(set(distances))
-                                    
-                                    if distances:
-                                        marathon['distances'] = distances
                                 except Exception as e:
                                     logger.error(f"상세 페이지 처리 실패 ({url}): {str(e)}")
-                            
+
                             # 중복 확인
                             is_duplicate = False
                             for existing in marathons:
@@ -160,40 +144,6 @@ def get_marathon_list(page=1):
                                 logger.info(f"마라톤 정보 추출: {name_cell}, 장소: {location_cell}")
                     except Exception as e:
                         logger.error(f"행 파싱 실패: {str(e)}, 행: {row}")
-        
-        # 추출된 마라톤 정보가 없으면 기본 테스트 데이터 사용
-        if not marathons:
-            logger.warning("웹사이트에서 마라톤 정보를 찾을 수 없어 테스트용 데이터를 생성합니다.")
-            
-            # 테스트용 데이터 생성 (실제 마라톤 대회 정보 기반)
-            test_marathons = [
-                {
-                    'id': '2025-seoul-marathon',
-                    'name': '2025 서울마라톤 (동아 마라톤)',
-                    'date': datetime(2025, 3, 15).date(),  # datetime 대신 date 객체 사용
-                    'location': '서울 광화문광장',
-                    'url': 'https://runningwikii.com/entry/2025-seoul-marathon',
-                    'distances': ['풀코스 (42.195km)', '하프코스 (21.0975km)', '10km', '5km']
-                },
-                {
-                    'id': '2025-seoul-half-marathon',
-                    'name': '2025 서울하프마라톤',
-                    'date': datetime(2025, 4, 27).date(),  # datetime 대신 date 객체 사용
-                    'location': '서울 광화문 - 월드컵공원',
-                    'url': 'https://runningwikii.com/entry/2025-seoul-half-marathon',
-                    'distances': ['하프코스 (21.0975km)', '10km']
-                },
-                {
-                    'id': '2025-jeju-international-marathon',
-                    'name': '2025 평화의 섬 제주국제마라톤',
-                    'date': datetime(2025, 4, 27).date(),  # datetime 대신 date 객체 사용
-                    'location': '제주시 구좌읍',
-                    'url': 'https://runningwikii.com/entry/2025-jeju-international-marathon',
-                    'distances': ['풀코스 (42.195km)', '하프코스 (21.0975km)', '10km', '5km']
-                }
-            ]
-            
-            marathons.extend(test_marathons)
             
         return marathons
     
@@ -228,51 +178,50 @@ def parse_marathon_detail(html_content):
     try:
         soup = BeautifulSoup(html_content, 'html.parser')
         
-        # 거리 정보 추출 방법 개선
-        distances = []
-        
-        # 방법 1: 전체 텍스트에서 종목 정보 찾기
-        page_text = soup.get_text()
-        
-        # 원래 종목명 그대로 유지
-        if re.search(r'풀코스|42[.,]195|42km|42 ?km', page_text, re.IGNORECASE):
-            distances.append('풀코스')
-        
-        if re.search(r'하프코스|하프|half|21[.,]0975|21km|21 ?km', page_text, re.IGNORECASE):
-            distances.append('하프')
-        
-        if re.search(r'10[kK]|10km|10 ?km', page_text, re.IGNORECASE):
-            distances.append('10km')
-        
-        if re.search(r'5[kK]|5km|5 ?km', page_text, re.IGNORECASE):
-            distances.append('5km')
-        
-        # 방법 2: "종목" 또는 "코스" 단어 근처에서 정보 추출
-        for p in soup.find_all(['p', 'div', 'li', 'span']):
-            text = p.get_text()
-            if '종목' in text or '코스' in text:
-                if '풀' in text or '42' in text or 'full' in text.lower():
-                    if '풀코스' not in distances:
-                        distances.append('풀코스')
-                if '하프' in text or '21' in text or 'half' in text.lower():
-                    if '하프' not in distances:
-                        distances.append('하프')
-                if '10k' in text.lower() or '10km' in text.lower() or '10 km' in text.lower():
-                    if '10km' not in distances:
-                        distances.append('10km')
-                if '5k' in text.lower() or '5km' in text.lower() or '5 km' in text.lower():
-                    if '5km' not in distances:
-                        distances.append('5km')
-        
-        # 중복 제거
-        distances = list(set(distances))
-        
-        # 거리 정보 저장
-        if distances:
-            details['distances'] = distances
+        # 첫 번째 유효한 '종목'만 꺼내오기
+        raw_distance = None
+
+        for tr in soup.find_all('tr'):
+            tds = tr.find_all('td')
+            if len(tds) < 2:
+                continue
+            header_td = tds[0]
+            if header_td.get('id', '').startswith('Buo'):
+                continue
+            if header_td.get_text(strip=True) == '종목':
+                raw_distance = tds[1].get_text(strip=True)
+                break
+
+        if raw_distance:
+            parts = re.split(r'[,\.\s]+', raw_distance)
+            
+            filtered = []
+            for part in parts:
+                if not part:
+                    continue
+                part = part.replace('(', '').replace(')', '')
+                if '거리' in part:
+                    continue
+                if part.startswith('0'):
+                    continue
+                low = part.lower()
+                if '풀' in part or '하프' in part or 'km' in low:
+                    filtered.append(part)
+
+            mapped = []
+            for part in filtered:
+                if '풀' in part:
+                    mapped.append('풀(42.195km)')
+                elif '하프' in part:
+                    mapped.append('하프(21.0975km)')
+                else:
+                    mapped.append(part)
+
+            if mapped:
+                details['distances'] = mapped
         
         return details
     
     except Exception as e:
-        logger.error(f"상세 페이지 파싱 실패: {str(e)}")
+        logger.error(f"상세 페이지 파싱 실패: {e}")
         return details
