@@ -3,8 +3,6 @@ package com.D107.runmate.presentation.user.view
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
@@ -16,15 +14,14 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.D107.runmate.presentation.R
-import com.D107.runmate.presentation.components.CustomDatePicker
-import com.D107.runmate.presentation.components.CustomGenderPicker
 import com.D107.runmate.presentation.databinding.FragmentPersonalJoinBinding
 import com.D107.runmate.presentation.user.viewmodel.JoinViewModel
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.ssafy.locket.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import java.io.InputStream
 
 @AndroidEntryPoint
 class Join2Fragment : BaseFragment<FragmentPersonalJoinBinding>(
@@ -88,7 +85,10 @@ class Join2Fragment : BaseFragment<FragmentPersonalJoinBinding>(
         // 프로필 이미지 관찰
         viewModel.profileImageUri.observe(viewLifecycleOwner) { uri ->
             if (uri != null) {
-                binding.profileImg.setImageURI(uri)
+                Glide.with(requireContext())
+                    .load(uri)
+                    .apply(RequestOptions.circleCropTransform())
+                    .into(binding.profileImg)
             }
         }
     }
@@ -137,7 +137,6 @@ class Join2Fragment : BaseFragment<FragmentPersonalJoinBinding>(
 
     private fun showDatePicker() {
         CustomDatePicker(
-            context = requireContext(),
             initialYear = selectedYear,
             initialMonth = selectedMonth,
             initialDay = selectedDay,
@@ -148,7 +147,7 @@ class Join2Fragment : BaseFragment<FragmentPersonalJoinBinding>(
                 binding.birthDateButton.text = formattedDate
                 binding.birthDateButton.setTextColor(Color.BLACK)
             }
-        ).show()
+        ).show(parentFragmentManager, "datePicker")
     }
 
     private fun showGenderPicker() {
@@ -170,13 +169,18 @@ class Join2Fragment : BaseFragment<FragmentPersonalJoinBinding>(
 
     private fun setProfileImage(uri: Uri) {
         try {
-            // 이미지 URI를 ViewModel에 직접 전달
+            // URI를 ViewModel에 저장
             viewModel.setProfileImage(uri)
-            // UI에 이미지 표시
-            binding.profileImg.setImageURI(uri)
+
+            // Glide를 사용하여 원형으로 표시
+            Glide.with(requireContext())
+                .load(uri)
+                .apply(RequestOptions.circleCropTransform())
+                .into(binding.profileImg)
         } catch (e: Exception) {
             e.printStackTrace()
-            showToast("이미지를 불러오는데 실패했습니다.")
+            showToast("이미지를 처리하는데 실패했습니다.")
+            Log.e("Join2Fragment", "이미지 처리 오류", e)
         }
     }
 

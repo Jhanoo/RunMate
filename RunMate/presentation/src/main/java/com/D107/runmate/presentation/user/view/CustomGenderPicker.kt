@@ -1,4 +1,4 @@
-package com.D107.runmate.presentation.components
+package com.D107.runmate.presentation.user.view
 
 import android.app.Dialog
 import android.content.Context
