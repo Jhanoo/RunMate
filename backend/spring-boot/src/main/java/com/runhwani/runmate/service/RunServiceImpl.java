@@ -1,5 +1,6 @@
 package com.runhwani.runmate.service;
 
+import com.runhwani.runmate.dao.CurriculumDao;
 import com.runhwani.runmate.dao.HistoryDao;
 import com.runhwani.runmate.dto.request.run.RunEndRequest;
 import com.runhwani.runmate.model.History;
@@ -20,6 +21,7 @@ import java.util.UUID;
 public class RunServiceImpl implements RunService {
 
     private final HistoryDao historyDao;
+    private final CurriculumDao curriculumDao;
 
     @Override
     public void endRun(UUID userId, MultipartFile gpxFile, RunEndRequest req) throws IOException {
@@ -47,5 +49,7 @@ public class RunServiceImpl implements RunService {
                 .build();
 
         historyDao.insert(history);
+
+        curriculumDao.updateTodoDone(userId);
     }
 }

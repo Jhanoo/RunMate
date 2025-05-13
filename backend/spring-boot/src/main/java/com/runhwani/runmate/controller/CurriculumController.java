@@ -38,7 +38,7 @@ public class CurriculumController implements CurriculumControllerDocs {
     }
 
     @Override
-    public ResponseEntity<CommonResponse<Curriculum>> getCurriculum(UserDetails principal) {
+    public ResponseEntity<CommonResponse<Curriculum>> getMyCurriculum(UserDetails principal) {
         // 1. JWT 토큰에서 userId 추출
         UUID userId = UUID.fromString(principal.getUsername());
 

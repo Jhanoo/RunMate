@@ -31,7 +31,7 @@ public interface CurriculumDao {
      *
      * @param userId 조회할 유저 ID
      */
-    Curriculum selectByUserId(UUID userId);
+    Curriculum selectCurriculumByUserId(UUID userId);
 
     /**
      * 주어진 기간(period) 내의 Todo 조회
@@ -40,18 +40,32 @@ public interface CurriculumDao {
      * @param start  조회 시작 시각 (inclusive)
      * @param end    조회 종료 시각 (exclusive)
      */
-    List<Todo> selectByPeriod(UUID userId, OffsetDateTime start, OffsetDateTime end);
+    List<Todo> selectTodoListByPeriod(UUID userId, OffsetDateTime start, OffsetDateTime end);
 
     /**
      * 커리큘럼의 is_finished를 true로 갱신
      *
      * @param curriculumId 수정할 커리큘럼 ID
      */
-    void updateIsFinished(UUID curriculumId);
+    void updateCurriculumIsFinished(UUID curriculumId);
 
 
     /**
      * 매일 자정마다 커리큘럼 목표 날짜가 지나면 커리큘럼의 is_finished=false를 true로 갱신
      */
-    void updateIsFinishedEveryDay();
+    void updateCurriculumIsFinishedEveryDay();
+
+    /**
+     * 커리큘럼이 바뀌면서 앞으로의 Todo들 삭제
+     *
+     * @param userId 유저 ID
+     */
+    void deleteTodoList(UUID userId);
+
+    /**
+     * Todo의 isDone을 true로 갱신
+     *
+     * @param userId 유저 ID
+     */
+    void updateTodoDone(UUID userId);
 }

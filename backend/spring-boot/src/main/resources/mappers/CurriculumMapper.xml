@@ -37,25 +37,34 @@
                            curriculum_id,
                            user_id,
                            content,
-                           date,
-                           is_done)
+                           is_done,
+                           date)
         VALUES (#{todoId},
                 #{curriculumId},
                 #{userId},
                 #{content},
-                #{date},
-                FALSE)
+                #{isDone},
+                #{date})
     </insert>
 
-    <select id="selectByUserId" parameterType="java.util.UUID">
-        SELECT *
+    <select id="selectCurriculumByUserId" resultType="com.runhwani.runmate.model.Curriculum"
+            parameterType="java.util.UUID">
+        SELECT curriculum_id AS curriculumId,
+               user_id       AS userId,
+               marathon_id   AS marathonId,
+               goal_dist     AS goalDist,
+               goal_date     AS goalDate,
+               run_exp       AS runExp,
+               dist_exp      AS distExp,
+               freq_exp      AS freqExp,
+               is_finished   AS isFinished
         FROM curricula
         WHERE user_id = #{userId}
           AND is_finished = false
         LIMIT 1
     </select>
 
-    <select id="selectByPeriod"
+    <select id="selectTodoListByPeriod"
             resultMap="TodoResultMap"
             parameterType="map">
         SELECT *
@@ -66,18 +75,33 @@
         ORDER BY date
     </select>
 
-    <update id="updateIsFinished" parameterType="java.util.UUID">
+    <update id="updateCurriculumIsFinished" parameterType="java.util.UUID">
         UPDATE curricula
         SET is_finished = true
         WHERE curriculum_id = #{curriculumId}
           AND is_finished = false
     </update>
 
-    <update id="updateIsFinishedEveryDay">
+    <update id="updateCurriculumIsFinishedEveryDay">
         UPDATE curricula
         SET is_finished = TRUE
         WHERE is_finished = FALSE
           AND goal_date &lt; NOW()
+    </update>
+
+    <delete id="deleteTodoList" parameterType="java.util.UUID">
+        DELETE
+        FROM todos
+        WHERE user_id = #{userId}
+          AND date &gt; NOW()
+    </delete>
+
+    <update id="updateTodoDone" parameterType="java.util.UUID">
+        UPDATE todos
+        SET is_done = TRUE
+        WHERE date::date = CURRENT_DATE
+          AND user_id = #{userId}
+          AND is_done = FALSE
     </update>
 
 </mapper>
