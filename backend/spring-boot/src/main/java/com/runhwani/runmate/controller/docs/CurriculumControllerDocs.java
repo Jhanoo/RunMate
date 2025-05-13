@@ -77,11 +77,7 @@ public interface CurriculumControllerDocs {
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "조회 성공",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = TodoResponse.class)
-                            )
+                            description = "조회 성공"
                     )
             }
     )
