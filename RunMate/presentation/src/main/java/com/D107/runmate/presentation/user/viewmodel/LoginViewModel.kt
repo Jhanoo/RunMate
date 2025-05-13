@@ -1,5 +1,6 @@
 package com.D107.runmate.presentation.user.viewmodel
 
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel

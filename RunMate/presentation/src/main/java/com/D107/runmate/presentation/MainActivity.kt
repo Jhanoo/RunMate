@@ -36,6 +36,7 @@ import com.google.android.material.navigation.NavigationView
 import com.ssafy.locket.presentation.base.BaseActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
@@ -78,9 +79,27 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
             viewModel.nickname.collect { nickname ->
                 if (!nickname.isNullOrEmpty()) {
                     // 드로어 헤더의 이름 업데이트
+                    Timber.d("nickname : $nickname")
                     val headerView = binding.navView.getHeaderView(0)
                     val headerBinding = DrawerHeaderBinding.bind(headerView)
                     headerBinding.tvName.text = nickname
+                }
+                else {
+                    Timber.d("delete nickname")
+                    val navHostFragment =
+                        supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+                    val navController = navHostFragment.navController
+
+                    navController.currentDestination?.id?.let { currentDestinationId ->
+
+
+                        val navigateOptions = NavOptions.Builder()
+                            .setLaunchSingleTop(true)
+                            .setPopUpTo(currentDestinationId, true)
+                            .build()
+
+                        navController.navigate(R.id.loginFragment)
+                    }
                 }
             }
         }
@@ -181,6 +200,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                     binding.navView.menu.findItem(R.id.drawer_logout).isChecked = true
                     showLogoutConfirmDialog()
                     binding.drawerLayout.closeDrawer(GravityCompat.START)
+                    hideHamburgerBtn()
                     return true
                 }
             }
@@ -221,15 +241,15 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
 
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        val navController = navHostFragment.navController
-
-        navController.navigate(
-            R.id.loginFragment,
-            null,
-            NavOptions.Builder()
-                .setPopUpTo(R.id.nav_graph, true)
-                .build()
-        )
+//        val navController = navHostFragment.navController
+//
+//        navController.navigate(
+//            R.id.loginFragment,
+//            null,
+//            NavOptions.Builder()
+//                .setPopUpTo(R.id.nav_graph, true)
+//                .build()
+//        )
     }
 
     private val checker = PermissionChecker(this)

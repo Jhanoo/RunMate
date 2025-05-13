@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
@@ -55,6 +56,7 @@ class MainViewModel @Inject constructor(
         // DataStore에서 사용자 정보 로드
         viewModelScope.launch {
             dataStoreRepository.userId.collect { userId ->
+                Timber.d("userID $userId")
                 _userId.value = userId
             }
         }
