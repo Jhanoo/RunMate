@@ -36,7 +36,7 @@
         android:id="@+id/tv_no_group_message_group"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:gravity="center"
         android:text="현제 가입된 그룹이 없습니다."
         android:textColor="@color/text"
@@ -67,7 +67,7 @@
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_create_join_group_group"
-        app:layout_constraintVertical_bias="0.9" />
+        />
 
     <!-- Join Group Button -->
     <com.google.android.material.button.MaterialButton

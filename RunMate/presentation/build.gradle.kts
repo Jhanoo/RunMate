@@ -89,6 +89,9 @@ dependencies {
     implementation(libs.androidx.emoji2.views)
 
     implementation("com.prolificinteractive:material-calendarview:1.4.3")
+
+    implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
+    implementation("com.squareup.okhttp3:okhttp-urlconnection:4.10.0")
 }
 
 kapt {

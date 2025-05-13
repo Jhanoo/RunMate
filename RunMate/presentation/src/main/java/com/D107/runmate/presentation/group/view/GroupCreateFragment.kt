@@ -1,9 +1,11 @@
 package com.D107.runmate.presentation.group.view
 
 import android.app.DatePickerDialog
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -12,16 +14,22 @@ import com.D107.runmate.presentation.databinding.FragmentGroupCreateBinding
 import com.D107.runmate.presentation.group.viewmodel.GroupCreateViewModel
 import com.ssafy.locket.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Locale
 
+@RequiresApi(Build.VERSION_CODES.O)
 @AndroidEntryPoint
 class GroupCreateFragment : BaseFragment<FragmentGroupCreateBinding>(
     FragmentGroupCreateBinding::bind,
     R.layout.fragment_group_create) {
+
+
+    val formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd", Locale.getDefault())
     val viewModel: GroupCreateViewModel by activityViewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -48,8 +56,13 @@ class GroupCreateFragment : BaseFragment<FragmentGroupCreateBinding>(
         binding.etDate.setOnClickListener{
             showDatePickerDialog(binding.etDate)
         }
+        binding.btnCreateGroup.setOnClickListener{
+            viewModel.createGroup()
+            findNavController().popBackStack()
+        }
 
     }
+
     private fun showDatePickerDialog(dateEditText: EditText) {
         val calendar = Calendar.getInstance() // 현재 날짜를 기본으로 설정
 
@@ -70,13 +83,12 @@ class GroupCreateFragment : BaseFragment<FragmentGroupCreateBinding>(
         val datePickerDialog = DatePickerDialog(
             requireContext(),
             { _, selectedYear, selectedMonth, selectedDayOfMonth ->
-                val selectedCalendar = Calendar.getInstance()
-                selectedCalendar.set(selectedYear, selectedMonth, selectedDayOfMonth)
+                val selectedLocalDate = LocalDate.of(selectedYear, selectedMonth + 1, selectedDayOfMonth)
+                val selectedDateTime = selectedLocalDate.atStartOfDay(ZoneId.systemDefault()).toOffsetDateTime()
 
-                val displayFormat = SimpleDateFormat("yyyy.MM.dd", Locale.getDefault())
-                val formattedDateString = displayFormat.format(selectedCalendar.time)
-                dateEditText.setText(formattedDateString)
-                viewModel.selectDate(selectedCalendar.time)
+                dateEditText.setText(selectedDateTime.format(formatter))
+
+                viewModel.selectDate(selectedDateTime)
 
 
             },
