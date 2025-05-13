@@ -20,6 +20,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
@@ -31,6 +32,7 @@ import com.D107.runmate.watch.presentation.running.ResultScreen
 import com.D107.runmate.watch.presentation.running.RunningData
 import com.D107.runmate.watch.presentation.running.RunningScreen
 import com.D107.runmate.watch.presentation.running.RunningViewModel
+import com.D107.runmate.watch.presentation.service.BluetoothService
 import com.D107.runmate.watch.presentation.splash.SplashScreen
 import com.D107.runmate.watch.presentation.theme.RunMateTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -44,6 +46,15 @@ import java.util.Locale
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private lateinit var runningViewModel: RunningViewModel
+
+    private fun startHeartRateOnly() {
+        lifecycleScope.launch {
+            Log.d("HeartRate", "심박수 전송 시작")
+            runningViewModel.startHeartRateOnlyTracking(applicationContext)
+        }
+    }
+
     @SuppressLint("StateFlowValueCalledInComposition", "DefaultLocale")
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -75,13 +86,14 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberSwipeDismissableNavController()
 
                 val runningViewModel: RunningViewModel = hiltViewModel()
-
                 // RunningScreen의 상태를 저장할 변수들
                 var savedTopIndex by remember { mutableStateOf(0) }
                 var savedLeftIndex by remember { mutableStateOf(1) }
                 var savedRightIndex by remember { mutableStateOf(2) }
                 var savedPace by remember { mutableStateOf("0:00") }
                 var savedRunningData by remember { mutableStateOf(RunningData()) }
+
+                this@MainActivity.runningViewModel = runningViewModel
 
                 SwipeDismissableNavHost(
                     navController = navController,
@@ -289,6 +301,22 @@ class MainActivity : ComponentActivity() {
         }
 
 
+    }
+
+    // 블루투스 연결 성공 후 심박수 전송 시작
+    private fun connectToApp(deviceAddress: String) {
+        lifecycleScope.launch {
+            val bluetoothService = BluetoothService(applicationContext)
+            if (bluetoothService.connectToDevice(deviceAddress)) {
+                // 연결 성공 - 심박수만 전송 모드 시작
+                Log.d("Bluetooth", "앱에 연결 성공")
+                // 수정된 부분: 클래스 멤버 변수 사용
+                runningViewModel.startHeartRateOnlyTracking(applicationContext)
+            } else {
+                // 연결 실패
+                Log.e("Bluetooth", "앱에 연결 실패")
+            }
+        }
     }
 
     companion object {

@@ -43,17 +43,28 @@ class LocationTrackingService : Service() {
     lateinit var gpxRepository: GpxRepository
 
     @Inject
+    lateinit var bluetoothService: BluetoothService
+
+    @Inject
     lateinit var cadenceRepository: CadenceRepository
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var lastLocation: Location? = null
 
+    private var connectedDeviceAddress: String? = null
 
     companion object {
         private const val NOTIFICATION_ID = 1
         private const val CHANNEL_ID = "location_tracking_channel"
         private const val TAG = "LocationTrackingService"
+
+        // 앱에서 기록 or 워치에서 기록
+        const val ACTION_START_WITH_RECORDING = "com.D107.runmate.watch.START_WITH_RECORDING"
+        const val ACTION_START_HEART_RATE_ONLY = "com.D107.runmate.watch.START_HEART_RATE_ONLY"
+
+        // 기록 모드 (true: GPX 파일 생성, false: 심박수만 전송)
+        private var recordingMode = true
 
         // 위치 수집 간격 (5초)
         private const val LOCATION_UPDATE_INTERVAL = 5000L
@@ -87,6 +98,7 @@ class LocationTrackingService : Service() {
     }
 
     // 위치 업데이트 콜백
+    // 위치 업데이트 콜백
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             locationResult.lastLocation?.let { location ->
@@ -94,34 +106,49 @@ class LocationTrackingService : Service() {
                 val now = Date()
                 val currentCadence = cadenceRepository.getCurrentCadence()
 
-                // 위치 데이터 수집 (5초마다 호출됨)
-                val trackPoint = GpxTrackPoint(
-                    latitude = location.latitude,
-                    longitude = location.longitude,
-                    elevation = location.altitude,
-                    time = now,
-                    heartRate = lastHeartRate,
-                    cadence = currentCadence, // 고정 값
-                    pace = currentPace
-                )
-
-                Log.d(
-                    "GpxTracking",
-                    "위치 포인트 수집: lat=${location.latitude}, lon=${location.longitude}, hr=${lastHeartRate}, pace=${currentPace}"
-                )
-
-                // Repository에 트랙 포인트 추가
+                // 심박수 데이터 전송 (항상 실행)
                 serviceScope.launch {
                     try {
-                        gpxRepository.addTrackPoint(trackPoint)
-                        Log.d("GpxTracking", "트랙 포인트 저장 성공")
+                        // 심박수만 전송
+                        bluetoothService.sendHeartRate(lastHeartRate)
                     } catch (e: Exception) {
-                        Log.e("GpxTracking", "트랙 포인트 저장 실패: ${e.message}", e)
+                        Log.e("HeartRate", "심박수 전송 실패: ${e.message}", e)
                     }
                 }
 
+                // GPX 기록 모드인 경우에만 트랙 포인트 저장
+                if (recordingMode) {
+                    // 위치 데이터 수집 (5초마다 호출됨)
+                    val trackPoint = GpxTrackPoint(
+                        latitude = location.latitude,
+                        longitude = location.longitude,
+                        elevation = location.altitude,
+                        time = now,
+                        heartRate = lastHeartRate,
+                        cadence = currentCadence,
+                        pace = currentPace
+                    )
+
+                    Log.d(
+                        "GpxTracking",
+                        "위치 포인트 수집: lat=${location.latitude}, lon=${location.longitude}, hr=${lastHeartRate}, pace=${currentPace}"
+                    )
+
+                    // Repository에 트랙 포인트 추가
+                    serviceScope.launch {
+                        try {
+                            gpxRepository.addTrackPoint(trackPoint)
+                            Log.d("GpxTracking", "트랙 포인트 저장 성공")
+                        } catch (e: Exception) {
+                            Log.e("GpxTracking", "트랙 포인트 저장 실패: ${e.message}", e)
+                        }
+                    }
+                } else {
+                    Log.d("HeartRateOnly", "심박수만 전송 모드: HR=${lastHeartRate}")
+                }
+
                 lastLocation = location
-            } ?: Log.e("GpxTracking", "위치 결과가 null입니다")
+            } ?: Log.e("LocationService", "위치 결과가 null입니다")
         }
     }
 
@@ -129,11 +156,21 @@ class LocationTrackingService : Service() {
         super.onCreate()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         createNotificationChannel()
+
+//        connectedDeviceAddress = "56:9e:a0:de:5f:b1"
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_START -> start()
+            ACTION_START_WITH_RECORDING -> {
+                recordingMode = true
+                start()
+            }
+            ACTION_START_HEART_RATE_ONLY -> {
+                recordingMode = false
+                start()
+            }
             ACTION_PAUSE -> pause()
             ACTION_RESUME -> resume()
             ACTION_STOP -> stop()
