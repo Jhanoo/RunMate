@@ -3,8 +3,6 @@ package com.D107.runmate.presentation.user.view
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
@@ -16,15 +14,12 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.D107.runmate.presentation.R
-import com.D107.runmate.presentation.components.CustomDatePicker
-import com.D107.runmate.presentation.components.CustomGenderPicker
 import com.D107.runmate.presentation.databinding.FragmentPersonalJoinBinding
 import com.D107.runmate.presentation.user.viewmodel.JoinViewModel
 import com.ssafy.locket.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import java.io.InputStream
 
 @AndroidEntryPoint
 class Join2Fragment : BaseFragment<FragmentPersonalJoinBinding>(
@@ -137,7 +132,6 @@ class Join2Fragment : BaseFragment<FragmentPersonalJoinBinding>(
 
     private fun showDatePicker() {
         CustomDatePicker(
-            context = requireContext(),
             initialYear = selectedYear,
             initialMonth = selectedMonth,
             initialDay = selectedDay,
@@ -148,7 +142,7 @@ class Join2Fragment : BaseFragment<FragmentPersonalJoinBinding>(
                 binding.birthDateButton.text = formattedDate
                 binding.birthDateButton.setTextColor(Color.BLACK)
             }
-        ).show()
+        ).show(parentFragmentManager, "datePicker")
     }
 
     private fun showGenderPicker() {
