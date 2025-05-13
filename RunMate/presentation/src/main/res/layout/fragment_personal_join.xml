@@ -33,10 +33,10 @@
 
     <ImageView
         android:id="@+id/profileImg"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_marginTop="50dp"
-        android:src="@drawable/join_profile"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="30dp"
+        android:src="@drawable/prefile_image"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/progressBar"
@@ -44,9 +44,9 @@
 
     <ImageView
         android:id="@+id/profileUpload"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_marginLeft="-30dp"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_marginLeft="-35dp"
         android:src="@drawable/join_profile_upload"
         app:layout_constraintBottom_toBottomOf="@+id/profileImg"
         app:layout_constraintStart_toEndOf="@+id/profileImg" />
@@ -56,6 +56,7 @@
         android:fontFamily="@font/pretendard_medium"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:text="이름(닉네임)"
         android:textSize="16sp"
         app:layout_constraintTop_toBottomOf="@+id/profileImg"
