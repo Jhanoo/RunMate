@@ -23,6 +23,7 @@ export default (io: Server, socket: Socket) => {
     const { userId, nickname, groupId } = socket.data.user as any
     socket.leave(groupId)
     socket.data.user.groupId = null
+    socket.to(groupId).emit('memberLeaved', { userId })
     console.log(`${userId}: ${nickname}님이 그룹 ${groupId} 탈퇴`)
   })
 
