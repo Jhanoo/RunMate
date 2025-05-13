@@ -17,6 +17,7 @@ import com.D107.runmate.domain.model.user.UserInfo
 import com.D107.runmate.domain.repository.user.AuthRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import timber.log.Timber
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
@@ -27,6 +28,7 @@ class AuthRepositoryImpl @Inject constructor(
         val request = LoginRequest(email, password)
         when (val response = authDataSource.login(request)) {
             is ApiResponse.Success -> {
+                Timber.d("login ${response}")
                 emit(ResponseStatus.Success(response.data.toDomainModel()))
             }
             is ApiResponse.Error -> {

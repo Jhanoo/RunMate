@@ -2,11 +2,13 @@ package com.D107.runmate.presentation.user.view
 
 import android.os.Bundle
 import android.view.View
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentLoginBinding
+import com.D107.runmate.presentation.user.viewmodel.JoinViewModel
 import com.D107.runmate.presentation.user.viewmodel.LoginViewModel
 import com.ssafy.locket.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -19,6 +21,7 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(
     R.layout.fragment_login
 ) {
     private val viewModel: LoginViewModel by viewModels()
+    private val joinViewModel: JoinViewModel by activityViewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -81,6 +84,7 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(
         }
 
         binding.joinBtn.setOnClickListener {
+            joinViewModel.resetState()
             findNavController().navigate(R.id.JoinFragment)
         }
     }

@@ -121,7 +121,7 @@ class JoinViewModel @Inject constructor(
         // 비밀번호 규칙 검증
         val isValid = validatePasswordUseCase(password)
         if (!isValid) {
-            _passwordError.value = "비밀번호는 8자 이상, 특수문자와 대문자를 포함해야 합니다."
+            _passwordError.value = "비밀번호는 8자 이상이어야 합니다."
             return false
         }
 

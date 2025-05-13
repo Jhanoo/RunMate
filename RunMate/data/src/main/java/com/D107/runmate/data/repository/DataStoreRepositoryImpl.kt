@@ -13,9 +13,12 @@ class DataStoreRepositoryImpl @Inject constructor(
 
     override suspend fun saveNickname(nickname: String) = dataStore.saveNickname(nickname)
 
-    override val userId: Flow<Long?> = dataStore.userId
+    override val userId: Flow<String?> = dataStore.userId
 
-    override suspend fun saveUserId(userId: Long) = dataStore.saveUserId(userId)
+    override suspend fun saveUserId(userId: String) = dataStore.saveUserId(userId)
+
+    override val profileImage: Flow<String?> = dataStore.profileImage
+    override suspend fun saveProfileImage(profileImage: String?) = dataStore.saveProfileImage(profileImage)
 
     override val accessToken: Flow<String?> = dataStore.accessToken
 

@@ -1,14 +1,21 @@
 package com.D107.runmate.presentation
 
 import android.Manifest
+import android.app.Dialog
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.util.Base64
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
+import android.view.Window
+import android.widget.Button
+import android.widget.ImageView
 import androidx.activity.viewModels
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -24,10 +31,12 @@ import com.D107.runmate.presentation.utils.LocationUtils.getLocation
 import com.D107.runmate.presentation.utils.LocationUtils.isEnableLocationSystem
 import com.D107.runmate.presentation.utils.LocationUtils.showLocationEnableDialog
 import com.D107.runmate.presentation.utils.PermissionChecker
+import com.bumptech.glide.Glide
 import com.google.android.material.navigation.NavigationView
 import com.ssafy.locket.presentation.base.BaseActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
@@ -46,6 +55,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         mContext = this
 
         initDrawerHeader()
+        // 사용자 정보 관찰
+        observeUserInfo()
 
         getKeyHash()
 
@@ -59,6 +70,58 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                 binding.drawerLayout.closeDrawer(GravityCompat.START)
             } else {
                 binding.drawerLayout.openDrawer(GravityCompat.START)
+            }
+        }
+    }
+
+    private fun observeUserInfo() {
+        lifecycleScope.launch {
+            viewModel.nickname.collect { nickname ->
+                if (!nickname.isNullOrEmpty()) {
+                    // 드로어 헤더의 이름 업데이트
+                    Timber.d("nickname : $nickname")
+                    val headerView = binding.navView.getHeaderView(0)
+                    val headerBinding = DrawerHeaderBinding.bind(headerView)
+                    headerBinding.tvName.text = nickname
+                }
+                else {
+                    Timber.d("delete nickname")
+                    val navHostFragment =
+                        supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+                    val navController = navHostFragment.navController
+
+                    navController.currentDestination?.id?.let { currentDestinationId ->
+
+
+                        val navigateOptions = NavOptions.Builder()
+                            .setLaunchSingleTop(true)
+                            .setPopUpTo(currentDestinationId, true)
+                            .build()
+
+                        navController.navigate(R.id.loginFragment)
+                    }
+                }
+            }
+        }
+
+        // 프로필 이미지 변경 관찰
+        lifecycleScope.launch {
+            viewModel.profileImage.collect { profileImageUrl ->
+                val headerView = binding.navView.getHeaderView(0)
+                val headerBinding = DrawerHeaderBinding.bind(headerView)
+
+                if (!profileImageUrl.isNullOrEmpty()) {
+                    // 프로필 이미지 로드
+                    Glide.with(this@MainActivity)
+                        .load(profileImageUrl)
+                        .placeholder(R.drawable.ic_drawer_profile)
+                        .error(R.drawable.ic_drawer_profile)
+                        .circleCrop()
+                        .into(headerBinding.ivProfile)
+                } else {
+                    // 기본 이미지 설정
+                    headerBinding.ivProfile.setImageResource(R.drawable.ic_drawer_profile)
+                }
             }
         }
     }
@@ -132,12 +195,61 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                         navigateOptions
                     )
                 }
+
+                R.id.drawer_logout -> {
+                    binding.navView.menu.findItem(R.id.drawer_logout).isChecked = true
+                    showLogoutConfirmDialog()
+                    binding.drawerLayout.closeDrawer(GravityCompat.START)
+                    hideHamburgerBtn()
+                    return true
+                }
             }
         }
         true
         hideHamburgerBtn(navController)
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    private fun showLogoutConfirmDialog() {
+        val dialog = Dialog(this)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setContentView(R.layout.dialog_logout)
+
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        dialog.window?.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+
+        val btnClose = dialog.findViewById<ImageView>(R.id.btn_close)
+        btnClose.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        val btnLogout = dialog.findViewById<Button>(R.id.btn_confirm_short)
+        btnLogout.setOnClickListener {
+            performLogout()
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
+    private fun performLogout() {
+        viewModel.logout()
+
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+//        val navController = navHostFragment.navController
+//
+//        navController.navigate(
+//            R.id.loginFragment,
+//            null,
+//            NavOptions.Builder()
+//                .setPopUpTo(R.id.nav_graph, true)
+//                .build()
+//        )
     }
 
     private val checker = PermissionChecker(this)
@@ -184,9 +296,20 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         lifecycleScope.launch {
             try {
                 mContext?.let {
-                    if(isEnableLocationSystem(it)) {
+                    if (isEnableLocationSystem(it)) {
                         val location = getLocation(it)
-                        viewModel.setUserLocation(UserLocationState.Exist(listOf(LocationModel(location.latitude, location.longitude, location.altitude, location.speed))))
+                        viewModel.setUserLocation(
+                            UserLocationState.Exist(
+                                listOf(
+                                    LocationModel(
+                                        location.latitude,
+                                        location.longitude,
+                                        location.altitude,
+                                        location.speed
+                                    )
+                                )
+                            )
+                        )
                     } else {
                         showLocationEnableDialog(it)
                     }
@@ -209,7 +332,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         val headerBinding = DrawerHeaderBinding.bind(headerView)
 
         headerBinding.ivProfile.setImageResource(R.drawable.ic_drawer_profile) // TODO 사용자 프로필로 변경, 없을 경우 ic_drawer_profile 사용
-        headerBinding.tvName.text = "한아영"
+        headerBinding.tvName.text = "게스트"
     }
 
     private fun setDrawerWidth() {
@@ -258,12 +381,18 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
 
     fun getKeyHash() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            val packageInfo = this.packageManager.getPackageInfo(this.packageName, PackageManager.GET_SIGNING_CERTIFICATES)
+            val packageInfo = this.packageManager.getPackageInfo(
+                this.packageName,
+                PackageManager.GET_SIGNING_CERTIFICATES
+            )
             for (signature in packageInfo.signingInfo!!.apkContentsSigners) {
                 try {
                     val md = MessageDigest.getInstance("SHA")
                     md.update(signature.toByteArray())
-                    Log.d("getKeyHash", "key hash: ${Base64.encodeToString(md.digest(), Base64.NO_WRAP)}")
+                    Log.d(
+                        "getKeyHash",
+                        "key hash: ${Base64.encodeToString(md.digest(), Base64.NO_WRAP)}"
+                    )
                 } catch (e: NoSuchAlgorithmException) {
                     Log.w("getKeyHash", "Unable to get MessageDigest. signature=$signature", e)
                 }

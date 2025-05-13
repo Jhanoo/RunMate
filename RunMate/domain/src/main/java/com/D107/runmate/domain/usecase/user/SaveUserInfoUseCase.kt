@@ -8,14 +8,10 @@ class SaveUserInfoUseCase @Inject constructor(
     private val dataStoreRepository: DataStoreRepository
 ) {
     suspend operator fun invoke(userInfo: UserInfo) {
-        
-        val userIdLong = try {
-            userInfo.userId.hashCode().toLong()
-        } catch (e: Exception) {
-            0L
-        }
-
-        dataStoreRepository.saveUserId(userIdLong)
+        dataStoreRepository.saveUserId(userInfo.userId)
         dataStoreRepository.saveNickname(userInfo.nickname)
+        userInfo.profileImage?.let { profileImageUrl ->
+            dataStoreRepository.saveProfileImage(profileImageUrl)
+        }
     }
 }

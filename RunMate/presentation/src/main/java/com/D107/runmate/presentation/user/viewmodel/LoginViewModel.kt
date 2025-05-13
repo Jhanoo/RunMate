@@ -1,5 +1,6 @@
 package com.D107.runmate.presentation.user.viewmodel
 
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -59,7 +60,7 @@ class LoginViewModel @Inject constructor(
         }
 
         if (!isPasswordValid) {
-            _passwordError.value = "비밀번호는 8자 이상, 특수문자 포함, 대문자 포함이어야 합니다."
+            _passwordError.value = "비밀번호는 8자 이상이어야 합니다."
             return
         } else {
             _passwordError.value = null

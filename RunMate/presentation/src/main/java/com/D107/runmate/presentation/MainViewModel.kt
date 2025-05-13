@@ -12,6 +12,7 @@ import androidx.lifecycle.viewModelScope
 import com.D107.runmate.domain.model.running.PersonalRunningInfo
 import com.D107.runmate.domain.model.running.RunningRecordState
 import com.D107.runmate.domain.model.running.UserLocationState
+import com.D107.runmate.domain.repository.DataStoreRepository
 import com.D107.runmate.domain.repository.running.RunningTrackingRepository
 import com.D107.runmate.presentation.utils.LocationUtils.getPaceFromSpeed
 import com.D107.runmate.presentation.utils.LocationUtils.trackingLocation
@@ -19,11 +20,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
@@ -31,13 +34,51 @@ import kotlin.coroutines.cancellation.CancellationException
 private const val TAG = "MainViewModel"
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val repository: RunningTrackingRepository
+    private val repository: RunningTrackingRepository,
+    private val dataStoreRepository: DataStoreRepository
 ): ViewModel() {
     private val _isVibrationEnabled = MutableStateFlow(true)
     val isVibrationEnabled = _isVibrationEnabled.asStateFlow()
 
     private val _isSoundEnabled = MutableStateFlow(true)
     val isSoundEnabled = _isSoundEnabled.asStateFlow()
+
+    private val _userId = MutableStateFlow<String?>(null)
+    val userId: StateFlow<String?> = _userId
+
+    private val _nickname = MutableStateFlow<String?>(null)
+    val nickname: StateFlow<String?> = _nickname
+
+    private val _profileImage = MutableStateFlow<String?>(null)
+    val profileImage: StateFlow<String?> = _profileImage
+
+    init {
+        // DataStore에서 사용자 정보 로드
+        viewModelScope.launch {
+            dataStoreRepository.userId.collect { userId ->
+                Timber.d("userID $userId")
+                _userId.value = userId
+            }
+        }
+
+        viewModelScope.launch {
+            dataStoreRepository.nickname.collect { nickname ->
+                _nickname.value = nickname
+            }
+        }
+
+        viewModelScope.launch {
+            dataStoreRepository.profileImage.collect { profileImage ->
+                _profileImage.value = profileImage
+            }
+        }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            dataStoreRepository.clearAll()
+        }
+    }
 
 //    private val _isRunning = MutableStateFlow(false)
 //    val isRunning = _isRunning.asStateFlow()
