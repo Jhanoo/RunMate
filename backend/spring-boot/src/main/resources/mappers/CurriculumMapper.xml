@@ -70,6 +70,7 @@
         UPDATE curricula
         SET is_finished = true
         WHERE curriculum_id = #{curriculumId}
+          AND is_finished = false
     </update>
 
     <update id="updateIsFinishedEveryDay">
