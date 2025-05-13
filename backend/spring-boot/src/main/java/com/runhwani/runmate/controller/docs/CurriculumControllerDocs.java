@@ -67,7 +67,7 @@ public interface CurriculumControllerDocs {
             }
     )
     @GetMapping("/my")
-    ResponseEntity<CommonResponse<Curriculum>> getCurriculum(
+    ResponseEntity<CommonResponse<Curriculum>> getMyCurriculum(
             @AuthenticationPrincipal UserDetails principal
     );
 
