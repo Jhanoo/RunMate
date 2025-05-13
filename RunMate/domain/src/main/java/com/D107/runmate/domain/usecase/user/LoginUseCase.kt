@@ -17,6 +17,9 @@ class LoginUseCase @Inject constructor(
             if (result is ResponseStatus.Success) {
                 // 로그인 성공 시 토큰 저장
                 dataStoreRepository.saveAccessToken(result.data.accessToken)
+                result.data.userId?.let { dataStoreRepository.saveUserId(it) }
+                result.data.nickname?.let { dataStoreRepository.saveNickname(it) }
+                result.data.profileImage?.let { dataStoreRepository.saveProfileImage(it) }
             }
         }
     }

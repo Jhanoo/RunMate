@@ -22,7 +22,8 @@ class UserDataStoreSource @Inject constructor(
 ) {
     companion object {
         val NICKNAME = stringPreferencesKey("nickname")
-        val USER_ID = longPreferencesKey("user_id")
+        val USER_ID = stringPreferencesKey("user_id")
+        val PROFILE_IMAGE = stringPreferencesKey("profile_image")
         val ACCESS_TOKEN = stringPreferencesKey("access_token")
         val LEFT_INSOLE_ADDRESS = stringPreferencesKey("left_insole_address")
         val RIGHT_INSOLE_ADDRESS = stringPreferencesKey("right_insole_address")
@@ -35,7 +36,17 @@ class UserDataStoreSource @Inject constructor(
         }
     }
 
-    suspend fun saveUserId(userId: Long) {
+    suspend fun saveProfileImage(profileImage: String?) {
+        dataStore.edit { preferences ->
+            if (profileImage != null) {
+                preferences[PROFILE_IMAGE] = profileImage
+            } else {
+                preferences.remove(PROFILE_IMAGE)
+            }
+        }
+    }
+
+    suspend fun saveUserId(userId: String) {
         dataStore.edit { preferences ->
             preferences[USER_ID] = userId
         }
@@ -47,7 +58,7 @@ class UserDataStoreSource @Inject constructor(
         }
     }
 
-    suspend fun saveGaitAnalysisResult(result:GaitAnalysisResult){
+    suspend fun saveGaitAnalysisResult(result: GaitAnalysisResult) {
         val jsonString = json.encodeToString(result)
         dataStore.edit { preferences ->
             preferences[GAIT_ANALYSIS_RESULT] = jsonString
@@ -59,8 +70,12 @@ class UserDataStoreSource @Inject constructor(
         preferences[NICKNAME]
     }
 
-    val userId: Flow<Long?> = dataStore.data.map { preferences ->
+    val userId: Flow<String?> = dataStore.data.map { preferences ->
         preferences[USER_ID]
+    }
+
+    val profileImage: Flow<String?> = dataStore.data.map { preferences ->
+        preferences[PROFILE_IMAGE]
     }
 
     val accessToken: Flow<String?> = dataStore.data.map { preferences ->
@@ -82,7 +97,7 @@ class UserDataStoreSource @Inject constructor(
             Pair(left, right)
         }
 
-    val savedGaitAnalysisResult:Flow<GaitAnalysisResult?> = flow{
+    val savedGaitAnalysisResult: Flow<GaitAnalysisResult?> = flow {
         val jsonString = dataStore.data
             .map { preferences ->
                 preferences[GAIT_ANALYSIS_RESULT]
