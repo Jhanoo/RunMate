@@ -131,7 +131,6 @@ docker run -d --name marathon-crawler \
 - **DB_PORT**: 데이터베이스 포트 (기본값: 5432)
 - **DB_NAME**: 데이터베이스 이름
 
-- **PAGES_TO_CRAWL**: 크롤링할 페이지 수 (기본값: 1)
 - **CRAWL_DELAY_MIN**: 최소 요청 간격 (초) (기본값: 1.0)
 - **CRAWL_DELAY_MAX**: 최대 요청 간격 (초) (기본값: 3.0)
 - **LOG_LEVEL**: 로깅 레벨 (기본값: INFO)

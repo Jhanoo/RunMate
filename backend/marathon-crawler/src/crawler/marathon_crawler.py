@@ -20,7 +20,6 @@ from src.utils.helpers import get_env_int, get_env_float, random_delay, retry
 load_dotenv()
 
 # 환경 변수에서 설정 로드
-PAGES_TO_CRAWL = get_env_int('PAGES_TO_CRAWL', 5)
 CRAWL_DELAY_MIN = get_env_float('CRAWL_DELAY_MIN', 1.0)
 CRAWL_DELAY_MAX = get_env_float('CRAWL_DELAY_MAX', 3.0)
 
@@ -84,26 +83,20 @@ class MarathonCrawler:
             
             # 마라톤 정보와 상세 정보 병합
             marathon.update(details)
-        
-        # 거리 정보가 없는 경우 기본값 추가
-        if 'distances' not in marathon or not marathon['distances']:
-            # 대회명에서 거리 정보 추론
-            if '풀' in marathon.get('name', '') or '42' in marathon.get('name', ''):
-                self.logger.info(f"대회명에서 풀코스 정보 추출: {marathon.get('name', '이름 없음')}")
-                marathon['distances'] = ['풀코스']
-            elif '하프' in marathon.get('name', '') or 'half' in marathon.get('name', '').lower():
-                self.logger.info(f"대회명에서 하프코스 정보 추출: {marathon.get('name', '이름 없음')}")
-                marathon['distances'] = ['하프']
-            else:
-                self.logger.warning(f"마라톤 '{marathon.get('name', '이름 없음')}'의 거리 정보가 없어 기본값을 사용합니다.")
-                marathon['distances'] = ['풀코스', '하프', '10km', '5km']
-        
+
         # 데이터베이스에 저장
         self._save_marathon(marathon)
     
     def _save_marathon(self, marathon_data):
         """마라톤 정보를 데이터베이스에 저장"""
         try:
+            # 거리가 하나도 없으면 마라톤 자체를 저장하지 않음
+            if 'distances' not in marathon_data or not marathon_data['distances']:
+                self.logger.warning(
+                    f"거리 정보가 없어 마라톤 저장을 건너뜁니다: {marathon_data.get('name','이름 없음')}"
+                )
+                return False
+            
             # 필수 필드 확인
             if not all(key in marathon_data and marathon_data[key] for key in ['name', 'date', 'location']):
                 self.logger.warning(f"필수 필드 누락: {marathon_data.get('name', '이름 없음')}")
