@@ -28,8 +28,11 @@ import com.google.android.gms.location.Priority
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Date
@@ -53,6 +56,8 @@ class LocationTrackingService : Service() {
     private var lastLocation: Location? = null
 
     private var connectedDeviceAddress: String? = null
+
+    private var heartRateJob: Job? = null
 
     companion object {
         private const val NOTIFICATION_ID = 1
@@ -81,6 +86,8 @@ class LocationTrackingService : Service() {
         // 현재 페이스 가져오는 방법
         private var currentPace = "0'00\""
 
+        private var lastCadence = 0
+
         fun updateHeartRate(heartRate: Int) {
             lastHeartRate = heartRate
         }
@@ -89,15 +96,12 @@ class LocationTrackingService : Service() {
             currentPace = pace
         }
 
-        private var lastCadence = 0
-
         fun updateCadence(cadence: Int) {
             lastCadence = cadence
             Log.d("Cadence", "서비스에 캐이던스 값 설정: $cadence")
         }
     }
 
-    // 위치 업데이트 콜백
     // 위치 업데이트 콜백
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
@@ -156,8 +160,6 @@ class LocationTrackingService : Service() {
         super.onCreate()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         createNotificationChannel()
-
-//        connectedDeviceAddress = "56:9e:a0:de:5f:b1"
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -200,15 +202,42 @@ class LocationTrackingService : Service() {
         // 위치 업데이트 시작
         startLocationUpdates()
 
+        // 심박수 전송 시작
+        startHeartRateTransmission()
+
         // 케이던스 모니터링 시작
         (cadenceRepository as CadenceRepositoryImpl).startMonitoring()
 
         Log.d(TAG, "위치 추적 서비스 시작됨")
     }
 
+    private fun startHeartRateTransmission() {
+        heartRateJob = serviceScope.launch {
+            while (isActive) {
+                try {
+                    // 심박수 전송
+                    bluetoothService.sendHeartRate(lastHeartRate)
+                    Log.d(TAG, "심박수 전송: $lastHeartRate")
+                    delay(5000) // 5초 간격으로 전송
+                } catch (e: Exception) {
+                    Log.e(TAG, "심박수 전송 실패: ${e.message}", e)
+                }
+            }
+        }
+    }
+
+    private fun stopHeartRateTransmission() {
+        heartRateJob?.cancel()
+        heartRateJob = null
+    }
+
+
     private fun stop() {
         // 위치 업데이트 중지
         stopLocationUpdates()
+
+        // 심박수 전송 중지
+        stopHeartRateTransmission()
 
         // 케이던스 모니터링 중지
         (cadenceRepository as CadenceRepositoryImpl).stopMonitoring()

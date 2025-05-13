@@ -46,7 +46,6 @@ internal abstract class RepositoryModule {
     @Singleton
     abstract fun bindGroupRepository(impl: GroupRepositoryImpl): GroupRepository
 
-    // RepositoryModule.kt에 추가할 코드
     @Binds
     @Singleton
     abstract fun bindAuthRepository(

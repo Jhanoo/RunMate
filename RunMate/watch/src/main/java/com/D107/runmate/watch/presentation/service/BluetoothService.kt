@@ -25,6 +25,7 @@ class BluetoothService @Inject constructor(
 
     private var connectedDeviceAddress: String? = null
 
+    // 블루투스 연결 상태 확인
     fun isConnected(): Boolean {
         return bluetoothSocket?.isConnected == true
     }
@@ -35,21 +36,26 @@ class BluetoothService @Inject constructor(
     }
 
     @SuppressLint("MissingPermission")
+    // 블루투스 연결 시도
     suspend fun connectToDevice(deviceAddress: String): Boolean {
         return withContext(Dispatchers.IO) {
             try {
+                // 기존에 연결된 소켓이 있다면 닫기
                 if (bluetoothSocket?.isConnected == true) {
                     bluetoothSocket?.close()
                 }
 
+                // 주소로 원격 블루투스 기기 가져오기 및 소켓 생성
                 val device = bluetoothAdapter?.getRemoteDevice(deviceAddress)
                 bluetoothSocket = device?.createRfcommSocketToServiceRecord(SERVICE_UUID)
                 bluetoothSocket?.connect()
 
+                // 연결된 기기 주소 저장
                 connectedDeviceAddress = deviceAddress
                 Log.d(TAG, "Successfully connected to device: $deviceAddress")
                 true
             } catch (e: IOException) {
+                // 연결 실패 시 로그 출력 및 소켓 정리
                 Log.e(TAG, "Failed to connect: ${e.message}")
                 bluetoothSocket?.close()
                 bluetoothSocket = null
@@ -68,6 +74,7 @@ class BluetoothService @Inject constructor(
 
         return withContext(Dispatchers.IO) {
             try {
+                // 심박수 데이터를 문자열 형태로 전송
                 val message = "HR:$heartRate"
                 bluetoothSocket?.outputStream?.write(message.toByteArray())
                 Log.d(TAG, "Heart rate sent: $heartRate")

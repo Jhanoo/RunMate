@@ -3,6 +3,7 @@ package com.D107.runmate.watch.presentation
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Half.toFloat
 import android.util.Log
@@ -43,17 +44,14 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private lateinit var runningViewModel: RunningViewModel
 
-    private fun startHeartRateOnly() {
-        lifecycleScope.launch {
-            Log.d("HeartRate", "심박수 전송 시작")
-            runningViewModel.startHeartRateOnlyTracking(applicationContext)
-        }
-    }
+    @Inject
+    lateinit var bluetoothService: BluetoothService
 
     @SuppressLint("StateFlowValueCalledInComposition", "DefaultLocale")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,6 +61,17 @@ class MainActivity : ComponentActivity() {
         splashScreen.setKeepOnScreenCondition { false }
 
         setTheme(android.R.style.Theme_DeviceDefault)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT)
+                != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.BLUETOOTH_CONNECT),
+                    BLUETOOTH_PERMISSION_REQUEST_CODE
+                )
+            }
+        }
 
         // 권환 확인 및 요청
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.BODY_SENSORS)
@@ -303,24 +312,43 @@ class MainActivity : ComponentActivity() {
 
     }
 
-    // 블루투스 연결 성공 후 심박수 전송 시작
-    private fun connectToApp(deviceAddress: String) {
-        lifecycleScope.launch {
-            val bluetoothService = BluetoothService(applicationContext)
-            if (bluetoothService.connectToDevice(deviceAddress)) {
-                // 연결 성공 - 심박수만 전송 모드 시작
-                Log.d("Bluetooth", "앱에 연결 성공")
-                // 수정된 부분: 클래스 멤버 변수 사용
-                runningViewModel.startHeartRateOnlyTracking(applicationContext)
-            } else {
-                // 연결 실패
-                Log.e("Bluetooth", "앱에 연결 실패")
+    // M권한 요청 결과 처리
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        when (requestCode) {
+            BODY_SENSOR_PERMISSION_REQUEST_CODE -> {
+                if ((grantResults.isNotEmpty() &&
+                            grantResults[0] == PackageManager.PERMISSION_GRANTED &&
+                            grantResults.size >= 3 &&
+                            grantResults[1] == PackageManager.PERMISSION_GRANTED &&
+                            grantResults[2] == PackageManager.PERMISSION_GRANTED)) {
+                    Log.d("Permission", "센서 및 위치 권한 승인됨")
+                    // 권한이 승인되었을 때 필요한 초기화 작업
+                } else {
+                    Log.e("Permission", "센서 또는 위치 권한이 거부됨")
+                    // 권한이 거부되었을 때 사용자에게 알림
+                }
+            }
+            BLUETOOTH_PERMISSION_REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d("Bluetooth", "블루투스 권한 승인됨")
+                    // 블루투스 권한이 승인되었을 때 필요한 초기화 작업
+                } else {
+                    Log.e("Bluetooth", "블루투스 권한 거부됨")
+                    // 블루투스 권한이 거부되었을 때 사용자에게 알림
+                }
             }
         }
     }
 
     companion object {
         private const val BODY_SENSOR_PERMISSION_REQUEST_CODE = 1
+        private const val BLUETOOTH_PERMISSION_REQUEST_CODE = 2
     }
 }
 
