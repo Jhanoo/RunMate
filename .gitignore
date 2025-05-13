@@ -95,3 +95,4 @@ backend/spring-boot/gpx/*
 
 ### uploads ###
 backend/spring-boot/uploads/*
+backend/nodejs/test/index.html
