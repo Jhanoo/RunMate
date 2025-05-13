@@ -66,4 +66,17 @@
         ORDER BY date
     </select>
 
+    <update id="updateIsFinished" parameterType="java.util.UUID">
+        UPDATE curricula
+        SET is_finished = true
+        WHERE curriculum_id = #{curriculumId}
+    </update>
+
+    <update id="updateIsFinishedEveryDay">
+        UPDATE curricula
+        SET is_finished = TRUE
+        WHERE is_finished = FALSE
+          AND goal_date &lt; NOW()
+    </update>
+
 </mapper>

@@ -35,4 +35,10 @@ public interface CurriculumService {
      * @return 해당 월의 Todo 리스트
      */
     List<Todo> getTodoListByMonth(UUID userId, int year, int month);
+
+    /**
+     * 매일 00:00 (Asia/Seoul) 에 실행:
+     * is_finished = false 이고 goal_date < now() 인 커리큘럼을 종료 처리
+     */
+    void finishCurriculaSchedule();
 }

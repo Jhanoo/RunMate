@@ -41,4 +41,17 @@ public interface CurriculumDao {
      * @param end    조회 종료 시각 (exclusive)
      */
     List<Todo> selectByPeriod(UUID userId, OffsetDateTime start, OffsetDateTime end);
+
+    /**
+     * 커리큘럼의 is_finished를 true로 갱신
+     *
+     * @param curriculumId 수정할 커리큘럼 ID
+     */
+    void updateIsFinished(UUID curriculumId);
+
+
+    /**
+     * 매일 자정마다 커리큘럼 목표 날짜가 지나면 커리큘럼의 is_finished=false를 true로 갱신
+     */
+    void updateIsFinishedEveryDay();
 }
