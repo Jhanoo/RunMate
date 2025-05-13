@@ -2,9 +2,12 @@ package com.D107.runmate.presentation.running.view
 
 import android.os.Bundle
 import android.view.View
+import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.D107.runmate.domain.model.running.CourseInfo
 import com.D107.runmate.domain.model.running.Creator
+import com.D107.runmate.presentation.MainViewModel
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentCourseBinding
 import com.D107.runmate.presentation.running.adapter.CourseRVAdapter
@@ -19,6 +22,7 @@ class CourseFragment : BaseFragment<FragmentCourseBinding>(
 
     private var type: CourseType = CourseType.RECENT
     private lateinit var courseRVAdapter: CourseRVAdapter
+    private val mainViewModel: MainViewModel by activityViewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -39,11 +43,12 @@ class CourseFragment : BaseFragment<FragmentCourseBinding>(
                     courseRVAdapter.submitList(tmpList)
                 }
 
-
                 courseRVAdapter.itemClickListener = object : CourseRVAdapter.ItemClickListener {
                     override fun onClick(view: View, data: CourseInfo, position: Int) {
                         // TODO 코스 상세 화면으로 이동
                         Timber.d("onClick: ${data.courseId} ${data.courseName}")
+                        val actions = CourseSettingFragmentDirections.actionCourseSettingFragmentToCourseDetailFragment(data.courseId)
+                        findNavController().navigate(actions)
                     }
                 }
 
@@ -63,6 +68,7 @@ class CourseFragment : BaseFragment<FragmentCourseBinding>(
                     override fun onClick(view: View, data: CourseInfo, position: Int) {
                         // TODO 코스 상세 화면으로 이동
                         Timber.d("onClick: ${data.courseId} ${data.courseName}")
+                        mainViewModel.setCourseId(data.courseId)
                     }
                 }
 

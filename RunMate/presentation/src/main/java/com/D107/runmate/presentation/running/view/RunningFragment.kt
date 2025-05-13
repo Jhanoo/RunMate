@@ -292,8 +292,10 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
         binding.btnSetPace.setOnClickListener {
             dialog = PaceSettingDialog(setting) { value ->
                 if (value.size != 0) {
+                    mainViewModel.setGoalPace(value[0] * 60 + value[1])
                     Log.d(TAG, "onViewCreated: value ${value[0]} ${value[1]}")
                 } else {
+                    mainViewModel.setGoalPace(null)
                     Log.d(TAG, "onViewCreated: value is empty")
                 }
                 setting = value

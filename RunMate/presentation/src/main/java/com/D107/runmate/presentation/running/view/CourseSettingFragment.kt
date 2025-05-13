@@ -36,6 +36,7 @@ class CourseSettingFragment : BaseFragment<FragmentCourseSettingBinding>(
         initTabLayout()
 
         binding.btnBack.setOnClickListener {
+
             findNavController().popBackStack()
         }
 
@@ -59,11 +60,6 @@ class CourseSettingFragment : BaseFragment<FragmentCourseSettingBinding>(
             tab.text = if (position == 0) "최근에 달린 코스" else "내가 만든 코스"
         }.attach()
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-
-            }
-        }
 
         binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {

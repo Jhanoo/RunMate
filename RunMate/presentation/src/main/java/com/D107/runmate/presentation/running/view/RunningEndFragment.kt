@@ -5,16 +5,20 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.D107.runmate.domain.model.running.RunningRecordState
 import com.D107.runmate.domain.model.running.TrackingStatus
 import com.D107.runmate.domain.model.running.UserLocationState
 import com.D107.runmate.presentation.MainViewModel
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentRunningEndBinding
+import com.D107.runmate.presentation.running.RunningEndViewModel
 import com.D107.runmate.presentation.utils.CommonUtils.getGpxInputStream
 import com.D107.runmate.presentation.utils.GpxParser.parseGpx
 import com.D107.runmate.presentation.utils.KakaoMapUtil.addCourseLine
 import com.D107.runmate.presentation.utils.LocationUtils
+import com.D107.runmate.presentation.utils.LocationUtils.getPaceFromSpeed
 import com.kakao.vectormap.KakaoMap
 import com.kakao.vectormap.KakaoMapReadyCallback
 import com.kakao.vectormap.LatLng
@@ -33,6 +37,7 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
 ) {
     private var kakaoMap: KakaoMap? = null
     private val mainViewModel: MainViewModel by activityViewModels()
+    private val runningEndViewModel: RunningEndViewModel by viewModels()
     private lateinit var dialog: CourseAddDialog
     private var mContext: Context? = null
 
@@ -52,8 +57,26 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
 
     private fun initEvent() {
         binding.btnNext.setOnClickListener {
-            mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
-            findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
+            val record = mainViewModel.runningRecord.value
+            if(record is RunningRecordState.Exist) {
+                runningEndViewModel.endRunning(
+                    0.0,
+                    record.runningRecords.last().cadenceSum/mainViewModel.recordSize.value,
+                record.runningRecords.last().altitudeSum/mainViewModel.recordSize.value,
+                    16.6667 / record.runningRecords.last().avgSpeed,
+                    0.0,
+                    mainViewModel.courseId.value ?: "-1",
+                    (record.runningRecords.last().distance).toDouble(),
+                    record.runningRecords.last().currentTime,
+                    "",
+                    record.runningRecords.first().currentTime
+                )
+            }
+
+
+//            mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
+//
+//            findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
         }
 
         binding.btnChart.setOnClickListener {
