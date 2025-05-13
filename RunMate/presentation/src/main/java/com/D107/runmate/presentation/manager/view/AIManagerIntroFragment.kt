@@ -1,4 +1,4 @@
-package com.D107.runmate.presentation.manager
+package com.D107.runmate.presentation.manager.view
 
 import android.graphics.Typeface
 import android.os.Bundle

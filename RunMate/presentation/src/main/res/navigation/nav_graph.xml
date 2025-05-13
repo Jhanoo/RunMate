@@ -60,13 +60,13 @@
 
     <fragment
         android:id="@+id/AIManagerFragment"
-        android:name="com.D107.runmate.presentation.manager.AIManagerFragment"
+        android:name="com.D107.runmate.presentation.manager.view.AIManagerFragment"
         android:label="fragment_a_i_manager"
         tools:layout="@layout/fragment_a_i_manager" />
 
     <fragment
         android:id="@+id/AIManagerIntroFragment"
-        android:name="com.D107.runmate.presentation.manager.AIManagerIntroFragment"
+        android:name="com.D107.runmate.presentation.manager.view.AIManagerIntroFragment"
         android:label="fragment_a_i_manager_intro"
         tools:layout="@layout/fragment_a_i_manager_intro" />
 
@@ -132,7 +132,7 @@
         tools:layout="@layout/fragment_wearable" />
     <fragment
         android:id="@+id/goalSettingFragment"
-        android:name="com.D107.runmate.presentation.manager.GoalSettingFragment"
+        android:name="com.D107.runmate.presentation.manager.view.GoalSettingFragment"
         android:label="fragment_goal_setting"
         tools:layout="@layout/fragment_goal_setting" />
     <fragment
