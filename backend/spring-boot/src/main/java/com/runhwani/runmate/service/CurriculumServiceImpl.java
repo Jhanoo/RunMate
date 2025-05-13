@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -64,7 +65,13 @@ public class CurriculumServiceImpl implements CurriculumService {
         // 4) JSON 파싱 → Map<LocalDate, List<String>>
         Map<LocalDate, List<String>> schedule = parseAiResponse(aiJson);
 
-        // 5) Curriculum 엔티티 저장
+        // 만약 진행중인 커리큘럼이 있다면 isFinished=true 로 갱신
+        Curriculum prevCurriculum = curriculumDao.selectByUserId(userId);
+        if (prevCurriculum != null) {
+            curriculumDao.updateIsFinished(prevCurriculum.getCurriculumId());
+        }
+
+        // 5) 새로운 Curriculum 생성
         UUID curriculumId = UUID.randomUUID();
         Curriculum curriculum = Curriculum.builder()
                 .curriculumId(curriculumId)
@@ -124,6 +131,13 @@ public class CurriculumServiceImpl implements CurriculumService {
         OffsetDateTime end = endDate.atStartOfDay(zone).toOffsetDateTime();
 
         return curriculumDao.selectByPeriod(userId, start, end);
+    }
+
+    @Override
+    @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")
+    public void finishCurriculaSchedule() {
+        curriculumDao.updateIsFinishedEveryDay();
+        log.debug("커리큘럼의 isFinished를 갱신합니다.");
     }
 
     /**
