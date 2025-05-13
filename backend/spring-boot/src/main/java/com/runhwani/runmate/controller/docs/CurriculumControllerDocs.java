@@ -82,8 +82,7 @@ public interface CurriculumControllerDocs {
                                     mediaType = "application/json",
                                     schema = @Schema(implementation = TodoResponse.class)
                             )
-                    ),
-                    @ApiResponse(responseCode = "404", description = "커리큘럼 또는 ToDo가 존재하지 않음")
+                    )
             }
     )
     @GetMapping("/todoList")
