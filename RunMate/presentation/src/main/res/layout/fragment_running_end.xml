@@ -207,7 +207,7 @@
         android:gravity="center"
         android:letterSpacing="-0.02"
         android:maxLines="1"
-        android:text="케이던스"
+        android:text="평균 케이던스"
         android:textColor="@color/caption"
         android:textSize="14sp"
         android:textStyle="bold"

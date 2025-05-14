@@ -11,9 +11,11 @@ import com.D107.runmate.domain.model.running.TrackPoint
 import com.D107.runmate.domain.model.running.TrackingStatus
 import com.D107.runmate.domain.model.running.UserLocationState
 import com.D107.runmate.domain.repository.running.RunningTrackingRepository
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -60,7 +62,7 @@ class RunningTrackingRepositoryImpl @Inject constructor(
         _userLocation.value = UserLocationState.Exist(listOf(location))
     }
 
-    override fun finishTracking() {
+    override fun finishTracking(): Flow<Boolean> = flow {
         when (val record = _runningRecord.value) {
             is RunningRecordState.Exist -> {
                 val trackPoints =
@@ -94,11 +96,13 @@ class RunningTrackingRepositoryImpl @Inject constructor(
                     )
                     gpxWriter.createGpxFile(trackPoints, metadata)
                 }
-                gpxWriter.finishWriteGpxFile()
+                if(gpxWriter.finishWriteGpxFile()) {
+                    emit(true)
+                }else {
+                    emit(false)
+                }
             }
-
-            else -> {}
-
+            else -> {emit(false)}
         }
     }
 

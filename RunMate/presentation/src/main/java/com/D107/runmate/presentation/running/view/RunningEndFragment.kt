@@ -68,6 +68,7 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
                         mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
                         findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
                     }
+
                     is RunningEndState.Success -> {
                         mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
 
@@ -85,14 +86,15 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
                         mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
                         findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
                     }
+
                     is Coord2AddressState.Success -> {
                         val record = mainViewModel.runningRecord.value
                         val locations = mainViewModel.userLocation.value
-                        if(record is RunningRecordState.Exist && locations is UserLocationState.Exist) {
+                        if (record is RunningRecordState.Exist && locations is UserLocationState.Exist) {
                             runningEndViewModel.endRunning(
                                 0.0,
-                                record.runningRecords.last().cadenceSum/record.runningRecords.size,
-                                record.runningRecords.last().altitudeSum/record.runningRecords.size,
+                                record.runningRecords.last().cadenceSum / record.runningRecords.size,
+                                record.runningRecords.last().altitudeSum / record.runningRecords.size,
                                 16.6667 / record.runningRecords.last().avgSpeed,
                                 0.0,
                                 mainViewModel.courseId.value,
@@ -110,6 +112,23 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
             }
         }
 
+        viewLifecycleOwner.lifecycleScope.launch {
+            mainViewModel.runningRecord.collectLatest {
+                if(it is RunningRecordState.Exist) {
+                    val time = mainViewModel.time.value
+                    val lastRecord = it.runningRecords.last()
+                    val firstRecord = it.runningRecords.first()
+                    binding.tvDistance.text = getString(R.string.course_distance, lastRecord.distance)
+                    binding.tvDateGroupInfo.text = getString(R.string.running_date, firstRecord.currentTime, lastRecord.currentTime)
+                    binding.tvTime.text = getString(R.string.running_time, time / 60, time % 60)
+                    binding.tvBpm.text = "-" // TODO 추후 HR 연결하여 데이터 수정
+                    binding.tvAvgPace.text = getPaceFromSpeed(lastRecord.avgSpeed)
+                    binding.tvCadence.text = getString(R.string.running_avg_cadence, lastRecord.cadenceSum / it.runningRecords.size)
+                    binding.tvAltitude.text = getString(R.string.running_avg_altitude, lastRecord.altitudeSum / it.runningRecords.size)
+                    binding.tvCalorie.text = "0" // TODO 삼성헬스 연결하여 데이터 수정
+                }
+            }
+        }
     }
 
     private fun initEvent() {

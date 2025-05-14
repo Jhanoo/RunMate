@@ -25,9 +25,6 @@ import com.D107.runmate.presentation.RunningTrackingService
 import com.D107.runmate.presentation.databinding.FragmentRunningBinding
 import com.D107.runmate.presentation.utils.CommonUtils
 import com.D107.runmate.presentation.utils.CommonUtils.getActivityContext
-import com.D107.runmate.presentation.utils.CommonUtils.getGpxInputStream
-import com.D107.runmate.presentation.utils.GpxParser.parseGpx
-import com.D107.runmate.presentation.utils.KakaoMapUtil.addCourseLine
 import com.D107.runmate.presentation.utils.KakaoMapUtil.addCoursePoint
 import com.D107.runmate.presentation.utils.LocationUtils
 import com.kakao.vectormap.KakaoMap
@@ -102,24 +99,6 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
             }
         })
 
-//        CoroutineScope(Dispatchers.IO).launch {
-//            try {
-//                mContext?.let {
-//                    getGpxInputStream(it)?.let { inputStream ->
-//                        val trackPoints = parseGpx(inputStream)
-//                        withContext(Dispatchers.Main) {
-//                            kakaoMap?.let { map ->
-//                                addCourseLine(it, map, trackPoints)
-//                            }
-//                        }
-//                    }
-//                }
-//            }catch (e: Exception) {
-//                Timber.e("${e.message}")
-//            }
-//
-//        }
-
         initEvent()
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -144,11 +123,6 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                             kakaoMap?.moveCamera(cameraUpdate)
                             addMarker(state.locations.last().latitude, state.locations.last().longitude)
                         }
-//                        mContext?.let { context ->
-//                            kakaoMap?.let { map ->
-//                                addCoursePoint(context, map, LatLng.from(state.locations.last().latitude, state.locations.last().longitude))
-//                            }
-//                        }
                     }
                     is UserLocationState.Initial -> {
                         Timber.d("UserLocationState Initial ")
@@ -217,7 +191,12 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                         if(locationValue is UserLocationState.Exist) {
                             val currentLocation = LatLng.from(locationValue.locations.last().latitude, locationValue.locations.last().longitude)
                             val prevLocation = LatLng.from(locationValue.locations[locationValue.locations.size - 2].latitude, locationValue.locations[locationValue.locations.size - 2].longitude)
-                            addCoursePoint(mContext!!, kakaoMap!!, prevLocation, currentLocation)
+                            mContext?.let {
+                                kakaoMap?.let {
+                                    addCoursePoint(mContext!!, kakaoMap!!, prevLocation, currentLocation)
+                                }
+                            }
+
                         }
                     }
                     binding.tvDistance.text = getString(R.string.running_distance, state.runningRecords.last().distance)
@@ -348,8 +327,6 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
         super.onResume()
         binding.mapView.resume()
 
-        (activity as? MainActivity)?.showHamburgerBtn()
-
         when (mainViewModel.trackingStatus.value) {
             TrackingStatus.STOPPED -> {
                 // 종료
@@ -360,6 +337,9 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                 binding.groupRecord.visibility = View.VISIBLE
                 binding.groupBtnPause.visibility = View.GONE
                 binding.groupBtnRunning.visibility = View.VISIBLE
+                mContext?.let {
+                    (getActivityContext(it) as MainActivity).hideHamburgerBtn()
+                }
             }
 
             TrackingStatus.INITIAL -> {
@@ -367,6 +347,10 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                 binding.groupRecord.visibility = View.GONE
                 binding.groupBtnPause.visibility = View.GONE
                 binding.groupBtnRunning.visibility = View.GONE
+                mContext?.let {
+                    (getActivityContext(it) as MainActivity).showHamburgerBtn()
+                }
+
             }
 
             TrackingStatus.PAUSED -> {
@@ -374,6 +358,9 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                 binding.groupRecord.visibility = View.VISIBLE
                 binding.groupBtnPause.visibility = View.VISIBLE
                 binding.groupBtnRunning.visibility = View.GONE
+                mContext?.let {
+                    (getActivityContext(it) as MainActivity).hideHamburgerBtn()
+                }
             }
         }
     }

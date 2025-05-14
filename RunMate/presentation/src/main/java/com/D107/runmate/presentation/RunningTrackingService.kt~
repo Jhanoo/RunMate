@@ -88,7 +88,7 @@ class RunningTrackingService : Service() {
         stopLocationTracking()
         stopTracking()
         repository.finishTracking().collectLatest {
-
+            
         }
         stopForeground(true)
         stopSelf()
