@@ -14,8 +14,11 @@ import java.util.UUID;
 @Schema(description = "그룹 생성 응답 정보")
 public class GroupMemberResponse {
 
-    @Schema(description = "그룹원 ID", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
+    @Schema(description = "그룹멤버 엔티티 ID", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
     private UUID memberId;
+
+    @Schema(description = "유저 ID", example = "3fa85f64-5717-4562-b3fc-2c963f66afa4")
+    private UUID userId;
 
     @Schema(description = "닉네임", example = "runner1")
     private String nickname;
