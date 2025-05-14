@@ -49,7 +49,7 @@ spring:
   # 한국 시간 설정
   jackson:
     time-zone: Asia/Seoul
-    
+
 mybatis:
   configuration:
     map-underscore-to-camel-case: true

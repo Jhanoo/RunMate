@@ -71,6 +71,7 @@
             parameterType="java.util.UUID"
             resultType="com.runhwani.runmate.dto.response.group.GroupMemberResponse">
         SELECT gm.member_id    AS memberId,
+               gm.user_id      AS userId,
                u.nickname      AS nickname,
                u.profile_image AS profileImage
         FROM group_members gm
