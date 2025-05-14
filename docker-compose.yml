@@ -18,6 +18,7 @@ services:
       - .env
     environment:
       - APP_BASE_URL=https://k12d107.p.ssafy.io  # 기본 URL 설정
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=Asia/Seoul
     depends_on:
       - postgres
       - redis
