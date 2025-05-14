@@ -17,6 +17,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.D107.runmate.domain.model.running.LocationModel
 import com.D107.runmate.domain.model.running.TrackingStatus
+import com.D107.runmate.domain.repository.running.RunningRepository
 import com.D107.runmate.domain.repository.running.RunningTrackingRepository
 import com.D107.runmate.presentation.utils.LocationUtils.trackingLocation
 import dagger.hilt.android.AndroidEntryPoint
@@ -41,6 +42,9 @@ class RunningTrackingService : Service() {
 
     @Inject
     lateinit var repository: RunningTrackingRepository
+
+    @Inject
+    lateinit var runningRepository: RunningRepository
 
     private val serviceScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     var runningJob: RunningJobState = RunningJobState.Initial
@@ -87,11 +91,17 @@ class RunningTrackingService : Service() {
         stopTimeTracking()
         stopLocationTracking()
         stopTracking()
-        repository.finishTracking().collectLatest {
-
+        CoroutineScope(Dispatchers.IO).launch {
+            repository.finishTracking().collectLatest {
+                if(it) {
+                    val record = repository.runningRecord.value
+                    val location = repository.userLocation.value
+                    runningRepository.endRunning()
+                    stopForeground(true)
+                    stopSelf()
+                }
+            }
         }
-        stopForeground(true)
-        stopSelf()
     }
 
     private fun pauseService() {
@@ -100,15 +110,17 @@ class RunningTrackingService : Service() {
         stopTracking()
     }
 
-    private fun observeState() {
-        repository.trackingState.collectLatest {
-            when (it) {
-                TrackingStatus.PAUSED -> {
-                    stopTimeTracking()
-                    stopLocationTracking()
-                    stopTracking()
-                }
-    }
+//    private fun observeState() {
+//        repository.trackingStatus.collectLatest {
+//            when (it) {
+//                TrackingStatus.PAUSED -> {
+//                    stopTimeTracking()
+//                    stopLocationTracking()
+//                    stopTracking()
+//                }
+//            }
+//    }
+//        }
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
