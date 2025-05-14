@@ -22,4 +22,6 @@ interface RunningTrackingRepository {
     fun setInitialUserLocation(location: LocationModel)
     fun finishTracking(): Flow<Boolean>
 
+    fun deleteFile(): Flow<Boolean>
+
 }

@@ -83,6 +83,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
         }, object : KakaoMapReadyCallback() {
             override fun onMapReady(p0: KakaoMap) {
                 kakaoMap = p0
+                loadLocationAndMove()
             }
 
             override fun getPosition(): LatLng {
@@ -100,41 +101,6 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
         })
 
         initEvent()
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            mainViewModel.userLocation.collectLatest { state ->
-                when (state) {
-                    is UserLocationState.Exist -> {
-                        Timber.d("UserLocationState Exist")
-                        val tmpUserLabel = userLabel
-                        if (tmpUserLabel != null) {
-                            tmpUserLabel.moveTo(
-                                LatLng.from(
-                                    state.locations.last().latitude,
-                                    state.locations.last().longitude
-                                ), 800)
-                        } else {
-                            val cameraUpdate = CameraUpdateFactory.newCenterPosition(
-                                LatLng.from(
-                                    state.locations.last().latitude,
-                                    state.locations.last().longitude
-                                )
-                            )
-                            kakaoMap?.moveCamera(cameraUpdate)
-                            addMarker(state.locations.last().latitude, state.locations.last().longitude)
-                        }
-                    }
-                    is UserLocationState.Initial -> {
-                        Timber.d("UserLocationState Initial ")
-                    }
-
-                    else -> {
-                        Timber.d("UserLocationState else ")
-                    }
-                }
-            }
-        }
-
 
         viewLifecycleOwner.lifecycleScope.launch {
             mainViewModel.time.collectLatest { it ->
@@ -247,7 +213,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
         binding.btnEnd.setOnClickListener {
             mContext?.let {
                 RunningTrackingService.stopService(it)
-                findNavController().navigate(R.id.action_runningFragment_to_runningEndFragment)
+//                findNavController().navigate(R.id.action_runningFragment_to_runningEndFragment)
             }
         }
 
@@ -360,6 +326,42 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                 binding.groupBtnRunning.visibility = View.GONE
                 mContext?.let {
                     (getActivityContext(it) as MainActivity).hideHamburgerBtn()
+                }
+            }
+        }
+    }
+
+    private fun loadLocationAndMove() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            mainViewModel.userLocation.collectLatest { state ->
+                when (state) {
+                    is UserLocationState.Exist -> {
+                        Timber.d("UserLocationState Exist")
+                        val tmpUserLabel = userLabel
+                        if (tmpUserLabel != null) {
+                            tmpUserLabel.moveTo(
+                                LatLng.from(
+                                    state.locations.last().latitude,
+                                    state.locations.last().longitude
+                                ), 800)
+                        } else {
+                            val cameraUpdate = CameraUpdateFactory.newCenterPosition(
+                                LatLng.from(
+                                    state.locations.last().latitude,
+                                    state.locations.last().longitude
+                                )
+                            )
+                            kakaoMap?.moveCamera(cameraUpdate)
+                            addMarker(state.locations.last().latitude, state.locations.last().longitude)
+                        }
+                    }
+                    is UserLocationState.Initial -> {
+                        Timber.d("UserLocationState Initial ")
+                    }
+
+                    else -> {
+                        Timber.d("UserLocationState else ")
+                    }
                 }
             }
         }

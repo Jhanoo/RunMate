@@ -58,7 +58,6 @@ internal class RunningRepositoryImpl @Inject constructor(
                     )))
                 }
             }
-            gpxWriter.deleteFile()
         } catch (e: Exception) {
             Timber.e("${e.message}")
             gpxWriter.deleteFile()

@@ -7,12 +7,14 @@ import com.D107.runmate.domain.model.base.ResponseStatus
 import com.D107.runmate.domain.model.group.Address
 import com.D107.runmate.domain.repository.running.RunningRepository
 import com.D107.runmate.domain.usecase.group.GetCoord2AddressUseCase
+import com.D107.runmate.domain.usecase.running.DeleteFileUseCase
 import com.D107.runmate.domain.usecase.running.EndRunningUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -21,78 +23,21 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RunningEndViewModel @Inject constructor(
-    private val endRunningUseCase: EndRunningUseCase,
-    private val getCoord2AddressUseCase: GetCoord2AddressUseCase
+    private val deleteFileUseCase: DeleteFileUseCase
 ) : ViewModel() {
-    private val _endRunning = MutableSharedFlow<RunningEndState>()
-    val endRunning = _endRunning.asSharedFlow()
 
-    private val _coord2Address = MutableSharedFlow<Coord2AddressState>()
-    val coord2Address = _coord2Address.asSharedFlow()
-
-    fun getCoord2Address(lon: Double, lat: Double) {
-        viewModelScope.launch(Dispatchers.IO) {
-            getCoord2AddressUseCase(lon, lat).collect { status ->
-                when (status) {
-                    is ResponseStatus.Success -> {
-                        _coord2Address.emit(Coord2AddressState.Success(status.data))
-                    }
-
-                    is ResponseStatus.Error -> {
-                        Timber.e("coord2address error ${status.error}")
-                        _coord2Address.emit(Coord2AddressState.Error(status.error.message))
-                    }
+    fun deleteFile() {
+        viewModelScope.launch {
+            deleteFileUseCase().collectLatest {
+                if(it){
+                    Timber.d("파일삭제")
+                }else{
+                    Timber.d("파일삭제실패")
                 }
             }
         }
     }
 
-    fun endRunning(
-        avgBpm: Double,
-        avgCadence: Double,
-        avgElevation: Double,
-        avgPace: Double,
-        calories: Double,
-        courseId: String?,
-        distance: Double,
-        endTime: String,
-        startLocation: String,
-        startTime: String
-    ) {
-        viewModelScope.launch(Dispatchers.IO) {
-            endRunningUseCase(
-                avgBpm,
-                avgCadence,
-                avgElevation,
-                avgPace,
-                calories,
-                courseId,
-                distance,
-                endTime,
-                startLocation,
-                startTime
-            )
-                .onStart {
-                }
-                .catch { e ->
-                    Timber.e("runningend error catch ${e.message}")
-                    _endRunning.emit(RunningEndState.Error(e.message ?: "알 수 없는 오류가 발생했습니다"))
-                }
-                .collect { status ->
-                    when (status) {
-                        is ResponseStatus.Success -> {
-                            Timber.d("runningend success")
-                            _endRunning.emit(RunningEndState.Success)
-                        }
-
-                        is ResponseStatus.Error -> {
-                            Timber.d("runningend error ${status.error.message}")
-                            _endRunning.emit(RunningEndState.Error(status.error.message))
-                        }
-                    }
-                }
-        }
-    }
 }
 
 sealed class RunningEndState {

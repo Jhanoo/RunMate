@@ -106,6 +106,10 @@ class RunningTrackingRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun deleteFile(): Flow<Boolean> {
+        return flow { emit(gpxWriter.deleteFile()) }
+    }
+
     private var isVibrationEnabled = true
     private var isSoundEnabled = true
 
@@ -134,6 +138,7 @@ class RunningTrackingRepositoryImpl @Inject constructor(
                 val tmpList = listOf(personalRunningInfo)
                 _runningRecord.value = RunningRecordState.Exist(tmpList)
                 _userLocation.value = UserLocationState.Exist(listOf(location))
+                _recordSize.value = 1
             }
 
             is UserLocationState.Exist -> {
@@ -183,6 +188,7 @@ class RunningTrackingRepositoryImpl @Inject constructor(
                             }
                             _runningRecord.value = RunningRecordState.Exist(listOf())
                             _userLocation.value = UserLocationState.Exist(listOf())
+                            _recordSize.value = 0
                         }
                         val tmpList: List<PersonalRunningInfo> = record.runningRecords +
                                 PersonalRunningInfo(
@@ -198,6 +204,7 @@ class RunningTrackingRepositoryImpl @Inject constructor(
                         _runningRecord.value = RunningRecordState.Exist(tmpList)
                         _userLocation.value =
                             UserLocationState.Exist((_userLocation.value as UserLocationState.Exist).locations + location)
+                        _recordSize.value += 1
                     }
 
                     is RunningRecordState.Initial -> {
@@ -214,6 +221,7 @@ class RunningTrackingRepositoryImpl @Inject constructor(
                         val tmpList = listOf(personalRunningInfo)
                         _runningRecord.value = RunningRecordState.Exist(tmpList)
                         _userLocation.value = UserLocationState.Exist(listOf(location))
+                        _recordSize.value = 0
                     }
                 }
             }

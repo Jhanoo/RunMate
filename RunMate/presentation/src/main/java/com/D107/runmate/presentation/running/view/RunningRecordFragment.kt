@@ -117,7 +117,7 @@ class RunningRecordFragment : BaseFragment<FragmentRunningRecordBinding>(
         binding.btnEnd.setOnClickListener {
             mContext?.let {
                 RunningTrackingService.stopService(it)
-                findNavController().navigate(R.id.action_runningRecordFragment_to_runningEndFragment)
+//                findNavController().navigate(R.id.action_runningRecordFragment_to_runningEndFragment)
             }
         }
 

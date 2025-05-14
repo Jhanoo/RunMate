@@ -47,7 +47,7 @@ class NotificationReceiver : BroadcastReceiver() {
                 Timber.d("onReceive: ACTION_STOP")
                 context?.let {
                     RunningTrackingService.stopService(it)
-                    repository.setTrackingStatus(TrackingStatus.STOPPED)
+//                    repository.setTrackingStatus(TrackingStatus.STOPPED)
                 }
             }
         }

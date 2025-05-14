@@ -60,57 +60,56 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
         initEvent()
         initMap()
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            runningEndViewModel.endRunning.collectLatest {
-                when (it) {
-                    is RunningEndState.Error -> {
-                        Timber.d("runningend error ${it.message}")
-                        mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
-                        findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
-                    }
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            runningEndViewModel.endRunning.collectLatest {
+//                when (it) {
+//                    is RunningEndState.Error -> {
+//                        Timber.d("runningend error ${it.message}")
+//                        mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
+//                        findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
+//                    }
+//
+//                    is RunningEndState.Success -> {
+//                        mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
+//                        findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
+//                    }
+//                }
+//            }
+//        }
 
-                    is RunningEndState.Success -> {
-                        mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
-
-                        findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
-                    }
-                }
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            runningEndViewModel.coord2Address.collectLatest {
-                when (it) {
-                    is Coord2AddressState.Error -> {
-                        Timber.d("coord2address error ${it.message}")
-                        mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
-                        findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
-                    }
-
-                    is Coord2AddressState.Success -> {
-                        val record = mainViewModel.runningRecord.value
-                        val locations = mainViewModel.userLocation.value
-                        if (record is RunningRecordState.Exist && locations is UserLocationState.Exist) {
-                            runningEndViewModel.endRunning(
-                                0.0,
-                                record.runningRecords.last().cadenceSum / record.runningRecords.size,
-                                record.runningRecords.last().altitudeSum / record.runningRecords.size,
-                                16.6667 / record.runningRecords.last().avgSpeed,
-                                0.0,
-                                mainViewModel.courseId.value,
-                                (record.runningRecords.last().distance).toDouble(),
-                                convertDateTime(record.runningRecords.last().currentTime),
-                                it.address.address_name,
-                                convertDateTime(record.runningRecords.first().currentTime)
-                            )
-                        } else {
-                            mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
-                            findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
-                        }
-                    }
-                }
-            }
-        }
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            runningEndViewModel.coord2Address.collectLatest {
+//                when (it) {
+//                    is Coord2AddressState.Error -> {
+//                        Timber.d("coord2address error ${it.message}")
+//                        mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
+//                        findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
+//                    }
+//
+//                    is Coord2AddressState.Success -> {
+//                        val record = mainViewModel.runningRecord.value
+//                        val locations = mainViewModel.userLocation.value
+//                        if (record is RunningRecordState.Exist && locations is UserLocationState.Exist) {
+//                            runningEndViewModel.endRunning(
+//                                0.0,
+//                                record.runningRecords.last().cadenceSum / record.runningRecords.size,
+//                                record.runningRecords.last().altitudeSum / record.runningRecords.size,
+//                                16.6667 / record.runningRecords.last().avgSpeed,
+//                                0.0,
+//                                mainViewModel.courseId.value,
+//                                (record.runningRecords.last().distance).toDouble(),
+//                                convertDateTime(record.runningRecords.last().currentTime),
+//                                it.address.address_name,
+//                                convertDateTime(record.runningRecords.first().currentTime)
+//                            )
+//                        } else {
+//                            mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
+//                            findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
+//                        }
+//                    }
+//                }
+//            }
+//        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             mainViewModel.runningRecord.collectLatest {
@@ -133,10 +132,9 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
 
     private fun initEvent() {
         binding.btnNext.setOnClickListener {
-            val location = mainViewModel.userLocation.value
-            if(location is UserLocationState.Exist) {
-                runningEndViewModel.getCoord2Address(location.locations.first().longitude, location.locations.first().latitude)
-            }
+            runningEndViewModel.deleteFile()
+            mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
+            findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
         }
 
         binding.btnChart.setOnClickListener {
@@ -170,20 +168,8 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
         }, object : KakaoMapReadyCallback() {
             override fun onMapReady(p0: KakaoMap) {
                 kakaoMap = p0
+                loadAndDrawGpxFile()
             }
-//            override fun getPosition(): LatLng {
-//                // TODO 코스의 시작지점을 LatLng으로 반환
-//                mainViewModel.userLocation.value?.let {
-//                    if (it is UserLocationState.Exist) {
-//                        return LatLng.from(
-//                            it.locations.last().latitude,
-//                            it.locations.last().longitude
-//                        )
-//                    }
-//                }
-//                val fallbackLocation = LocationUtils.getFallbackLocation()
-//                return LatLng.from(fallbackLocation.latitude, fallbackLocation.longitude)
-//            }
         })
     }
 
@@ -203,12 +189,15 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
             // TODO 사용자 좋아요 여부 좋아요 o
             binding.ivLike.setImageResource(R.drawable.ic_course_like)
         }
+    }
 
+    private fun loadAndDrawGpxFile() {
         CoroutineScope(Dispatchers.IO).launch {
             mContext?.let {
                 getGpxInputStream(it)?.let { inputStream ->
                     val trackPoints = parseGpx(inputStream)
                     withContext(Dispatchers.Main) {
+                        Timber.d("trackPoints size ${trackPoints.size}")
                         val startPoint = trackPoints[0]
                         val cameraUpdate = CameraUpdateFactory.newCenterPosition(
                             LatLng.from(

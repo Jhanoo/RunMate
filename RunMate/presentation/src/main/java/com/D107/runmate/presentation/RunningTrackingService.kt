@@ -15,10 +15,18 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.D107.runmate.domain.model.base.ResponseStatus
 import com.D107.runmate.domain.model.running.LocationModel
+import com.D107.runmate.domain.model.running.RunningRecordState
 import com.D107.runmate.domain.model.running.TrackingStatus
+import com.D107.runmate.domain.model.running.UserLocationState
 import com.D107.runmate.domain.repository.running.RunningRepository
 import com.D107.runmate.domain.repository.running.RunningTrackingRepository
+import com.D107.runmate.domain.usecase.group.GetCoord2AddressUseCase
+import com.D107.runmate.domain.usecase.running.EndRunningUseCase
+import com.D107.runmate.presentation.running.Coord2AddressState
+import com.D107.runmate.presentation.running.RunningEndState
+import com.D107.runmate.presentation.utils.CommonUtils.convertDateTime
 import com.D107.runmate.presentation.utils.LocationUtils.trackingLocation
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -27,8 +35,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -44,7 +55,10 @@ class RunningTrackingService : Service() {
     lateinit var repository: RunningTrackingRepository
 
     @Inject
-    lateinit var runningRepository: RunningRepository
+    lateinit var getCoord2AddressUseCase: GetCoord2AddressUseCase
+
+    @Inject
+    lateinit var endRunningUseCase: EndRunningUseCase
 
     private val serviceScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     var runningJob: RunningJobState = RunningJobState.Initial
@@ -59,6 +73,13 @@ class RunningTrackingService : Service() {
 
     private var isTracking = false
 
+    private val serviceJobIo = SupervisorJob()
+    private val serviceScopeIO = CoroutineScope(Dispatchers.IO + serviceJobIo)
+
+//    private val _coord2Address = MutableSharedFlow<Coord2AddressState>()
+
+    private val _endRunning = MutableSharedFlow<RunningEndState>()
+
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
@@ -71,7 +92,6 @@ class RunningTrackingService : Service() {
             ACTION_START_SERVICE -> startForegroundService()
             ACTION_PAUSE_SERVICE -> pauseService()
             ACTION_STOP_SERVICE -> stopService()
-
         }
 
         return START_STICKY
@@ -91,12 +111,48 @@ class RunningTrackingService : Service() {
         stopTimeTracking()
         stopLocationTracking()
         stopTracking()
+
         CoroutineScope(Dispatchers.IO).launch {
             repository.finishTracking().collectLatest {
-                if(it) {
+                if (it) {
+                    Timber.d("write finish")
                     val record = repository.runningRecord.value
                     val location = repository.userLocation.value
-                    runningRepository.endRunning()
+                    val recordSize = repository.recordSize.value
+                    if (location is UserLocationState.Exist && record is RunningRecordState.Exist) {
+                        Timber.d("coord2Address recordSize ${recordSize}")
+                        val address = getAddress(
+                            location.locations.first().longitude,
+                            location.locations.first().latitude
+                        )
+                        address?.let {
+                            Timber.d("lastRecord")
+                            val lastRecord = record.runningRecords.last()
+                            endRunning(
+                                0.0,
+                                lastRecord.cadenceSum / recordSize,
+                                lastRecord.altitudeSum / recordSize,
+                                16.6667 / lastRecord.avgSpeed,
+                                0.0,
+                                null,
+                                (lastRecord.distance).toDouble(),
+                                convertDateTime(lastRecord.currentTime),
+                                it,
+                                convertDateTime(record.runningRecords.first().currentTime)
+                            )
+                        }
+                    }
+                } else {
+                    Timber.d("write fail")
+                }
+            }
+        }
+
+        CoroutineScope(Dispatchers.Default).launch {
+            _endRunning.collectLatest {
+                if (it is RunningEndState.Success) {
+                    Timber.d("running end ! stop service")
+                    repository.setTrackingStatus(TrackingStatus.PAUSED)
                     stopForeground(true)
                     stopSelf()
                 }
@@ -110,17 +166,61 @@ class RunningTrackingService : Service() {
         stopTracking()
     }
 
-//    private fun observeState() {
-//        repository.trackingStatus.collectLatest {
-//            when (it) {
-//                TrackingStatus.PAUSED -> {
-//                    stopTimeTracking()
-//                    stopLocationTracking()
-//                    stopTracking()
-//                }
-//            }
-//    }
-//        }
+    private suspend fun getAddress(lon: Double, lat: Double): String? {
+        return getCoord2AddressUseCase(lon, lat)
+            .first { it is ResponseStatus.Success }
+            .let { status ->
+                when (status) {
+                    is ResponseStatus.Success -> status.data.address_name
+                    else -> null
+                }
+            }
+    }
+
+    private suspend fun endRunning(
+        avgBpm: Double,
+        avgCadence: Double,
+        avgElevation: Double,
+        avgPace: Double,
+        calories: Double,
+        courseId: String?,
+        distance: Double,
+        endTime: String,
+        startLocation: String,
+        startTime: String
+    ) {
+        endRunningUseCase(
+            avgBpm,
+            avgCadence,
+            avgElevation,
+            avgPace,
+            calories,
+            courseId,
+            distance,
+            endTime,
+            startLocation,
+            startTime
+        )
+            .onStart {
+            }
+            .catch { e ->
+                Timber.e("runningend error catch ${e.message}")
+                _endRunning.emit(RunningEndState.Error(e.message ?: "알 수 없는 오류가 발생했습니다"))
+            }
+            .collect { status ->
+                when (status) {
+                    is ResponseStatus.Success -> {
+                        Timber.d("runningend success")
+                        _endRunning.emit(RunningEndState.Success)
+                    }
+
+                    is ResponseStatus.Error -> {
+                        Timber.d("runningend error ${status.error.message}")
+                        _endRunning.emit(RunningEndState.Error(status.error.message))
+                    }
+                }
+            }
+    }
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -203,7 +303,7 @@ class RunningTrackingService : Service() {
         if (runningJob is RunningJobState.Active) {
             (runningJob as RunningJobState.Active).job.cancel()
             runningJob = RunningJobState.None
-            repository.setTrackingStatus(TrackingStatus.PAUSED)
+//            repository.setTrackingStatus(TrackingStatus.PAUSED)
             updateNotification(runningJob)
         }
     }
@@ -361,6 +461,7 @@ class RunningTrackingService : Service() {
                 calculateCadence()
             }
         }
+
         override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
     }
 
