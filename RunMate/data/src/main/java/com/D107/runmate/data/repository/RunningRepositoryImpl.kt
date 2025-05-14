@@ -4,6 +4,7 @@ import com.D107.runmate.data.remote.common.ApiResponse
 import com.D107.runmate.data.remote.datasource.running.RunningDataSource
 import com.D107.runmate.data.remote.request.FinishRunningRequest
 import com.D107.runmate.data.remote.response.user.LoginResponse.Companion.toDomainModel
+import com.D107.runmate.data.utils.GpxWriter
 import com.D107.runmate.domain.model.base.NetworkError
 import com.D107.runmate.domain.model.base.ResponseStatus
 import com.D107.runmate.domain.repository.running.RunningRepository
@@ -13,7 +14,8 @@ import timber.log.Timber
 import javax.inject.Inject
 
 internal class RunningRepositoryImpl @Inject constructor(
-    private val runningDataSource: RunningDataSource
+    private val runningDataSource: RunningDataSource,
+    private val gpxWriter: GpxWriter
 ) : RunningRepository {
     override suspend fun endRunning(
         avgBpm: Double,
@@ -28,7 +30,6 @@ internal class RunningRepositoryImpl @Inject constructor(
         startTime: String
     ): Flow<ResponseStatus<Unit>> = flow {
         try {
-
           when (val response = runningDataSource.endRunning(
                 FinishRunningRequest(
                     avgBpm = avgBpm,
@@ -57,8 +58,10 @@ internal class RunningRepositoryImpl @Inject constructor(
                     )))
                 }
             }
+            gpxWriter.deleteFile()
         } catch (e: Exception) {
             Timber.e("${e.message}")
+            gpxWriter.deleteFile()
             emit(
                 ResponseStatus.Error(
                     NetworkError(

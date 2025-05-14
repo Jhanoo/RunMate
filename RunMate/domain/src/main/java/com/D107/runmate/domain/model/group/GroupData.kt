@@ -1,6 +1,7 @@
 package com.D107.runmate.domain.model.group
 
 import com.D107.runmate.domain.model.base.BaseModel
+import com.D107.runmate.domain.model.common.User
 import java.time.OffsetDateTime
 
 data class GroupData(
@@ -11,7 +12,9 @@ data class GroupData(
 
     val leaderId: String = "",
 
-    val courseId: String = "",
+    val courseId: String?,
+
+    val courseName:String?,
 
     val startTime: String = "",
 
@@ -23,5 +26,7 @@ data class GroupData(
 
     val inviteCode: String = "",
 
-    val members: List<GroupMemberData> = emptyList()
+    val status: Int = 0,
+
+    val members: List<User> = emptyList()
 ):BaseModel

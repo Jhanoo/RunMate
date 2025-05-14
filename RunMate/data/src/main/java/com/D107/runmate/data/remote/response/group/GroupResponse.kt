@@ -15,8 +15,10 @@ data class GroupResponse(
     val groupName: String,
     @Json(name = "leaderId")
     val leaderId: String,
+    @Json(name = "courseName")
+    val courseName: String?,
     @Json(name = "courseId")
-    val courseId: String,
+    val courseId: String?,
     @Json(name = "startTime")
     val startTime: String,
     @Json(name = "startLocation")
@@ -27,22 +29,26 @@ data class GroupResponse(
     val longitude: Double,
     @Json(name = "inviteCode")
     val inviteCode: String,
+    @Json(name = "status")
+    val status: Int,
     @Json(name = "members")
-    val members: List<GroupMemberResponse>
+    val members: List<GroupMemberResponse>?
 ):BaseResponse{
     companion object : DataMapper<GroupResponse, GroupData> {
-        override fun GroupResponse.toDomainModel(): GroupData {
+            override fun GroupResponse.toDomainModel(): GroupData {
             return GroupData(
                 groupId = groupId,
                 groupName = groupName,
                 leaderId = leaderId,
                 courseId = courseId,
+                courseName = courseName,
                 startTime = startTime,
                 startLocation = startLocation,
                 latitude = latitude,
                 longitude = longitude,
                 inviteCode = inviteCode,
-                members = members.map { it.toDomainModel() }
+                status = status,
+                members = members?.map { it.toDomainModel() }?: emptyList()
             )
 
         }

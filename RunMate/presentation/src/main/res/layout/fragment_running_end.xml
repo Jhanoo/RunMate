@@ -44,7 +44,7 @@
         tools:text="0.00km" />
 
     <TextView
-        android:id="@+id/tv_date"
+        android:id="@+id/tv_date_group_info"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:letterSpacing="-0.02"
@@ -109,7 +109,7 @@
         app:layout_constraintEnd_toStartOf="@+id/tv_calorie"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_date"
+        app:layout_constraintTop_toBottomOf="@+id/tv_date_group_info"
         tools:text="05:20" />
 
     <TextView

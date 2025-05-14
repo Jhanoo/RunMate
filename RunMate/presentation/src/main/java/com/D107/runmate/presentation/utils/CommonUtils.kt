@@ -4,11 +4,13 @@ import android.content.Context
 import android.content.res.Resources
 import android.graphics.Point
 import android.graphics.Rect
+import android.os.Build
 import android.util.TypedValue
 import android.view.TouchDelegate
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import androidx.annotation.RequiresApi
 import dagger.hilt.android.internal.managers.ViewComponentManager
 import timber.log.Timber
 import java.io.File
@@ -19,9 +21,10 @@ import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
@@ -50,6 +53,14 @@ object CommonUtils {
         val format = SimpleDateFormat("yyyy.MM.dd. HH:mm", Locale.KOREA)
         format.timeZone = TimeZone.getTimeZone("Asia/Seoul")
         return format.format(time)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun formatIsoDateToCustom(isoDateString: String): String {
+        val offsetDateTime = OffsetDateTime.parse(isoDateString)
+        val outputFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd", Locale.getDefault())
+
+        return offsetDateTime.format(outputFormatter)
     }
 
     fun dateformatYMD(time: Date): String {

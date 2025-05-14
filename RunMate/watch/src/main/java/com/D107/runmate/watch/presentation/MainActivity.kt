@@ -3,6 +3,7 @@ package com.D107.runmate.watch.presentation
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Half.toFloat
 import android.util.Log
@@ -20,6 +21,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
@@ -31,6 +33,7 @@ import com.D107.runmate.watch.presentation.running.ResultScreen
 import com.D107.runmate.watch.presentation.running.RunningData
 import com.D107.runmate.watch.presentation.running.RunningScreen
 import com.D107.runmate.watch.presentation.running.RunningViewModel
+import com.D107.runmate.watch.presentation.service.BluetoothService
 import com.D107.runmate.watch.presentation.splash.SplashScreen
 import com.D107.runmate.watch.presentation.theme.RunMateTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -41,9 +44,15 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private lateinit var runningViewModel: RunningViewModel
+
+    @Inject
+    lateinit var bluetoothService: BluetoothService
+
     @SuppressLint("StateFlowValueCalledInComposition", "DefaultLocale")
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -52,6 +61,17 @@ class MainActivity : ComponentActivity() {
         splashScreen.setKeepOnScreenCondition { false }
 
         setTheme(android.R.style.Theme_DeviceDefault)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT)
+                != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.BLUETOOTH_CONNECT),
+                    BLUETOOTH_PERMISSION_REQUEST_CODE
+                )
+            }
+        }
 
         // 권환 확인 및 요청
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.BODY_SENSORS)
@@ -75,13 +95,14 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberSwipeDismissableNavController()
 
                 val runningViewModel: RunningViewModel = hiltViewModel()
-
                 // RunningScreen의 상태를 저장할 변수들
                 var savedTopIndex by remember { mutableStateOf(0) }
                 var savedLeftIndex by remember { mutableStateOf(1) }
                 var savedRightIndex by remember { mutableStateOf(2) }
                 var savedPace by remember { mutableStateOf("0:00") }
                 var savedRunningData by remember { mutableStateOf(RunningData()) }
+
+                this@MainActivity.runningViewModel = runningViewModel
 
                 SwipeDismissableNavHost(
                     navController = navController,
@@ -291,8 +312,43 @@ class MainActivity : ComponentActivity() {
 
     }
 
+    // M권한 요청 결과 처리
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        when (requestCode) {
+            BODY_SENSOR_PERMISSION_REQUEST_CODE -> {
+                if ((grantResults.isNotEmpty() &&
+                            grantResults[0] == PackageManager.PERMISSION_GRANTED &&
+                            grantResults.size >= 3 &&
+                            grantResults[1] == PackageManager.PERMISSION_GRANTED &&
+                            grantResults[2] == PackageManager.PERMISSION_GRANTED)) {
+                    Log.d("Permission", "센서 및 위치 권한 승인됨")
+                    // 권한이 승인되었을 때 필요한 초기화 작업
+                } else {
+                    Log.e("Permission", "센서 또는 위치 권한이 거부됨")
+                    // 권한이 거부되었을 때 사용자에게 알림
+                }
+            }
+            BLUETOOTH_PERMISSION_REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d("Bluetooth", "블루투스 권한 승인됨")
+                    // 블루투스 권한이 승인되었을 때 필요한 초기화 작업
+                } else {
+                    Log.e("Bluetooth", "블루투스 권한 거부됨")
+                    // 블루투스 권한이 거부되었을 때 사용자에게 알림
+                }
+            }
+        }
+    }
+
     companion object {
         private const val BODY_SENSOR_PERMISSION_REQUEST_CODE = 1
+        private const val BLUETOOTH_PERMISSION_REQUEST_CODE = 2
     }
 }
 

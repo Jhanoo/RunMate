@@ -9,7 +9,7 @@ import okhttp3.Response
 class RequestInterceptor constructor(private val dataStore: UserDataStoreSource): Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val token = runBlocking {
-            dataStore.accessToken.firstOrNull() ?: ""
+            dataStore.accessToken.firstOrNull() ?: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3MmIxZGE3Ny1kMzE0LTRiZTAtODdmYS0xZWE4N2E5NWM4N2MiLCJpYXQiOjE3NDY5NDg1MjQsImV4cCI6MTc0NzAzNDkyNH0.3f1RH93cVvBapngOTKSzLZviDddG65htvXO-jD9w1lk"
         }
         val authHeaderValue = "Bearer $token"
 

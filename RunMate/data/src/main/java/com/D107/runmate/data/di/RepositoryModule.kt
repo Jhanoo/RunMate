@@ -10,6 +10,7 @@ import android.content.Context
 import com.D107.runmate.data.repository.RunningTrackingRepositoryImpl
 import com.D107.runmate.domain.repository.running.RunningTrackingRepository
 import com.D107.runmate.data.repository.SmartInsoleRepositoryImpl
+import com.D107.runmate.data.repository.SocketRepositoryImpl
 import com.D107.runmate.domain.repository.SmartInsoleRepository
 import com.D107.runmate.domain.repository.user.AuthRepository
 import dagger.Binds
@@ -18,6 +19,7 @@ import dagger.hilt.InstallIn
 import com.D107.runmate.domain.repository.running.RunningRepository
 import com.D107.runmate.data.repository.RunningRepositoryImpl
 import com.D107.runmate.domain.repository.group.GroupRepository
+import com.D107.runmate.domain.repository.socket.SocketRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
@@ -61,4 +63,8 @@ internal abstract class RepositoryModule {
     abstract fun bindAuthRepository(
         authRepositoryImpl: AuthRepositoryImpl
     ): AuthRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSocketRepository(impl: SocketRepositoryImpl): SocketRepository
 }

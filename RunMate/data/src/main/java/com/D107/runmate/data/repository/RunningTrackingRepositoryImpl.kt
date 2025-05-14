@@ -44,6 +44,13 @@ class RunningTrackingRepositoryImpl @Inject constructor(
     override val trackingStatus: StateFlow<TrackingStatus> = _trackingStatus.asStateFlow()
 
     override fun setTrackingStatus(status: TrackingStatus) {
+        if(status == TrackingStatus.INITIAL) {
+            _time.value = 0
+            _cadenceRecord.value = CadenceRecordState.Initial
+            _runningRecord.value = RunningRecordState.Initial
+            _userLocation.value = UserLocationState.Initial
+            _recordSize.value = 0
+        }
         _trackingStatus.value = status
     }
 
@@ -85,8 +92,6 @@ class RunningTrackingRepositoryImpl @Inject constructor(
                     )
                     gpxWriter.createGpxFile(trackPoints, metadata)
                 }
-//                _runningRecord.value = RunningRecordState.Initial
-//                _userLocation.value = UserLocationState.Initial
                 gpxWriter.finishWriteGpxFile()
             }
 

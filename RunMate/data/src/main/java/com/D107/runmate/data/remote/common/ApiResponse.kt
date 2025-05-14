@@ -6,7 +6,7 @@ import com.squareup.moshi.JsonClass
 
 sealed class ApiResponse<out T> {
     @JsonClass(generateAdapter = true)
-    data class Success<T>(
+    data class Success<out T>(
         @Json(name = "data")val data: T
     ): ApiResponse<T>()
     @JsonClass(generateAdapter = true)

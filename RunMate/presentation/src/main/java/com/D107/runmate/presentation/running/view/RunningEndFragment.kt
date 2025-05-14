@@ -14,6 +14,7 @@ import com.D107.runmate.domain.model.running.UserLocationState
 import com.D107.runmate.presentation.MainViewModel
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentRunningEndBinding
+import com.D107.runmate.presentation.running.Coord2AddressState
 import com.D107.runmate.presentation.running.RunningEndState
 import com.D107.runmate.presentation.running.RunningEndViewModel
 import com.D107.runmate.presentation.utils.CommonUtils.convertDateTime
@@ -69,7 +70,43 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
                     }
                     is RunningEndState.Success -> {
                         mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
+
                         findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
+                    }
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            runningEndViewModel.coord2Address.collectLatest {
+                when (it) {
+                    is Coord2AddressState.Error -> {
+                        Timber.d("coord2address error ${it.message}")
+                        mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
+                        findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
+                    }
+                    is Coord2AddressState.Success -> {
+                        val record = mainViewModel.runningRecord.value
+                        val locations = mainViewModel.userLocation.value
+                        if(record is RunningRecordState.Exist && locations is UserLocationState.Exist) {
+                            Timber.d("runningend record exist ${record.runningRecords.size}")
+                            runningEndViewModel.endRunning(
+                                0.0,
+                                record.runningRecords.last().cadenceSum/record.runningRecords.size,
+                                record.runningRecords.last().altitudeSum/record.runningRecords.size,
+                                16.6667 / record.runningRecords.last().avgSpeed,
+                                0.0,
+                                mainViewModel.courseId.value,
+                                (record.runningRecords.last().distance).toDouble(),
+                                convertDateTime(record.runningRecords.last().currentTime),
+                                it.address.address_name,
+                                convertDateTime(record.runningRecords.first().currentTime)
+                            )
+                        } else {
+                            Timber.d("runningend record not exist")
+                            mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
+                            findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
+                        }
                     }
                 }
             }
@@ -79,26 +116,30 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
 
     private fun initEvent() {
         binding.btnNext.setOnClickListener {
-            val record = mainViewModel.runningRecord.value
-            if(record is RunningRecordState.Exist) {
-                Timber.d("runningend record exist ${record.runningRecords.size}")
-                runningEndViewModel.endRunning(
-                    0.0,
-                    record.runningRecords.last().cadenceSum/record.runningRecords.size,
-                record.runningRecords.last().altitudeSum/record.runningRecords.size,
-                    16.6667 / record.runningRecords.last().avgSpeed,
-                    0.0,
-                    mainViewModel.courseId.value,
-                    (record.runningRecords.last().distance).toDouble(),
-                    convertDateTime(record.runningRecords.last().currentTime),
-                    "hjkl",
-                    convertDateTime(record.runningRecords.first().currentTime)
-                )
-            } else {
-                Timber.d("runningend record not exist")
-                mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
-                findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
+//            val record = mainViewModel.runningRecord.value
+            val location = mainViewModel.userLocation.value
+            if(location is UserLocationState.Exist) {
+                runningEndViewModel.getCoord2Address(location.locations.first().latitude, location.locations.first().longitude)
             }
+//            if(record is RunningRecordState.Exist && locations is UserLocationState.Exist) {
+//                Timber.d("runningend record exist ${record.runningRecords.size}")
+//                runningEndViewModel.endRunning(
+//                    0.0,
+//                    record.runningRecords.last().cadenceSum/record.runningRecords.size,
+//                record.runningRecords.last().altitudeSum/record.runningRecords.size,
+//                    16.6667 / record.runningRecords.last().avgSpeed,
+//                    0.0,
+//                    mainViewModel.courseId.value,
+//                    (record.runningRecords.last().distance).toDouble(),
+//                    convertDateTime(record.runningRecords.last().currentTime),
+//                    "",
+//                    convertDateTime(record.runningRecords.first().currentTime)
+//                )
+//            } else {
+//                Timber.d("runningend record not exist")
+//                mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
+//                findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
+//            }
         }
 
         binding.btnChart.setOnClickListener {
