@@ -88,6 +88,8 @@ logging:
   level:
     root: INFO
     com.runhwani.runmate: DEBUG
+  pattern:
+    dateformat: yyyy-MM-dd HH:mm:ss.SSS,Asia/Seoul
 
 server:
   port: 8080

@@ -25,4 +25,4 @@ COPY --from=builder /home/gradle/project/build/libs/*.jar app.jar
 # 로그 디렉토리 생성
 RUN mkdir -p /app/logs && chmod 777 /app/logs
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Duser.timezone=Asia/Seoul", "-jar", "app.jar"]
