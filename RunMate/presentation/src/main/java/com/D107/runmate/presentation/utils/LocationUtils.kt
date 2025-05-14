@@ -138,6 +138,7 @@ object LocationUtils {
     }
 
     fun getPaceFromSpeed(speed: Float): String {
+        if(speed == 0f) return "0'00\""
         val minPerMs = 16.6667 / speed
         val min = minPerMs.toInt()
         val sec = ((minPerMs - min) * 60).toInt()

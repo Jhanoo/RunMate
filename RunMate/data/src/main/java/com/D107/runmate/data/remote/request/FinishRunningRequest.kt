@@ -9,7 +9,7 @@ data class FinishRunningRequest(
     val avgElevation: Double,
     val avgPace: Double,
     val calories: Double,
-    val courseId: String,
+    val courseId: String?,
     val distance: Double,
     val endTime: String,
     val startLocation: String,

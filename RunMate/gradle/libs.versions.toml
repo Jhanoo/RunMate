@@ -10,7 +10,9 @@ composeMaterialVersion = "1.3.0"
 composeNavigation = "1.2.0"
 converterMoshi = "2.9.0"
 dotlottieAndroid = "0.5.0"
+emoji2 = "1.5.0"
 glide = "4.16.0"
+glideVersion = "4.13.2"
 healthServicesClient = "1.0.0-rc02"
 hiltAndroidCompiler = "2.51.1"
 kotlin = "1.9.22"
@@ -51,6 +53,8 @@ uiTestJunit4 = "1.4.3"
 android = { module = "com.kakao.maps.open:android", version.ref = "android" }
 android-gpx-parser = { module = "com.github.ticofab:android-gpx-parser", version.ref = "androidGpxParser" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-emoji2 = { module = "androidx.emoji2:emoji2", version.ref = "emoji2" }
+androidx-emoji2-views = { module = "androidx.emoji2:emoji2-views", version.ref = "emoji2" }
 androidx-lifecycle-service = { module = "androidx.lifecycle:lifecycle-service", version.ref = "lifecycleService" }
 androidx-media = { module = "androidx.media:media", version.ref = "media" }
 androidx-navigation-fragment = { module = "androidx.navigation:navigation-fragment", version.ref = "navigationFragment" }
@@ -68,6 +72,7 @@ coil-gif = { module = "io.coil-kt:coil-gif", version.ref = "coilGif" }
 converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "converterMoshi" }
 dotlottie-android = { module = "com.github.LottieFiles:dotlottie-android", version.ref = "dotlottieAndroid" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
+glide-v4132 = { module = "com.github.bumptech.glide:glide", version.ref = "glideVersion" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroidCompiler" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompiler" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

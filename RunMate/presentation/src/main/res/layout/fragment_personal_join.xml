@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingHorizontal="26dp"
+    android:paddingTop="16dp"
+    tools:context=".user.view.Join2Fragment">
+
+    <ImageView
+        android:id="@+id/leftArrow"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/left_arrow"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="@style/JoinProgressBarStyle"
+        android:layout_width="0dp"
+        android:layout_height="12dp"
+        android:layout_marginStart="16dp"
+        android:progress="100"
+        android:progressDrawable="@drawable/custom_progress_bar"
+        app:layout_constraintBottom_toBottomOf="@+id/leftArrow"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/leftArrow"
+        app:layout_constraintTop_toTopOf="@+id/leftArrow" />
+
+    <ImageView
+        android:id="@+id/profileImg"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="30dp"
+        android:src="@drawable/prefile_image"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/progressBar"
+        tools:ignore="MissingConstraints" />
+
+    <ImageView
+        android:id="@+id/profileUpload"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_marginLeft="-35dp"
+        android:src="@drawable/join_profile_upload"
+        app:layout_constraintBottom_toBottomOf="@+id/profileImg"
+        app:layout_constraintStart_toEndOf="@+id/profileImg" />
+
+    <TextView
+        android:id="@+id/idTextView"
+        android:fontFamily="@font/pretendard_medium"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="이름(닉네임)"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@+id/profileImg"
+        tools:ignore="MissingConstraints" />
+
+    <EditText
+        android:id="@+id/idEditText"
+        style="@style/GrayEditTextStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:hint="달려라화니"
+        app:layout_constraintTop_toBottomOf="@+id/idTextView"
+        tools:ignore="HardcodedText,MissingConstraints" />
+
+    <TextView
+        android:id="@+id/pwTextView"
+        android:fontFamily="@font/pretendard_medium"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="생년월일"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@+id/idEditText"
+        tools:ignore="MissingConstraints" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/birthDateButton"
+        style="@style/GrayLineButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="생년월일을 입력해주세요"
+        app:layout_constraintTop_toBottomOf="@+id/pwTextView"
+        tools:ignore="HardcodedText,MissingConstraints" />
+
+    <TextView
+        android:id="@+id/pwCheckTextView"
+        android:fontFamily="@font/pretendard_medium"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="성별"
+        android:textSize="16sp"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintTop_toBottomOf="@+id/birthDateButton"
+        tools:ignore="MissingConstraints" />
+
+    <Button
+        android:id="@+id/genderButton"
+        style="@style/GrayLineButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="성별을 선택해주세요"
+        app:layout_constraintTop_toBottomOf="@+id/pwCheckTextView"
+        tools:ignore="HardcodedText,MissingConstraints" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/signupButton"
+        style="@style/DarkGreenButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="50dp"
+        android:text="회원가입"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

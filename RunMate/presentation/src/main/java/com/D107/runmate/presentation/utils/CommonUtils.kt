@@ -19,6 +19,9 @@ import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
@@ -120,11 +123,19 @@ object CommonUtils {
             //            file
             val file = File(context.filesDir, "running_tracking.gpx") // 실제로 작성한 파일
             FileInputStream(file)
-
         } catch (e: Exception) {
             Timber.e(e, "GPX 파일 읽기 실패")
             null
         }
+    }
+
+    fun convertDateTime(input: String): String {
+        // 입력 문자열을 LocalDateTime으로 파싱
+        val localDateTime = LocalDateTime.parse(input, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+        // Asia/Seoul 타임존으로 ZonedDateTime 생성
+        val zonedDateTime = localDateTime.atZone(ZoneId.of("Asia/Seoul"))
+        // ISO_OFFSET_DATE_TIME 포맷으로 출력
+        return zonedDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
     }
 }
 

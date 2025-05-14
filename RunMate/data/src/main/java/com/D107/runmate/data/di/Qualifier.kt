@@ -17,3 +17,11 @@ annotation class InterceptorOkHttpClient
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class NoInterceptorOkHttpClient
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class KakaoApiOkHttpClient
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class KakaoApiRetrofit

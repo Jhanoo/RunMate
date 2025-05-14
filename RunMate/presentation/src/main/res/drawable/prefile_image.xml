@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 배경 이미지 -->
+    <item>
+        <bitmap
+            android:src="@drawable/join_profile"
+            android:gravity="center"/>
+    </item>
+
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#00000000"/>
+        </shape>
+    </item>
+</layer-list>

@@ -21,6 +21,10 @@
             android:id="@+id/drawer_history"
             android:title="히스토리"
             android:icon="@drawable/ic_drawer_history" />
+
+        <item
+            android:id="@+id/drawer_logout"
+            android:title="로그아웃" />
     </group>
 
 </menu>

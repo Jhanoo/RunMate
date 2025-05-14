@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.View
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.D107.runmate.domain.model.running.RunningRecordState
 import com.D107.runmate.domain.model.running.TrackingStatus
@@ -13,7 +14,9 @@ import com.D107.runmate.domain.model.running.UserLocationState
 import com.D107.runmate.presentation.MainViewModel
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentRunningEndBinding
+import com.D107.runmate.presentation.running.RunningEndState
 import com.D107.runmate.presentation.running.RunningEndViewModel
+import com.D107.runmate.presentation.utils.CommonUtils.convertDateTime
 import com.D107.runmate.presentation.utils.CommonUtils.getGpxInputStream
 import com.D107.runmate.presentation.utils.GpxParser.parseGpx
 import com.D107.runmate.presentation.utils.KakaoMapUtil.addCourseLine
@@ -25,12 +28,15 @@ import com.kakao.vectormap.LatLng
 import com.kakao.vectormap.MapLifeCycleCallback
 import com.kakao.vectormap.camera.CameraUpdateFactory
 import com.ssafy.locket.presentation.base.BaseFragment
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
+@AndroidEntryPoint
 class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
     FragmentRunningEndBinding::bind,
     R.layout.fragment_running_end
@@ -53,30 +59,46 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
         initEvent()
         initMap()
 
+        viewLifecycleOwner.lifecycleScope.launch {
+            runningEndViewModel.endRunning.collectLatest {
+                when (it) {
+                    is RunningEndState.Error -> {
+                        Timber.d("runningend error ${it.message}")
+                        mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
+                        findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
+                    }
+                    is RunningEndState.Success -> {
+                        mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
+                        findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
+                    }
+                }
+            }
+        }
+
     }
 
     private fun initEvent() {
         binding.btnNext.setOnClickListener {
             val record = mainViewModel.runningRecord.value
             if(record is RunningRecordState.Exist) {
+                Timber.d("runningend record exist ${record.runningRecords.size}")
                 runningEndViewModel.endRunning(
                     0.0,
-                    record.runningRecords.last().cadenceSum/mainViewModel.recordSize.value,
-                record.runningRecords.last().altitudeSum/mainViewModel.recordSize.value,
+                    record.runningRecords.last().cadenceSum/record.runningRecords.size,
+                record.runningRecords.last().altitudeSum/record.runningRecords.size,
                     16.6667 / record.runningRecords.last().avgSpeed,
                     0.0,
-                    mainViewModel.courseId.value ?: "-1",
+                    mainViewModel.courseId.value,
                     (record.runningRecords.last().distance).toDouble(),
-                    record.runningRecords.last().currentTime,
-                    "",
-                    record.runningRecords.first().currentTime
+                    convertDateTime(record.runningRecords.last().currentTime),
+                    "hjkl",
+                    convertDateTime(record.runningRecords.first().currentTime)
                 )
+            } else {
+                Timber.d("runningend record not exist")
+                mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
+                findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
             }
-
-
-//            mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
-//
-//            findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
         }
 
         binding.btnChart.setOnClickListener {

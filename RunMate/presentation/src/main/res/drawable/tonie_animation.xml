@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android" android:oneshot="false">
+    <item android:drawable="@drawable/tonie_1" android:duration="60" />
+    <item android:drawable="@drawable/tonie_2" android:duration="60" />
+    <item android:drawable="@drawable/tonie_3" android:duration="60" />
+    <item android:drawable="@drawable/tonie_4" android:duration="60" />
+    <item android:drawable="@drawable/tonie_5" android:duration="60" />
+    <item android:drawable="@drawable/tonie_6" android:duration="60" />
+    <item android:drawable="@drawable/tonie_8" android:duration="60" />
+    <item android:drawable="@drawable/tonie_9" android:duration="60" />
+    <item android:drawable="@drawable/tonie_10" android:duration="60" />
+    <item android:drawable="@drawable/tonie_11" android:duration="60" />
+    <item android:drawable="@drawable/tonie_12" android:duration="60" />
+    <item android:drawable="@drawable/tonie_13" android:duration="60" />
+    <item android:drawable="@drawable/tonie_14" android:duration="60" />
+    <item android:drawable="@drawable/tonie_15" android:duration="60" />
+    <item android:drawable="@drawable/tonie_16" android:duration="60" />
+</animation-list>

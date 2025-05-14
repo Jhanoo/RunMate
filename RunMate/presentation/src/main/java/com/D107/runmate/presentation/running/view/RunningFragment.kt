@@ -74,6 +74,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
         binding.mapView.start(object : MapLifeCycleCallback() {
             override fun onMapDestroy() {
             }
@@ -101,23 +102,23 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
             }
         })
 
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                mContext?.let {
-                    getGpxInputStream(it)?.let { inputStream ->
-                        val trackPoints = parseGpx(inputStream)
-                        withContext(Dispatchers.Main) {
-                            kakaoMap?.let { map ->
-                                addCourseLine(it, map, trackPoints)
-                            }
-                        }
-                    }
-                }
-            }catch (e: Exception) {
-                Timber.e("${e.message}")
-            }
-
-        }
+//        CoroutineScope(Dispatchers.IO).launch {
+//            try {
+//                mContext?.let {
+//                    getGpxInputStream(it)?.let { inputStream ->
+//                        val trackPoints = parseGpx(inputStream)
+//                        withContext(Dispatchers.Main) {
+//                            kakaoMap?.let { map ->
+//                                addCourseLine(it, map, trackPoints)
+//                            }
+//                        }
+//                    }
+//                }
+//            }catch (e: Exception) {
+//                Timber.e("${e.message}")
+//            }
+//
+//        }
 
         initEvent()
 
@@ -169,7 +170,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
 
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mainViewModel.trackingStatus.collect { status ->
+                mainViewModel.trackingStatus.collectLatest { status ->
                     when (mainViewModel.trackingStatus.value) {
                         TrackingStatus.STOPPED -> {
                             findNavController().navigate(R.id.action_runningFragment_to_runningEndFragment)
@@ -346,6 +347,35 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
     override fun onResume() {
         super.onResume()
         binding.mapView.resume()
+
+        (activity as? MainActivity)?.showHamburgerBtn()
+
+        when (mainViewModel.trackingStatus.value) {
+            TrackingStatus.STOPPED -> {
+                // 종료
+            }
+
+            TrackingStatus.RUNNING -> {
+                binding.groupBtnStart.visibility = View.INVISIBLE
+                binding.groupRecord.visibility = View.VISIBLE
+                binding.groupBtnPause.visibility = View.GONE
+                binding.groupBtnRunning.visibility = View.VISIBLE
+            }
+
+            TrackingStatus.INITIAL -> {
+                binding.groupBtnStart.visibility = View.VISIBLE
+                binding.groupRecord.visibility = View.GONE
+                binding.groupBtnPause.visibility = View.GONE
+                binding.groupBtnRunning.visibility = View.GONE
+            }
+
+            TrackingStatus.PAUSED -> {
+                binding.groupBtnStart.visibility = View.INVISIBLE
+                binding.groupRecord.visibility = View.VISIBLE
+                binding.groupBtnPause.visibility = View.VISIBLE
+                binding.groupBtnRunning.visibility = View.GONE
+            }
+        }
     }
 
     override fun onPause() {

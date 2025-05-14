@@ -14,23 +14,21 @@ class EndRunningUseCase @Inject constructor(
         avgElevation: Double,
         avgPace: Double,
         calories: Double,
-        courseId: String,
+        courseId: String?,
         distance: Double,
         endTime: String,
         startLocation: String,
         startTime: String
-    ): Flow<ResponseStatus<Unit>> {
-        return runningRepository.endRunning(
-            avgBpm,
-            avgCadence,
-            avgElevation,
-            avgPace,
-            calories,
-            courseId,
-            distance,
-            endTime,
-            startLocation,
-            startTime
-        )
-    }
+    ) = runningRepository.endRunning(
+        avgBpm,
+        avgCadence,
+        avgElevation,
+        avgPace,
+        calories,
+        courseId,
+        distance,
+        endTime,
+        startLocation,
+        startTime
+    )
 }

@@ -13,6 +13,17 @@
     <color name="category_stroke">#DADADA</color>
     <color name="background">#F6F7F9</color>
     <color name="disabled">#9E9E9E</color>
+    <color name="background_home">#FFFDF8</color>
+    <color name="finance_budget_over">#E06F72</color>
+    <color name="finance_budget_under">#4C8077</color>
+    <color name="colorButtonActive">#00CBBF</color>
+    <color name="colorButtonInactive">#C9C9C9</color>
+    <color name="color_button_secondary">#D6EFE4</color>
+    <color name="finance_budget_over_text">#F7726D</color>
+    <color name="color_edit_text">#F4F4F4</color>
     <color name="caption">#BBBAB9</color>
+    <color name="login_background">#1D4F38</color>
+    <color name="login_btn">#298E60</color>
+
 
 </resources>

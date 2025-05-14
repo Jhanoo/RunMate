@@ -64,10 +64,9 @@ class RunningTrackingRepositoryImpl @Inject constructor(
                                 time = runningRecord.currentTime,
                                 hr = 0, // 워치로부터 데이터받아와서 넣기 (hr리스트 만들어도 될 듯)
                                 cadence = runningRecord.cadence,
-                                pace = (16.6667 / runningRecord.currentSpeed).toInt()
+                                pace = if (runningRecord.currentSpeed == 0f) 0 else (16.6667 / runningRecord.currentSpeed).toInt()
                             )
                         }
-                Timber.d("finishTracking trackPoints ${trackPoints.size} ${trackPoints.first().time} ${trackPoints[0].pace} ${trackPoints[0].lat}")
                 if (gpxWriter.isFileExists() != null) {
                     gpxWriter.appendGpxFile(trackPoints)
                 } else {
@@ -86,8 +85,8 @@ class RunningTrackingRepositoryImpl @Inject constructor(
                     )
                     gpxWriter.createGpxFile(trackPoints, metadata)
                 }
-                _runningRecord.value = RunningRecordState.Initial
-                _userLocation.value = UserLocationState.Initial
+//                _runningRecord.value = RunningRecordState.Initial
+//                _userLocation.value = UserLocationState.Initial
                 gpxWriter.finishWriteGpxFile()
             }
 
@@ -150,7 +149,7 @@ class RunningTrackingRepositoryImpl @Inject constructor(
                                             time = runningRecord.currentTime,
                                             hr = 0, // 워치로부터 데이터받아와서 넣기 (hr리스트 만들어도 될 듯)
                                             cadence = runningRecord.cadence,
-                                            pace = (16.6667 / runningRecord.currentSpeed).toInt()
+                                            pace = if (runningRecord.currentSpeed == 0f) 0 else (16.6667 / runningRecord.currentSpeed).toInt()
                                         )
                                     }
                             if (gpxWriter.isFileExists() != null) {
@@ -207,6 +206,7 @@ class RunningTrackingRepositoryImpl @Inject constructor(
                     }
                 }
             }
+            else -> {}
         }
     }
 }

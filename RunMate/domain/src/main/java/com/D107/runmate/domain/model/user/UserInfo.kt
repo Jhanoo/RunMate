@@ -3,8 +3,10 @@ package com.D107.runmate.domain.model.user
 import com.D107.runmate.domain.model.base.BaseModel
 
 data class UserInfo(
-    val birthYear: Int,
+    val userId: String,
+    val email: String,
     val nickname: String,
-    val userId: Int,
-    val userJob: String
+    val profileImage: String?,
+    val birthday: String,
+    val gender: String
 ): BaseModel

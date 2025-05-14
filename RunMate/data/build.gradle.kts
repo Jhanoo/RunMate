@@ -8,12 +8,16 @@ plugins {
     id("kotlin-parcelize")
     id("org.jetbrains.kotlin.plugin.serialization")
 }
-
 val properties = Properties().apply {
     load(rootProject.file("apikey.properties").inputStream())
 }
 
+val restApiKey: String = properties.getProperty("rest_api_key") ?: ""
+val nativeApiKey: String = properties.getProperty("native_api_key") ?: ""
+val serverUrl: String = properties.getProperty("base_url") ?: ""
+val kakaoApiUrl: String = properties.getProperty("kakao_url") ?: ""
 val baseUrl: String = properties.getProperty("base_url") ?: ""
+val tmpToken: String = properties.getProperty("")?:""
 
 android {
     namespace = "com.D107.runmate.domain"
@@ -23,6 +27,10 @@ android {
         minSdk = 24
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "REST_API_KEY", restApiKey)
+        buildConfigField("String", "NATIVE_API_KEY", nativeApiKey)
+        buildConfigField("String", "BASE_URL", serverUrl)
+        buildConfigField("String", "KAKAO_API_URL", kakaoApiUrl)
         consumerProguardFiles("consumer-rules.pro")
         externalNativeBuild {
             cmake {

@@ -10,7 +10,7 @@ interface RunningRepository {
         avgElevation: Double,
         avgPace: Double,
         calories: Double,
-        courseId: String,
+        courseId: String?,
         distance: Double,
         endTime: String,
         startLocation: String,

@@ -7,8 +7,11 @@ interface DataStoreRepository {
     val nickname: Flow<String?>
     suspend fun saveNickname(nickname: String)
 
-    val userId: Flow<Long?>
-    suspend fun saveUserId(userId: Long)
+    val userId: Flow<String?>
+    suspend fun saveUserId(userId: String)
+
+    val profileImage: Flow<String?>
+    suspend fun saveProfileImage(profileImage: String?)
 
     val accessToken: Flow<String?>
     suspend fun saveAccessToken(accessToken: String)
@@ -19,7 +22,7 @@ interface DataStoreRepository {
     suspend fun saveInsoleAddresses(leftAddress: String, rightAddress: String)
     suspend fun clearInsoleAddresses()
 
-    val savedGaitAnalysisResult : Flow<GaitAnalysisResult?>
+    val savedGaitAnalysisResult: Flow<GaitAnalysisResult?>
     suspend fun saveGaitAnalysisResult(gaitAnalysisResult: GaitAnalysisResult)
 
 }
