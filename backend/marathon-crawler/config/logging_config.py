@@ -40,13 +40,15 @@ def setup_logging(log_dir='logs', log_level=logging.INFO):
     file_handler = RotatingFileHandler(
         os.path.join(log_dir, 'marathon_crawler.log'),
         maxBytes=10 * 1024 * 1024,  # 10MB
-        backupCount=5,
-        encoding='utf-8'  # UTF-8 인코딩 사용
+        backupCount=5,              # 백업 5개 보관관
+        encoding='utf-8'
     )
+    file_handler.setLevel(log_level)
     file_handler.setFormatter(formatter)
     
     # 콘솔 핸들러
     console_handler = logging.StreamHandler()
+    console_handler.setLevel(log_level)
     console_handler.setFormatter(formatter)
     
     # 핸들러 추가
