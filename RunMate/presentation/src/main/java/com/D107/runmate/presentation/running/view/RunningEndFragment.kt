@@ -89,7 +89,6 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
                         val record = mainViewModel.runningRecord.value
                         val locations = mainViewModel.userLocation.value
                         if(record is RunningRecordState.Exist && locations is UserLocationState.Exist) {
-                            Timber.d("runningend record exist ${record.runningRecords.size}")
                             runningEndViewModel.endRunning(
                                 0.0,
                                 record.runningRecords.last().cadenceSum/record.runningRecords.size,
@@ -103,7 +102,6 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
                                 convertDateTime(record.runningRecords.first().currentTime)
                             )
                         } else {
-                            Timber.d("runningend record not exist")
                             mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
                             findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
                         }
@@ -116,30 +114,10 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
 
     private fun initEvent() {
         binding.btnNext.setOnClickListener {
-//            val record = mainViewModel.runningRecord.value
             val location = mainViewModel.userLocation.value
             if(location is UserLocationState.Exist) {
-                runningEndViewModel.getCoord2Address(location.locations.first().latitude, location.locations.first().longitude)
+                runningEndViewModel.getCoord2Address(location.locations.first().longitude, location.locations.first().latitude)
             }
-//            if(record is RunningRecordState.Exist && locations is UserLocationState.Exist) {
-//                Timber.d("runningend record exist ${record.runningRecords.size}")
-//                runningEndViewModel.endRunning(
-//                    0.0,
-//                    record.runningRecords.last().cadenceSum/record.runningRecords.size,
-//                record.runningRecords.last().altitudeSum/record.runningRecords.size,
-//                    16.6667 / record.runningRecords.last().avgSpeed,
-//                    0.0,
-//                    mainViewModel.courseId.value,
-//                    (record.runningRecords.last().distance).toDouble(),
-//                    convertDateTime(record.runningRecords.last().currentTime),
-//                    "",
-//                    convertDateTime(record.runningRecords.first().currentTime)
-//                )
-//            } else {
-//                Timber.d("runningend record not exist")
-//                mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
-//                findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
-//            }
         }
 
         binding.btnChart.setOnClickListener {

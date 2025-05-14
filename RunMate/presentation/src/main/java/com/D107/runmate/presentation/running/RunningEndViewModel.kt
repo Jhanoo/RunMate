@@ -30,9 +30,9 @@ class RunningEndViewModel @Inject constructor(
     private val _coord2Address = MutableSharedFlow<Coord2AddressState>()
     val coord2Address = _coord2Address.asSharedFlow()
 
-    fun getCoord2Address(lat: Double, lon: Double) {
+    fun getCoord2Address(lon: Double, lat: Double) {
         viewModelScope.launch(Dispatchers.IO) {
-            getCoord2AddressUseCase(lat, lon).collect { status ->
+            getCoord2AddressUseCase(lon, lat).collect { status ->
                 when (status) {
                     is ResponseStatus.Success -> {
                         _coord2Address.emit(Coord2AddressState.Success(status.data))
