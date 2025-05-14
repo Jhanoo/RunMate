@@ -1,14 +1,221 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".manager.view.AIManagerExpMarathonFragment">
+    android:paddingHorizontal="26dp"
+    tools:context=".manager.view.AIManagerFragment">
 
-    <!-- TODO: Update blank fragment layout -->
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:id="@+id/tv_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/pretendard_medium"
+        android:gravity="center"
+        android:letterSpacing="-0.02"
+        android:text="목표 설정하기"
+        android:textColor="@color/text"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="MissingConstraints" />
 
-</FrameLayout>
+    <!-- 마라톤 경험 체크박스 -->
+    <TextView
+        android:id="@+id/tv_marathon_experience"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:fontFamily="@font/pretendard_medium"
+        android:text="마라톤 경험이 있습니까?"
+        android:textColor="@color/text"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toStartOf="@+id/cb_marathon_experience"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_title" />
+
+    <CheckBox
+        android:id="@+id/cb_marathon_experience"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/tv_marathon_experience"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_marathon_experience" />
+
+    <!-- 주간 달리기 횟수 라디오 그룹 -->
+    <TextView
+        android:id="@+id/tv_weekly_runs"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:fontFamily="@font/pretendard_medium"
+        android:text="일주일에 몇 회 정도 달리기를 하고 계신가요?"
+        android:textColor="@color/text"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_marathon_experience" />
+
+    <RadioGroup
+        android:id="@+id/rg_weekly_runs"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_weekly_runs">
+
+        <RadioButton
+            android:id="@+id/rb_run_0"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/radio_selector"
+            android:textSize="16sp"
+            android:button="@null"
+            android:gravity="center"
+            android:padding="6dp"
+            android:text="0회" />
+
+        <RadioButton
+            android:id="@+id/rb_run_1_2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/radio_selector"
+            android:button="@null"
+            android:checked="true"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:padding="6dp"
+            android:text="1~2회"
+            android:textColor="@color/white"/>
+
+        <RadioButton
+            android:id="@+id/rb_run_3_4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/radio_selector"
+            android:button="@null"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:padding="6dp"
+            android:text="3~4회" />
+
+        <RadioButton
+            android:id="@+id/rb_run_5_more"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/radio_selector"
+            android:button="@null"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:padding="6dp"
+            android:text="5회 이상" />
+    </RadioGroup>
+
+    <!-- 최대 달리기 거리 라디오 그룹 -->
+
+    <TextView
+        android:id="@+id/tv_max_distance"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:fontFamily="@font/pretendard_medium"
+        android:text="현재 편안하게 달릴 수 있는 최대 거리는 얼마인가요?"
+        android:textColor="@color/text"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rg_weekly_runs" />
+
+    <RadioGroup
+        android:id="@+id/rg_max_distance"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_max_distance">
+
+        <RadioButton
+            android:id="@+id/rb_distance_5km"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/radio_selector"
+            android:button="@null"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:padding="6dp"
+            android:text="~5km" />
+
+        <RadioButton
+            android:id="@+id/rb_distance_10km"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/radio_selector"
+            android:button="@null"
+            android:checked="true"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:padding="6dp"
+            android:text="~10km"
+            android:textColor="@color/white"/>
+
+        <RadioButton
+            android:id="@+id/rb_distance_half"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/radio_selector"
+            android:button="@null"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:padding="6dp"
+            android:text="~하프" />
+
+        <RadioButton
+            android:id="@+id/rb_distance_full"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/radio_selector"
+            android:button="@null"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:padding="6dp"
+            android:text="~풀" />
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/btn_confirm_short"
+        style="@style/GreenButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/bg_all_btn_short"
+        android:text="다음"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="MissingConstraints" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
