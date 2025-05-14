@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- 1. 지도와 중앙 마커를 담는 FrameLayout -->
+    <FrameLayout
+        android:id="@+id/fl_map_container_select_place"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/tv_address_select_place"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.kakao.vectormap.MapView
+            android:id="@+id/map_view_select_place"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <ImageView
+                android:id="@+id/iv_marker_select_place"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="12dp"
+                android:src="@drawable/bg_running_marker_blue"
+                tools:ignore="ContentDescription" />
+        </com.kakao.vectormap.MapView>
+
+    </FrameLayout>
+
+
+    <TextView
+        android:id="@+id/tv_address_select_place"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:gravity="center_vertical"
+        android:padding="16dp"
+        android:text="주소: 지도를 움직여 위치를 선택하세요."
+        android:fontFamily="@font/pretendard_medium"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/btn_confirm_select_place"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_confirm_select_place"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        style="@style/GreenButtonStyle"
+        android:text="시작장소 선택"
+        android:fontFamily="@font/pretendard_bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

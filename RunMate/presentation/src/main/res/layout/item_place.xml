@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="8dp"
     android:layout_marginVertical="4dp"
     app:cardCornerRadius="8dp"
     app:cardElevation="2dp">
@@ -14,6 +13,14 @@
         android:layout_height="wrap_content"
         android:paddingHorizontal="12dp"
         android:paddingVertical="12dp">
+        <ImageView
+            android:id="@+id/iv_place_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_place"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            />
 
         <TextView
             android:id="@+id/tv_place_name"
@@ -22,8 +29,9 @@
             android:textColor="@color/black"
             android:textSize="16sp"
             android:fontFamily="@font/pretendard_medium"
+            android:layout_marginStart="4dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/iv_place_icon"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="동탄공원" />
 
@@ -36,7 +44,7 @@
             android:textSize="14sp"
             android:fontFamily="@font/pretendard_regular"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toStartOf="@id/tv_place_name"
             app:layout_constraintTop_toBottomOf="@id/tv_place_name"
             tools:text="경기도 화성시 동탄동 123-45" />
 

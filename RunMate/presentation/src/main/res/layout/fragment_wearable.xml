@@ -12,7 +12,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="36dp"
+        android:layout_marginTop="48dp"
         android:layout_marginEnd="16dp"
         app:cardCornerRadius="12dp"
         app:cardElevation="2dp"
@@ -44,12 +44,13 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
                 <!--    버튼색은 나중에 다른 버튼이랑 맞게-->
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_disconnect_insole"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
+                    style="@style/SmallGreenButtonStyle"
                     android:text="연결 끊기"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@id/iv_connected_insole"
@@ -122,13 +123,14 @@
                     app:layout_constraintTop_toTopOf="@id/iv_disconnected_image_insole"
                     app:layout_constraintVertical_chainStyle="packed" />
                 <!--    버튼색은 나중에 다른 버튼이랑 맞게-->
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_find_insole"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
                     android:text="인솔 찾기"
+                    style="@style/SmallGreenButtonStyle"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@id/iv_disconnected_image_insole"
                     app:layout_constraintTop_toBottomOf="@id/tv_disconnected_message_insole" />
@@ -197,7 +199,7 @@
                     <ImageView
                         android:id="@+id/iv_footstrike_insole"
                         android:layout_width="160dp"
-                        android:layout_height="120dp"
+                        android:layout_height="160dp"
                         android:src="@drawable/img_no_insole"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -365,6 +367,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:text="진단하기"
+                        style="@style/GreenButtonStyle"
                         android:visibility="gone"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -381,6 +384,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:text="진단하기"
+        style="@style/GreenButtonStyle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toTopOf="@id/gl_bottom_insole" />

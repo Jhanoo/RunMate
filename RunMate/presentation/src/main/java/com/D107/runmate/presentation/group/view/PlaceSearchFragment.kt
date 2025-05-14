@@ -47,6 +47,9 @@ class PlaceSearchFragment : BaseFragment<FragmentPlaceSearchBinding>(
         binding.toolbarPlaceSearch.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
+        binding.ivMapSearchPlace.setOnClickListener{
+            findNavController().navigate(R.id.placeSelectFragment)
+        }
 
         binding.btnClearSearchPlace.setOnClickListener {
             binding.etSearchPlace.text.clear()

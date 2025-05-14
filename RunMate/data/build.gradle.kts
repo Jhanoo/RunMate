@@ -82,8 +82,8 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
 
     // Data Store
-    implementation ("androidx.datastore:datastore-preferences:1.1.4")
-    implementation ("androidx.datastore:datastore-core:1.1.4")
+    implementation("androidx.datastore:datastore-preferences:1.1.4")
+    implementation("androidx.datastore:datastore-core:1.1.4")
 
     // Hilt
     implementation("com.google.dagger:hilt-android:2.51.1")
@@ -91,7 +91,7 @@ dependencies {
 
     // Logging-Interceptor
     implementation("com.squareup.okhttp3:okhttp-urlconnection:4.10.0")
-    implementation ("com.squareup.okhttp3:logging-interceptor:4.10.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
 
     // Moshi
     implementation(libs.moshi)
@@ -102,6 +102,12 @@ dependencies {
 
     //Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+
+    //Socket.IO
+    implementation("io.socket:socket.io-client:2.1.2"){
+        exclude(group = "org.json", module = "json")
+    }
+    implementation("org.json:json:20231013")
 }
 
 kapt {
