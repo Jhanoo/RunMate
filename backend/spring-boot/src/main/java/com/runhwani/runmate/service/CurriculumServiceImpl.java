@@ -169,7 +169,7 @@ public class CurriculumServiceImpl implements CurriculumService {
                 .append("목표 날짜: ").append(goalDate.format(fmt)).append("\n")
                 .append("훈련 시작 날짜: ").append(startDate.format(fmt)).append("\n")
                 .append("마라톤 경험 유무: ").append(req.isRunExp() ? "있음" : "없음").append("\n")
-                .append("현재 달릴 수 있는 최대 거리: ").append(req.getDistExp()).append("\n")
+                .append("달릴 수 있는 거리: ").append(req.getDistExp()).append("\n")
                 .append("일주일 달리기 빈도: ").append(req.getFreqExp()).append("\n\n");
 
         // (C) 최근 1달 기록
