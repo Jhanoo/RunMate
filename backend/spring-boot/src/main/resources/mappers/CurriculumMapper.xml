@@ -99,9 +99,16 @@
     <update id="updateTodoDone" parameterType="java.util.UUID">
         UPDATE todos
         SET is_done = TRUE
+        WHERE todo_id = #{todoId}
+    </update>
+
+    <select id="selectTodayTodoByUserId" resultMap="TodoResultMap" parameterType="java.util.UUID">
+        SELECT *
+        FROM todos
         WHERE date::date = CURRENT_DATE
           AND user_id = #{userId}
           AND is_done = FALSE
-    </update>
+        LIMIT 1
+    </select>
 
 </mapper>

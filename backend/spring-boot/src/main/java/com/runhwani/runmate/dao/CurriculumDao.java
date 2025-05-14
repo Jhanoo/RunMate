@@ -65,7 +65,14 @@ public interface CurriculumDao {
     /**
      * Todo의 isDone을 true로 갱신
      *
+     * @param todoId todo ID
+     */
+    void updateTodoDone(UUID todoId);
+
+    /**
+     * 해당 유저의 오늘자 Todo 조회
+     *
      * @param userId 유저 ID
      */
-    void updateTodoDone(UUID userId);
+    Todo selectTodayTodoByUserId(UUID userId);
 }
