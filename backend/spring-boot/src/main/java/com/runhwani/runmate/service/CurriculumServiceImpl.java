@@ -91,7 +91,7 @@ public class CurriculumServiceImpl implements CurriculumService {
         // 7) Todo 저장
         schedule.forEach((date, content) -> {
             // content가 "<숫자>km"로 시작하면 isDone=false, 아니면 null
-            Boolean isDoneVal = content.matches("^\\d+km.*") ? false : null;
+            Boolean isDoneVal = content.matches("^\\d+(?:\\.\\d+)?km.*") ? false : null;
 
             Todo todo = Todo.builder()
                     .todoId(UUID.randomUUID())

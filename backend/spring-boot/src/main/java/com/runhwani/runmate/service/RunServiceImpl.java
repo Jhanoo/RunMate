@@ -4,6 +4,7 @@ import com.runhwani.runmate.dao.CurriculumDao;
 import com.runhwani.runmate.dao.HistoryDao;
 import com.runhwani.runmate.dto.request.run.RunEndRequest;
 import com.runhwani.runmate.model.History;
+import com.runhwani.runmate.model.Todo;
 import com.runhwani.runmate.utils.GpxStorageUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,8 @@ import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +53,18 @@ public class RunServiceImpl implements RunService {
 
         historyDao.insert(history);
 
-        curriculumDao.updateTodoDone(userId);
+        Todo todo = curriculumDao.selectTodayTodoByUserId(userId);
+        if (todo != null) {
+            Pattern p = Pattern.compile("^([0-9]+(?:\\.[0-9]+)?)km.*");
+            Matcher m = p.matcher(todo.getContent());
+
+            if (m.find()) {
+                double todoDist = Double.parseDouble(m.group(1));
+
+                if (todoDist * 0.95 <= history.getDistance()) {
+                    curriculumDao.updateTodoDone(todo.getTodoId());
+                }
+            }
+        }
     }
 }
