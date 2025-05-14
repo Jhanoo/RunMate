@@ -3,15 +3,21 @@ package com.D107.runmate.presentation.group.view
 import android.app.DatePickerDialog
 import android.os.Build
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.widget.EditText
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentGroupCreateBinding
+import com.D107.runmate.presentation.group.viewmodel.GroupUiEvent
 import com.D107.runmate.presentation.group.viewmodel.GroupCreateViewModel
+import com.D107.runmate.presentation.utils.CommonUtils
 import com.ssafy.locket.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -34,19 +40,72 @@ class GroupCreateFragment : BaseFragment<FragmentGroupCreateBinding>(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setClickListener()
+        updateUI()
+        setListener()
         observeViewModel()
+    }
+
+    private fun updateUI() {
+        binding.etGroupName.setText(viewModel.groupName.value)
+        binding.etLocation.setText(viewModel.selectedPlace.value?.address?:"")
+        binding.etDate.setText(CommonUtils.formatIsoDateToCustom((viewModel.selectedDate.value.toString())))
+
     }
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.selectedPlace.collect{place->
-                binding.etLocation.setText(place?.name)
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                launch {
+                    viewModel.groupName.collect { name ->
+                        if (binding.etGroupName.text.toString() != name) {
+                            binding.etGroupName.setText(name)
+                            binding.etGroupName.setSelection(name.length) // 커서를 텍스트 끝으로 이동
+                        }
+                    }
+                }
+
+                launch {
+                    viewModel.selectedPlace.collect { place ->
+                        binding.etLocation.setText(place?.address)
+                    }
+                }
+
+                launch {
+                    viewModel.selectedDate.collect { date ->
+                        if (date != null) {
+                            val formattedDate = date.format(formatter)
+                            if (binding.etDate.text.toString() != formattedDate) {
+                                binding.etDate.setText(formattedDate)
+                            }
+                        } else {
+                            binding.etDate.setText("") // 날짜가 선택되지 않았으면 비움
+                        }
+                    }
+                }
+
+                launch {
+                    viewModel.uiEvent.collect { event ->
+                        when (event) {
+                            is GroupUiEvent.CreationSuccess -> {
+                                findNavController().popBackStack()
+                            }
+
+                            is GroupUiEvent.ShowToast -> {
+                                showToast(event.message)
+                            }
+                            else -> {}
+
+                        }
+                    }
+                }
+
             }
         }
+
     }
 
-    private fun setClickListener() {
+    private fun setListener() {
         binding.toolbarGroupCreate.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
@@ -60,6 +119,15 @@ class GroupCreateFragment : BaseFragment<FragmentGroupCreateBinding>(
             viewModel.createGroup()
             findNavController().popBackStack()
         }
+        binding.etGroupName.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                viewModel.onGroupNameChanged(s.toString())
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
 
     }
 
@@ -86,8 +154,6 @@ class GroupCreateFragment : BaseFragment<FragmentGroupCreateBinding>(
                 val selectedLocalDate = LocalDate.of(selectedYear, selectedMonth + 1, selectedDayOfMonth)
                 val selectedDateTime = selectedLocalDate.atStartOfDay(ZoneId.systemDefault()).toOffsetDateTime()
 
-                dateEditText.setText(selectedDateTime.format(formatter))
-
                 viewModel.selectDate(selectedDateTime)
 
 
@@ -108,6 +174,10 @@ class GroupCreateFragment : BaseFragment<FragmentGroupCreateBinding>(
         datePickerDialog.show()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+
+    }
 
 
 

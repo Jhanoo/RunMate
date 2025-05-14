@@ -8,6 +8,7 @@ import com.D107.runmate.data.remote.datasource.group.GroupDataSource
 import com.D107.runmate.data.remote.datasource.group.GroupDataSourceImpl
 import com.D107.runmate.data.remote.datasource.group.KakaoLocalDataSource
 import com.D107.runmate.data.remote.datasource.group.KakaoLocalDataSourceImpl
+import com.D107.runmate.data.remote.datasource.socket.SocketService
 import com.D107.runmate.data.remote.datasource.user.AuthDataSource
 import com.D107.runmate.data.remote.datasource.user.AuthDataSourceImpl
 import com.squareup.moshi.Moshi
@@ -16,6 +17,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
 import javax.inject.Singleton
 
 @Module
@@ -42,4 +44,12 @@ object RemoteDataSourceModule {
     ): AuthDataSource {
         return AuthDataSourceImpl(userService, moshi, context)
     }
+
+    @Provides
+    @Singleton
+    fun provideSocketService(): SocketService {
+        return SocketService()
+    }
+
+
 }

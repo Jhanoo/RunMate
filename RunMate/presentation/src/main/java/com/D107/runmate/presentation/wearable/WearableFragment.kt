@@ -329,7 +329,7 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
 
 
             binding.tvDiagnosisDateInsole.text = formatTimestampToKoreanDate(result.timestamp?:0L)
-
+            binding.tvDiagnosisDateInsole.visibility = View.VISIBLE
             if (forefootPercent > maxPercent) {
                 maxPercent = forefootPercent
                 strikeType = FootStrikeType.FOREFOOT
@@ -360,21 +360,24 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
                 FootStrikeType.UNKNOWN -> R.drawable.img_no_insole
             }
             val footStringDescription = when(strikeType){
-                FootStrikeType.REARFOOT -> getString(R.string.rearfoot_strike_description)
-                FootStrikeType.MIDFOOT -> getString(R.string.midfoot_strike_description)
-                FootStrikeType.FOREFOOT -> getString(R.string.forefoot_strike_description)
-                FootStrikeType.UNKNOWN -> getString(R.string.unknown_strike_description)
+                FootStrikeType.REARFOOT -> getText(R.string.rearfoot_strike_description)
+                FootStrikeType.MIDFOOT -> getText(R.string.midfoot_strike_description)
+                FootStrikeType.FOREFOOT -> getText(R.string.forefoot_strike_description)
+                FootStrikeType.UNKNOWN -> getText(R.string.unknown_strike_description)
             }
 
 
             binding.tvFootstrikeDescriptionInsole.text = footStringDescription
             binding.ivFootstrikeInsole.setImageResource(footstrikeImageResource)
+            binding.btnDiagnoseInsole.visibility = View.VISIBLE
 
         } else {
             // 결과 없음 또는 유효하지 않음
             binding.layoutAnalysisResultsInsole.visibility = View.GONE
             binding.layoutNoDiagnosisInsole.visibility = View.VISIBLE
             binding.btnDiagnoseNoResultsInsole.visibility = View.VISIBLE // 결과 없음 화면의 버튼 표시
+            binding.btnDiagnoseInsole.visibility = View.GONE
+            binding.tvDiagnosisDateInsole.visibility = View.GONE
 
             // 인솔 연결 상태에 따라 추가 메시지 표시
             binding.tvConnectInsoleMessageInsole.visibility = if (viewModel.connectionState.value != InsoleConnectionState.FULLY_CONNECTED) {

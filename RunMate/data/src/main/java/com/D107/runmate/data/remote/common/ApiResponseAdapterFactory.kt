@@ -22,7 +22,7 @@ class ApiResponseAdapterFactory : JsonAdapter.Factory {
         return ApiResponseAdapter(dataAdapter, errorAdapter)
     }
 
-    private class ApiResponseAdapter<T : Any>(
+    private class ApiResponseAdapter<T>(
         private val dataAdapter: JsonAdapter<T>,
         private val errorAdapter: JsonAdapter<ErrorResponse>
     ) : JsonAdapter<ApiResponse<T>>() {
@@ -35,12 +35,11 @@ class ApiResponseAdapterFactory : JsonAdapter.Factory {
                 throw JsonDataException("Expected a JSON object for ApiResponse at ${reader.path}")
             }
 
-            // 'data' 필드가 있는지 확인
-            if (jsonValue.containsKey("data") && jsonValue["data"] != null) {
-                val data = dataAdapter.fromJsonValue(jsonValue["data"])
-                if (data != null) {
-                    return ApiResponse.Success(data)
-                }
+            if (jsonValue.containsKey("data")) {
+                val dataJsonElement = jsonValue["data"]
+                val data = dataAdapter.fromJsonValue(dataJsonElement)
+                @Suppress("UNCHECKED_CAST")
+                return ApiResponse.Success(data as T)
             }
 
             // 'error' 필드가 있는지 확인
