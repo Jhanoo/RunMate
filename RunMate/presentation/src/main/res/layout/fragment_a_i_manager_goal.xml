@@ -4,24 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingHorizontal="26dp"
     tools:context=".manager.view.AIManagerFragment">
 
-    <TextView
-        android:id="@+id/tv_title"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar_goal_title"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
         android:fontFamily="@font/pretendard_medium"
-        android:gravity="center"
-        android:letterSpacing="-0.02"
-        android:text="목표 설정하기"
-        android:textColor="@color/text"
-        android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="MissingConstraints" />
+        app:navigationIcon="@drawable/ic_back"
+        app:title="목표 설정하기"
+        app:titleCentered="true"
+        app:titleTextAppearance="@style/ToolbarTitleFont"
+        app:titleTextColor="@android:color/black" />
 
     <!-- 목표 마라톤 선택 -->
     <TextView
@@ -30,12 +27,13 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:fontFamily="@font/pretendard_medium"
+        android:paddingHorizontal="26dp"
         android:text="목표 마라톤이 있습니까?"
         android:textColor="@color/text"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_title" />
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_goal_title" />
 
     <RelativeLayout
         android:id="@+id/marathon_layout"
@@ -51,6 +49,8 @@
             android:layout_height="wrap_content"
             android:background="@android:color/darker_gray"
             android:backgroundTint="#F5F5F5"
+            android:layout_marginLeft="26dp"
+            android:layout_marginRight="26dp"
             android:clickable="true"
             android:focusable="false"
             android:hint="달려라하니 마라톤"
@@ -74,6 +74,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:fontFamily="@font/pretendard_medium"
+        android:paddingHorizontal="26dp"
         android:text="목표하는 날짜가 있습니까?"
         android:textColor="@color/text"
         android:textSize="16sp"
@@ -93,6 +94,8 @@
             android:id="@+id/et_target_date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="26dp"
+            android:layout_marginRight="26dp"
             android:background="@android:color/darker_gray"
             android:backgroundTint="#F5F5F5"
             android:clickable="true"
@@ -119,6 +122,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:fontFamily="@font/pretendard_medium"
+        android:paddingHorizontal="26dp"
         android:text="마라톤 목표를 설정해주세요"
         android:textColor="@color/text"
         android:textSize="16sp"
@@ -133,6 +137,8 @@
         android:layout_marginTop="16dp"
         android:orientation="horizontal"
         android:gravity="center"
+        android:layout_marginLeft="26dp"
+        android:layout_marginRight="26dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_goal_setting">
@@ -142,6 +148,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+
             android:background="@drawable/radio_selector"
             android:button="@null"
             android:gravity="center"
@@ -198,6 +205,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp"
+        android:layout_marginLeft="26dp"
+        android:layout_marginRight="26dp"
         android:background="@drawable/bg_all_btn_short"
         android:text="설정하기"
         android:textStyle="bold"

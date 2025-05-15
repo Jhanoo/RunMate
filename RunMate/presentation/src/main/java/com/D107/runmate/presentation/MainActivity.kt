@@ -190,7 +190,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                 R.id.drawer_manager -> {
                     binding.navView.menu.findItem(R.id.drawer_manager).isChecked = true
                     navController.navigate(
-                        R.id.AIManagerIntroFragment,
+                        R.id.AIManagerLoadingFragment,
                         null,
                         navigateOptions
                     )

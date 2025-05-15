@@ -4,24 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingHorizontal="26dp"
     tools:context=".manager.view.AIManagerFragment">
 
-    <TextView
-        android:id="@+id/tv_title"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar_exp_title"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
         android:fontFamily="@font/pretendard_medium"
-        android:gravity="center"
-        android:letterSpacing="-0.02"
-        android:text="목표 설정하기"
-        android:textColor="@color/text"
-        android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="MissingConstraints" />
+        app:navigationIcon="@drawable/ic_back"
+        app:title="목표 설정하기"
+        app:titleCentered="true"
+        app:titleTextAppearance="@style/ToolbarTitleFont"
+        app:titleTextColor="@android:color/black" />
 
     <!-- 마라톤 경험 체크박스 -->
     <TextView
@@ -29,18 +26,20 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
+        android:layout_marginLeft="26dp"
         android:fontFamily="@font/pretendard_medium"
         android:text="마라톤 경험이 있습니까?"
         android:textColor="@color/text"
         android:textSize="16sp"
         app:layout_constraintEnd_toStartOf="@+id/cb_marathon_experience"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_title" />
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_exp_title" />
 
     <CheckBox
         android:id="@+id/cb_marathon_experience"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginRight="26dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/tv_marathon_experience"
         app:layout_constraintBottom_toBottomOf="@+id/tv_marathon_experience" />
@@ -49,6 +48,7 @@
     <TextView
         android:id="@+id/tv_weekly_runs"
         android:layout_width="0dp"
+        android:paddingHorizontal="26dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:fontFamily="@font/pretendard_medium"
@@ -62,6 +62,7 @@
     <RadioGroup
         android:id="@+id/rg_weekly_runs"
         android:layout_width="0dp"
+        android:paddingHorizontal="26dp"
         android:layout_height="32dp"
         android:layout_marginTop="16dp"
         android:orientation="horizontal"
@@ -127,6 +128,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:fontFamily="@font/pretendard_medium"
+        android:paddingHorizontal="26dp"
         android:text="현재 편안하게 달릴 수 있는 최대 거리는 얼마인가요?"
         android:textColor="@color/text"
         android:textSize="16sp"
@@ -138,6 +140,7 @@
     <RadioGroup
         android:id="@+id/rg_max_distance"
         android:layout_width="0dp"
+        android:paddingHorizontal="26dp"
         android:layout_height="32dp"
         android:layout_marginTop="16dp"
         android:orientation="horizontal"
@@ -200,6 +203,8 @@
         android:id="@+id/btn_confirm_exp"
         style="@style/GreenButtonStyle"
         android:layout_width="0dp"
+        android:layout_marginLeft="26dp"
+        android:layout_marginRight="26dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp"

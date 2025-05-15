@@ -1,14 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".manager.view.AIManagerLoadingFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar_manager_title"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="?attr/actionBarSize"
+        android:fontFamily="@font/pretendard_medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@drawable/ic_back"
+        app:title="AI매니저"
+        app:titleCentered="true"
+        app:titleTextAppearance="@style/ToolbarTitleFont"
+        app:titleTextColor="@android:color/black" />
 
-</FrameLayout>
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_view_loading"
+        android:layout_width="248dp"
+        android:layout_height="248dp"
+        android:backgroundTint="@color/black"
+        app:cardCornerRadius="124dp"
+        app:cardElevation="0dp"
+        android:layout_marginTop="150dp"
+        app:layout_constraintBottom_toTopOf="@+id/loading_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_manager_title"
+        app:layout_constraintVertical_bias="0.5">
+
+        <ImageView
+            android:id="@+id/manager_loading"
+            android:layout_width="wrap_content"
+            android:layout_height="248dp"
+            android:contentDescription="Loading animation"
+            android:scaleType="matrix" />
+
+    </androidx.cardview.widget.CardView>
+
+    <ImageView
+        android:layout_width="248dp"
+        android:layout_height="30dp"
+
+        android:adjustViewBounds="true"
+        android:translationY="-30dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/card_view_loading"
+        android:background="@color/white"/>
+
+    <ImageView
+        android:id="@+id/gifTonie"
+        android:layout_width="350dp"
+        android:layout_height="350dp"
+        android:adjustViewBounds="true"
+        android:translationY="-34dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_manager_title"
+        app:layout_constraintTop_toTopOf="@+id/card_view_loading"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/loading_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="AI 러닝 플랜이 생성중입니다.."
+        app:layout_constraintTop_toBottomOf="@+id/card_view_loading"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
