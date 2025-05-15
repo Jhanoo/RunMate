@@ -76,7 +76,6 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        runningEndViewModel.deleteFile()
         if (mainViewModel.userLocation.value is UserLocationState.Initial) {
             viewLifecycleOwner.lifecycleScope.launch {
                 mContext?.let {
@@ -160,6 +159,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                             mContext?.let {
                                 (getActivityContext(it) as MainActivity).showHamburgerBtn()
                             }
+                            runningEndViewModel.deleteFile()
                         }
 
                         TrackingStatus.PAUSED -> {
@@ -355,7 +355,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                 mContext?.let {
                     (getActivityContext(it) as MainActivity).showHamburgerBtn()
                 }
-
+                runningEndViewModel.deleteFile()
             }
 
             TrackingStatus.PAUSED -> {

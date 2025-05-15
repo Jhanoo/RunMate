@@ -21,7 +21,5 @@ data class GroupJoinResponse (
                 groupName = groupName
             )
         }
-
-
     }
 }

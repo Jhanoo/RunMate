@@ -6,7 +6,7 @@ import com.D107.runmate.data.repository.GroupRepositoryImpl
 import com.D107.runmate.data.repository.KakaoApiRepositoryImpl
 import com.D107.runmate.domain.repository.DataStoreRepository
 import com.D107.runmate.domain.repository.KakaoApiRepository
-import android.content.Context
+import com.D107.runmate.data.repository.CourseRepositoryImpl
 import com.D107.runmate.data.repository.RunningTrackingRepositoryImpl
 import com.D107.runmate.domain.repository.running.RunningTrackingRepository
 import com.D107.runmate.data.repository.SmartInsoleRepositoryImpl
@@ -18,9 +18,9 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import com.D107.runmate.domain.repository.running.RunningRepository
 import com.D107.runmate.data.repository.RunningRepositoryImpl
+import com.D107.runmate.domain.repository.course.CourseRepository
 import com.D107.runmate.domain.repository.group.GroupRepository
 import com.D107.runmate.domain.repository.socket.SocketRepository
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -67,4 +67,10 @@ internal abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindSocketRepository(impl: SocketRepositoryImpl): SocketRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindCourseRepository(
+        courseRepositoryImpl: CourseRepositoryImpl
+    ): CourseRepository
 }

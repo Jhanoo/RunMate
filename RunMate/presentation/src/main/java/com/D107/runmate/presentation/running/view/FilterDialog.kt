@@ -3,12 +3,10 @@ package com.D107.runmate.presentation.running.view
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.NumberPicker
 import androidx.fragment.app.DialogFragment
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.DialogFilterBinding
@@ -17,7 +15,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 
 @AndroidEntryPoint
-class FilterDialog(private val setting: List<Int>, private val callback: (List<Int>) -> Unit): DialogFragment() {
+class FilterDialog(private val setting: List<Int?>, private val callback: (List<Int?>) -> Unit): DialogFragment() {
     private var mContext: Context? = null
     private lateinit var binding: DialogFilterBinding
     private val buttons by lazy {
@@ -99,7 +97,7 @@ class FilterDialog(private val setting: List<Int>, private val callback: (List<I
             button.setOnClickListener {
                 if (button.isSelected) {
                     button.isSelected = false
-                    selectedKm = -1
+                    selectedKm = null
                     button.setBackgroundResource(R.drawable.bg_course_distance_item)
                     button.setTextColor(resources.getColor(R.color.text))
                 } else {
@@ -127,7 +125,7 @@ class FilterDialog(private val setting: List<Int>, private val callback: (List<I
         }
 
         binding.btnConfirmShort.setOnClickListener {
-            val list = listOf<Int>(selectedKm, isLiked)
+            val list = listOf<Int?>(selectedKm, isLiked)
             callback(list)
             dialog?.dismiss()
         }
@@ -137,7 +135,7 @@ class FilterDialog(private val setting: List<Int>, private val callback: (List<I
         }
 
         binding.btnReset.setOnClickListener {
-            callback(listOf(-1, 0))
+            callback(listOf(null, null))
             dialog?.dismiss()
         }
     }

@@ -18,8 +18,10 @@ import com.D107.runmate.presentation.utils.CommonUtils.getActivityContext
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.ssafy.locket.presentation.base.BaseFragment
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class CourseSettingFragment : BaseFragment<FragmentCourseSettingBinding>(
     FragmentCourseSettingBinding::bind,
     R.layout.fragment_course_setting

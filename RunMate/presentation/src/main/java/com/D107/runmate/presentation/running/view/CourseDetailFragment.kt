@@ -2,10 +2,12 @@ package com.D107.runmate.presentation.running.view
 
 import android.os.Bundle
 import android.view.View
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentCourseDetailBinding
+import com.D107.runmate.presentation.running.CourseViewModel
 import com.D107.runmate.presentation.utils.KakaoMapUtil.addCourseLine
 import com.D107.runmate.presentation.utils.LocationUtils
 import com.kakao.vectormap.KakaoMap
@@ -21,6 +23,7 @@ class CourseDetailFragment : BaseFragment<FragmentCourseDetailBinding>(
 ) {
     private var kakaoMap: KakaoMap? = null
 //    private val mainViewModel: MainViewModel by activityViewModels()
+    private val courseViewModel: CourseViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

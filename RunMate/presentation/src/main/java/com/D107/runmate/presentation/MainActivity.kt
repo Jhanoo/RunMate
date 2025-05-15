@@ -363,27 +363,24 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
 
     fun showHamburgerBtn() {
         binding.btnMenu.visibility = View.VISIBLE
-        fun showHamburgerBtn() {
-            binding.btnMenu.visibility = View.VISIBLE
-        }
+    }
 
-        fun getKeyHash() {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                val packageInfo = this.packageManager.getPackageInfo(
-                    this.packageName,
-                    PackageManager.GET_SIGNING_CERTIFICATES
-                )
-                for (signature in packageInfo.signingInfo!!.apkContentsSigners) {
-                    try {
-                        val md = MessageDigest.getInstance("SHA")
-                        md.update(signature.toByteArray())
-                        Log.d(
-                            "getKeyHash",
-                            "key hash: ${Base64.encodeToString(md.digest(), Base64.NO_WRAP)}"
-                        )
-                    } catch (e: NoSuchAlgorithmException) {
-                        Log.w("getKeyHash", "Unable to get MessageDigest. signature=$signature", e)
-                    }
+    fun getKeyHash() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val packageInfo = this.packageManager.getPackageInfo(
+                this.packageName,
+                PackageManager.GET_SIGNING_CERTIFICATES
+            )
+            for (signature in packageInfo.signingInfo!!.apkContentsSigners) {
+                try {
+                    val md = MessageDigest.getInstance("SHA")
+                    md.update(signature.toByteArray())
+                    Log.d(
+                        "getKeyHash",
+                        "key hash: ${Base64.encodeToString(md.digest(), Base64.NO_WRAP)}"
+                    )
+                } catch (e: NoSuchAlgorithmException) {
+                    Log.w("getKeyHash", "Unable to get MessageDigest. signature=$signature", e)
                 }
             }
         }

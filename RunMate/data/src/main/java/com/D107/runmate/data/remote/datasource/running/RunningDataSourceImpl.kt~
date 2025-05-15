@@ -20,6 +20,7 @@ class RunningDataSourceImpl @Inject constructor(
     override suspend fun endRunning(request: FinishRunningRequest): ApiResponse<Any> {
         val fileName = "running_tracking.gpx"
         val file = File(context.filesDir, fileName)
+//        val file = context.assets.open("test_3.gpx")
         if (!file.exists()) {
             return ApiResponse.Error(
                 ErrorResponse(

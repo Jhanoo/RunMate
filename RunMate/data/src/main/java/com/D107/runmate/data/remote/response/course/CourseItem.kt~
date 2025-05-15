@@ -1,4 +1,4 @@
-package com.D107.runmate.domain.model.running
+package com.D107.runmate.data.remote.response.course
 
 import com.D107.runmate.domain.model.base.BaseModel
 
@@ -9,8 +9,7 @@ data class CourseInfo(
     val creator: Creator,
     val distance: Double,
     val likeCount: Int,
-    val shared: Boolean,
     val liked: Boolean,
+    val shared: Boolean,
     val startLocation: String
-) : BaseModel
-
+): BaseModel

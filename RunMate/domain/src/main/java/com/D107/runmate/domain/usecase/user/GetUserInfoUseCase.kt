@@ -1,4 +1,4 @@
-package com.D107.runmate.domain.usecase
+package com.D107.runmate.domain.usecase.user
 
 import com.D107.runmate.domain.repository.DataStoreRepository
 import javax.inject.Inject

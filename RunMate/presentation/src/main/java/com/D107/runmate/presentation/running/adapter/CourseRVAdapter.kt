@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.D107.runmate.domain.model.running.CourseInfo
+import com.D107.runmate.domain.model.course.CourseInfo
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.ItemCourseBinding
 import com.bumptech.glide.Glide
