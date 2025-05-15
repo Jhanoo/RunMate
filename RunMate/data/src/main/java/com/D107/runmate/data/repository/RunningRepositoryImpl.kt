@@ -3,10 +3,12 @@ package com.D107.runmate.data.repository
 import com.D107.runmate.data.remote.common.ApiResponse
 import com.D107.runmate.data.remote.datasource.running.RunningDataSource
 import com.D107.runmate.data.remote.request.FinishRunningRequest
+import com.D107.runmate.data.remote.response.EndRunningResponse.Companion.toDomainModel
 import com.D107.runmate.data.remote.response.user.LoginResponse.Companion.toDomainModel
 import com.D107.runmate.data.utils.GpxWriter
 import com.D107.runmate.domain.model.base.NetworkError
 import com.D107.runmate.domain.model.base.ResponseStatus
+import com.D107.runmate.domain.model.running.EndRunning
 import com.D107.runmate.domain.repository.running.RunningRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -28,7 +30,7 @@ internal class RunningRepositoryImpl @Inject constructor(
         endTime: String,
         startLocation: String,
         startTime: String
-    ): Flow<ResponseStatus<Unit>> = flow {
+    ): Flow<ResponseStatus<EndRunning>> = flow {
         try {
           when (val response = runningDataSource.endRunning(
                 FinishRunningRequest(
@@ -46,7 +48,7 @@ internal class RunningRepositoryImpl @Inject constructor(
             )) {
                 is ApiResponse.Success -> {
                     Timber.d("response success: $response")
-                    emit(ResponseStatus.Success(Unit))
+                    emit(ResponseStatus.Success(response.data.toDomainModel()))
                 }
                 is ApiResponse.Error -> {
                     Timber.d("response error: ${response.error.message}")

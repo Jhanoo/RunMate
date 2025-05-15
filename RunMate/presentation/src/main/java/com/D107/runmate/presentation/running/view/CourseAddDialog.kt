@@ -14,7 +14,7 @@ import com.D107.runmate.presentation.utils.CommonUtils
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class CourseAddDialog(): DialogFragment() {
+class CourseAddDialog(private val callback: (Pair<String, Boolean>) -> Unit): DialogFragment() {
     private var mContext: Context? = null
     private lateinit var binding: DialogCourseAddBinding
 
@@ -60,5 +60,15 @@ class CourseAddDialog(): DialogFragment() {
             dialog?.dismiss()
         }
 
+        binding.btnAdd.setOnClickListener {
+            // TODO 코스 생성
+            callback(
+                Pair(
+                    if(binding.etCourseName.text.toString().isEmpty()) "Untitled" else
+                binding.etCourseName.text.toString(),
+                binding.cbCourseShare.isChecked)
+            )
+            dialog?.dismiss()
+        }
     }
 }

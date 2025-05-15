@@ -14,14 +14,12 @@ import com.D107.runmate.domain.model.running.UserLocationState
 import com.D107.runmate.presentation.MainViewModel
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentRunningEndBinding
-import com.D107.runmate.presentation.running.Coord2AddressState
-import com.D107.runmate.presentation.running.RunningEndState
+import com.D107.runmate.presentation.running.CourseViewModel
 import com.D107.runmate.presentation.running.RunningEndViewModel
-import com.D107.runmate.presentation.utils.CommonUtils.convertDateTime
+import com.D107.runmate.presentation.utils.CommonUtils.dateformatMMdd
 import com.D107.runmate.presentation.utils.CommonUtils.getGpxInputStream
 import com.D107.runmate.presentation.utils.GpxParser.parseGpx
 import com.D107.runmate.presentation.utils.KakaoMapUtil.addCourseLine
-import com.D107.runmate.presentation.utils.LocationUtils
 import com.D107.runmate.presentation.utils.LocationUtils.getPaceFromSpeed
 import com.kakao.vectormap.KakaoMap
 import com.kakao.vectormap.KakaoMapReadyCallback
@@ -45,6 +43,7 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
     private var kakaoMap: KakaoMap? = null
     private val mainViewModel: MainViewModel by activityViewModels()
     private val runningEndViewModel: RunningEndViewModel by viewModels()
+    private val courseViewModel: CourseViewModel by viewModels()
     private lateinit var dialog: CourseAddDialog
     private var mContext: Context? = null
 
@@ -66,6 +65,7 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
                     val time = mainViewModel.time.value
                     val lastRecord = it.runningRecords.last()
                     val firstRecord = it.runningRecords.first()
+                    val startLocation = mainViewModel.userLocation.value
                     binding.tvDistance.text = getString(R.string.course_distance, lastRecord.distance)
                     binding.tvDateGroupInfo.text = getString(R.string.running_date, firstRecord.currentTime, lastRecord.currentTime)
                     binding.tvTime.text = getString(R.string.running_time, time / 60, time % 60)
@@ -74,6 +74,10 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
                     binding.tvCadence.text = getString(R.string.running_avg_cadence, lastRecord.cadenceSum / it.runningRecords.size)
                     binding.tvAltitude.text = getString(R.string.running_avg_altitude, lastRecord.altitudeSum / it.runningRecords.size)
                     binding.tvCalorie.text = "0" // TODO 삼성헬스 연결하여 데이터 수정
+
+                    if(startLocation is UserLocationState.Exist) {
+                        courseViewModel.getAddressFromLatLng(startLocation.locations.last().longitude, startLocation.locations.last().latitude)
+                    }
                 }
             }
         }
@@ -83,6 +87,8 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
         binding.btnNext.setOnClickListener {
             runningEndViewModel.deleteFile()
             mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
+            // TODO 사용자 좋아요 여부 업데이트 api 요청하기 --> 초기값과 달라졌을 때만 요청하기?
+            mainViewModel.resetHistoryId()
             findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
         }
 
@@ -91,7 +97,21 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
         }
 
         binding.btnAddCourse.setOnClickListener {
-            dialog = CourseAddDialog()
+            dialog = CourseAddDialog() {
+                Timber.d("pair ${it.first} ${it.second}")
+                val record = mainViewModel.runningRecord.value
+                if(record is RunningRecordState.Exist) {
+                    val lastRecord = record.runningRecords.last()
+
+                    var name: String = "${mainViewModel.nickname} ${dateformatMMdd(record.runningRecords.first().currentTime)}"
+
+                    if(it.first.isNotEmpty()) {
+                        name = it.first
+                    }
+                    courseViewModel.createCourse(lastRecord.altitudeSum/mainViewModel.recordSize.value, lastRecord.distance,
+                        mainViewModel.historyId.value!!, name, it.second, courseViewModel.address.value!!)
+                }
+            }
             dialog.show(requireActivity().supportFragmentManager, "course_add")
         }
         
@@ -102,6 +122,7 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
             // TODO 사용자가 처음 좋아요하는 경우
             binding.ivLike.setImageResource(R.drawable.ic_course_like)
 
+            // TODO 좋아요 업데이트 함수 호출하기
         }
     }
 

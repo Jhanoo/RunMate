@@ -76,6 +76,7 @@ class MainViewModel @Inject constructor(
     val time = repository.time
     val recordSize = repository.recordSize
     val trackingStatus = repository.trackingStatus
+    val historyId = repository.historyId
 
     fun setUserLocation(state: UserLocationState) {
         if (state is UserLocationState.Exist) {
@@ -85,6 +86,10 @@ class MainViewModel @Inject constructor(
 
     fun setTrackingStatus(status: TrackingStatus) {
         repository.setTrackingStatus(status)
+    }
+
+    fun resetHistoryId() {
+        repository.setHistoryId(null)
     }
 
     fun setCourseId(id: String?) {

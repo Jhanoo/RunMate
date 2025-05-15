@@ -2,13 +2,16 @@ package com.D107.runmate.data.repository
 
 import com.D107.runmate.data.remote.common.ApiResponse
 import com.D107.runmate.data.remote.datasource.course.CourseDataSource
+import com.D107.runmate.data.remote.request.course.CreateCourseRequest
 import com.D107.runmate.data.remote.response.course.CourseDetailResponse.Companion.toDomainModel
 import com.D107.runmate.data.remote.response.course.CourseItem
 import com.D107.runmate.data.remote.response.course.CourseItemResponse.Companion.toDomainModel
+import com.D107.runmate.data.remote.response.course.CourseLikeResponse.Companion.toDomainModel
 import com.D107.runmate.domain.model.base.NetworkError
 import com.D107.runmate.domain.model.base.ResponseStatus
 import com.D107.runmate.domain.model.course.CourseDetail
 import com.D107.runmate.domain.model.course.CourseInfo
+import com.D107.runmate.domain.model.course.CourseLike
 import com.D107.runmate.domain.repository.course.CourseRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -62,8 +65,17 @@ class CourseRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateCourseLike(courseId: String): Flow<ResponseStatus<CourseInfo>> {
-        TODO("Not yet implemented")
+    override suspend fun updateCourseLike(courseId: String): Flow<ResponseStatus<CourseLike>> {
+        return flow {
+            when(val response = courseDataSource.updateCourseLike(courseId = courseId)) {
+                is ApiResponse.Error -> emit(ResponseStatus.Error(NetworkError(
+                    error = response.error.error?:"UNKNOWN_ERROR",
+                    code = response.error.code?:"UNKNOWN_CODE",
+                    status = response.error.status?:"ERROR",
+                    message = response.error.message?:"코스 좋아요 업데이트에 실패했습니다")))
+                is ApiResponse.Success -> emit(ResponseStatus.Success(response.data.toDomainModel()))
+            }
+        }
     }
 
     override suspend fun deleteCourse(courseId: String): Flow<ResponseStatus<Any?>> {
@@ -101,4 +113,26 @@ class CourseRepositoryImpl @Inject constructor(
             }
         }
     }
+
+    override suspend fun createCourse(
+        avgElevation: Double,
+        distance: Float,
+        historyId: String,
+        name: String,
+        shared: Boolean,
+        startLocation: String
+    ): Flow<ResponseStatus<String>> {
+        return flow {
+            val request = CreateCourseRequest(avgElevation, distance, historyId, name, shared, startLocation)
+            when(val response = courseDataSource.createCourse(request)) {
+                is ApiResponse.Error -> emit(ResponseStatus.Error(NetworkError(
+                    error = response.error.error?:"UNKNOWN_ERROR",
+                    code = response.error.code?:"UNKNOWN_CODE",
+                    status = response.error.status?:"ERROR",
+                    message = response.error.message?:"코스 생성에 실패했습니다")))
+                is ApiResponse.Success -> emit(ResponseStatus.Success(response.data.courseId))
+            }
+        }
+    }
+
 }

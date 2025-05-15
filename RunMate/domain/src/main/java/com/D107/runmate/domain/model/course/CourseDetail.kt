@@ -4,7 +4,7 @@ import com.D107.runmate.domain.model.base.BaseModel
 
 data class CourseDetail(
     val avgElevation: Double,
-    val avgEstimatedTime: Int,
+    val avgEstimatedTime: Int?,
     val distance: Double,
     val gpxFile: String,
     val id: String,
@@ -13,5 +13,5 @@ data class CourseDetail(
     val name: String,
     val shared: Boolean,
     val startLocation: String,
-    val userEstimatedTime: Int
+    val userEstimatedTime: Int?
 ): BaseModel

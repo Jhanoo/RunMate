@@ -8,7 +8,7 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 data class CourseDetailResponse(
     val avgElevation: Double,
-    val avgEstimatedTime: Int,
+    val avgEstimatedTime: Int?,
     val distance: Double,
     val gpxFile: String,
     val id: String,
@@ -17,7 +17,7 @@ data class CourseDetailResponse(
     val name: String,
     val shared: Boolean,
     val startLocation: String,
-    val userEstimatedTime: Int
+    val userEstimatedTime: Int?
 ) : BaseResponse {
     companion object : DataMapper<CourseDetailResponse, CourseDetail> {
         override fun CourseDetailResponse.toDomainModel(): CourseDetail {

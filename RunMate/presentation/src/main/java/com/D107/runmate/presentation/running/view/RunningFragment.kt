@@ -52,7 +52,6 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 
-
 private const val TAG = "RunningFragment"
 
 @AndroidEntryPoint

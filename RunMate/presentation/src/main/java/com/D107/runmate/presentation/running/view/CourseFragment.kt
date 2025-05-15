@@ -8,7 +8,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.D107.runmate.domain.model.course.CourseInfo
-import com.D107.runmate.domain.model.course.Creator
 import com.D107.runmate.presentation.MainViewModel
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentCourseBinding
@@ -17,7 +16,6 @@ import com.D107.runmate.presentation.running.CourseViewModel
 import com.D107.runmate.presentation.running.adapter.CourseRVAdapter
 import com.ssafy.locket.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -45,7 +43,7 @@ class CourseFragment : BaseFragment<FragmentCourseBinding>(
                     }
 
                     is CourseSearchState.Error -> {
-                        Timber.d("getAllCourseList Error {${state.message}}")
+                        Timber.d("getMyCourse Error {${state.message}}")
                     }
 
                     CourseSearchState.Initial -> {}
@@ -61,7 +59,7 @@ class CourseFragment : BaseFragment<FragmentCourseBinding>(
                     }
 
                     is CourseSearchState.Error -> {
-                        Timber.d("getAllCourseList Error {${state.message}}")
+                        Timber.d("getRecentCourse Error {${state.message}}")
                     }
 
                     CourseSearchState.Initial -> {}

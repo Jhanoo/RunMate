@@ -73,11 +73,6 @@ class RunningTrackingService : Service() {
 
     private var isTracking = false
 
-    private val serviceJobIo = SupervisorJob()
-    private val serviceScopeIO = CoroutineScope(Dispatchers.IO + serviceJobIo)
-
-//    private val _coord2Address = MutableSharedFlow<Coord2AddressState>()
-
     private val _endRunning = MutableSharedFlow<RunningEndState>()
 
     override fun onCreate() {
@@ -119,7 +114,7 @@ class RunningTrackingService : Service() {
                     val record = repository.runningRecord.value
                     val location = repository.userLocation.value
                     val recordSize = repository.recordSize.value
-                    if (location is UserLocationState.Exist && record is RunningRecordState.Exist) {
+                    if (location is UserLocationState.Exist && record is RunningRecordState.Exist && recordSize > 0) {
                         Timber.d("coord2Address recordSize ${recordSize}")
                         val address = getAddress(
                             location.locations.first().longitude,
@@ -141,6 +136,8 @@ class RunningTrackingService : Service() {
                                 convertDateTime(record.runningRecords.first().currentTime)
                             )
                         }
+                    } else {
+                        Timber.d("기록이 없습니다 recordSize 0")
                     }
                 } else {
                     Timber.d("write fail")
@@ -153,6 +150,8 @@ class RunningTrackingService : Service() {
                 if (it is RunningEndState.Success) {
                     Timber.d("running end ! stop service")
                     repository.setTrackingStatus(TrackingStatus.PAUSED)
+                    repository.setHistoryId(it.historyId)
+                    Timber.d("historyId in service collect ${it.historyId}")
                     stopForeground(true)
                     stopSelf()
                 }
@@ -211,7 +210,7 @@ class RunningTrackingService : Service() {
                 when (status) {
                     is ResponseStatus.Success -> {
                         Timber.d("runningend success")
-                        _endRunning.emit(RunningEndState.Success)
+                        _endRunning.emit(RunningEndState.Success(status.data.historyId))
                     }
 
                     is ResponseStatus.Error -> {
@@ -303,7 +302,6 @@ class RunningTrackingService : Service() {
         if (runningJob is RunningJobState.Active) {
             (runningJob as RunningJobState.Active).job.cancel()
             runningJob = RunningJobState.None
-//            repository.setTrackingStatus(TrackingStatus.PAUSED)
             updateNotification(runningJob)
         }
     }

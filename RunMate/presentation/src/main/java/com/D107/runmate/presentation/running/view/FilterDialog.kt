@@ -115,12 +115,12 @@ class FilterDialog(private val setting: List<Int?>, private val callback: (List<
         }
 
         binding.ivCourseLike.setOnClickListener {
-            if(isLiked == 0) {
+            if(isLiked == null) {
                 binding.ivCourseLike.setImageResource(R.drawable.ic_course_like)
                 isLiked = 1
             } else {
                 binding.ivCourseLike.setImageResource(R.drawable.ic_course_like_inactive)
-                isLiked = 0
+                isLiked = null
             }
         }
 

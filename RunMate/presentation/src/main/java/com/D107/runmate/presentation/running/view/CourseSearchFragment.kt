@@ -1,23 +1,15 @@
 package com.D107.runmate.presentation.running.view
 
 import android.os.Bundle
-import android.util.Log
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.D107.runmate.domain.model.base.ResponseStatus
-import com.D107.runmate.domain.model.course.CourseFilter
 import com.D107.runmate.domain.model.course.CourseInfo
-import com.D107.runmate.domain.model.course.Creator
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentCourseSearchBinding
-import com.D107.runmate.presentation.running.CourseFilterState
 import com.D107.runmate.presentation.running.CourseSearchState
 import com.D107.runmate.presentation.running.CourseViewModel
 import com.D107.runmate.presentation.running.adapter.CourseRVAdapter
@@ -26,7 +18,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import kotlin.math.max
 
 @AndroidEntryPoint
 class CourseSearchFragment : BaseFragment<FragmentCourseSearchBinding>(
@@ -34,7 +25,7 @@ class CourseSearchFragment : BaseFragment<FragmentCourseSearchBinding>(
     R.layout.fragment_course_search
 ) {
     private lateinit var dialog: FilterDialog
-    private var setting: List<Int?> = listOf(null, null) // 첫 번째 거는 선택된 아이템의 index(선택 x는 -1), 두 번째 거는 0, 1로 bool대신 int
+    private var setting: List<Int?> = listOf(null, null) // 첫 번째 거는 선택된 아이템(거리)의 index(선택 x는 -1), 두 번째 거는 0, 1로 bool대신 int
     private lateinit var courseRVAdapter: CourseRVAdapter
     private val courseViewModel: CourseViewModel by viewModels()
     private val distanceFilterList = listOf(0.0, 5.0, 10.0, 21.097, 120.0)
@@ -44,17 +35,18 @@ class CourseSearchFragment : BaseFragment<FragmentCourseSearchBinding>(
 
         initAdapter()
 
+        binding.btnBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
+
         binding.btnFilter.setOnClickListener {
             dialog = FilterDialog(setting) { value ->
                 if (value.size != 0) {
                     Timber.d("onViewCreated: value ${value[0]} ${value[1]}")
                     val isLiked = if(value[1] == 0) false else if(value[1] == 1) true else null
 
-//                    courseViewModel.setCourseFilter(CourseFilterState.Set(CourseFilter(isLiked, maxDistance)))
                     val courseList = courseViewModel.courseList.value
                     if(courseList is CourseSearchState.Success) {
-                        // TODO isLiked가 null인 경우, liked 빼고 filter
-                        // 0이면 0초과 5.0이하, 1이면 5.0초과 10.0이하, 2이면 10.0초과 21.097이하, 3이면 21.097초과, -1이나 else면 null로 filter x
                         val minDistance = if(value[0] == null) null else distanceFilterList[value[0]!!]
                         val maxDistance = if(value[0] == null) null else if(value[0] == distanceFilterList.size-1) null else distanceFilterList[value[0]!!+1]
                         if(isLiked == null){
@@ -90,11 +82,6 @@ class CourseSearchFragment : BaseFragment<FragmentCourseSearchBinding>(
                                 )
                             }
                         }
-//                        courseRVAdapter.submitList(
-//                            courseList.courseList.filter {
-//                                it.distance <= maxDistance && it.isLiked == isLiked
-//                            }
-//                        )
                     }
 
                 } else {

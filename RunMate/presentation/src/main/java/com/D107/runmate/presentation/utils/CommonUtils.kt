@@ -41,11 +41,11 @@ object CommonUtils {
         return comma.format(num)
     }
 
-    fun dateformatYMDHMFromInt(year: Int, month: Int, day: Int): String {
-//        val format = SimpleDateFormat("yyyy.MM.dd. HH:mm", Locale.KOREA)
-//        format.timeZone = TimeZone.getTimeZone("Asia/Seoul")
-//        return format.format(time)
-        return "${year}.${month}.${day}."
+    fun dateformatMMdd(dateString: String): String {
+        val formatterInput = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        val formatterOutput = DateTimeFormatter.ofPattern("MM.dd")
+        val dateTime = LocalDateTime.parse(dateString, formatterInput)
+        return dateTime.format(formatterOutput)
     }
 
     //날짜 포맷 출력
@@ -147,6 +147,13 @@ object CommonUtils {
         val zonedDateTime = localDateTime.atZone(ZoneId.of("Asia/Seoul"))
         // ISO_OFFSET_DATE_TIME 포맷으로 출력
         return zonedDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+    }
+
+    fun formatSecondsToHMS(seconds: Int): String {
+        val hours = seconds / 3600
+        val minutes = (seconds % 3600) / 60
+        val secs = seconds % 60
+        return String.format("%02d:%02d:%02d", hours, minutes, secs)
     }
 }
 

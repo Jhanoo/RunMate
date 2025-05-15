@@ -1,15 +1,23 @@
 package com.D107.runmate.presentation.utils
 
+import android.content.Context
 import android.util.Xml
 import com.D107.runmate.domain.model.running.TrackPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import timber.log.Timber
+import java.io.File
 import java.io.IOException
 import java.io.InputStream
+import java.net.URL
 
 object GpxParser {
     fun parseGpx(inputStream: InputStream): List<TrackPoint> {
+        Timber.d("inputStream ${inputStream}")
         inputStream.use {
             val parser: XmlPullParser = Xml.newPullParser().apply {
                 setInput(it, null)
@@ -105,6 +113,25 @@ object GpxParser {
             }
             eventType = parser.next()
         }
+        Timber.d("trackPoints size ${trackPoints.size}")
         return trackPoints
+    }
+
+    suspend fun getGpxInputStream(url: String): InputStream =
+        withContext(Dispatchers.IO) {
+            val url = URL(url)
+            url.openStream()
+        }
+
+    fun downloadFile(url: String, context: Context) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val file = File(context.filesDir, "running_tracking_2.gpx")
+            val url = URL(url)
+            url.openStream().use { input ->
+                file.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+        }
     }
 }
