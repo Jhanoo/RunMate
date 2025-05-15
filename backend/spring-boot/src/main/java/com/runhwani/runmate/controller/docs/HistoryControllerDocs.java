@@ -52,7 +52,7 @@ public interface HistoryControllerDocs {
         @ApiResponse(responseCode = "200", description = "히스토리 상세 조회 성공", 
                     content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = CommonResponse.class),
-                    examples = @ExampleObject(value = "{\"message\":\"히스토리 상세 조회 성공\",\"data\":{\"historyId\":\"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\"groupRun\":[{\"userId\":\"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\"nickname\":\"alice\",\"distance\":5.0,\"time\":1800,\"avgPace\":360.0},{\"userId\":\"3fa85f64-5717-4562-b3fc-2c963f66afa7\",\"nickname\":\"bob\",\"distance\":5.0,\"time\":1900,\"avgPace\":380.0}],\"myRun\":{\"distance\":5.0,\"time\":1800,\"avgPace\":360.0,\"avgBpm\":150.0,\"calories\":300.0,\"addedToCourse\":true}}}"))),
+                    examples = @ExampleObject(value = "{\"message\":\"히스토리 상세 조회 성공\",\"data\":{\"historyId\":\"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\"gpxFile\":\"/gpx/abc123.gpx\",\"groupRun\":[{\"userId\":\"3fa85f64-5717-4562-b3fc-2c963f66afa6\",\"nickname\":\"alice\",\"distance\":5.0,\"time\":1800,\"avgPace\":360.0,\"courseLiked\":true},{\"userId\":\"3fa85f64-5717-4562-b3fc-2c963f66afa7\",\"nickname\":\"bob\",\"distance\":5.0,\"time\":1900,\"avgPace\":380.0,\"courseLiked\":false}],\"myRun\":{\"distance\":5.0,\"time\":1800,\"avgPace\":360.0,\"avgBpm\":150.0,\"calories\":300.0,\"addedToCourse\":true,\"courseLiked\":true,\"courseLikes\":42}}}"))),
         @ApiResponse(responseCode = "400", description = "잘못된 요청", 
                     content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = CommonResponse.class),

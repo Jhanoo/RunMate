@@ -26,6 +26,9 @@ public class GroupRunnerResponse {
     @Schema(description = "달린 시간(초)", example = "1800")
     private long time;
     
-    @Schema(description = "평균 페이스(초/km)", example = "360")
+    @Schema(description = "평균 페이스(초/km)", example = "360.0")
     private Double avgPace;
+    
+    @Schema(description = "코스 좋아요 여부", example = "true")
+    private boolean courseLiked;
 } 
