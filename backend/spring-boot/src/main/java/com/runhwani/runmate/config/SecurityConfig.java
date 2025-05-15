@@ -66,6 +66,7 @@ public class SecurityConfig {
                     "/api/courses/**",
                     "/test/**",
                     "/uploads/**",
+                    "/gpx/**",
                     "/swagger-ui/**",
                     "/v3/api-docs/**"
                 ).permitAll()
