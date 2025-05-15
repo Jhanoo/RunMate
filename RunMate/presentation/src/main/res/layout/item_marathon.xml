@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingVertical="16dp"
-    android:paddingHorizontal="16dp"
     android:background="?attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true">
@@ -26,19 +25,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="6/21"
-            android:textSize="18sp"
+            android:textSize="14sp"
             android:textStyle="bold"
             android:textColor="@android:color/black"
-            android:fontFamily="@font/pretendard_medium" />
+            android:fontFamily="@font/pretendard_bold" />
 
         <TextView
             android:id="@+id/tv_day"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="일"
-            android:textSize="16sp"
+            android:textSize="12sp"
             android:textColor="#FF0000"
-            android:fontFamily="@font/pretendard_medium" />
+            android:fontFamily="@font/pretendard_regular" />
     </LinearLayout>
 
     <!-- 마라톤 정보 컨테이너 -->
@@ -58,7 +57,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="춘천 호반 마라톤"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textColor="@android:color/black"
             android:textStyle="bold"
             android:fontFamily="@font/pretendard_medium"
@@ -83,9 +82,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="강원, 춘천 송암스포츠타운 종합경기장"
-                android:textSize="14sp"
+                android:textSize="12sp"
                 android:textColor="#666666"
-                android:fontFamily="@font/pretendard_medium"
+                android:fontFamily="@font/pretendard_regular"
                 android:layout_marginStart="4dp"
                 android:maxLines="1"
                 android:ellipsize="end" />

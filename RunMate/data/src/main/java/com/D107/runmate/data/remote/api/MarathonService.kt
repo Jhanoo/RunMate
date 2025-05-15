@@ -5,6 +5,6 @@ import com.D107.runmate.data.remote.response.manager.MarathonResponse
 import retrofit2.http.GET
 
 interface MarathonService {
-    @GET("api/marathons")
+    @GET("marathons")
     suspend fun getMarathons(): ApiResponse<List<MarathonResponse>>
 }

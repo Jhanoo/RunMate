@@ -7,8 +7,11 @@ import androidx.lifecycle.viewModelScope
 import com.D107.runmate.domain.model.manager.MarathonInfo
 import com.D107.runmate.domain.usecase.manager.GetMarathonsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
+import java.time.OffsetDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -24,6 +27,9 @@ class MarathonViewModel @Inject constructor(
 
     private val _error = MutableLiveData<String>()
     val error: LiveData<String> = _error
+
+    private val _selectedDate = MutableStateFlow<OffsetDateTime?>(null)
+    val selectedDate = _selectedDate.asStateFlow()
 
     private var allMarathons = listOf<MarathonInfo>()
 
@@ -57,5 +63,9 @@ class MarathonViewModel @Inject constructor(
             marathon.title.contains(query, ignoreCase = true) ||
                     marathon.location.contains(query, ignoreCase = true)
         }
+    }
+
+    fun selectDate(date: OffsetDateTime){
+        _selectedDate.value = date
     }
 }

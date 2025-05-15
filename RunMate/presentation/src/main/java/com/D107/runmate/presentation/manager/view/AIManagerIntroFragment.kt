@@ -6,6 +6,7 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.StyleSpan
 import android.view.View
+import androidx.navigation.fragment.findNavController
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentAIManagerIntroBinding
 import com.ssafy.locket.presentation.base.BaseFragment
@@ -18,6 +19,13 @@ class AIManagerIntroFragment : BaseFragment<FragmentAIManagerIntroBinding>(
         super.onViewCreated(view, savedInstanceState)
 
         setupTextWithBoldSpan()
+        setupListeners()
+    }
+
+    private fun setupListeners() {
+        binding.testButton.setOnClickListener {
+            findNavController().navigate(R.id.action_aiManagerIntro_to_aiManagerExp)
+        }
     }
 
     private fun setupTextWithBoldSpan() {

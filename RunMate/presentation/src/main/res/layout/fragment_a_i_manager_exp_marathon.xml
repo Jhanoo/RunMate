@@ -62,7 +62,7 @@
     <RadioGroup
         android:id="@+id/rg_weekly_runs"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="32dp"
         android:layout_marginTop="16dp"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
@@ -78,7 +78,6 @@
             android:textSize="16sp"
             android:button="@null"
             android:gravity="center"
-            android:padding="6dp"
             android:text="0회" />
 
         <RadioButton
@@ -92,7 +91,6 @@
             android:checked="true"
             android:gravity="center"
             android:textSize="16sp"
-            android:padding="6dp"
             android:text="1~2회"
             android:textColor="@color/white"/>
 
@@ -106,7 +104,6 @@
             android:button="@null"
             android:gravity="center"
             android:textSize="16sp"
-            android:padding="6dp"
             android:text="3~4회" />
 
         <RadioButton
@@ -119,7 +116,6 @@
             android:button="@null"
             android:gravity="center"
             android:textSize="16sp"
-            android:padding="6dp"
             android:text="5회 이상" />
     </RadioGroup>
 
@@ -142,7 +138,7 @@
     <RadioGroup
         android:id="@+id/rg_max_distance"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="32dp"
         android:layout_marginTop="16dp"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
@@ -158,7 +154,6 @@
             android:button="@null"
             android:gravity="center"
             android:textSize="16sp"
-            android:padding="6dp"
             android:text="~5km" />
 
         <RadioButton
@@ -172,7 +167,7 @@
             android:checked="true"
             android:gravity="center"
             android:textSize="16sp"
-            android:padding="6dp"
+            android:padding="2dp"
             android:text="~10km"
             android:textColor="@color/white"/>
 
@@ -186,7 +181,6 @@
             android:button="@null"
             android:gravity="center"
             android:textSize="16sp"
-            android:padding="6dp"
             android:text="~하프" />
 
         <RadioButton
@@ -199,12 +193,11 @@
             android:button="@null"
             android:gravity="center"
             android:textSize="16sp"
-            android:padding="6dp"
             android:text="~풀" />
     </RadioGroup>
 
     <Button
-        android:id="@+id/btn_confirm_short"
+        android:id="@+id/btn_confirm_exp"
         style="@style/GreenButtonStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

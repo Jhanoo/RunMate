@@ -3,11 +3,14 @@ package com.D107.runmate.data.di
 import android.content.Context
 import com.D107.runmate.data.remote.api.GroupService
 import com.D107.runmate.data.remote.api.KakaoLocalService
+import com.D107.runmate.data.remote.api.MarathonService
 import com.D107.runmate.data.remote.api.UserService
 import com.D107.runmate.data.remote.datasource.group.GroupDataSource
 import com.D107.runmate.data.remote.datasource.group.GroupDataSourceImpl
 import com.D107.runmate.data.remote.datasource.group.KakaoLocalDataSource
 import com.D107.runmate.data.remote.datasource.group.KakaoLocalDataSourceImpl
+import com.D107.runmate.data.remote.datasource.manager.MarathonDataSource
+import com.D107.runmate.data.remote.datasource.manager.MarathonDataSourceImpl
 import com.D107.runmate.data.remote.datasource.user.AuthDataSource
 import com.D107.runmate.data.remote.datasource.user.AuthDataSourceImpl
 import com.squareup.moshi.Moshi
@@ -41,5 +44,11 @@ object RemoteDataSourceModule {
         @ApplicationContext context: Context
     ): AuthDataSource {
         return AuthDataSourceImpl(userService, moshi, context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMarathonDataSource(marathonService: MarathonService): MarathonDataSource {
+        return MarathonDataSourceImpl(marathonService)
     }
 }

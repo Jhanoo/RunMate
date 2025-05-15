@@ -12,7 +12,9 @@ import com.D107.runmate.presentation.databinding.FragmentAIManagerSearchMarathon
 import com.D107.runmate.presentation.manager.adapter.MarathonSearchRVAdapter
 import com.D107.runmate.presentation.manager.viewmodel.MarathonViewModel
 import com.ssafy.locket.presentation.base.BaseFragment
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class AIManagerSearchMarathonFragment : BaseFragment<FragmentAIManagerSearchMarathonBinding>(
     FragmentAIManagerSearchMarathonBinding::bind,
     R.layout.fragment_a_i_manager_search_marathon

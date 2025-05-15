@@ -4,6 +4,7 @@ import com.D107.runmate.data.repository.AuthRepositoryImpl
 import com.D107.runmate.data.repository.DataStoreRepositoryImpl
 import com.D107.runmate.data.repository.GroupRepositoryImpl
 import com.D107.runmate.data.repository.KakaoApiRepositoryImpl
+import com.D107.runmate.data.repository.MarathonRepositoryImpl
 import com.D107.runmate.domain.repository.DataStoreRepository
 import com.D107.runmate.domain.repository.KakaoApiRepository
 import com.D107.runmate.data.repository.RunningTrackingRepositoryImpl
@@ -11,6 +12,7 @@ import com.D107.runmate.domain.repository.running.RunningTrackingRepository
 import com.D107.runmate.data.repository.SmartInsoleRepositoryImpl
 import com.D107.runmate.domain.repository.SmartInsoleRepository
 import com.D107.runmate.domain.repository.group.GroupRepository
+import com.D107.runmate.domain.repository.manager.MarathonRepository
 import com.D107.runmate.domain.repository.user.AuthRepository
 import dagger.Binds
 import dagger.Module
@@ -51,4 +53,10 @@ internal abstract class RepositoryModule {
     abstract fun bindAuthRepository(
         authRepositoryImpl: AuthRepositoryImpl
     ): AuthRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindMarathonRepository(
+        marathonRepositoryImpl: MarathonRepositoryImpl
+    ): MarathonRepository
 }
