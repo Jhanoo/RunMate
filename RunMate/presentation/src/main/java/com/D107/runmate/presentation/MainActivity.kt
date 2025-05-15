@@ -28,8 +28,6 @@ import com.D107.runmate.domain.model.running.UserLocationState
 import com.D107.runmate.presentation.databinding.ActivityMainBinding
 import com.D107.runmate.presentation.databinding.DrawerHeaderBinding
 import com.D107.runmate.presentation.utils.LocationUtils.getLocation
-import com.D107.runmate.presentation.utils.LocationUtils.isEnableLocationSystem
-import com.D107.runmate.presentation.utils.LocationUtils.showLocationEnableDialog
 import com.D107.runmate.presentation.utils.PermissionChecker
 import com.bumptech.glide.Glide
 import com.google.android.material.navigation.NavigationView
@@ -58,7 +56,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         // 사용자 정보 관찰
         observeUserInfo()
 
-        getKeyHash()
+//        getKeyHash()
 
         // TODO 앱 초기 실행 시, 사용자 정보 서버로부터 가져와서 MainActivity의 ViewModel에 저장하기
         setDrawerWidth()
@@ -83,16 +81,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                     val headerView = binding.navView.getHeaderView(0)
                     val headerBinding = DrawerHeaderBinding.bind(headerView)
                     headerBinding.tvName.text = nickname
-                }
-                else {
+                } else {
                     Timber.d("delete nickname")
                     val navHostFragment =
                         supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
                     val navController = navHostFragment.navController
 
                     navController.currentDestination?.id?.let { currentDestinationId ->
-
-
                         val navigateOptions = NavOptions.Builder()
                             .setLaunchSingleTop(true)
                             .setPopUpTo(currentDestinationId, true)
@@ -206,7 +201,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
             }
         }
         true
-        hideHamburgerBtn(navController)
+        showHamburgerBtn(navController)
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
@@ -269,13 +264,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     private fun checkPermission() {
         if (!checker.checkPermission(this, runtimePermissions)) {
             checker.setOnGrantedListener {
-                Log.d(TAG, "checkPermission: checkBack")
                 checkBackgroundPermission()
             }
             checker.requestPermissionLauncher.launch(runtimePermissions)
             return
         }
-        Log.d(TAG, "checkPermission: checkBack2")
         checkBackgroundPermission()
     }
 
@@ -296,23 +289,20 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         lifecycleScope.launch {
             try {
                 mContext?.let {
-                    if (isEnableLocationSystem(it)) {
-                        val location = getLocation(it)
-                        viewModel.setUserLocation(
-                            UserLocationState.Exist(
-                                listOf(
-                                    LocationModel(
-                                        location.latitude,
-                                        location.longitude,
-                                        location.altitude,
-                                        location.speed
-                                    )
+                    val location = getLocation(it, this@MainActivity)
+                    viewModel.setUserLocation(
+                        UserLocationState.Exist(
+                            listOf(
+                                LocationModel(
+                                    location.latitude,
+                                    location.longitude,
+                                    location.altitude,
+                                    location.speed
                                 )
                             )
                         )
-                    } else {
-                        showLocationEnableDialog(it)
-                    }
+                    )
+                    Log.d(TAG, "onAllPermissionsGranted: location ${location}")
                 }
             } catch (e: Exception) {
                 Log.d(TAG, "onAllPermissionsGranted: ${e.message}")
@@ -348,10 +338,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         binding.navView.layoutParams = params
     }
 
-    private fun hideHamburgerBtn(navController: NavController) {
+    private fun showHamburgerBtn(navController: NavController) {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             binding.btnMenu.visibility = when (destination.id) {
-                R.id.goalSettingFragment -> View.VISIBLE
                 R.id.runningFragment -> View.VISIBLE
                 R.id.groupFragment -> View.VISIBLE
                 R.id.historyFragment -> View.VISIBLE
@@ -374,29 +363,27 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
 
     fun showHamburgerBtn() {
         binding.btnMenu.visibility = View.VISIBLE
-    }
+        fun showHamburgerBtn() {
+            binding.btnMenu.visibility = View.VISIBLE
+        }
 
-    override fun onResume() {
-        super.onResume()
-//        checkPermission()
-    }
-
-    fun getKeyHash() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            val packageInfo = this.packageManager.getPackageInfo(
-                this.packageName,
-                PackageManager.GET_SIGNING_CERTIFICATES
-            )
-            for (signature in packageInfo.signingInfo!!.apkContentsSigners) {
-                try {
-                    val md = MessageDigest.getInstance("SHA")
-                    md.update(signature.toByteArray())
-                    Log.d(
-                        "getKeyHash",
-                        "key hash: ${Base64.encodeToString(md.digest(), Base64.NO_WRAP)}"
-                    )
-                } catch (e: NoSuchAlgorithmException) {
-                    Log.w("getKeyHash", "Unable to get MessageDigest. signature=$signature", e)
+        fun getKeyHash() {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                val packageInfo = this.packageManager.getPackageInfo(
+                    this.packageName,
+                    PackageManager.GET_SIGNING_CERTIFICATES
+                )
+                for (signature in packageInfo.signingInfo!!.apkContentsSigners) {
+                    try {
+                        val md = MessageDigest.getInstance("SHA")
+                        md.update(signature.toByteArray())
+                        Log.d(
+                            "getKeyHash",
+                            "key hash: ${Base64.encodeToString(md.digest(), Base64.NO_WRAP)}"
+                        )
+                    } catch (e: NoSuchAlgorithmException) {
+                        Log.w("getKeyHash", "Unable to get MessageDigest. signature=$signature", e)
+                    }
                 }
             }
         }

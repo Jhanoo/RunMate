@@ -10,6 +10,7 @@ data class CourseInfo(
     val distance: Double,
     val likeCount: Int,
     val shared: Boolean,
+    val liked: Boolean,
     val startLocation: String
 ) : BaseModel
 

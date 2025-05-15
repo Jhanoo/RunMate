@@ -4,30 +4,51 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.D107.runmate.domain.model.running.TrackingStatus
+import com.D107.runmate.domain.repository.running.RunningTrackingRepository
+import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
+import javax.inject.Inject
 
-private const val TAG = "NotificationReceiver"
-
+@AndroidEntryPoint
 class NotificationReceiver : BroadcastReceiver() {
+    @Inject
+    lateinit var repository: RunningTrackingRepository
+
     override fun onReceive(context: Context?, intent: Intent?) {
         when (intent?.action) {
             ACTION_VIBRATE -> {
-                Log.d(TAG, "onReceive: ACTION_VIBRATE")
+                Timber.d("onReceive: ACTION_VIBRATE")
             }
 
             ACTION_SOUND -> {
-                Log.d(TAG, "onReceive: ACTION_SOUND")
+                Timber.d("onReceive: ACTION_SOUND")
             }
 
             ACTION_PAUSE -> {
-                Log.d(TAG, "onReceive: ACTION_PAUSE")
+                Timber.d("onReceive: ACTION_PAUSE")
+                context?.let {
+                    RunningTrackingService.pauseService(it)
+                    repository.setTrackingStatus(TrackingStatus.PAUSED)
+                }
+                // running, record fragment ui 수정
+                //
             }
 
             ACTION_START -> {
-                Log.d(TAG, "onReceive: ACTION_START")
+                Timber.d("onReceive: ACTION_START")
+                context?.let {
+                    RunningTrackingService.startService(it)
+                    repository.setTrackingStatus(TrackingStatus.RUNNING)
+                }
             }
 
             ACTION_STOP -> {
-                Log.d(TAG, "onReceive: ACTION_STOP")
+                Timber.d("onReceive: ACTION_STOP")
+                context?.let {
+                    RunningTrackingService.stopService(it)
+//                    repository.setTrackingStatus(TrackingStatus.STOPPED)
+                }
             }
         }
     }

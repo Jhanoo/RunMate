@@ -8,5 +8,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface KakaoApiRepository {
     suspend fun getSearchKeyword(query:String): Flow<ResponseStatus<List<Place>>>
-    suspend fun getCoord2Address(x:Double,y:Double): Flow<ResponseStatus<Address>>
+    fun getCoord2Address(x:Double,y:Double): Flow<ResponseStatus<Address>>
 }

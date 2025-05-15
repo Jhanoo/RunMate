@@ -3,15 +3,19 @@ package com.D107.runmate.data.di
 import android.content.Context
 import com.D107.runmate.data.remote.api.GroupService
 import com.D107.runmate.data.remote.api.KakaoLocalService
+import com.D107.runmate.data.remote.api.RunningService
 import com.D107.runmate.data.remote.api.UserService
 import com.D107.runmate.data.remote.datasource.group.GroupDataSource
 import com.D107.runmate.data.remote.datasource.group.GroupDataSourceImpl
 import com.D107.runmate.data.remote.datasource.group.KakaoLocalDataSource
 import com.D107.runmate.data.remote.datasource.group.KakaoLocalDataSourceImpl
+import com.D107.runmate.data.remote.datasource.running.RunningDataSource
+import com.D107.runmate.data.remote.datasource.running.RunningDataSourceImpl
 import com.D107.runmate.data.remote.datasource.socket.SocketService
 import com.D107.runmate.data.remote.datasource.user.AuthDataSource
 import com.D107.runmate.data.remote.datasource.user.AuthDataSourceImpl
 import com.squareup.moshi.Moshi
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -43,6 +47,15 @@ object RemoteDataSourceModule {
         @ApplicationContext context: Context
     ): AuthDataSource {
         return AuthDataSourceImpl(userService, moshi, context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideRunningDataSource(
+        @ApplicationContext context: Context,
+        runningService: RunningService
+    ): RunningDataSource {
+        return RunningDataSourceImpl(context, runningService)
     }
 
     @Provides

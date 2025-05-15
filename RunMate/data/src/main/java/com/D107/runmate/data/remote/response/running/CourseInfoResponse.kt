@@ -13,6 +13,7 @@ data class CourseInfoResponse(
     val distance: Double,
     val likeCount: Int,
     val shared: Boolean,
+    val liked: Boolean,
     val startLocation: String
 ): BaseResponse {
     companion object: DataMapper<CourseInfoResponse, CourseInfo> {
@@ -25,6 +26,7 @@ data class CourseInfoResponse(
                 distance = distance,
                 likeCount = likeCount,
                 shared = shared,
+                liked = liked,
                 startLocation = startLocation
             )
         }

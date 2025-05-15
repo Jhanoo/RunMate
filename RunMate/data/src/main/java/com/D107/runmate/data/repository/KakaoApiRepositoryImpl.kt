@@ -13,6 +13,7 @@ import com.D107.runmate.domain.repository.KakaoApiRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
@@ -48,27 +49,58 @@ class KakaoApiRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getCoord2Address(x: Double, y: Double): Flow<ResponseStatus<Address>> = flow{
-        try {
-            val response = withContext(CoroutineScope(Dispatchers.IO).coroutineContext) {
-                kakaoLocalDataSource.getCoord2Address(x, y)
-            }
-            val body = response.body()
-            if (response.isSuccessful && body != null) {
-                emit(
-                    ResponseStatus.Success(
-                        body.documents.first().address.toDomainModel()
-                    )
+    override fun getCoord2Address(x: Double, y: Double): Flow<ResponseStatus<Address>> = flow {
+        val response = withContext(Dispatchers.IO) {
+            kakaoLocalDataSource.getCoord2Address(x, y)
+        }
+        val body = response.body()
+        if (response.isSuccessful && body != null) {
+            emit(
+                ResponseStatus.Success(
+                    body.documents.first().address.toDomainModel()
                 )
-            }
-        }catch(e:Exception) {
+            )
+        } else {
             emit(
                 ResponseStatus.Error(
                     NetworkError(
-                        message = e.message ?: ""
+                        message = "Response is not successful or body is null"
                     )
                 )
             )
         }
+    }.catch { e ->
+        emit(
+            ResponseStatus.Error(
+                NetworkError(
+                    message = e.message ?: ""
+                )
+            )
+        )
     }
+
+
+//    override suspend fun getCoord2Address(x: Double, y: Double): Flow<ResponseStatus<Address>> = flow{
+//        try {
+//            val response = withContext(CoroutineScope(Dispatchers.IO).coroutineContext) {
+//                kakaoLocalDataSource.getCoord2Address(x, y)
+//            }
+//            val body = response.body()
+//            if (response.isSuccessful && body != null) {
+//                emit(
+//                    ResponseStatus.Success(
+//                        body.documents.first().address.toDomainModel()
+//                    )
+//                )
+//            }
+//        }catch(e:Exception) {
+//            emit(
+//                ResponseStatus.Error(
+//                    NetworkError(
+//                        message = e.message ?: ""
+//                    )
+//                )
+//            )
+//        }
+//    }
 }

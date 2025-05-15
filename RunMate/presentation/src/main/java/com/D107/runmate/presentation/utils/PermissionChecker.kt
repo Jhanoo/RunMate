@@ -59,7 +59,7 @@ class PermissionChecker(activityOrFragment: Any) {
     private fun resultChecking(result: Map<String, Boolean>) {
         if(result.values.contains(false)){
             result.keys.forEach { Log.d(TAG, "checkPermission: $it") }
-            moveToSettings()
+//            moveToSettings()
         } else {
             permitted.onGranted()
         }

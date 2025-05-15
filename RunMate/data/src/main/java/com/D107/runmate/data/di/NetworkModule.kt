@@ -25,7 +25,6 @@ import javax.inject.Singleton
 object NetworkModule {
     private const val SERVER_URL = BuildConfig.BASE_URL // 찐서버 url
     private const val KAKAO_API_URL = BuildConfig.KAKAO_API_URL // 카카오 API url
-//    private const val SERVER_URL = "서버url"
 
     @Provides
     @Singleton

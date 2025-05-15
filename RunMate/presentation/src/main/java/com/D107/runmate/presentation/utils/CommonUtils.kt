@@ -12,6 +12,10 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
 import dagger.hilt.android.internal.managers.ViewComponentManager
+import timber.log.Timber
+import java.io.File
+import java.io.FileInputStream
+import java.io.InputStream
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.DecimalFormat
@@ -19,6 +23,8 @@ import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
@@ -35,7 +41,7 @@ object CommonUtils {
         return comma.format(num)
     }
 
-    fun dateformatYMDHMFromInt(year: Int, month: Int, day: Int):String{
+    fun dateformatYMDHMFromInt(year: Int, month: Int, day: Int): String {
 //        val format = SimpleDateFormat("yyyy.MM.dd. HH:mm", Locale.KOREA)
 //        format.timeZone = TimeZone.getTimeZone("Asia/Seoul")
 //        return format.format(time)
@@ -43,7 +49,7 @@ object CommonUtils {
     }
 
     //날짜 포맷 출력
-    fun dateformatYMDHM(time:Date):String{
+    fun dateformatYMDHM(time: Date): String {
         val format = SimpleDateFormat("yyyy.MM.dd. HH:mm", Locale.KOREA)
         format.timeZone = TimeZone.getTimeZone("Asia/Seoul")
         return format.format(time)
@@ -57,7 +63,7 @@ object CommonUtils {
         return offsetDateTime.format(outputFormatter)
     }
 
-    fun dateformatYMD(time: Date):String{
+    fun dateformatYMD(time: Date): String {
         val format = SimpleDateFormat("yyyy.MM.dd", Locale.KOREA)
         format.timeZone = TimeZone.getTimeZone("Asia/Seoul")
         return format.format(time)
@@ -112,6 +118,7 @@ object CommonUtils {
             context
         }
     }
+
     fun getWindowSize(context: Context): Point {
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val display = windowManager.defaultDisplay
@@ -119,6 +126,27 @@ object CommonUtils {
         display.getSize(size)
 
         return size
+    }
+
+    fun getGpxInputStream(context: Context): InputStream? {
+        return try {
+//            val file = context.assets.open("test_3.gpx") // test용
+            //            file
+            val file = File(context.filesDir, "running_tracking.gpx") // 실제로 작성한 파일
+            FileInputStream(file)
+        } catch (e: Exception) {
+            Timber.e(e, "GPX 파일 읽기 실패")
+            null
+        }
+    }
+
+    fun convertDateTime(input: String): String {
+        // 입력 문자열을 LocalDateTime으로 파싱
+        val localDateTime = LocalDateTime.parse(input, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+        // Asia/Seoul 타임존으로 ZonedDateTime 생성
+        val zonedDateTime = localDateTime.atZone(ZoneId.of("Asia/Seoul"))
+        // ISO_OFFSET_DATE_TIME 포맷으로 출력
+        return zonedDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
     }
 }
 
