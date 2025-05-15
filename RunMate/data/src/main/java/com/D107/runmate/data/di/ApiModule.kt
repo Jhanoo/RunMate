@@ -1,5 +1,6 @@
 package com.D107.runmate.data.di
 
+import com.D107.runmate.data.remote.api.CurriculumService
 import com.D107.runmate.data.remote.api.GroupService
 import com.D107.runmate.data.remote.api.KakaoLocalService
 import com.D107.runmate.data.remote.api.MarathonService
@@ -37,5 +38,11 @@ class ApiModule {
     @Singleton
     fun marathonService(@InterceptorRetrofit retrofit: Retrofit): MarathonService {
         return retrofit.create(MarathonService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun curriculumService(@InterceptorRetrofit retrofit: Retrofit): CurriculumService {
+        return retrofit.create(CurriculumService::class.java)
     }
 }

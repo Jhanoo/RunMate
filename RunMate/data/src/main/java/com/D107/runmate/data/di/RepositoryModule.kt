@@ -1,6 +1,7 @@
 package com.D107.runmate.data.di
 
 import com.D107.runmate.data.repository.AuthRepositoryImpl
+import com.D107.runmate.data.repository.CurriculumRepositoryImpl
 import com.D107.runmate.data.repository.DataStoreRepositoryImpl
 import com.D107.runmate.data.repository.GroupRepositoryImpl
 import com.D107.runmate.data.repository.KakaoApiRepositoryImpl
@@ -12,6 +13,7 @@ import com.D107.runmate.domain.repository.running.RunningTrackingRepository
 import com.D107.runmate.data.repository.SmartInsoleRepositoryImpl
 import com.D107.runmate.domain.repository.SmartInsoleRepository
 import com.D107.runmate.domain.repository.group.GroupRepository
+import com.D107.runmate.domain.repository.manager.CurriculumRepository
 import com.D107.runmate.domain.repository.manager.MarathonRepository
 import com.D107.runmate.domain.repository.user.AuthRepository
 import dagger.Binds
@@ -59,4 +61,10 @@ internal abstract class RepositoryModule {
     abstract fun bindMarathonRepository(
         marathonRepositoryImpl: MarathonRepositoryImpl
     ): MarathonRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindCurriculumRepository(
+        curriculumRepositoryImpl: CurriculumRepositoryImpl
+    ): CurriculumRepository
 }

@@ -17,8 +17,10 @@ import android.view.Window
 import android.widget.Button
 import android.widget.ImageView
 import androidx.activity.viewModels
+import androidx.core.os.bundleOf
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
@@ -27,6 +29,7 @@ import com.D107.runmate.domain.model.running.LocationModel
 import com.D107.runmate.domain.model.running.UserLocationState
 import com.D107.runmate.presentation.databinding.ActivityMainBinding
 import com.D107.runmate.presentation.databinding.DrawerHeaderBinding
+import com.D107.runmate.presentation.manager.viewmodel.CurriculumViewModel
 import com.D107.runmate.presentation.utils.LocationUtils.getLocation
 import com.D107.runmate.presentation.utils.LocationUtils.isEnableLocationSystem
 import com.D107.runmate.presentation.utils.LocationUtils.showLocationEnableDialog
@@ -35,6 +38,7 @@ import com.bumptech.glide.Glide
 import com.google.android.material.navigation.NavigationView
 import com.ssafy.locket.presentation.base.BaseActivity
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.security.MessageDigest
@@ -189,11 +193,46 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
 
                 R.id.drawer_manager -> {
                     binding.navView.menu.findItem(R.id.drawer_manager).isChecked = true
-                    navController.navigate(
-                        R.id.AIManagerLoadingFragment,
-                        null,
-                        navigateOptions
-                    )
+
+                    // AI 매니저 메뉴 선택 시 커리큘럼 확인 로직
+                    val curriculumViewModel = ViewModelProvider(this).get(CurriculumViewModel::class.java)
+
+                    // 먼저 API 호출로 커리큘럼 존재 여부 확인
+                    lifecycleScope.launch {
+                        try {
+                            // 커리큘럼 조회
+                            curriculumViewModel.getMyCurriculum()
+
+                            // 짧은 시간 대기 (API 응답 대기)
+                            delay(300)
+
+                            // 커리큘럼이 있는지 확인
+                            val curriculum = curriculumViewModel.myCurriculum.value?.getOrNull()
+
+                            if (curriculum != null) {
+                                // 커리큘럼이 존재하면 AIManagerFragment로 이동
+                                navController.navigate(
+                                    R.id.AIManagerFragment,
+                                    bundleOf("curriculumId" to curriculum.curriculumId),
+                                    navigateOptions
+                                )
+                            } else {
+                                // 커리큘럼이 없으면 인트로 화면으로 이동
+                                navController.navigate(
+                                    R.id.AIManagerIntroFragment,
+                                    null,
+                                    navigateOptions
+                                )
+                            }
+                        } catch (e: Exception) {
+                            // 오류 발생 시 인트로 화면으로 이동
+                            navController.navigate(
+                                R.id.AIManagerIntroFragment,
+                                null,
+                                navigateOptions
+                            )
+                        }
+                    }
                 }
 
                 R.id.drawer_logout -> {
@@ -203,6 +242,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                     hideHamburgerBtn()
                     return true
                 }
+
+                else -> {}
             }
         }
         true
