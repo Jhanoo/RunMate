@@ -52,7 +52,11 @@ public interface RunControllerDocs {
                     @ApiResponse(responseCode = "201", description = "달리기 종료 및 저장 성공",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(allOf = { CommonResponse.class, RunEndResponse.class })
+                                    schema = @Schema(allOf = { CommonResponse.class, RunEndResponse.class }),
+                                    examples = @ExampleObject(
+                                            name = "성공 응답 예시",
+                                            value = "{\"message\":\"OK\",\"data\":{\"historyId\":\"3fa85f64-5717-4562-b3fc-2c963f66afa6\"}}"
+                                    )
                             )
                     ),
                     @ApiResponse(responseCode = "400", description = "잘못된 요청",
@@ -64,7 +68,16 @@ public interface RunControllerDocs {
                                             value = "{\"message\":\"GPX 파일 파싱 오류\",\"data\":null}"
                                     )
                             )),
-                    @ApiResponse(responseCode = "401", description = "인증 필요")
+                    @ApiResponse(responseCode = "401", description = "인증 필요",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = CommonResponse.class),
+                                    examples = @ExampleObject(
+                                            name = "인증 실패 예시",
+                                            value = "{\"message\":\"인증 필요\",\"data\":null}"
+                                    )
+                            )
+                    )
             }
     )
     @PostMapping(
