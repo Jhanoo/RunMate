@@ -2,6 +2,7 @@ package com.D107.runmate.data.di
 
 import com.D107.runmate.data.remote.api.GroupService
 import com.D107.runmate.data.remote.api.KakaoLocalService
+import com.D107.runmate.data.remote.api.MarathonService
 import com.D107.runmate.data.remote.api.UserService
 import dagger.Module
 import dagger.Provides
@@ -32,4 +33,9 @@ class ApiModule {
         return retrofit.create(UserService::class.java)
     }
 
+    @Provides
+    @Singleton
+    fun marathonService(@InterceptorRetrofit retrofit: Retrofit): MarathonService {
+        return retrofit.create(MarathonService::class.java)
+    }
 }
