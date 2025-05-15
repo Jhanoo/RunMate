@@ -19,6 +19,9 @@ public class RunEndRequest {
     @Schema(description = "선택한 코스 ID", example = "4f5a6b7c-8d9e-0f1a-2b3c-4d5e6f7a8b9c")
     private UUID courseId;
 
+    @Schema(description = "그룹 ID", example = "4f5a6b7c-8d9e-0f1a-2b3c-4d5e6f7a8b2c")
+    private UUID groupId;
+
     @Schema(description = "출발 위치", example = "여의도 한강공원")
     private String startLocation;
 

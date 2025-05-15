@@ -37,6 +37,7 @@ public class RunServiceImpl implements RunService {
         History history = History.builder()
                 .historyId(UUID.randomUUID())
                 .userId(userId)
+                .groupId(req.getGroupId())
                 .courseId(req.getCourseId())
                 .gpxFile(gpxFileName)
                 .startLocation(req.getStartLocation())
