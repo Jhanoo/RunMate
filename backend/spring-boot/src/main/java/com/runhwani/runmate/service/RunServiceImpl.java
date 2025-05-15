@@ -2,6 +2,7 @@ package com.runhwani.runmate.service;
 
 import com.runhwani.runmate.dao.CurriculumDao;
 import com.runhwani.runmate.dao.HistoryDao;
+import com.runhwani.runmate.dao.UserDao;
 import com.runhwani.runmate.dto.request.run.RunEndRequest;
 import com.runhwani.runmate.model.History;
 import com.runhwani.runmate.model.Todo;
@@ -25,6 +26,7 @@ public class RunServiceImpl implements RunService {
 
     private final HistoryDao historyDao;
     private final CurriculumDao curriculumDao;
+    private final UserDao userDao;
 
     @Override
     public void endRun(UUID userId, MultipartFile gpxFile, RunEndRequest req) throws IOException {
@@ -53,6 +55,19 @@ public class RunServiceImpl implements RunService {
                 .build();
 
         historyDao.insert(history);
+
+        // users : avgPace 업데이트
+        // 3-1) 현재 저장된 historyId 조회
+        long count = historyDao.countByUserId(userId);
+        // 3-2) 이전에 users table에 저장된 avg_pace 조회
+        Double prevAvg = userDao.findAvgPaceByUserId(userId);
+        // 3-3) 평균 페이스 새롭게 계산
+        double updatedAvgPace = (
+                ((prevAvg != null ? prevAvg : 0.0) * (count - 1)) + req.getAvgPace()
+                ) / count;
+        // 3-4) users table update
+        userDao.updateAvgPace(userId, updatedAvgPace);
+        log.debug("User({}) avg_pace updated to {}", userId, updatedAvgPace);
 
         Todo todo = curriculumDao.selectTodayTodoByUserId(userId);
         if (todo != null) {

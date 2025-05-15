@@ -2,6 +2,7 @@ package com.runhwani.runmate.dao;
 
 import com.runhwani.runmate.model.User;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.UUID;
 
@@ -12,4 +13,8 @@ public interface UserDao {
     void insert(User user);
     boolean existsByEmail(String email);
     boolean existsByNickname(String nickname);
-} 
+    // 사용자 평균 페이스 조회
+    Double findAvgPaceByUserId(UUID userId);
+    // 사용자별 평균 페이스 업데이트
+    void updateAvgPace(UUID userId, Double avgPace);
+}

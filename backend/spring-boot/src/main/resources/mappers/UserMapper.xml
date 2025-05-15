@@ -40,4 +40,17 @@
         VALUES (#{userId}, #{email}, #{password}, #{nickname},
                 #{profileImage}, #{avgPace}, #{birthday}, #{gender}::gender_enum, #{createdAt})
     </insert>
+
+<!--    사용자별 평균 페이스 조회-->
+    <select id="findAvgPaceByUserId" resultType="double">
+        SELECT avg_pace
+        FROM users
+        WHERE user_id = #{userId}
+    </select>
+<!--    사용자별 평균 페이스 업데이트-->
+    <update id="updateAvgPace">
+        UPDATE users
+        SET avg_pace = #{avgPace}
+        WHERE user_id = #{userId}
+    </update>
 </mapper> 
