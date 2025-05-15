@@ -32,7 +32,7 @@ public class GpxStorageUtil {
         }
 
         // 1) 저장할 파일명 생성
-        String fileName = "https://k12d107.p.ssafy.io/gpx/"+ UUID.randomUUID().toString().substring(0, 8) + ".gpx";
+        String fileName = UUID.randomUUID().toString().substring(0, 8) + ".gpx";
 
         log.debug("gpxStoragePath: {}", gpxStoragePath);
         

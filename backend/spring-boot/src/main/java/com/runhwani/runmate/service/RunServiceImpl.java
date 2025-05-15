@@ -39,7 +39,7 @@ public class RunServiceImpl implements RunService {
                 .userId(userId)
                 .groupId(req.getGroupId())
                 .courseId(req.getCourseId())
-                .gpxFile(gpxFileName)
+                .gpxFile("https://k12d107.p.ssafy.io/gpx/" + gpxFileName)
                 .startLocation(req.getStartLocation())
                 .startTime(req.getStartTime())
                 .endTime(req.getEndTime())
