@@ -18,15 +18,21 @@ public class MyRunDetailResponse {
     @Schema(description = "달린 시간(초)", example = "1800")
     private long time;
     
-    @Schema(description = "평균 페이스(초/km)", example = "360")
+    @Schema(description = "평균 페이스(초/km)", example = "360.0")
     private Double avgPace;
     
-    @Schema(description = "평균 심박수(bpm)", example = "150")
+    @Schema(description = "평균 심박수", example = "150.0")
     private Double avgBpm;
     
-    @Schema(description = "소모 칼로리(kcal)", example = "300")
+    @Schema(description = "소모 칼로리", example = "300.0")
     private Double calories;
     
-    @Schema(description = "코스에 추가 여부", example = "true")
+    @Schema(description = "코스 추가 여부", example = "true")
     private boolean addedToCourse;
+    
+    @Schema(description = "코스 좋아요 여부", example = "true")
+    private boolean courseLiked;
+    
+    @Schema(description = "코스 좋아요 수", example = "42")
+    private int courseLikes;
 } 

@@ -1,6 +1,7 @@
 package com.runhwani.runmate.service;
 
 import com.runhwani.runmate.dao.HistoryDao;
+import com.runhwani.runmate.dao.CourseDao;
 import com.runhwani.runmate.dto.response.history.*;
 import com.runhwani.runmate.exception.CustomException;
 import com.runhwani.runmate.exception.ErrorCode;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 public class HistoryServiceImpl implements HistoryService {
 
     private final HistoryDao historyDao;
+    private final CourseDao courseDao;
 
     @Override
     @Transactional(readOnly = true)
@@ -95,10 +97,20 @@ public class HistoryServiceImpl implements HistoryService {
         // GPX 파일 경로 가져오기
         String gpxFile = (String) historyDetail.get("gpx_file");
         
+        // 코스 ID 가져오기
+        UUID courseId = convertToUUID(historyDetail.get("course_id"));
+        
         // 그룹 러닝 참여자 기록 조회
         List<Map<String, Object>> groupRunners = historyDao.findGroupRunnersByGroupId(groupId);
         List<GroupRunnerResponse> groupRunResponses = groupRunners.stream()
-                .map(this::convertToGroupRunnerResponse)
+                .map(runner -> {
+                    UUID runnerId = convertToUUID(runner.get("user_id"));
+                    boolean runnerLiked = false;
+                    if (courseId != null) {
+                        runnerLiked = courseDao.existsCourseLike(runnerId, courseId);
+                    }
+                    return convertToGroupRunnerResponse(runner, runnerLiked);
+                })
                 .collect(Collectors.toList());
         
         // 내 상세 기록 조회
@@ -108,14 +120,21 @@ public class HistoryServiceImpl implements HistoryService {
         }
         
         // 코스 추가 여부 확인
-        UUID courseId = convertToUUID(myRunDetail.get("course_id"));
         boolean addedToCourse = false;
+        boolean courseLiked = false;
+        int courseLikes = 0;
+        
         if (courseId != null) {
             addedToCourse = historyDao.isAddedToCourse(courseId, userId);
+            
+            // 코스 좋아요 정보 조회
+            courseLiked = courseDao.existsCourseLike(userId, courseId);
+            courseLikes = courseDao.countLikesByCourseId(courseId);
         }
         
-        // 내 상세 기록 변환
-        MyRunDetailResponse myRunResponse = convertToMyRunDetailResponse(myRunDetail, addedToCourse);
+        // 내 상세 기록 변환 (좋아요 정보 추가)
+        MyRunDetailResponse myRunResponse = convertToMyRunDetailResponse(
+            myRunDetail, addedToCourse, courseLiked, courseLikes);
         
         // 응답 객체 생성
         return HistoryDetailResponse.builder()
@@ -204,29 +223,55 @@ public class HistoryServiceImpl implements HistoryService {
     }
     
     /**
-     * 그룹 러닝 참여자 기록 변환
+     * Map을 GroupRunnerResponse로 변환
      */
-    private GroupRunnerResponse convertToGroupRunnerResponse(Map<String, Object> runner) {
+    private GroupRunnerResponse convertToGroupRunnerResponse(Map<String, Object> map, boolean courseLiked) {
+        OffsetDateTime startTime = convertToOffsetDateTime(map.get("start_time"));
+        OffsetDateTime endTime = convertToOffsetDateTime(map.get("end_time"));
+        
+        // 시간 계산 (초 단위)
+        long time = 0;
+        if (startTime != null && endTime != null) {
+            time = Duration.between(startTime, endTime).getSeconds();
+        }
+        
         return GroupRunnerResponse.builder()
-                .userId(convertToUUID(runner.get("user_id")))
-                .nickname((String) runner.get("nickname"))
-                .distance(convertToDouble(runner.get("distance")))
-                .time(convertToLong(runner.get("time")))
-                .avgPace(convertToDouble(runner.get("avg_pace")))
+                .userId(convertToUUID(map.get("user_id")))
+                .nickname((String) map.get("nickname"))
+                .distance(convertToDouble(map.get("distance")))
+                .time(time)
+                .avgPace(convertToDouble(map.get("avg_pace")))
+                .courseLiked(courseLiked)
                 .build();
     }
     
     /**
-     * 내 상세 기록 변환
+     * Map을 MyRunDetailResponse로 변환
      */
-    private MyRunDetailResponse convertToMyRunDetailResponse(Map<String, Object> myRun, boolean addedToCourse) {
+    private MyRunDetailResponse convertToMyRunDetailResponse(
+            Map<String, Object> map, 
+            boolean addedToCourse, 
+            boolean courseLiked, 
+            int courseLikes) {
+        
+        OffsetDateTime startTime = convertToOffsetDateTime(map.get("start_time"));
+        OffsetDateTime endTime = convertToOffsetDateTime(map.get("end_time"));
+        
+        // 시간 계산 (초 단위)
+        long time = 0;
+        if (startTime != null && endTime != null) {
+            time = Duration.between(startTime, endTime).getSeconds();
+        }
+        
         return MyRunDetailResponse.builder()
-                .distance(convertToDouble(myRun.get("distance")))
-                .time(convertToLong(myRun.get("time")))
-                .avgPace(convertToDouble(myRun.get("avg_pace")))
-                .avgBpm(convertToDouble(myRun.get("avg_bpm")))
-                .calories(convertToDouble(myRun.get("calories")))
+                .distance(convertToDouble(map.get("distance")))
+                .time(time)
+                .avgPace(convertToDouble(map.get("avg_pace")))
+                .avgBpm(convertToDouble(map.get("avg_bpm")))
+                .calories(convertToDouble(map.get("calories")))
                 .addedToCourse(addedToCourse)
+                .courseLiked(courseLiked)
+                .courseLikes(courseLikes)
                 .build();
     }
     
