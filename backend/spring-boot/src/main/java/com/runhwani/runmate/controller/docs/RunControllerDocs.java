@@ -2,6 +2,7 @@ package com.runhwani.runmate.controller.docs;
 
 import com.runhwani.runmate.dto.common.CommonResponse;
 import com.runhwani.runmate.dto.request.run.RunEndRequest;
+import com.runhwani.runmate.dto.response.run.RunEndResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.StringToClassMapItem;
@@ -51,13 +52,13 @@ public interface RunControllerDocs {
                     @ApiResponse(responseCode = "201", description = "달리기 종료 및 저장 성공",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = CommonResponse.class)
+                                    schema = @Schema(implementation = RunEndResponse.class)
                             )
                     ),
                     @ApiResponse(responseCode = "400", description = "잘못된 요청",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = CommonResponse.class),
+                                    schema = @Schema(implementation = RunEndResponse.class),
                                     examples = @ExampleObject(
                                             name = "실패 응답 예시",
                                             value = "{\"message\":\"GPX 파일 파싱 오류\",\"data\":null}"
@@ -71,7 +72,7 @@ public interface RunControllerDocs {
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<CommonResponse<Void>> endRun(
+    ResponseEntity<CommonResponse<RunEndResponse>> endRun(
             @AuthenticationPrincipal UserDetails principal,
 
             @Parameter(

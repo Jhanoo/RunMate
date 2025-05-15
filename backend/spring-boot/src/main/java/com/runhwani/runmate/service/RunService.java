@@ -12,9 +12,10 @@ import java.util.UUID;
 public interface RunService {
     /**
      * GPX 파일과 통계 정보를 받아 달리기 기록을 저장한다.
+     * 저장된 히스토리아이디도 반환해버리겟다.
      *
      * @param gpxFile GPX 경로 파일
      * @param request 달리기 종료 통계 정보
      */
-    void endRun(UUID userId, MultipartFile gpxFile, RunEndRequest request) throws IOException;
+    UUID endRun(UUID userId, MultipartFile gpxFile, RunEndRequest request) throws IOException;
 }

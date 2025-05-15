@@ -29,7 +29,7 @@ public class RunServiceImpl implements RunService {
     private final UserDao userDao;
 
     @Override
-    public void endRun(UUID userId, MultipartFile gpxFile, RunEndRequest req) throws IOException {
+    public UUID endRun(UUID userId, MultipartFile gpxFile, RunEndRequest req) throws IOException {
         // 1. GPX 파일 처리: 유틸 호출
 
         String gpxFileName = GpxStorageUtil.saveGpxFile(gpxFile);
@@ -82,5 +82,6 @@ public class RunServiceImpl implements RunService {
                 }
             }
         }
+        return history.getHistoryId();
     }
 }
