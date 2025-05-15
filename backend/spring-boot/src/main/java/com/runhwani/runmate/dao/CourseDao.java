@@ -17,6 +17,7 @@ public interface CourseDao {
     // 2. 코스 삭제
     Course selectCourseById(@Param("courseId") UUID courseId);
     void deleteCourse(@Param("courseId") UUID courseId);
+    void nullifyCourseReferenceInHistories(@Param("courseId") UUID courseId);
     // 3. 코스 검색
     List<CourseResponse> searchCourses(Map<String, Object> params);
     // 4. 최근 코스 조회

@@ -42,6 +42,12 @@
     </select>
 
 <!--    2. 코스 삭제-->
+    <update id="nullifyCourseReferenceInHistories" parameterType="java.util.UUID">
+        UPDATE histories
+        SET course_id = NULL
+        WHERE course_id = #{courseId}
+    </update>
+
     <delete id="deleteCourse" parameterType="java.util.UUID">
         DELETE FROM courses
         WHERE course_id = #{courseId}

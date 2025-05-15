@@ -61,6 +61,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    @Transactional
     public void deleteCourse(UUID courseId, UUID userId) throws IOException {
         // 1. DB 코스 조회
         Course course = courseDao.selectCourseById(courseId);
@@ -73,11 +74,14 @@ public class CourseServiceImpl implements CourseService {
             throw new AccessDeniedException("삭제 권한이 없습니다.");
         }
 
-        // 3. gpx 파일 삭제
+        // 3. 히스토리에서 참조 끊기: course_id를 NULL로 업데이트
+        courseDao.nullifyCourseReferenceInHistories(courseId);
+
+        // 4. gpx 파일 삭제
         String gpxFileName = course.getGpxFile();
         GpxStorageUtil.deleteGpxFile(gpxFileName);
 
-        // 4. db 레코드 삭제
+        // 5. db 레코드 삭제
         courseDao.deleteCourse(courseId);
         log.debug("코스 db 삭제 완료: {}", courseId);
     }
