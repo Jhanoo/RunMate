@@ -47,6 +47,10 @@ class CurriculumViewModel @Inject constructor(
         _distExp.value = dist
     }
 
+    fun resetMyCurriculum() {
+        _myCurriculum.value = null
+    }
+
     fun forceNavigateToCurriculumView(curriculumId: String) {
         _curriculumCreationResult.value = Result.success(curriculumId)
     }

@@ -11,10 +11,12 @@ import com.D107.runmate.domain.repository.KakaoApiRepository
 import com.D107.runmate.data.repository.RunningTrackingRepositoryImpl
 import com.D107.runmate.domain.repository.running.RunningTrackingRepository
 import com.D107.runmate.data.repository.SmartInsoleRepositoryImpl
+import com.D107.runmate.data.repository.TodoRepositoryImpl
 import com.D107.runmate.domain.repository.SmartInsoleRepository
 import com.D107.runmate.domain.repository.group.GroupRepository
 import com.D107.runmate.domain.repository.manager.CurriculumRepository
 import com.D107.runmate.domain.repository.manager.MarathonRepository
+import com.D107.runmate.domain.repository.manager.TodoRepository
 import com.D107.runmate.domain.repository.user.AuthRepository
 import dagger.Binds
 import dagger.Module
@@ -67,4 +69,10 @@ internal abstract class RepositoryModule {
     abstract fun bindCurriculumRepository(
         curriculumRepositoryImpl: CurriculumRepositoryImpl
     ): CurriculumRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindTodoRepository(
+        todoRepositoryImpl: TodoRepositoryImpl
+    ): TodoRepository
 }

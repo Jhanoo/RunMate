@@ -55,7 +55,7 @@ class ScheduleRVAdapter :
             binding.tvDay.text = item.day
             binding.checkboxSchedule.text = item.scheduleText
             binding.checkboxSchedule.isChecked = item.isCompleted
-            item.colorIndicator?.let { binding.viewColorIndicator.setBackgroundColor(it) }
+//            item.colorIndicator?.let { binding.viewColorIndicator.setBackgroundColor(it) }
         }
     }
 

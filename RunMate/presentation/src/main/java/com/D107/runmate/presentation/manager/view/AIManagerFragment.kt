@@ -1,29 +1,33 @@
 package com.D107.runmate.presentation.manager.view
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.D107.runmate.domain.model.manager.ScheduleItem
+import com.D107.runmate.domain.repository.manager.TodoRepository
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentAIManagerBinding
 import com.D107.runmate.presentation.manager.adapter.ScheduleRVAdapter
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.ssafy.locket.presentation.base.BaseFragment
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
 import java.util.Locale
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
     FragmentAIManagerBinding::bind,
     R.layout.fragment_a_i_manager
 ) {
+    @Inject
+    lateinit var todoRepository: TodoRepository
+
     private lateinit var scheduleAdapter: ScheduleRVAdapter
     private val calendar = Calendar.getInstance()
     private val dayOfWeekMap = mapOf(
@@ -71,20 +75,21 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
             val selectedCalendar = Calendar.getInstance().apply {
                 set(date.year, date.month, date.day)
             }
+            loadSchedulesForSelectedDate(selectedCalendar)
 
             // 오늘 날짜를 포함한 주의 월요일부터의 날짜를 계산
-            val thisWeekMonday = getThisWeekMonday()
+//            val thisWeekMonday = getThisWeekMonday()
 
             // 선택한 날짜가 이번 주 월요일보다 이전이거나 같고, 오늘보다 이전이거나 같은 경우만 처리
-            if (!selectedCalendar.after(Calendar.getInstance()) && !selectedCalendar.before(
-                    thisWeekMonday
-                )
-            ) {
-                loadSchedulesForSelectedDate(selectedCalendar)
-            } else if (selectedCalendar.after(Calendar.getInstance())) {
-                Toast.makeText(context, "미래 날짜는 선택할 수 없습니다", Toast.LENGTH_SHORT).show()
-                binding.calendar.setDateSelected(today, true)
-            }
+//            if (!selectedCalendar.after(Calendar.getInstance()) && !selectedCalendar.before(
+//                    thisWeekMonday
+//                )
+//            ) {
+//                loadSchedulesForSelectedDate(selectedCalendar)
+//            } else if (selectedCalendar.after(Calendar.getInstance())) {
+//                Toast.makeText(context, "미래 날짜는 선택할 수 없습니다", Toast.LENGTH_SHORT).show()
+//                binding.calendar.setDateSelected(today, true)
+//            }
         }
     }
 
@@ -120,81 +125,44 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
 
     // API에서 일정 데이터 로드
     private fun loadScheduleFromApi(year: Int, month: Int, selectedDate: Calendar) {
-        // 예시 코드: 실제 환경에서는 ViewModel 및 Repository 패턴 사용을 권장
+        timber.log.Timber.d("일정 로드 시작: year=$year, month=$month")
+
         lifecycleScope.launch {
             try {
-                // 네트워크 호출은 백그라운드 스레드에서 실행
                 withContext(Dispatchers.IO) {
-                    // 실제 API 호출 부분 (예시)
-                    /*
-                    apiService.getTodos(year, month).enqueue(object : Callback<TodoResponse> {
-                        override fun onResponse(call: Call<TodoResponse>, response: Response<TodoResponse>) {
-                            if (response.isSuccessful) {
-                                val todoResponse = response.body()
-                                todoResponse?.data?.let { todos ->
-                                    // API 응답을 ScheduleItem 리스트로 변환
-                                    allScheduleItems.clear()
-                                    allScheduleItems.addAll(convertToScheduleItems(todos))
+                    timber.log.Timber.d("TodoRepository API 호출: getTodoList($year, $month)")
 
-                                    // 선택한 날짜에 해당하는 일정만 필터링하여 표시
+                    // TodoRepository를 통한 API 호출
+                    todoRepository.getTodoList(year, month).collect { result ->
+                        result.fold(
+                            onSuccess = { todoList ->
+                                timber.log.Timber.d("API 호출 성공: ${todoList.size}개 일정 수신")
+
+                                // API 응답을 ScheduleItem 리스트로 변환
+                                allScheduleItems.clear()
+                                allScheduleItems.addAll(convertToScheduleItems(todoList))
+
+                                // 선택한 날짜에 해당하는 일정만 필터링하여 표시
+                                withContext(Dispatchers.Main) {
                                     filterAndDisplaySchedules(selectedDate)
                                 }
-                            } else {
-                                Toast.makeText(context, "일정을 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                            },
+                            onFailure = { error ->
+                                timber.log.Timber.e("API 호출 실패: ${error.message}")
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(
+                                        context,
+                                        "일정을 불러오는데 실패했습니다: ${error.message}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
                             }
-                        }
-
-                        override fun onFailure(call: Call<TodoResponse>, t: Throwable) {
-                            Toast.makeText(context, "네트워크 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
-                        }
-                    })
-                    */
-
-                    // 샘플 데이터로 테스트 (실제 구현 시 API 호출로 대체)
-                    allScheduleItems.clear()
-                    allScheduleItems.add(
-                        ScheduleItem(
-                            "5/10", "토", "5km 속도 연습", false,
-                            Color.parseColor("#4CAF50"),
-                            "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-                        )
-                    )
-
-                    // 더 많은 샘플 데이터 추가 (오늘 날짜와 주변 날짜)
-                    val today = Calendar.getInstance()
-                    val dayFormat = SimpleDateFormat("M/d", Locale.getDefault())
-                    val weekDayFormat = SimpleDateFormat("E", Locale.KOREAN)
-
-                    for (i in -2..4) {
-                        val date = Calendar.getInstance().apply {
-                            add(Calendar.DAY_OF_MONTH, i)
-                        }
-
-                        val dateStr = dayFormat.format(date.time)
-                        val dayStr = weekDayFormat.format(date.time)
-
-                        allScheduleItems.add(
-                            ScheduleItem(
-                                dateStr,
-                                dayStr,
-                                "러닝 ${5 + i}km",
-                                false,
-                                when (date.get(Calendar.DAY_OF_WEEK)) {
-                                    Calendar.MONDAY -> Color.parseColor("#FF5722")
-                                    Calendar.WEDNESDAY -> Color.parseColor("#2196F3")
-                                    Calendar.FRIDAY -> Color.parseColor("#9C27B0")
-                                    else -> Color.parseColor("#4CAF50")
-                                },
-                                java.util.UUID.randomUUID().toString()
-                            )
                         )
                     }
                 }
-
-                // UI 업데이트는 메인 스레드에서 실행
-                filterAndDisplaySchedules(selectedDate)
-
             } catch (e: Exception) {
+                timber.log.Timber.e("예외 발생: ${e.message}")
+                timber.log.Timber.e(e)
                 withContext(Dispatchers.Main) {
                     Toast.makeText(context, "오류가 발생했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
@@ -203,29 +171,82 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
     }
 
     // API 응답을 ScheduleItem 리스트로 변환
-    private fun convertToScheduleItems(todos: List<TodoItem>): List<ScheduleItem> {
-        return todos.map { todo ->
-            // 날짜 포맷 변환 (ISO-8601 -> M/d)
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.getDefault())
-            val date = dateFormat.parse(todo.date)
+    private fun convertToScheduleItems(todoList: List<com.D107.runmate.domain.model.manager.TodoItem>): List<ScheduleItem> {
+        timber.log.Timber.d("convertToScheduleItems 시작: ${todoList.size}개 항목")
 
-            val outputFormat = SimpleDateFormat("M/d", Locale.getDefault())
-            val dayFormat = SimpleDateFormat("E", Locale.KOREAN)
+        return todoList.mapNotNull { todo ->
+            try {
+                timber.log.Timber.d("일정 변환 시도: ${todo.todoId}, date=${todo.date}")
 
-            ScheduleItem(
-                outputFormat.format(date!!),
-                dayFormat.format(date),
-                todo.content,
-                todo.isDone,
-                Color.parseColor("#4CAF50"),
-                todo.todoId
-            )
+                // ISO 날짜 문자열에서 날짜 추출 (예: 2025-05-16T00:00:00+09:00)
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.getDefault())
+                val date = dateFormat.parse(todo.date) ?: return@mapNotNull null
+
+                if (date == null) {
+                    timber.log.Timber.w("날짜 파싱 실패: ${todo.date}")
+                    return@mapNotNull null
+                }
+
+                // 표시용 날짜 및 요일 포맷
+                val dayFormat = SimpleDateFormat("M/d", Locale.getDefault())
+                val weekDayFormat = SimpleDateFormat("E", Locale.KOREAN)
+
+                val formattedDate = dayFormat.format(date)
+                val formattedDay = weekDayFormat.format(date)
+
+                timber.log.Timber.d("날짜 변환 성공: ${todo.date} -> $formattedDate ($formattedDay)")
+
+                ScheduleItem(
+                    date = formattedDate,
+                    day = formattedDay,
+                    scheduleText = todo.content,
+                    isCompleted = todo.isDone,
+                    todoId = todo.todoId
+                )
+            } catch (e: Exception) {
+                android.util.Log.e("AIManagerFragment", "날짜 변환 오류: ${e.message}, 날짜: ${todo.date}")
+                null
+            }
         }
     }
 
+
     // 선택한 날짜에 해당하는 일정만 필터링하여 표시
     private fun filterAndDisplaySchedules(selectedDate: Calendar) {
+        val selectedDateStr = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(selectedDate.time)
+        timber.log.Timber.d("일정 필터링: 선택된 날짜=$selectedDateStr, 전체 일정 수=${allScheduleItems.size}")
 
+        try {
+            // 선택한 날짜의 월/일 형식 문자열
+            val dayFormat = SimpleDateFormat("M/d", Locale.getDefault())
+            val selectedDateFormatted = dayFormat.format(selectedDate.time)
+
+            timber.log.Timber.d("선택된 날짜 포맷: $selectedDateFormatted")
+
+            // 선택한 날짜와 일치하는 일정만 필터링
+            val filteredSchedules = allScheduleItems.filter { item ->
+                val match = item.date == selectedDateFormatted
+                timber.log.Timber.d("일정 비교: 일정 날짜=${item.date}, 선택 날짜=$selectedDateFormatted, 일치=${match}")
+                match
+            }
+
+            timber.log.Timber.d("필터링 결과: ${filteredSchedules.size}개 일정 표시")
+
+            // 리사이클러뷰에 표시
+            scheduleAdapter.submitList(filteredSchedules)
+
+            // 필터링된 일정이 없는 경우 로그
+            if (filteredSchedules.isEmpty()) {
+                timber.log.Timber.w("필터링된 일정이 없습니다. 선택 날짜: $selectedDateFormatted")
+            }
+        } catch (e: Exception) {
+            timber.log.Timber.e("일정 필터링 중 오류: ${e.message}")
+            timber.log.Timber.e(e)
+
+            // 오류 발생 시 모든 일정 표시 (디버깅용)
+            timber.log.Timber.d("오류로 인해 모든 일정 표시 (${allScheduleItems.size}개)")
+            scheduleAdapter.submitList(allScheduleItems)
+        }
     }
 
     // 이번 주 월요일 구하기

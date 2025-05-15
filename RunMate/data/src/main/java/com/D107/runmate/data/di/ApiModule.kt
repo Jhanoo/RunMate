@@ -4,6 +4,7 @@ import com.D107.runmate.data.remote.api.CurriculumService
 import com.D107.runmate.data.remote.api.GroupService
 import com.D107.runmate.data.remote.api.KakaoLocalService
 import com.D107.runmate.data.remote.api.MarathonService
+import com.D107.runmate.data.remote.api.TodoService
 import com.D107.runmate.data.remote.api.UserService
 import dagger.Module
 import dagger.Provides
@@ -44,5 +45,11 @@ class ApiModule {
     @Singleton
     fun curriculumService(@InterceptorRetrofit retrofit: Retrofit): CurriculumService {
         return retrofit.create(CurriculumService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun todoService(@InterceptorRetrofit retrofit: Retrofit): TodoService {
+        return retrofit.create(TodoService::class.java)
     }
 }

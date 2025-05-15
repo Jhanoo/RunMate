@@ -194,30 +194,57 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                 R.id.drawer_manager -> {
                     binding.navView.menu.findItem(R.id.drawer_manager).isChecked = true
 
-                    // AI 매니저 메뉴 선택 시 커리큘럼 확인 로직
+                    // 일단 로딩창은 표시하지 않고, 바로 API 요청
                     val curriculumViewModel = ViewModelProvider(this).get(CurriculumViewModel::class.java)
 
-                    // 먼저 API 호출로 커리큘럼 존재 여부 확인
+                    // null 관련 문제를 추적하기 위한 로그 추가
+                    Timber.d("AI 매니저 메뉴 선택됨: 커리큘럼 조회 시작")
+
                     lifecycleScope.launch {
                         try {
-                            // 커리큘럼 조회
+                            // 기존 결과 초기화
+                            curriculumViewModel.resetMyCurriculum()
+
+                            // 커리큘럼 조회 API 호출
                             curriculumViewModel.getMyCurriculum()
 
-                            // 짧은 시간 대기 (API 응답 대기)
-                            delay(300)
+                            // 응답 대기 (최대 1초)
+                            var timeoutCounter = 0
+                            var hasCurriculum = false
 
-                            // 커리큘럼이 있는지 확인
-                            val curriculum = curriculumViewModel.myCurriculum.value?.getOrNull()
+                            while (timeoutCounter < 10) {
+                                delay(100)
+                                timeoutCounter++
 
-                            if (curriculum != null) {
-                                // 커리큘럼이 존재하면 AIManagerFragment로 이동
-                                navController.navigate(
-                                    R.id.AIManagerFragment,
-                                    bundleOf("curriculumId" to curriculum.curriculumId),
-                                    navigateOptions
-                                )
-                            } else {
-                                // 커리큘럼이 없으면 인트로 화면으로 이동
+                                val curriculumResult = curriculumViewModel.myCurriculum.value
+                                Timber.d("커리큘럼 조회 결과($timeoutCounter): $curriculumResult")
+
+                                // Result 객체가 있고, 성공한 경우만 확인
+                                if (curriculumResult != null) {
+                                    val curriculum = curriculumResult.getOrNull()
+
+                                    if (curriculum != null) {
+                                        // 커리큘럼이 있으면 AIManagerFragment로 이동
+                                        Timber.d("커리큘럼 확인됨: curriculumId=${curriculum.curriculumId}")
+                                        hasCurriculum = true
+
+                                        navController.navigate(
+                                            R.id.AIManagerFragment,
+                                            bundleOf("curriculumId" to curriculum.curriculumId),
+                                            navigateOptions
+                                        )
+                                        break
+                                    } else if (curriculumResult.isFailure) {
+                                        // API 호출은 완료되었지만 커리큘럼이 없는 경우
+                                        Timber.d("커리큘럼 조회 실패: ${curriculumResult.exceptionOrNull()?.message}")
+                                        break
+                                    }
+                                }
+                            }
+
+                            // 커리큘럼이 없거나 API 호출 타임아웃인 경우
+                            if (!hasCurriculum) {
+                                Timber.d("커리큘럼 없음: AIManagerIntroFragment로 이동")
                                 navController.navigate(
                                     R.id.AIManagerIntroFragment,
                                     null,
@@ -225,7 +252,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                                 )
                             }
                         } catch (e: Exception) {
-                            // 오류 발생 시 인트로 화면으로 이동
+                            // 예외 발생 시 로그 출력 및 IntroFragment로 이동
+                            Timber.e("AI 매니저 접근 오류: ${e.message}")
                             navController.navigate(
                                 R.id.AIManagerIntroFragment,
                                 null,
@@ -246,7 +274,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                 else -> {}
             }
         }
-        true
+//        true
         hideHamburgerBtn(navController)
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true

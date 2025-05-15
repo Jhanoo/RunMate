@@ -5,6 +5,7 @@ import com.D107.runmate.data.remote.api.CurriculumService
 import com.D107.runmate.data.remote.api.GroupService
 import com.D107.runmate.data.remote.api.KakaoLocalService
 import com.D107.runmate.data.remote.api.MarathonService
+import com.D107.runmate.data.remote.api.TodoService
 import com.D107.runmate.data.remote.api.UserService
 import com.D107.runmate.data.remote.datasource.group.GroupDataSource
 import com.D107.runmate.data.remote.datasource.group.GroupDataSourceImpl
@@ -14,6 +15,8 @@ import com.D107.runmate.data.remote.datasource.manager.CurriculumDataSource
 import com.D107.runmate.data.remote.datasource.manager.CurriculumDataSourceImpl
 import com.D107.runmate.data.remote.datasource.manager.MarathonDataSource
 import com.D107.runmate.data.remote.datasource.manager.MarathonDataSourceImpl
+import com.D107.runmate.data.remote.datasource.manager.TodoDataSource
+import com.D107.runmate.data.remote.datasource.manager.TodoDataSourceImpl
 import com.D107.runmate.data.remote.datasource.user.AuthDataSource
 import com.D107.runmate.data.remote.datasource.user.AuthDataSourceImpl
 import com.squareup.moshi.Moshi
@@ -59,5 +62,11 @@ object RemoteDataSourceModule {
     @Singleton
     fun provideCurriculumDataSource(curriculumService: CurriculumService): CurriculumDataSource {
         return CurriculumDataSourceImpl(curriculumService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTodoDataSource(todoService: TodoService): TodoDataSource {
+        return TodoDataSourceImpl(todoService)
     }
 }
