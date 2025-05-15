@@ -60,57 +60,6 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
         initEvent()
         initMap()
 
-//        viewLifecycleOwner.lifecycleScope.launch {
-//            runningEndViewModel.endRunning.collectLatest {
-//                when (it) {
-//                    is RunningEndState.Error -> {
-//                        Timber.d("runningend error ${it.message}")
-//                        mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
-//                        findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
-//                    }
-//
-//                    is RunningEndState.Success -> {
-//                        mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
-//                        findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
-//                    }
-//                }
-//            }
-//        }
-
-//        viewLifecycleOwner.lifecycleScope.launch {
-//            runningEndViewModel.coord2Address.collectLatest {
-//                when (it) {
-//                    is Coord2AddressState.Error -> {
-//                        Timber.d("coord2address error ${it.message}")
-//                        mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
-//                        findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
-//                    }
-//
-//                    is Coord2AddressState.Success -> {
-//                        val record = mainViewModel.runningRecord.value
-//                        val locations = mainViewModel.userLocation.value
-//                        if (record is RunningRecordState.Exist && locations is UserLocationState.Exist) {
-//                            runningEndViewModel.endRunning(
-//                                0.0,
-//                                record.runningRecords.last().cadenceSum / record.runningRecords.size,
-//                                record.runningRecords.last().altitudeSum / record.runningRecords.size,
-//                                16.6667 / record.runningRecords.last().avgSpeed,
-//                                0.0,
-//                                mainViewModel.courseId.value,
-//                                (record.runningRecords.last().distance).toDouble(),
-//                                convertDateTime(record.runningRecords.last().currentTime),
-//                                it.address.address_name,
-//                                convertDateTime(record.runningRecords.first().currentTime)
-//                            )
-//                        } else {
-//                            mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
-//                            findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
-//                        }
-//                    }
-//                }
-//            }
-//        }
-
         viewLifecycleOwner.lifecycleScope.launch {
             mainViewModel.runningRecord.collectLatest {
                 if(it is RunningRecordState.Exist) {

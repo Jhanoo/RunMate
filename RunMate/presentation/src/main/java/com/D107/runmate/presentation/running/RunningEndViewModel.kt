@@ -37,7 +37,6 @@ class RunningEndViewModel @Inject constructor(
             }
         }
     }
-
 }
 
 sealed class RunningEndState {

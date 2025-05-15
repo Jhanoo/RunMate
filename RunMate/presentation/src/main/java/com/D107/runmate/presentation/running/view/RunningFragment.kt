@@ -11,10 +11,12 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.D107.runmate.domain.model.running.LocationModel
 import com.D107.runmate.domain.model.running.RunningRecordState
 import com.D107.runmate.domain.model.running.TrackingStatus
 import com.D107.runmate.domain.model.running.UserLocationState
@@ -23,6 +25,7 @@ import com.D107.runmate.presentation.MainViewModel
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.RunningTrackingService
 import com.D107.runmate.presentation.databinding.FragmentRunningBinding
+import com.D107.runmate.presentation.running.RunningEndViewModel
 import com.D107.runmate.presentation.utils.CommonUtils
 import com.D107.runmate.presentation.utils.CommonUtils.getActivityContext
 import com.D107.runmate.presentation.utils.KakaoMapUtil.addCoursePoint
@@ -51,6 +54,7 @@ import java.net.URL
 
 
 private const val TAG = "RunningFragment"
+
 @AndroidEntryPoint
 class RunningFragment : BaseFragment<FragmentRunningBinding>(
     FragmentRunningBinding::bind,
@@ -58,6 +62,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
 ) {
     private var kakaoMap: KakaoMap? = null
     private val mainViewModel: MainViewModel by activityViewModels()
+    private val runningEndViewModel: RunningEndViewModel by viewModels()
     private var mContext: Context? = null
     private var userLabel: Label? = null
     private lateinit var dialog: PaceSettingDialog
@@ -71,6 +76,27 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        runningEndViewModel.deleteFile()
+        if (mainViewModel.userLocation.value is UserLocationState.Initial) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                mContext?.let {
+                    val location =
+                        LocationUtils.getLocation(it, (getActivityContext(it) as MainActivity))
+                    mainViewModel.setUserLocation(
+                        UserLocationState.Exist(
+                            listOf(
+                                LocationModel(
+                                    location.latitude,
+                                    location.longitude,
+                                    location.altitude,
+                                    location.speed
+                                )
+                            )
+                        )
+                    )
+                }
+            }
+        }
 
         binding.mapView.start(object : MapLifeCycleCallback() {
             override fun onMapDestroy() {
@@ -115,6 +141,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                         TrackingStatus.STOPPED -> {
                             findNavController().navigate(R.id.action_runningFragment_to_runningEndFragment)
                         }
+
                         TrackingStatus.RUNNING -> {
                             binding.groupBtnStart.visibility = View.INVISIBLE
                             binding.groupRecord.visibility = View.VISIBLE
@@ -151,21 +178,33 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
 
         viewLifecycleOwner.lifecycleScope.launch {
             mainViewModel.runningRecord.collectLatest { state ->
-                if(state is RunningRecordState.Exist) {
-                    if(state.runningRecords.size > 1) {
+                if (state is RunningRecordState.Exist) {
+                    if (state.runningRecords.size > 1) {
                         val locationValue = mainViewModel.userLocation.value
-                        if(locationValue is UserLocationState.Exist) {
-                            val currentLocation = LatLng.from(locationValue.locations.last().latitude, locationValue.locations.last().longitude)
-                            val prevLocation = LatLng.from(locationValue.locations[locationValue.locations.size - 2].latitude, locationValue.locations[locationValue.locations.size - 2].longitude)
+                        if (locationValue is UserLocationState.Exist) {
+                            val currentLocation = LatLng.from(
+                                locationValue.locations.last().latitude,
+                                locationValue.locations.last().longitude
+                            )
+                            val prevLocation = LatLng.from(
+                                locationValue.locations[locationValue.locations.size - 2].latitude,
+                                locationValue.locations[locationValue.locations.size - 2].longitude
+                            )
                             mContext?.let {
                                 kakaoMap?.let {
-                                    addCoursePoint(mContext!!, kakaoMap!!, prevLocation, currentLocation)
+                                    addCoursePoint(
+                                        mContext!!,
+                                        kakaoMap!!,
+                                        prevLocation,
+                                        currentLocation
+                                    )
                                 }
                             }
 
                         }
                     }
-                    binding.tvDistance.text = getString(R.string.running_distance, state.runningRecords.last().distance)
+                    binding.tvDistance.text =
+                        getString(R.string.running_distance, state.runningRecords.last().distance)
                     binding.tvPace.text =
                         LocationUtils.getPaceFromSpeed(state.runningRecords.last().currentSpeed)
                 } else {
@@ -332,6 +371,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
     }
 
     private fun loadLocationAndMove() {
+        Timber.d("map ready and move")
         viewLifecycleOwner.lifecycleScope.launch {
             mainViewModel.userLocation.collectLatest { state ->
                 when (state) {
@@ -343,7 +383,8 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                                 LatLng.from(
                                     state.locations.last().latitude,
                                     state.locations.last().longitude
-                                ), 800)
+                                ), 800
+                            )
                         } else {
                             val cameraUpdate = CameraUpdateFactory.newCenterPosition(
                                 LatLng.from(
@@ -352,9 +393,13 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                                 )
                             )
                             kakaoMap?.moveCamera(cameraUpdate)
-                            addMarker(state.locations.last().latitude, state.locations.last().longitude)
+                            addMarker(
+                                state.locations.last().latitude,
+                                state.locations.last().longitude
+                            )
                         }
                     }
+
                     is UserLocationState.Initial -> {
                         Timber.d("UserLocationState Initial ")
                     }
