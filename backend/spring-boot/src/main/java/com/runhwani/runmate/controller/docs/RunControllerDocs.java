@@ -52,13 +52,13 @@ public interface RunControllerDocs {
                     @ApiResponse(responseCode = "201", description = "달리기 종료 및 저장 성공",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = RunEndResponse.class)
+                                    schema = @Schema(allOf = { CommonResponse.class, RunEndResponse.class })
                             )
                     ),
                     @ApiResponse(responseCode = "400", description = "잘못된 요청",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = RunEndResponse.class),
+                                    schema = @Schema(implementation = CommonResponse.class),
                                     examples = @ExampleObject(
                                             name = "실패 응답 예시",
                                             value = "{\"message\":\"GPX 파일 파싱 오류\",\"data\":null}"
