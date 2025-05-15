@@ -21,7 +21,9 @@ import com.kakao.vectormap.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
@@ -56,6 +58,9 @@ class CourseViewModel @Inject constructor(
 
     private val _address = MutableStateFlow<String?>(null)
     val address = _address.asStateFlow()
+
+    private val _courseCreate = MutableSharedFlow<Boolean>()
+    val courseCreate = _courseCreate.asSharedFlow()
 
     fun getAllCourseList() {
         viewModelScope.launch {
@@ -160,6 +165,16 @@ class CourseViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             createCourseUseCase(avgElevation, distance, historyId, name, shared, startLocation).collectLatest {
+                when (it) {
+                    is ResponseStatus.Success -> {
+                        Timber.d("createCourse Success {${it.data}}")
+                        _courseCreate.emit(true)
+                    }
+                    is ResponseStatus.Error -> {
+                        Timber.d("createCourse Error {${it.error}}")
+                        _courseCreate.emit(false)
+                    }
+                }
 
             }
         }

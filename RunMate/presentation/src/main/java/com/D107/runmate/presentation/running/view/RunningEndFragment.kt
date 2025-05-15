@@ -81,6 +81,14 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
                 }
             }
         }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            courseViewModel.courseCreate.collectLatest {
+                if(it) {
+                    binding.btnAddCourse.visibility = View.GONE
+                }
+            }
+        }
     }
 
     private fun initEvent() {
@@ -98,12 +106,11 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
 
         binding.btnAddCourse.setOnClickListener {
             dialog = CourseAddDialog() {
-                Timber.d("pair ${it.first} ${it.second}")
                 val record = mainViewModel.runningRecord.value
                 if(record is RunningRecordState.Exist) {
                     val lastRecord = record.runningRecords.last()
 
-                    var name: String = "${mainViewModel.nickname} ${dateformatMMdd(record.runningRecords.first().currentTime)}"
+                    var name = "${mainViewModel.nickname} ${dateformatMMdd(record.runningRecords.first().currentTime)}"
 
                     if(it.first.isNotEmpty()) {
                         name = it.first
