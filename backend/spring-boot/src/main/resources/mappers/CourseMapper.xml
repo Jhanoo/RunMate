@@ -133,31 +133,33 @@
         ORDER BY c.created_at DESC
     </select>
 
-<!--    5. 내가 만든 코스 조회-->
-    <select id="findCoursesCreatedByUser" resultType="com.runhwani.runmate.dto.response.course.CourseResponse">
+    <!-- 5. 내가 만든 코스 조회 (수정) -->
+    <select id="findCoursesCreatedByUser" resultMap="CourseResultMap">
         SELECT
-            c.course_id        AS courseId,
-            c.course_name      AS courseName,
-            c.is_shared        AS isShared,
-            c.distance         AS distance,
-            c.avg_elevation    AS avgElevation,
-            c.start_location   AS startLocation,
-            u.nickname         AS creator_nickname,
-            u.profile_image    AS creator_profile_image,
-            (SELECT COUNT(*)
-             FROM course_likes cl
-             WHERE cl.course_id = c.course_id)       AS likeCount,
-            EXISTS(
-                SELECT 1
-                FROM course_likes cl2
-                WHERE cl2.course_id = c.course_id
-                  AND cl2.user_id = #{userId}
-            )                                         AS liked
+        c.course_id      AS course_id,
+        c.course_name    AS course_name,
+        c.is_shared      AS is_shared,
+        c.distance       AS distance,
+        c.avg_elevation  AS avg_elevation,
+        c.start_location AS start_location,
+        u.nickname       AS nickname,
+        u.profile_image  AS profile_image,
+        COALESCE(
+        (SELECT COUNT(*) FROM course_likes cl WHERE cl.course_id = c.course_id),
+        0
+        )                AS like_count,
+        EXISTS(
+        SELECT 1
+        FROM course_likes cl2
+        WHERE cl2.course_id = c.course_id
+        AND cl2.user_id = #{userId}
+        )                AS liked            <!-- ✅ alias 일치 -->
         FROM courses c
-                 JOIN users u ON c.created_by = u.user_id
+        JOIN users u ON c.created_by = u.user_id
         WHERE c.created_by = #{userId}
         ORDER BY c.created_at DESC
     </select>
+
 
     <!-- 6. 전체 코스 조회 (수정) -->
     <select id="findAllCourses" resultMap="CourseResultMap">
