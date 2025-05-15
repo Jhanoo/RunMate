@@ -92,6 +92,9 @@ public class HistoryServiceImpl implements HistoryService {
             throw new CustomException(ErrorCode.INVALID_REQUEST, "그룹 러닝 기록이 아닙니다.");
         }
         
+        // GPX 파일 경로 가져오기
+        String gpxFile = (String) historyDetail.get("gpx_file");
+        
         // 그룹 러닝 참여자 기록 조회
         List<Map<String, Object>> groupRunners = historyDao.findGroupRunnersByGroupId(groupId);
         List<GroupRunnerResponse> groupRunResponses = groupRunners.stream()
@@ -117,6 +120,7 @@ public class HistoryServiceImpl implements HistoryService {
         // 응답 객체 생성
         return HistoryDetailResponse.builder()
                 .historyId(historyId)
+                .gpxFile(gpxFile)
                 .groupRun(groupRunResponses)
                 .myRun(myRunResponse)
                 .build();

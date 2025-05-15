@@ -18,6 +18,9 @@ public class HistoryDetailResponse {
     @Schema(description = "기록 ID", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
     private UUID historyId;
     
+    @Schema(description = "GPX 파일 경로", example = "/gpx/abc123.gpx")
+    private String gpxFile;
+    
     @Schema(description = "그룹 러닝 참여자 기록 목록")
     private List<GroupRunnerResponse> groupRun;
     
