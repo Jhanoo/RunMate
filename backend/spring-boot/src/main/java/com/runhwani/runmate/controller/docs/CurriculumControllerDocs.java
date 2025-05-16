@@ -89,4 +89,30 @@ public interface CurriculumControllerDocs {
             @RequestParam("month") int month,
             @AuthenticationPrincipal UserDetails principal
     );
+
+    @Operation(
+            summary = "오늘의 ToDo 조회",
+            description = "로그인한 사용자의 오늘 날짜에 해당하는 Todo를 반환합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "조회 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "오늘의 Todo가 없습니다.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    examples = @ExampleObject(
+                                            name = "NotFound",
+                                            value = "{\"message\": \"오늘의 Todo가 없습니다.\", \"data\": null}"
+                                    )
+                            )
+                    )
+            }
+    )
+    @GetMapping("/today")
+    ResponseEntity<CommonResponse<TodoResponse>> getTodayTodo(
+            @AuthenticationPrincipal UserDetails principal
+    );
 }

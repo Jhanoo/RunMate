@@ -6,6 +6,7 @@ import com.runhwani.runmate.dto.request.curriculum.CurriculumCreateRequest;
 import com.runhwani.runmate.dto.response.curriculum.CurriculumCreateResponse;
 import com.runhwani.runmate.dto.response.curriculum.TodoResponse;
 import com.runhwani.runmate.model.Curriculum;
+import com.runhwani.runmate.model.Todo;
 import com.runhwani.runmate.service.CurriculumService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -68,6 +69,19 @@ public class CurriculumController implements CurriculumControllerDocs {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(CommonResponse.ok(todos));
+    }
+
+    @Override
+    public ResponseEntity<CommonResponse<TodoResponse>> getTodayTodo(UserDetails principal) {
+        UUID userId = UUID.fromString(principal.getUsername());
+        Todo todo = curriculumService.getTodayTodo(userId);
+        TodoResponse response = TodoResponse.builder()
+                .todoId(todo.getTodoId())
+                .content(todo.getContent())
+                .isDone(todo.getIsDone())
+                .date(todo.getDate())
+                .build();
+        return ResponseEntity.ok(CommonResponse.ok(response));
     }
 
 }

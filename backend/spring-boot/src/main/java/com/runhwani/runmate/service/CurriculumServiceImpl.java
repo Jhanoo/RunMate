@@ -324,4 +324,9 @@ public class CurriculumServiceImpl implements CurriculumService {
             );
         }
     }
+
+    @Override
+    public Todo getTodayTodo(UUID userId) {
+        return curriculumDao.selectTodayTodoByUserId(userId);
+    }
 }
