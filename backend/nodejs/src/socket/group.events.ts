@@ -32,4 +32,3 @@ export default (io: Server, socket: Socket) => {
     console.log(`🔴 연결 해제: ${socket.id} (${reason})`)
   })
 }
-//test
