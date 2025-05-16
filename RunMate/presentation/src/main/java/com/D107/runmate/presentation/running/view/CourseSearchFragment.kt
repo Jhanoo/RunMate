@@ -35,6 +35,8 @@ class CourseSearchFragment : BaseFragment<FragmentCourseSearchBinding>(
 
         initAdapter()
 
+        courseViewModel.getAllCourseList()
+
         binding.btnBack.setOnClickListener {
             findNavController().popBackStack()
         }
@@ -42,7 +44,6 @@ class CourseSearchFragment : BaseFragment<FragmentCourseSearchBinding>(
         binding.btnFilter.setOnClickListener {
             dialog = FilterDialog(setting) { value ->
                 if (value.size != 0) {
-                    Timber.d("onViewCreated: value ${value[0]} ${value[1]}")
                     val isLiked = if(value[1] == 0) false else if(value[1] == 1) true else null
 
                     val courseList = courseViewModel.courseList.value
@@ -83,7 +84,6 @@ class CourseSearchFragment : BaseFragment<FragmentCourseSearchBinding>(
                             }
                         }
                     }
-
                 } else {
                     Timber.d("onViewCreated: value is empty")
                 }
@@ -108,7 +108,6 @@ class CourseSearchFragment : BaseFragment<FragmentCourseSearchBinding>(
             courseViewModel.courseList.collectLatest { state ->
                 when (state) {
                     is CourseSearchState.Success -> {
-                        Timber.d("getAllCourseList Success {${state.courseList}}")
                         courseRVAdapter.submitList(state.courseList)
                     }
                     is CourseSearchState.Error -> {
@@ -123,21 +122,14 @@ class CourseSearchFragment : BaseFragment<FragmentCourseSearchBinding>(
     private fun initAdapter() {
         courseRVAdapter = CourseRVAdapter()
 
-//        val tmpList = listOf(
-//            CourseInfo(0.1, "0", "테스트", Creator("테스트유저", "https://picsum.photos/200/300"), 1.2,13, true, false, "경상북도 구미시" ),
-//            CourseInfo(0.6, "12", "테스트1", Creator("테스트유저", "https://picsum.photos/200/300"), 6.2,190, true, true, "경상북도 구미시" ),
-//            CourseInfo(0.9, "443", "테스트44444", Creator("테스트유저", "https://picsum.photos/200/300"), 1.2,13, true, true, "경상북도 구미시" ))
-
         binding.rvCourse.apply {
             adapter = courseRVAdapter
             layoutManager = LinearLayoutManager(requireContext())
             courseRVAdapter.submitList(listOf())
         }
 
-
         courseRVAdapter.itemClickListener = object : CourseRVAdapter.ItemClickListener {
             override fun onClick(view: View, data: CourseInfo, position: Int) {
-                Timber.d("onClick: ${data.courseId} ${data.courseName}")
                 val action = CourseSearchFragmentDirections.actionCourseSearchFragmentToCourseDetailFragment(data.courseId)
                 findNavController().navigate(action)
             }

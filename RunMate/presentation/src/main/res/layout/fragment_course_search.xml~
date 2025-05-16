@@ -41,7 +41,6 @@
         android:inputType="text"
         android:paddingStart="12dp"
         android:drawablePadding="8dp"
-        android:maxLines="1"
         android:layout_marginHorizontal="24dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

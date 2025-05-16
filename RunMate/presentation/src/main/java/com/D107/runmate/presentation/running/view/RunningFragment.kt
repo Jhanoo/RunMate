@@ -370,20 +370,18 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
     }
 
     private fun loadLocationAndMove() {
-        Timber.d("map ready and move")
         viewLifecycleOwner.lifecycleScope.launch {
             mainViewModel.userLocation.collectLatest { state ->
                 when (state) {
                     is UserLocationState.Exist -> {
-                        Timber.d("UserLocationState Exist")
+                        Timber.d("loadLocationAndMove UserLocationState Exist")
                         val tmpUserLabel = userLabel
                         if (tmpUserLabel != null) {
                             tmpUserLabel.moveTo(
                                 LatLng.from(
                                     state.locations.last().latitude,
                                     state.locations.last().longitude
-                                ), 800
-                            )
+                                ), 800)
                         } else {
                             val cameraUpdate = CameraUpdateFactory.newCenterPosition(
                                 LatLng.from(
@@ -400,11 +398,11 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                     }
 
                     is UserLocationState.Initial -> {
-                        Timber.d("UserLocationState Initial ")
+                        Timber.d("loadLocationAndMove UserLocationState Initial")
                     }
 
                     else -> {
-                        Timber.d("UserLocationState else ")
+                        Timber.d("loadLocationAndMove UserLocationState else")
                     }
                 }
             }
@@ -414,6 +412,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
     override fun onPause() {
         super.onPause()
         binding.mapView.pause()
+        userLabel = null
     }
 
     private fun createProfileMarker(markerBackground: Bitmap, profileBitmap: Bitmap): Bitmap {

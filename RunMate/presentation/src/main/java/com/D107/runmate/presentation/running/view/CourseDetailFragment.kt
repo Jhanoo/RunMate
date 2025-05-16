@@ -39,8 +39,6 @@ class CourseDetailFragment : BaseFragment<FragmentCourseDetailBinding>(
     R.layout.fragment_course_detail
 ) {
     private var kakaoMap: KakaoMap? = null
-
-    //    private val mainViewModel: MainViewModel by activityViewModels()
     private val courseViewModel: CourseViewModel by viewModels()
     private var mContext: Context? = null
 
@@ -52,7 +50,6 @@ class CourseDetailFragment : BaseFragment<FragmentCourseDetailBinding>(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val args: CourseDetailFragmentArgs by navArgs()
-        Timber.d("args ${args.courseId}")
 
         courseViewModel.getCourseDetail(args.courseId)
 
@@ -62,7 +59,6 @@ class CourseDetailFragment : BaseFragment<FragmentCourseDetailBinding>(
 
         viewLifecycleOwner.lifecycleScope.launch {
             courseViewModel.courseDetail.collectLatest {
-                Timber.d("courseDetailState: $it")
                 if (it is CourseDetailState.Success) {
                     binding.tvCourseTitle.text = it.courseDetail.name
                     binding.tvCourseDistance.text =
@@ -76,13 +72,18 @@ class CourseDetailFragment : BaseFragment<FragmentCourseDetailBinding>(
                         if (it.courseDetail.userEstimatedTime == null) "-" else formatSecondsToHMS(
                             it.courseDetail.userEstimatedTime!!
                         )
+                    binding.tvCourseLikeCnt.text = it.courseDetail.likes.toString()
+                    if(it.courseDetail.liked) {
+                        binding.ivCourseLike.setImageResource(R.drawable.ic_course_like)
+                    } else {
+                        binding.ivCourseLike.setImageResource(R.drawable.ic_course_like_inactive)
+                    }
 
                     withContext(Dispatchers.IO) {
                         getGpxInputStream(it.courseDetail.gpxFile)?.let { inputStream ->
                             drawGpxFile(inputStream)
                         }
                     }
-
                 }
             }
         }
@@ -102,14 +103,12 @@ class CourseDetailFragment : BaseFragment<FragmentCourseDetailBinding>(
         }, object : KakaoMapReadyCallback() {
             override fun onMapReady(p0: KakaoMap) {
                 kakaoMap = p0
-                addCourseLine(requireContext(), kakaoMap!!, listOf())
-                // TODO 세 번째 파라미터 추후 전달받은 코스의 gpx 파일의 좌표값 리스트로 바꾸기
             }
 
             override fun getPosition(): LatLng {
                 val fallbackLocation = LocationUtils.getFallbackLocation()
                 return LatLng.from(fallbackLocation.latitude, fallbackLocation.longitude)
-            } // TODO 추후 전달받은 코스의 시작지점으로 변경
+            }
         })
     }
 
@@ -128,7 +127,6 @@ class CourseDetailFragment : BaseFragment<FragmentCourseDetailBinding>(
             mContext?.let {
                 val trackPoints = parseGpx(inputStream)
                 withContext(Dispatchers.Main) {
-                    Timber.d("trackPoints size ${trackPoints.size}")
                     val startPoint = trackPoints[0]
                     val cameraUpdate = CameraUpdateFactory.newCenterPosition(
                         LatLng.from(
@@ -144,5 +142,4 @@ class CourseDetailFragment : BaseFragment<FragmentCourseDetailBinding>(
             }
         }
     }
-
 }

@@ -66,8 +66,14 @@ class CourseViewModel @Inject constructor(
         viewModelScope.launch {
             getAllCourseUseCase().collect { status ->
                 when (status) {
-                    is ResponseStatus.Success -> Timber.d("getAllCourseList Success {${status.data}}")
-                    is ResponseStatus.Error -> Timber.d("getAllCourseList Error {${status.error}}")
+                    is ResponseStatus.Success -> {
+                        Timber.d("getAllCourseList Success {${status.data}}")
+                        _courseList.value = CourseSearchState.Success(status.data)
+                    }
+                    is ResponseStatus.Error -> {
+                        Timber.d("getAllCourseList Error {${status.error}}")
+                        _courseList.value = CourseSearchState.Error(status.error.message)
+                    }
                 }
             }
         }
