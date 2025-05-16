@@ -93,6 +93,8 @@ pipeline {
                             'cd ${APPDIR} &&
                              echo "Docker 컨테이너 중지 및 제거" &&
                              docker-compose down --remove-orphans &&
+                             echo "Node.js 이미지 재빌드" &&
+                             docker-compose build --no-cache nodejs &&
                              echo "새 컨테이너 시작" &&
                              docker-compose up -d
                             '
