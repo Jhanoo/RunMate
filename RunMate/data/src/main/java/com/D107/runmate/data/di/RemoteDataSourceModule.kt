@@ -3,6 +3,7 @@ package com.D107.runmate.data.di
 import android.content.Context
 import com.D107.runmate.data.remote.api.CourseService
 import com.D107.runmate.data.remote.api.GroupService
+import com.D107.runmate.data.remote.api.HistoryService
 import com.D107.runmate.data.remote.api.KakaoLocalService
 import com.D107.runmate.data.remote.api.RunningService
 import com.D107.runmate.data.remote.api.UserService
@@ -12,6 +13,8 @@ import com.D107.runmate.data.remote.datasource.group.GroupDataSource
 import com.D107.runmate.data.remote.datasource.group.GroupDataSourceImpl
 import com.D107.runmate.data.remote.datasource.group.KakaoLocalDataSource
 import com.D107.runmate.data.remote.datasource.group.KakaoLocalDataSourceImpl
+import com.D107.runmate.data.remote.datasource.history.HistoryDataSource
+import com.D107.runmate.data.remote.datasource.history.HistoryDataSourceImpl
 import com.D107.runmate.data.remote.datasource.running.RunningDataSource
 import com.D107.runmate.data.remote.datasource.running.RunningDataSourceImpl
 import com.D107.runmate.data.remote.datasource.socket.SocketService
@@ -73,6 +76,14 @@ object RemoteDataSourceModule {
         courseService: CourseService
     ): CourseDataSource {
         return CourseDataSourceImpl(courseService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideHistoryDataSource(
+        historyService: HistoryService
+    ): HistoryDataSource {
+        return HistoryDataSourceImpl(historyService)
     }
 
 }

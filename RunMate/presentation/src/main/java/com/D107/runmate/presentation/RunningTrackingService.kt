@@ -14,6 +14,7 @@ import android.hardware.SensorManager
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import com.D107.runmate.domain.model.base.ResponseStatus
 import com.D107.runmate.domain.model.running.LocationModel
@@ -26,6 +27,7 @@ import com.D107.runmate.domain.usecase.group.GetCoord2AddressUseCase
 import com.D107.runmate.domain.usecase.running.EndRunningUseCase
 import com.D107.runmate.presentation.running.Coord2AddressState
 import com.D107.runmate.presentation.running.RunningEndState
+import com.D107.runmate.presentation.utils.CommonUtils
 import com.D107.runmate.presentation.utils.CommonUtils.convertDateTime
 import com.D107.runmate.presentation.utils.LocationUtils.trackingLocation
 import dagger.hilt.android.AndroidEntryPoint
@@ -110,18 +112,15 @@ class RunningTrackingService : Service() {
         CoroutineScope(Dispatchers.IO).launch {
             repository.finishTracking().collectLatest {
                 if (it) {
-                    Timber.d("write finish")
                     val record = repository.runningRecord.value
                     val location = repository.userLocation.value
                     val recordSize = repository.recordSize.value
                     if (location is UserLocationState.Exist && record is RunningRecordState.Exist && recordSize > 0) {
-                        Timber.d("coord2Address recordSize ${recordSize}")
                         val address = getAddress(
                             location.locations.first().longitude,
                             location.locations.first().latitude
                         )
                         address?.let {
-                            Timber.d("lastRecord")
                             val lastRecord = record.runningRecords.last()
                             endRunning(
                                 0.0,

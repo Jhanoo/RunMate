@@ -15,6 +15,7 @@ import com.D107.runmate.domain.usecase.course.GetRecentCourseUseCase
 import com.D107.runmate.domain.usecase.course.SearchCourseUseCase
 import com.D107.runmate.domain.usecase.course.UpdateCourseLikeUseCase
 import com.D107.runmate.domain.usecase.group.GetCoord2AddressUseCase
+import com.D107.runmate.domain.usecase.history.GetHistoryDetailUseCase
 import com.D107.runmate.presentation.utils.GpxParser.getGpxInputStream
 import com.D107.runmate.presentation.utils.GpxParser.parseGpx
 import com.kakao.vectormap.LatLng
@@ -42,7 +43,8 @@ class CourseViewModel @Inject constructor(
     private val getInputStreamFromUrlUseCase: GetInputStreamFromUrlUseCase,
     private val createCourseUseCase: CreateCourseUseCase,
     private val updateCourseLikeUseCase: UpdateCourseLikeUseCase,
-    private val coord2AddressUseCase: GetCoord2AddressUseCase
+    private val coord2AddressUseCase: GetCoord2AddressUseCase,
+    private val getHistoryDetailUseCase: GetHistoryDetailUseCase
 ) : ViewModel() {
     private val _courseList = MutableStateFlow<CourseSearchState>(CourseSearchState.Initial)
     val courseList = _courseList.asStateFlow()
@@ -61,6 +63,9 @@ class CourseViewModel @Inject constructor(
 
     private val _courseCreate = MutableSharedFlow<Boolean>()
     val courseCreate = _courseCreate.asSharedFlow()
+
+    private val _courseLiked = MutableSharedFlow<Boolean>()
+    val courseLiked = _courseLiked.asSharedFlow()
 
     fun getAllCourseList() {
         viewModelScope.launch {
@@ -213,6 +218,22 @@ class CourseViewModel @Inject constructor(
                     is ResponseStatus.Error -> {
                         Timber.d("getAddressFromLatLng Error {${response.error}}")
                         _address.value = null
+                    }
+                }
+            }
+        }
+    }
+
+    fun getHistoryDetail(historyId: String) {
+        viewModelScope.launch {
+            getHistoryDetailUseCase(historyId).collect { response ->
+                when (response) {
+                    is ResponseStatus.Success -> {
+                        Timber.d("getHistoryDetail Success {${response.data}}")
+                        _courseLiked.emit(response.data.myRunItem.courseLiked)
+                    }
+                    is ResponseStatus.Error -> {
+                        Timber.d("getHistoryDetail Error {${response.error}}")
                     }
                 }
             }

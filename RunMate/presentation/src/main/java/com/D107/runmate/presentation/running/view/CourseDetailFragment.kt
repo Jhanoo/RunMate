@@ -3,10 +3,12 @@ package com.D107.runmate.presentation.running.view
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.D107.runmate.presentation.MainViewModel
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentCourseDetailBinding
 import com.D107.runmate.presentation.running.CourseDetailState
@@ -41,6 +43,7 @@ class CourseDetailFragment : BaseFragment<FragmentCourseDetailBinding>(
     private var kakaoMap: KakaoMap? = null
     private val courseViewModel: CourseViewModel by viewModels()
     private var mContext: Context? = null
+    private val mainViewModel: MainViewModel by activityViewModels()
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -54,7 +57,8 @@ class CourseDetailFragment : BaseFragment<FragmentCourseDetailBinding>(
         courseViewModel.getCourseDetail(args.courseId)
 
         binding.btnNext.setOnClickListener {
-
+            mainViewModel.setCourseId(args.courseId)
+            findNavController().navigate(R.id.action_courseDetailFragment_to_runningFragment)
         }
 
         viewLifecycleOwner.lifecycleScope.launch {

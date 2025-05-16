@@ -195,6 +195,11 @@
         <argument
             android:name="courseId"
             app:argType="string" />
+        <action
+            android:id="@+id/action_courseDetailFragment_to_runningFragment"
+            app:destination="@id/runningFragment"
+            app:popUpTo="@id/runningFragment"
+            app:popUpToInclusive="true"/>
     </fragment>
     <fragment
         android:id="@+id/chartFragment"

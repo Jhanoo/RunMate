@@ -75,6 +75,10 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        mainViewModel.courseId.value?.let {
+            Timber.d("courseId ${it}")
+        }
+
         if (mainViewModel.userLocation.value is UserLocationState.Initial) {
             viewLifecycleOwner.lifecycleScope.launch {
                 mContext?.let {

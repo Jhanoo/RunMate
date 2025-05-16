@@ -1,0 +1,26 @@
+package com.D107.runmate.data.remote.datasource.history
+
+import com.D107.runmate.data.remote.api.HistoryService
+import com.D107.runmate.data.remote.common.ApiResponse
+import com.D107.runmate.data.remote.response.history.HistoryDetailResponse
+import com.D107.runmate.data.remote.response.history.HistoryResponse
+import javax.inject.Inject
+
+class HistoryDataSourceImpl @Inject constructor(
+    private val historyService: HistoryService
+): HistoryDataSource {
+    override suspend fun getHistoryList(): ApiResponse<HistoryResponse> {
+        return historyService.getHistoryList()
+    }
+
+    override suspend fun getHistoryDetail(historyId: String): ApiResponse<HistoryDetailResponse> {
+        return historyService.getHistoryDetail(historyId)
+    }
+
+    override suspend fun getHistoryDetailByUserId(
+        historyId: String,
+        userId: String
+    ): ApiResponse<HistoryDetailResponse> {
+        return historyService.getHistoryDetailByUserId(historyId, userId)
+    }
+}

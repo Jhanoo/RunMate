@@ -46,6 +46,8 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
     private val courseViewModel: CourseViewModel by viewModels()
     private lateinit var dialog: CourseAddDialog
     private var mContext: Context? = null
+    private var isLike = false
+    private var initIsLike = false
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -58,6 +60,10 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
         initUI()
         initEvent()
         initMap()
+
+        mainViewModel.historyId.value?.let {
+            courseViewModel.getHistoryDetail(it)
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             mainViewModel.runningRecord.collectLatest {
@@ -83,6 +89,19 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
+            courseViewModel.courseLiked.collectLatest {
+                isLike = it
+                initIsLike = it
+                Timber.d("isLike ${isLike} ${it}")
+                if(it) {
+                    binding.ivLike.setImageResource(R.drawable.ic_course_like)
+                } else {
+                    binding.ivLike.setImageResource(R.drawable.ic_course_like_inactive)
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
             courseViewModel.courseCreate.collectLatest {
                 if(it) {
                     binding.btnAddCourse.visibility = View.GONE
@@ -95,8 +114,12 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
         binding.btnNext.setOnClickListener {
             runningEndViewModel.deleteFile()
             mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
-            // TODO 사용자 좋아요 여부 업데이트 api 요청하기 --> 초기값과 달라졌을 때만 요청하기?
             mainViewModel.resetHistoryId()
+            if(isLike != initIsLike) {
+                mainViewModel.courseId.value?.let {
+                    courseViewModel.updateCourseLike(it)
+                }
+            }
             findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
         }
 
@@ -122,14 +145,14 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
             dialog.show(requireActivity().supportFragmentManager, "course_add")
         }
         
-        binding.ivLike.setOnClickListener { 
-            // TODO 사용자가 이미 좋아요한 경우
-            binding.ivLike.setImageResource(R.drawable.ic_course_like_inactive)
-
-            // TODO 사용자가 처음 좋아요하는 경우
-            binding.ivLike.setImageResource(R.drawable.ic_course_like)
-
-            // TODO 좋아요 업데이트 함수 호출하기
+        binding.ivLike.setOnClickListener {
+            if(isLike == false) {
+                binding.ivLike.setImageResource(R.drawable.ic_course_like)
+                isLike = true
+            } else {
+                binding.ivLike.setImageResource(R.drawable.ic_course_like_inactive)
+                isLike = false
+            }
         }
     }
 
