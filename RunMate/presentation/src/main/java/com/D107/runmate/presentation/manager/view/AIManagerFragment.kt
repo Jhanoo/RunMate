@@ -77,7 +77,7 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
         scheduleAdapter.setItemClickListener(object : ScheduleRVAdapter.ItemClickListener {
             override fun onClick(view: View, data: ScheduleItem, position: Int) {
                 // 체크박스 상태 변경 시 수행할 작업
-                val message = if (data.isCompleted) "일정 완료!" else "일정 미완료로 변경"
+                val message = if (data.isCompleted ?: false) "일정 완료!" else "일정 미완료로 변경"
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 
                 // TODO: 완료 상태 변경 API 호출
@@ -196,7 +196,7 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
                     date = formattedDate,
                     day = formattedDay,
                     scheduleText = todo.content,
-                    isCompleted = todo.isDone,
+                    isCompleted = todo.isDone ?: false,
                     todoId = todo.todoId
                 )
             } catch (e: Exception) {

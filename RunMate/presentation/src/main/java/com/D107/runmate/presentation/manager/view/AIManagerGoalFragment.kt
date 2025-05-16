@@ -135,7 +135,6 @@ class AIManagerGoalFragment : BaseFragment<FragmentAIManagerGoalBinding>(
 
         binding.btnConfirmGoal.setOnClickListener {
             createCurriculum()
-//            findNavController().navigate(R.id.action_aiManagerGoal_to_aiManager)
         }
     }
 
@@ -221,7 +220,7 @@ class AIManagerGoalFragment : BaseFragment<FragmentAIManagerGoalBinding>(
 
         // 최대 날짜 설정 (오늘로부터 1년 후까지)
         val maxDateCalendar = Calendar.getInstance()
-        maxDateCalendar.add(Calendar.YEAR, 1) // 현재 날짜에 1년 추가
+        maxDateCalendar.add(Calendar.MONTH, 3) // 현재 날짜에 3개월 추가
         datePickerDialog.datePicker.maxDate = maxDateCalendar.timeInMillis
 
         datePickerDialog.show()

@@ -4,7 +4,7 @@ data class ScheduleItem(
     val date: String,
     val day: String,
     val scheduleText: String,
-    var isCompleted: Boolean,
+    var isCompleted: Boolean?,
 //    val colorIndicator: Int? = null,
     val todoId: String? = null
 )
