@@ -6,18 +6,19 @@ import com.D107.runmate.data.remote.response.history.GroupRunItem.Companion.toDo
 import com.D107.runmate.data.remote.response.history.HistoryItem.Companion.toDomainModel
 import com.D107.runmate.data.remote.response.history.MyRunItem.Companion.toDomainModel
 import com.D107.runmate.domain.model.history.HistoryDetail
+import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class HistoryDetailResponse(
     val gpxFile: String,
-    val groupRunItem: List<GroupRunItem>,
+    @Json(name = "groupRun") val groupRunItem: List<GroupRunItem?>,
     val historyId: String,
-    val myRunItem: MyRunItem
+    @Json(name = "myRun") val myRunItem: MyRunItem
 ): BaseResponse {
     companion object: DataMapper<HistoryDetailResponse, HistoryDetail> {
         override fun HistoryDetailResponse.toDomainModel(): HistoryDetail {
-            return HistoryDetail(gpxFile, groupRunItem.map { it.toDomainModel() }, historyId, myRunItem.toDomainModel())
+            return HistoryDetail(gpxFile, if(groupRunItem.isEmpty()) emptyList() else this.groupRunItem.map { it!!.toDomainModel() } , historyId, myRunItem.toDomainModel())
         }
     }
 }
