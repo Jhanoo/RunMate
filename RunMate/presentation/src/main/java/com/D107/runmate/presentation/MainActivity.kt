@@ -16,6 +16,7 @@ import android.view.ViewGroup
 import android.view.Window
 import android.widget.Button
 import android.widget.ImageView
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.core.os.bundleOf
 import androidx.core.view.GravityCompat
@@ -74,11 +75,36 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                 binding.drawerLayout.openDrawer(GravityCompat.START)
             }
         }
+
+        // 뒤로가기 콜백 등록
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    // 1) 드로어가 열려 있으면 닫기
+                    binding.drawerLayout.closeDrawer(GravityCompat.START)
+                } else {
+                    // 2) 기본 뒤로가기 동작 호출
+                    // 콜백을 비활성화한 뒤, 다시 디스패처에 이벤트를 넘겨줌
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
     }
 
     private fun observeUserInfo() {
         lifecycleScope.launch {
             viewModel.nickname.collect { nickname ->
+                val navController = (supportFragmentManager
+                    .findFragmentById(R.id.nav_host_fragment) as NavHostFragment)
+                    .navController
+                val current = navController.currentDestination?.id ?: return@collect
+
+                if (current == R.id.splashFragment) {
+                    // 스플래시 화면일 때는 SplashFragment 에서 로직 처리
+                    return@collect
+                }
+
                 if (!nickname.isNullOrEmpty()) {
                     // 드로어 헤더의 이름 업데이트
                     Timber.d("nickname : $nickname")
@@ -87,20 +113,14 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                     headerBinding.tvName.text = nickname
                 } else {
                     Timber.d("delete nickname")
-                    val navHostFragment =
-                        supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-                    val navController = navHostFragment.navController
-
-                    navController.currentDestination?.id?.let { currentDestinationId ->
-
-
-                        val navigateOptions = NavOptions.Builder()
+                    navController.navigate(
+                        R.id.loginFragment,
+                        null,
+                        NavOptions.Builder()
                             .setLaunchSingleTop(true)
-                            .setPopUpTo(currentDestinationId, true)
+                            .setPopUpTo(current, true)
                             .build()
-
-                        navController.navigate(R.id.loginFragment)
-                    }
+                    )
                 }
             }
         }
@@ -264,7 +284,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                     binding.navView.menu.findItem(R.id.drawer_logout).isChecked = true
                     showLogoutConfirmDialog()
                     binding.drawerLayout.closeDrawer(GravityCompat.START)
-                    hideHamburgerBtn()
+//                    hideHamburgerBtn()
                     return true
                 }
 
@@ -297,6 +317,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         val btnLogout = dialog.findViewById<Button>(R.id.btn_confirm_short)
         btnLogout.setOnClickListener {
             performLogout()
+            hideHamburgerBtn()
             dialog.dismiss()
         }
         dialog.show()
@@ -307,15 +328,16 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
 
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-//        val navController = navHostFragment.navController
-//
-//        navController.navigate(
-//            R.id.loginFragment,
-//            null,
-//            NavOptions.Builder()
-//                .setPopUpTo(R.id.nav_graph, true)
-//                .build()
-//        )
+
+        val navController = navHostFragment.navController
+
+        navController.navigate(
+            R.id.loginFragment,
+            null,
+            NavOptions.Builder()
+                .setPopUpTo(R.id.nav_graph, true)
+                .build()
+        )
     }
 
     private val checker = PermissionChecker(this)
@@ -460,4 +482,5 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
             }
         }
     }
+
 }
