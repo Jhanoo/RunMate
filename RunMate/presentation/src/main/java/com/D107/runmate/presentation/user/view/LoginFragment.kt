@@ -48,7 +48,7 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(
                     is LoginViewModel.LoginUiState.Success -> {
                         // 로그인 성공
                         showLoading(false)
-                        navigateToMain()
+//                        navigateToMain()
                     }
 
                     is LoginViewModel.LoginUiState.Error -> {
