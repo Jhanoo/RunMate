@@ -166,7 +166,7 @@
     </select>
 
 
-    <!-- 6. 전체 코스 조회 (수정) -->
+    <!-- 6. 전체 코스 조회 -->
     <select id="findAllCourses" resultMap="CourseResultMap">
         SELECT
             c.course_id        AS course_id,
@@ -191,6 +191,7 @@
             FROM course_likes
             GROUP BY course_id
         ) l ON l.course_id = c.course_id
+        WHERE c.is_shared = TRUE
         ORDER BY c.created_at DESC
     </select>
 
