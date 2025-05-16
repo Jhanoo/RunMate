@@ -13,4 +13,5 @@ interface GroupRepository {
     suspend fun joinGroup(intviteCode:String): Flow<ResponseStatus<JoinInfo?>>
     suspend fun startGroup():Flow<ResponseStatus<Unit?>>
     suspend fun finishGroup():Flow<ResponseStatus<Unit?>>
+    suspend fun hasGroupHistory():Flow<ResponseStatus<Boolean>>
 }

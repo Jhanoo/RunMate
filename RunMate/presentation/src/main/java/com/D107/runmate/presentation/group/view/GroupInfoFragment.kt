@@ -121,7 +121,7 @@ class GroupInfoFragment : BaseFragment<FragmentGroupInfoBinding>(
     private fun setupRecyclerView() {
         binding.rvGroupMembers.layoutManager = GridLayoutManager(requireContext(), 3)
 
-        adapter = GroupMemberAdapter()
+        adapter = GroupMemberAdapter(viewModel.currentGroup.value?.leaderId?:"")
         binding.rvGroupMembers.adapter = adapter
 
 //        adapter.submitList()

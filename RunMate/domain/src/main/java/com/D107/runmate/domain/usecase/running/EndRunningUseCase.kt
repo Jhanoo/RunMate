@@ -18,7 +18,8 @@ class EndRunningUseCase @Inject constructor(
         distance: Double,
         endTime: String,
         startLocation: String,
-        startTime: String
+        startTime: String,
+        groupId:String?=null
     ) = runningRepository.endRunning(
         avgBpm,
         avgCadence,
@@ -29,6 +30,7 @@ class EndRunningUseCase @Inject constructor(
         distance,
         endTime,
         startLocation,
-        startTime
+        startTime,
+        groupId
     )
 }

@@ -8,6 +8,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.D107.runmate.domain.model.running.RunningRecordState
 import com.D107.runmate.domain.model.running.TrackingStatus
 import com.D107.runmate.domain.model.running.UserLocationState
@@ -42,6 +43,8 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
     FragmentRunningEndBinding::bind,
     R.layout.fragment_running_end
 ) {
+    private val args: RunningEndFragmentArgs by navArgs()
+    lateinit var sourceFragment:String
     private var kakaoMap: KakaoMap? = null
     private val mainViewModel: MainViewModel by activityViewModels()
     private val runningEndViewModel: RunningEndViewModel by viewModels()
@@ -55,7 +58,7 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        sourceFragment = args.sourceScreen
         initUI()
         initEvent()
         initMap()
@@ -83,7 +86,10 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
         binding.btnNext.setOnClickListener {
             runningEndViewModel.deleteFile()
             mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
-            findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
+            when (sourceFragment) {
+                "RUNNING_FRAGMENT"-> findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
+                "GROUP_RUNNING_FRAGMENT"-> findNavController().navigate(R.id.action_runningEndFragment_to_groupRrunningFragment)
+            }
         }
 
         binding.btnChart.setOnClickListener {

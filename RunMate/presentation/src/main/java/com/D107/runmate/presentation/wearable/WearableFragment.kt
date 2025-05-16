@@ -27,6 +27,7 @@ import com.D107.runmate.presentation.databinding.FragmentWearableBinding
 import com.D107.runmate.presentation.wearable.state.InsoleCardState
 import com.D107.runmate.presentation.wearable.viewmodel.AnalysisProcessState
 import com.D107.runmate.presentation.wearable.viewmodel.InsoleViewModel
+import com.google.android.material.button.MaterialButton
 import com.ssafy.locket.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -319,10 +320,30 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
             if(result.averageLeftYaw!=null&&result.averageRightYaw!=null) {
                 gaitDiff = if(result.averageLeftYaw!!>result.averageRightYaw!!) result.averageRightYaw!! - result.averageLeftYaw!! else Math.abs(result.averageRightYaw!! - result.averageLeftYaw!!)
             }
-            var gaitResultDescriptionString = getGaitPatternString(gaitDiff,result.overallGaitPattern)
+            val gaitResultDescriptionString = getGaitPatternString(gaitDiff,result.overallGaitPattern)
 
 
             binding.tvAnalysisDescriptionInsole.text = gaitResultDescriptionString
+            when(result.overallGaitPattern){
+                GaitPatternType.IN_TOEING -> {
+                    binding.tvGaitResultInsole.text = "안짱걸음"
+                    binding.ivFootstrikeInsole.setImageResource(R.drawable.img_in_toeing)
+                    binding.ivFootstrikeInsole.visibility = View.VISIBLE
+                }
+                GaitPatternType.OUT_TOEING->{
+                    binding.tvGaitResultInsole.text = "팔짜걸음"
+                    binding.ivFootstrikeInsole.setImageResource(R.drawable.img_out_toeing)
+                    binding.ivFootstrikeInsole.visibility = View.VISIBLE
+                }GaitPatternType.NEUTRAL->{
+                    binding.tvGaitResultInsole.text = "정상걸음"
+                    binding.ivFootstrikeInsole.setImageResource(R.drawable.img_neutral_toeing)
+                    binding.ivFootstrikeInsole.visibility = View.VISIBLE
+                }else->{
+                    binding.tvGaitResultInsole.text = "알수 없음"
+                    binding.ivFootstrikeInsole.visibility = View.GONE
+
+                }
+            }
 
             var strikeType = FootStrikeType.UNKNOWN
             var maxPercent = -1
@@ -416,6 +437,10 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
         val listView = dialogView.findViewById<android.widget.ListView>(R.id.listViewDevices) // ListView ID 확인 필요
         val selectedLeftTextView = dialogView.findViewById<TextView>(R.id.textViewDialogSelectedLeft) // Dialog 내 TextView ID
         val selectedRightTextView = dialogView.findViewById<TextView>(R.id.textViewDialogSelectedRight) // Dialog 내 TextView ID
+        val fairingButton =  dialogView.findViewById<MaterialButton>(R.id.btn_fairing_dialog)
+        val cancelButton =  dialogView.findViewById<MaterialButton>(R.id.btn_cancel_dialog)
+
+
 
         val adapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_list_item_1)
         listView.adapter = adapter
@@ -424,13 +449,13 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
         updateDialogListAdapter(adapter, viewModel.scannedDevices.value)
         updateDialogSelectionText(selectedLeftTextView, selectedRightTextView)
 
-        val job = viewLifecycleOwner.lifecycleScope.launch {
+        val jobScannedDevices = viewLifecycleOwner.lifecycleScope.launch {
             viewModel.scannedDevices.collect { devices -> updateDialogListAdapter(adapter, devices) }
         }
-        val jobLeft = viewLifecycleOwner.lifecycleScope.launch {
+        val jobSelectedLeft = viewLifecycleOwner.lifecycleScope.launch {
             viewModel.selectedLeftInsole.collect { updateDialogSelectionText(selectedLeftTextView, selectedRightTextView) }
         }
-        val jobRight = viewLifecycleOwner.lifecycleScope.launch {
+        val jobSelectedRight = viewLifecycleOwner.lifecycleScope.launch {
             viewModel.selectedRightInsole.collect { updateDialogSelectionText(selectedLeftTextView, selectedRightTextView) }
         }
 
@@ -447,60 +472,48 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
         }
 
         val builder = AlertDialog.Builder(requireContext())
-            .setTitle("스마트 인솔 선택")
-            .setView(dialogView)
-            .setPositiveButton("페어링") { dialog, _ ->
-                viewModel.pairSelectedDevices()
-                dialog.dismiss() // Dialog 닫기
-            }
-            .setNegativeButton("취소") { dialog, _ ->
-                viewModel.stopScan()
-                viewModel.clearSelection()
-                dialog.dismiss()
-            }
-            .setOnDismissListener {
-                Timber.d("Device selection dialog dismissed")
-                if (viewModel.scanState.value) { // 아직 스캔 중이었다면 중지
-                    viewModel.stopScan()
-                }
-                job.cancel()
-                jobLeft.cancel()
-                jobRight.cancel()
-                deviceListDialog = null // 참조 제거
-            }
+            .setView(dialogView) // 커스텀 뷰 설정
+            // .setTitle("스마트 인솔 선택") // 커스텀 레이아웃에 제목이 있다면 제거
+            .setCancelable(true) // 백 버튼 등으로 닫을 수 있게 할지 여부 (선택)
 
         deviceListDialog = builder.create()
 
-        // "페어링" 버튼 초기 상태 설정 (양쪽 다 선택 시 활성화)
-        deviceListDialog?.setOnShowListener { dialogInterface ->
-            val positiveButton = (dialogInterface as AlertDialog).getButton(AlertDialog.BUTTON_POSITIVE)
-            // isPairingReady 상태를 구독하여 버튼 활성화/비활성화
-            val jobPairing = viewLifecycleOwner.lifecycleScope.launch {
-                viewModel.isPairingReady.collect { isReady ->
-                    positiveButton.isEnabled = isReady
-                }
-            }
-            // Dialog 해제 시 이 job도 취소
-            dialogInterface.setOnDismissListener {
-                jobPairing.cancel()
-                builder.create().dismiss() // 이렇게 하면 안됨, 기존 리스너 참조 필요
+        // 커스텀 레이아웃의 '페어링' 버튼 클릭 리스너 설정
+        fairingButton.setOnClickListener {
+            viewModel.pairSelectedDevices()
+            deviceListDialog?.dismiss() // Dialog 닫기
+        }
 
-            }
+        // 커스텀 레이아웃의 '취소' 버튼 클릭 리스너 설정
+        cancelButton.setOnClickListener {
+            viewModel.stopScan()
+            viewModel.clearSelection()
+            deviceListDialog?.dismiss() // Dialog 닫기
+        }
 
-            // --- Dismiss 리스너 통합 ---
-            dialogInterface.setOnDismissListener {
-                Timber.d("Device selection dialog dismissed (Integrated Listener)")
-                if (viewModel.scanState.value) {
-                    viewModel.stopScan()
-                }
-//                viewModel.clearSelection()
-                job.cancel()
-                jobLeft.cancel()
-                jobRight.cancel()
-                jobPairing.cancel() // 페어링 버튼 활성화 job도 취소
-                deviceListDialog = null
+        // '페어링' 버튼 활성화 상태를 ViewModel의 isPairingReady 상태와 동기화
+        val jobPairingButtonState = viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isPairingReady.collect { isReady ->
+                fairingButton.isEnabled = isReady
             }
         }
+
+        // 다이얼로그가 닫힐 때 처리 (리소스 정리 등)
+        deviceListDialog?.setOnDismissListener {
+            Timber.d("Device selection dialog dismissed")
+            if (viewModel.scanState.value) { // 아직 스캔 중이었다면 중지
+                viewModel.stopScan()
+            }
+
+            jobScannedDevices.cancel()
+            jobSelectedLeft.cancel()
+            jobSelectedRight.cancel()
+            jobPairingButtonState.cancel() // 페어링 버튼 상태 업데이트 job도 취소
+            deviceListDialog = null // 참조 제거
+        }
+
+        // 다이얼로그 배경을 투명하게 하여 커스텀 레이아웃의 배경만 보이도록 (선택 사항)
+        deviceListDialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         deviceListDialog?.show()
     }
@@ -540,38 +553,80 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
     }
 
     private fun showDiagnosisProgressDialog() {
-        if (diagnosisProgressDialog == null) {
-            diagnosisProgressDialog = AlertDialog.Builder(requireContext())
-                .setTitle("보행 분석 중")
-                .setMessage("15초 동안 데이터를 측정합니다...")
-                .setCancelable(false) // 사용자가 임의로 닫지 못하게
-                // .setNegativeButton("취소") { _, _ -> viewModel.stopRealTimeAnalysis("사용자 취소", saveResult = false)} // 취소 버튼 추가 시
-                .create()
+        // 이미 다이얼로그가 보여지고 있다면 아무것도 하지 않음
+        if (diagnosisProgressDialog != null && diagnosisProgressDialog!!.isShowing) {
+            return
         }
-        if (!diagnosisProgressDialog!!.isShowing) {
+
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_diagnosis_progress, null)
+        val titleTextView = dialogView.findViewById<TextView>(R.id.tv_dialog_progress_title)
+        val messageTextView = dialogView.findViewById<TextView>(R.id.tv_dialog_progress_message)
+        val cancelButton = dialogView.findViewById<MaterialButton>(R.id.btn_cancel_progress_dialog)
+        // ProgressBar는 XML에서 indeterminate="true"로 설정했으므로 특별히 제어할 필요 없음
+
+        // 필요시 텍스트 설정 (XML에 이미 있다면 생략 가능)
+        // titleTextView.text = "보행 분석 중"
+        messageTextView.text = "15초 동안 데이터를 측정합니다..." // 예시, 필요시 ViewModel 등에서 가져오기
+
+        val builder = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .setCancelable(false) // 이 다이얼로그는 코드에서만 닫히도록 (취소 버튼으로)
+
+        diagnosisProgressDialog = builder.create()
+
+        cancelButton.setOnClickListener {
+            viewModel.stopRealTimeAnalysis(saveResult = false)
+            showToast("분석이 취소되었습니다.") // 사용자에게 피드백
+            diagnosisProgressDialog?.dismiss()
+        }
+
+        // 다이얼로그 배경을 투명하게 (선택 사항, XML에서 이미 배경 처리했다면)
+        diagnosisProgressDialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        if (!diagnosisProgressDialog!!.isShowing) { // 다시 한번 확인 후 show
             diagnosisProgressDialog?.show()
         }
     }
 
-    /**
-     * "진단 중..." 다이얼로그를 숨깁니다.
-     */
 
     private fun showCalibrationInstructionDialog() {
-        if (calibrationInstructionDialog == null || !calibrationInstructionDialog!!.isShowing) {
-            // 이전 다이얼로그가 있다면 안전하게 dismiss
+        if (calibrationInstructionDialog != null && calibrationInstructionDialog!!.isShowing) {
+            return
+        }
+        // 이전 다이얼로그가 있다면 먼저 dismiss (혹시 모를 중복 방지)
+        calibrationInstructionDialog?.dismiss()
+
+
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_calibration, null)
+        val titleTextView = dialogView.findViewById<TextView>(R.id.tv_dialog_calibration_title)
+        val messageTextView = dialogView.findViewById<TextView>(R.id.tv_dialog_calibration_message)
+        val cancelButton = dialogView.findViewById<MaterialButton>(R.id.btn_cancel_calibration_dialog)
+
+        val calibrationDurationSeconds = viewModel.calibrationDurationSeconds
+
+        // 필요시 텍스트 설정
+        // titleTextView.text = "캘리브레이션"
+        messageTextView.text = "정확한 분석을 위해 발을 정면으로 향하고 ${calibrationDurationSeconds}초 동안 잠시 기다려주세요."
+
+        val builder = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .setCancelable(false) // 이 다이얼로그도 코드 또는 특정 조건에서만 닫히도록
+
+        calibrationInstructionDialog = builder.create()
+
+        cancelButton.setOnClickListener {
+            viewModel.stopRealTimeAnalysis(saveResult = false)
+            showToast("캘리브레이션이 취소되었습니다.")
             calibrationInstructionDialog?.dismiss()
+        }
 
-            val calibrationDurationSeconds = viewModel.calibrationDurationSeconds // 예시로 2초 (GaitAnalyzerUtil의 실제 값과 동기화 필요)
+        calibrationInstructionDialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-            calibrationInstructionDialog = AlertDialog.Builder(requireContext())
-                .setTitle("캘리브레이션")
-                .setMessage("정확한 분석을 위해 발을 정면으로 향하고 ${calibrationDurationSeconds}초 동안 잠시 기다려주세요.")
-                .setCancelable(false)
-                .create()
+        if (!calibrationInstructionDialog!!.isShowing) {
             calibrationInstructionDialog?.show()
         }
     }
+
 
     /**
      * 캘리브레이션 안내 다이얼로그를 숨깁니다.

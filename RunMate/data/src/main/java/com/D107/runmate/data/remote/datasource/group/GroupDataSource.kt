@@ -13,4 +13,5 @@ interface GroupDataSource  {
     suspend fun joinGroup(inviteCode: String): ApiResponse<GroupJoinResponse?>
     suspend fun startGroup(): ApiResponse<Any?>
     suspend fun finishGroup(): ApiResponse<Any?>
+    suspend fun hasGroupHistoriy(): ApiResponse<Boolean>
 }
