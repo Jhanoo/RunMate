@@ -90,9 +90,6 @@ public class HistoryServiceImpl implements HistoryService {
         
         // 그룹 ID 가져오기
         UUID groupId = convertToUUID(historyDetail.get("group_id"));
-        if (groupId == null) {
-            throw new CustomException(ErrorCode.INVALID_REQUEST, "그룹 러닝 기록이 아닙니다.");
-        }
         
         // GPX 파일 경로 가져오기
         String gpxFile = (String) historyDetail.get("gpx_file");
@@ -100,18 +97,21 @@ public class HistoryServiceImpl implements HistoryService {
         // 코스 ID 가져오기
         UUID courseId = convertToUUID(historyDetail.get("course_id"));
         
-        // 그룹 러닝 참여자 기록 조회
-        List<Map<String, Object>> groupRunners = historyDao.findGroupRunnersByGroupId(groupId);
-        List<GroupRunnerResponse> groupRunResponses = groupRunners.stream()
-                .map(runner -> {
-                    UUID runnerId = convertToUUID(runner.get("user_id"));
-                    boolean runnerLiked = false;
-                    if (courseId != null) {
-                        runnerLiked = courseDao.existsCourseLike(runnerId, courseId);
-                    }
-                    return convertToGroupRunnerResponse(runner, runnerLiked);
-                })
-                .collect(Collectors.toList());
+        // 그룹 러닝 참여자 기록 조회 (그룹 ID가 있는 경우에만)
+        List<GroupRunnerResponse> groupRunResponses = new ArrayList<>();
+        if (groupId != null) {
+            List<Map<String, Object>> groupRunners = historyDao.findGroupRunnersByGroupId(groupId);
+            groupRunResponses = groupRunners.stream()
+                    .map(runner -> {
+                        UUID runnerId = convertToUUID(runner.get("user_id"));
+                        boolean runnerLiked = false;
+                        if (courseId != null) {
+                            runnerLiked = courseDao.existsCourseLike(runnerId, courseId);
+                        }
+                        return convertToGroupRunnerResponse(runner, runnerLiked);
+                    })
+                    .collect(Collectors.toList());
+        }
         
         // 내 상세 기록 조회
         Map<String, Object> myRunDetail = historyDao.findMyRunDetail(historyId, userId);
@@ -132,7 +132,7 @@ public class HistoryServiceImpl implements HistoryService {
             courseLikes = courseDao.countLikesByCourseId(courseId);
         }
         
-        // 내 상세 기록 변환 (좋아요 정보 추가)
+        // 내 상세 기록 변환
         MyRunDetailResponse myRunResponse = convertToMyRunDetailResponse(
             myRunDetail, addedToCourse, courseLiked, courseLikes);
         
