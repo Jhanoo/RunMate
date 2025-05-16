@@ -41,4 +41,5 @@ public interface CurriculumService {
      * is_finished = false 이고 goal_date < now() 인 커리큘럼을 종료 처리
      */
     void finishCurriculaSchedule();
+    Todo getTodayTodo(UUID userId);
 }
