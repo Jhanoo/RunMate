@@ -29,8 +29,25 @@ public class SignupRequest {
     @Schema(description = "성별", example = "MALE")
     private Gender gender;
     
+    @Schema(description = "키 (cm)", example = "175.5")
+    private Double height;
+    
+    @Schema(description = "몸무게 (kg)", example = "68.5")
+    private Double weight;
+    
+    @Schema(description = "FCM 토큰", example = "eEw23SDFsdf...")
+    private String fcmToken;
+    
     @Schema(hidden = true)
     private MultipartFile profileImage;
     
-
+    public SignupRequest(String email, String password, String nickname, LocalDate birthday, 
+                         Gender gender, MultipartFile profileImage) {
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+        this.birthday = birthday;
+        this.gender = gender;
+        this.profileImage = profileImage;
+    }
 } 

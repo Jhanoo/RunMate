@@ -39,6 +39,15 @@ public class TokenResponse {
     @Schema(description = "프로필 이미지 URL")
     private String profileImageUrl;
     
+    @Schema(description = "키 (cm)")
+    private Double height;
+    
+    @Schema(description = "몸무게 (kg)")
+    private Double weight;
+    
+    @Schema(description = "FCM 토큰")
+    private String fcmToken;
+    
     // 기존 생성자 유지 (하위 호환성)
     public TokenResponse(String accessToken) {
         this.accessToken = accessToken;

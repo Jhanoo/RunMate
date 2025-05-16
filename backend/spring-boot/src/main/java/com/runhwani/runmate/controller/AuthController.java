@@ -44,15 +44,16 @@ public class AuthController implements AuthControllerDocs {
         try {
             // profileImage가 별도로 전달되면 DTO에 설정
             if (profileImage != null) {
-                // SignupRequest에 profileImage 설정 로직 필요
-                // 리플렉션이나 새 객체 생성 방식으로 처리 가능
-                // 여기서는 간단히 새 객체 생성 방식 사용
+                // 새 객체 생성 방식 사용 (모든 필드 포함)
                 data = new SignupRequest(
                     data.getEmail(),
                     data.getPassword(),
                     data.getNickname(),
                     data.getBirthday(),
                     data.getGender(),
+                    data.getHeight(),
+                    data.getWeight(),
+                    data.getFcmToken(),
                     profileImage
                 );
             }
