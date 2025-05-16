@@ -69,7 +69,7 @@ class ScheduleRVAdapter :
             binding.tvDate.text = item.date
             binding.tvDay.text = item.day
             binding.checkboxSchedule.text = item.scheduleText
-            binding.checkboxSchedule.isChecked = item.isCompleted
+            binding.checkboxSchedule.isChecked = item.isCompleted ?: false
 
             if (adapterPosition == selectedPosition) {
                 binding.viewColorIndicator.visibility = View.VISIBLE
@@ -99,7 +99,7 @@ class ScheduleRVAdapter :
         holder.binding.tvDate.text = item.date
         holder.binding.tvDay.text = item.day
         holder.binding.checkboxSchedule.text = item.scheduleText
-        holder.binding.checkboxSchedule.isChecked = item.isCompleted
+        holder.binding.checkboxSchedule.isChecked = item.isCompleted ?: false
 
     }
 }

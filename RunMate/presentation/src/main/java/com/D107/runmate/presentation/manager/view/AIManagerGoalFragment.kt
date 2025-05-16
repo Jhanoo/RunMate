@@ -3,7 +3,6 @@ package com.D107.runmate.presentation.manager.view
 import android.app.DatePickerDialog
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.Toast
@@ -17,7 +16,6 @@ import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentAIManagerGoalBinding
-import com.D107.runmate.presentation.group.viewmodel.GroupCreateViewModel
 import com.D107.runmate.presentation.manager.viewmodel.CurriculumViewModel
 import com.D107.runmate.presentation.manager.viewmodel.MarathonViewModel
 import com.ssafy.locket.presentation.base.BaseFragment
@@ -135,13 +133,12 @@ class AIManagerGoalFragment : BaseFragment<FragmentAIManagerGoalBinding>(
 
         binding.btnConfirmGoal.setOnClickListener {
             createCurriculum()
-//            findNavController().navigate(R.id.action_aiManagerGoal_to_aiManager)
         }
     }
 
     private fun createCurriculum() {
         val goalDate = selectedDate?.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-            ?: "2025-06-10T09:00:00+09:00" // 기본값
+            ?: java.time.OffsetDateTime.now().plusMonths(1).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
 
         // 선택된 거리 가져오기
         val goalDist = when (binding.rgMaxDistance.checkedRadioButtonId) {
@@ -221,7 +218,7 @@ class AIManagerGoalFragment : BaseFragment<FragmentAIManagerGoalBinding>(
 
         // 최대 날짜 설정 (오늘로부터 1년 후까지)
         val maxDateCalendar = Calendar.getInstance()
-        maxDateCalendar.add(Calendar.YEAR, 1) // 현재 날짜에 1년 추가
+        maxDateCalendar.add(Calendar.MONTH, 3) // 현재 날짜에 3개월 추가
         datePickerDialog.datePicker.maxDate = maxDateCalendar.timeInMillis
 
         datePickerDialog.show()
