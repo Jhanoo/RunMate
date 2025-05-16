@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingHorizontal="26dp"
-    tools:context=".manager.AIManagerFragment">
+    tools:context=".manager.view.AIManagerFragment">
 
     <TextView
         android:id="@+id/tv_title"
@@ -89,77 +89,25 @@
         android:id="@+id/calendar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:mcv_selectionColor="@color/login_btn"
-        app:mcv_showOtherDates="all"
         android:layout_marginTop="14dp"
-        app:mcv_headerTextAppearance="@style/CalendarHeaderTextStyle"
         app:layout_constraintTop_toBottomOf="@+id/layout_goal"
-        tools:ignore="MissingConstraints" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:mcv_headerTextAppearance="@style/CalendarHeaderTextStyle"
+        app:mcv_selectionColor="@color/login_btn"
+        app:mcv_showOtherDates="all" />
 
-
-    <!-- 스크롤 to-do list -->
-    <androidx.core.widget.NestedScrollView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_schedule_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="24dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/calendar">
+        android:orientation="vertical"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/calendar"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
-        <LinearLayout
-            android:id="@+id/layout_schedule_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <!-- 일정 아이템 1 -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingVertical="12dp">
-
-                <View
-                    android:layout_width="4dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginHorizontal="8dp"
-                    android:background="#4CAF50" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:layout_marginRight="20dp"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="6/11"
-                        android:fontFamily="@font/pretendard_bold"
-                        android:textColor="#000000"
-                        android:textSize="14sp" />
-
-                    <TextView
-                        style="@style/customTextViewFontStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="목"
-                        android:textColor="#000000"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-
-
-                <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/pretendard_regular"
-                    android:text="걷기 5분 + 달리기 3분 / 4회 반복"
-                    android:textSize="14sp" />
-            </LinearLayout>
-
-            <!-- 추가 일정 아이템들... -->
-
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

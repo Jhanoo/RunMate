@@ -17,8 +17,10 @@ import android.view.Window
 import android.widget.Button
 import android.widget.ImageView
 import androidx.activity.viewModels
+import androidx.core.os.bundleOf
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
@@ -27,12 +29,14 @@ import com.D107.runmate.domain.model.running.LocationModel
 import com.D107.runmate.domain.model.running.UserLocationState
 import com.D107.runmate.presentation.databinding.ActivityMainBinding
 import com.D107.runmate.presentation.databinding.DrawerHeaderBinding
+import com.D107.runmate.presentation.manager.viewmodel.CurriculumViewModel
 import com.D107.runmate.presentation.utils.LocationUtils.getLocation
 import com.D107.runmate.presentation.utils.PermissionChecker
 import com.bumptech.glide.Glide
 import com.google.android.material.navigation.NavigationView
 import com.ssafy.locket.presentation.base.BaseActivity
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.security.MessageDigest
@@ -56,7 +60,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         // 사용자 정보 관찰
         observeUserInfo()
 
-//        getKeyHash()
+        getKeyHash()
 
         // TODO 앱 초기 실행 시, 사용자 정보 서버로부터 가져와서 MainActivity의 ViewModel에 저장하기
         setDrawerWidth()
@@ -88,6 +92,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                     val navController = navHostFragment.navController
 
                     navController.currentDestination?.id?.let { currentDestinationId ->
+
+
                         val navigateOptions = NavOptions.Builder()
                             .setLaunchSingleTop(true)
                             .setPopUpTo(currentDestinationId, true)
@@ -184,11 +190,74 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
 
                 R.id.drawer_manager -> {
                     binding.navView.menu.findItem(R.id.drawer_manager).isChecked = true
-                    navController.navigate(
-                        R.id.AIManagerFragment,
-                        null,
-                        navigateOptions
-                    )
+
+                    // 일단 로딩창은 표시하지 않고, 바로 API 요청
+                    val curriculumViewModel = ViewModelProvider(this).get(CurriculumViewModel::class.java)
+
+                    // null 관련 문제를 추적하기 위한 로그 추가
+                    Timber.d("AI 매니저 메뉴 선택됨: 커리큘럼 조회 시작")
+
+                    lifecycleScope.launch {
+                        try {
+                            // 기존 결과 초기화
+                            curriculumViewModel.resetMyCurriculum()
+
+                            // 커리큘럼 조회 API 호출
+                            curriculumViewModel.getMyCurriculum()
+
+                            // 응답 대기 (최대 1초)
+                            var timeoutCounter = 0
+                            var hasCurriculum = false
+
+                            while (timeoutCounter < 10) {
+                                delay(100)
+                                timeoutCounter++
+
+                                val curriculumResult = curriculumViewModel.myCurriculum.value
+                                Timber.d("커리큘럼 조회 결과($timeoutCounter): $curriculumResult")
+
+                                // Result 객체가 있고, 성공한 경우만 확인
+                                if (curriculumResult != null) {
+                                    val curriculum = curriculumResult.getOrNull()
+
+                                    if (curriculum != null) {
+                                        // 커리큘럼이 있으면 AIManagerFragment로 이동
+                                        Timber.d("커리큘럼 확인됨: curriculumId=${curriculum.curriculumId}")
+                                        hasCurriculum = true
+
+                                        navController.navigate(
+                                            R.id.AIManagerFragment,
+                                            bundleOf("curriculumId" to curriculum.curriculumId),
+                                            navigateOptions
+                                        )
+                                        break
+                                    } else if (curriculumResult.isFailure) {
+                                        // API 호출은 완료되었지만 커리큘럼이 없는 경우
+                                        Timber.d("커리큘럼 조회 실패: ${curriculumResult.exceptionOrNull()?.message}")
+                                        break
+                                    }
+                                }
+                            }
+
+                            // 커리큘럼이 없거나 API 호출 타임아웃인 경우
+                            if (!hasCurriculum) {
+                                Timber.d("커리큘럼 없음: AIManagerIntroFragment로 이동")
+                                navController.navigate(
+                                    R.id.AIManagerIntroFragment,
+                                    null,
+                                    navigateOptions
+                                )
+                            }
+                        } catch (e: Exception) {
+                            // 예외 발생 시 로그 출력 및 IntroFragment로 이동
+                            Timber.e("AI 매니저 접근 오류: ${e.message}")
+                            navController.navigate(
+                                R.id.AIManagerIntroFragment,
+                                null,
+                                navigateOptions
+                            )
+                        }
+                    }
                 }
 
                 R.id.drawer_logout -> {
@@ -198,6 +267,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                     hideHamburgerBtn()
                     return true
                 }
+
+                else -> {}
             }
         }
         true
@@ -264,11 +335,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     private fun checkPermission() {
         if (!checker.checkPermission(this, runtimePermissions)) {
             checker.setOnGrantedListener {
+                Log.d(TAG, "checkPermission: checkBack")
                 checkBackgroundPermission()
             }
             checker.requestPermissionLauncher.launch(runtimePermissions)
             return
         }
+        Log.d(TAG, "checkPermission: checkBack2")
         checkBackgroundPermission()
     }
 
@@ -341,6 +414,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     private fun showHamburgerBtn(navController: NavController) {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             binding.btnMenu.visibility = when (destination.id) {
+                R.id.goalSettingFragment -> View.VISIBLE
                 R.id.runningFragment -> View.VISIBLE
                 R.id.groupFragment -> View.VISIBLE
                 R.id.historyFragment -> View.VISIBLE
@@ -363,27 +437,25 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
 
     fun showHamburgerBtn() {
         binding.btnMenu.visibility = View.VISIBLE
-        fun showHamburgerBtn() {
-            binding.btnMenu.visibility = View.VISIBLE
-        }
+    }
 
-        fun getKeyHash() {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                val packageInfo = this.packageManager.getPackageInfo(
-                    this.packageName,
-                    PackageManager.GET_SIGNING_CERTIFICATES
-                )
-                for (signature in packageInfo.signingInfo!!.apkContentsSigners) {
-                    try {
-                        val md = MessageDigest.getInstance("SHA")
-                        md.update(signature.toByteArray())
-                        Log.d(
-                            "getKeyHash",
-                            "key hash: ${Base64.encodeToString(md.digest(), Base64.NO_WRAP)}"
-                        )
-                    } catch (e: NoSuchAlgorithmException) {
-                        Log.w("getKeyHash", "Unable to get MessageDigest. signature=$signature", e)
-                    }
+
+    fun getKeyHash() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val packageInfo = this.packageManager.getPackageInfo(
+                this.packageName,
+                PackageManager.GET_SIGNING_CERTIFICATES
+            )
+            for (signature in packageInfo.signingInfo!!.apkContentsSigners) {
+                try {
+                    val md = MessageDigest.getInstance("SHA")
+                    md.update(signature.toByteArray())
+                    Log.d(
+                        "getKeyHash",
+                        "key hash: ${Base64.encodeToString(md.digest(), Base64.NO_WRAP)}"
+                    )
+                } catch (e: NoSuchAlgorithmException) {
+                    Log.w("getKeyHash", "Unable to get MessageDigest. signature=$signature", e)
                 }
             }
         }
