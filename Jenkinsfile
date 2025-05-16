@@ -39,6 +39,7 @@ pipeline {
                     cd backend/nodejs
                     npm ci
                     npm run build
+                    npm run start
                 '''
             }
         }

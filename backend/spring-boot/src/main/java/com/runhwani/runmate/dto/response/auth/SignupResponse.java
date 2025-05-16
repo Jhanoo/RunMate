@@ -33,4 +33,13 @@ public class SignupResponse {
     
     @Schema(description = "성별")
     private Gender gender;
+    
+    @Schema(description = "키 (cm)")
+    private Double height;
+    
+    @Schema(description = "몸무게 (kg)")
+    private Double weight;
+    
+    @Schema(description = "FCM 토큰")
+    private String fcmToken;
 } 

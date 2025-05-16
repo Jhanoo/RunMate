@@ -62,6 +62,9 @@ public class AuthServiceImpl implements AuthService {
                 .profileImage(profileImageUrl)
                 .birthday(request.getBirthday())
                 .gender(request.getGender())
+                .height(request.getHeight())
+                .weight(request.getWeight())
+                .fcmToken(request.getFcmToken())
                 .createdAt(OffsetDateTime.now(ZoneId.of("Asia/Seoul")))
                 .build();
         
@@ -74,6 +77,9 @@ public class AuthServiceImpl implements AuthService {
                 .profileImage(user.getProfileImage())
                 .birthday(user.getBirthday())
                 .gender(user.getGender())
+                .height(user.getHeight())
+                .weight(user.getWeight())
+                .fcmToken(user.getFcmToken())
                 .build();
     }
 
@@ -96,6 +102,9 @@ public class AuthServiceImpl implements AuthService {
                 .birthday(user.getBirthday())
                 .gender(user.getGender())
                 .profileImageUrl(user.getProfileImage())
+                .height(user.getHeight())
+                .weight(user.getWeight())
+                .fcmToken(user.getFcmToken())
                 .build();
     }
 

@@ -33,6 +33,12 @@ public class User {
     private LocalDate birthday;
     /** 성별 */
     private Gender gender;
+    /** FCM 토큰 */
+    private String fcmToken;
+    /** 키 (cm) */
+    private Double height;
+    /** 몸무게 (kg) */
+    private Double weight;
     /** 생성 시각 */
     private OffsetDateTime createdAt;
 }

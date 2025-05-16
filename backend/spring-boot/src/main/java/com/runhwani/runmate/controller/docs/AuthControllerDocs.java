@@ -66,7 +66,10 @@ public interface AuthControllerDocs {
                                                     "nickname": "러너1",
                                                     "birthday": "1990-01-01",
                                                     "gender": "MALE",
-                                                    "profileImageUrl": "http://localhost:8080/uploads/12345.jpg"
+                                                    "profileImageUrl": "http://localhost:8080/uploads/12345.jpg",
+                                                    "height": 175.5,
+                                                    "weight": 68.5,
+                                                    "fcmToken": "eEw23SDFsdf..."
                                                 }
                                             }
                                             """
@@ -134,7 +137,10 @@ public interface AuthControllerDocs {
                                                     "nickname": "러너1",
                                                     "profileImage": "http://localhost:8080/uploads/12345.jpg",
                                                     "birthday": "1990-01-01",
-                                                    "gender": "MALE"
+                                                    "gender": "MALE",
+                                                    "height": 175.5,
+                                                    "weight": 68.5,
+                                                    "fcmToken": "eEw23SDFsdf..."
                                                 }
                                             }
                                             """
