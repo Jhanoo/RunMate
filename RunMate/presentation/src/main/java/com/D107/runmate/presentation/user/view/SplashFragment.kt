@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentSplashBinding
@@ -38,26 +39,23 @@ class SplashFragment : BaseFragment<FragmentSplashBinding>(
             delay(2000) // 2초 대기 (애니메이션 보여주기 위한 최소 시간)
 
             viewModel.isLoggedIn.collectLatest { isLoggedIn ->
-                if (isAdded && !isDetached) {
-                    if (isLoggedIn) {
-                        // 로그인된 상태면 메인 화면으로 이동
-                        findNavController().navigate(
-                            R.id.runningFragment,
-                            null,
-                            androidx.navigation.NavOptions.Builder()
-                                .setPopUpTo(R.id.splashFragment, true)
-                                .build()
-                        )
-                    } else {
-                        // 로그인되지 않은 상태면 로그인 화면으로 이동
-                        findNavController().navigate(
-                            R.id.loginFragment,
-                            null,
-                            androidx.navigation.NavOptions.Builder()
-                                .setPopUpTo(R.id.splashFragment, true)
-                                .build()
-                        )
-                    }
+                if (!isAdded || isDetached) return@collectLatest
+
+                val navOptions = NavOptions.Builder()
+                    .setPopUpTo(R.id.splashFragment, true)
+                    .setLaunchSingleTop(true)
+                    .build()
+
+                if (isLoggedIn) {
+                    // 로그인된 상태면 메인 화면으로 이동
+                    findNavController().navigate(
+                        R.id.runningFragment,
+                        null,
+                        navOptions
+                    )
+                } else {
+                    // 로그인되지 않은 상태면 로그인 화면으로 이동
+                    findNavController().navigate(R.id.action_splashFragment_to_loginFragment)
                 }
             }
         }

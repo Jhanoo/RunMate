@@ -38,15 +38,18 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(
                     is LoginViewModel.LoginUiState.Initial -> {
                         // 초기 상태
                     }
+
                     is LoginViewModel.LoginUiState.Loading -> {
                         // 로딩 상태 - 프로그레스 표시
                         showLoading(true)
                     }
+
                     is LoginViewModel.LoginUiState.Success -> {
                         // 로그인 성공
                         showLoading(false)
                         navigateToMain()
                     }
+
                     is LoginViewModel.LoginUiState.Error -> {
                         // 로그인 실패
                         showLoading(false)
@@ -95,13 +98,7 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(
     }
 
     private fun navigateToMain() {
-        findNavController().navigate(
-            R.id.runningFragment,
-            null,
-            androidx.navigation.NavOptions.Builder()
-                .setPopUpTo(R.id.loginFragment, true)
-                .build()
-        )
+        findNavController().navigate(R.id.action_loginFragment_to_runningFragment)
     }
 
     override fun onDestroyView() {
