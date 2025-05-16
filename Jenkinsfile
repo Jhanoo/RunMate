@@ -39,7 +39,7 @@ pipeline {
                     cd backend/nodejs
                     npm ci
                     npm run build
-                    npm run start
+                    # npm run start  # 주석 처리: Docker 컨테이너에서 실행되므로 여기서 실행할 필요 없음
                 '''
             }
         }
