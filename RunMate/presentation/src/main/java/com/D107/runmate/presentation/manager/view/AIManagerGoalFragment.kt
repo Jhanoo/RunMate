@@ -3,7 +3,6 @@ package com.D107.runmate.presentation.manager.view
 import android.app.DatePickerDialog
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.Toast
@@ -17,7 +16,6 @@ import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentAIManagerGoalBinding
-import com.D107.runmate.presentation.group.viewmodel.GroupCreateViewModel
 import com.D107.runmate.presentation.manager.viewmodel.CurriculumViewModel
 import com.D107.runmate.presentation.manager.viewmodel.MarathonViewModel
 import com.ssafy.locket.presentation.base.BaseFragment
@@ -140,7 +138,7 @@ class AIManagerGoalFragment : BaseFragment<FragmentAIManagerGoalBinding>(
 
     private fun createCurriculum() {
         val goalDate = selectedDate?.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-            ?: "2025-06-10T09:00:00+09:00" // 기본값
+            ?: java.time.OffsetDateTime.now().plusMonths(1).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
 
         // 선택된 거리 가져오기
         val goalDist = when (binding.rgMaxDistance.checkedRadioButtonId) {

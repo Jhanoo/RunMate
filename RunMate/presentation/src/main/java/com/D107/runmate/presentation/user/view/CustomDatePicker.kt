@@ -3,20 +3,22 @@ package com.D107.runmate.presentation.user.view
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
 import android.view.WindowManager
 import android.widget.NumberPicker
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.DialogFragment
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.DialogDatePickerBinding
 import com.D107.runmate.presentation.utils.CommonUtils
 import java.util.Calendar
 
+@RequiresApi(Build.VERSION_CODES.O)
 class CustomDatePicker(
     private val initialYear: Int = 0,
     private val initialMonth: Int = 0,
@@ -94,7 +96,7 @@ class CustomDatePicker(
     private fun setupPickers() {
         // 현재 날짜 가져오기
         val calendar = Calendar.getInstance()
-        val currentYear = calendar.get(Calendar.YEAR)
+        val currentYear = java.time.LocalDate.now().year
 
         // 연도 설정 (1950년부터 현재 연도까지)
         binding.yearPicker.apply {

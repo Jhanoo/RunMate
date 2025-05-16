@@ -1,8 +1,10 @@
 package com.D107.runmate.presentation.manager.view
 
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.lifecycleScope
 import com.D107.runmate.domain.model.manager.ScheduleItem
 import com.D107.runmate.domain.repository.manager.TodoRepository
@@ -20,6 +22,7 @@ import java.util.Calendar
 import java.util.Locale
 import javax.inject.Inject
 
+@RequiresApi(Build.VERSION_CODES.O)
 @AndroidEntryPoint
 class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
     FragmentAIManagerBinding::bind,
@@ -176,19 +179,31 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
 
                 // ISO 날짜 문자열에서 날짜 추출 (예: 2025-05-16T00:00:00+09:00)
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.getDefault())
-                val date = dateFormat.parse(todo.date) ?: return@mapNotNull null
+//                val date = dateFormat.parse(todo.date) ?: return@mapNotNull null
 
-                if (date == null) {
-                    timber.log.Timber.w("날짜 파싱 실패: ${todo.date}")
-                    return@mapNotNull null
-                }
+//                if (date == null) {
+//                    timber.log.Timber.w("날짜 파싱 실패: ${todo.date}")
+//                    return@mapNotNull null
+//                }
 
                 // 표시용 날짜 및 요일 포맷
-                val dayFormat = SimpleDateFormat("M/d", Locale.getDefault())
-                val weekDayFormat = SimpleDateFormat("E", Locale.KOREAN)
+//                val dayFormat = SimpleDateFormat("M/d", Locale.getDefault())
+//                val weekDayFormat = SimpleDateFormat("E", Locale.KOREAN)
 
-                val formattedDate = dayFormat.format(date)
-                val formattedDay = weekDayFormat.format(date)
+//                val formattedDate = dayFormat.format(date)
+//                val formattedDay = weekDayFormat.format(date)4
+
+                val date = java.time.OffsetDateTime.parse(todo.date)
+                val formattedDate = "${date.monthValue}/${date.dayOfMonth}"
+                val formattedDay = when(date.dayOfWeek) {
+                    java.time.DayOfWeek.MONDAY -> "월"
+                    java.time.DayOfWeek.TUESDAY -> "화"
+                    java.time.DayOfWeek.WEDNESDAY -> "수"
+                    java.time.DayOfWeek.THURSDAY -> "목"
+                    java.time.DayOfWeek.FRIDAY -> "금"
+                    java.time.DayOfWeek.SATURDAY -> "토"
+                    java.time.DayOfWeek.SUNDAY -> "일"
+                }
 
                 timber.log.Timber.d("날짜 변환 성공: ${todo.date} -> $formattedDate ($formattedDay)")
 
