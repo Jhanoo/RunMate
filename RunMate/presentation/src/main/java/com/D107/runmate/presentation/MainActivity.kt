@@ -2,6 +2,8 @@ package com.D107.runmate.presentation
 
 import android.Manifest
 import android.app.Dialog
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
@@ -16,9 +18,12 @@ import android.view.ViewGroup
 import android.view.Window
 import android.widget.Button
 import android.widget.ImageView
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
+import androidx.core.os.bundleOf
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
@@ -27,12 +32,14 @@ import com.D107.runmate.domain.model.running.LocationModel
 import com.D107.runmate.domain.model.running.UserLocationState
 import com.D107.runmate.presentation.databinding.ActivityMainBinding
 import com.D107.runmate.presentation.databinding.DrawerHeaderBinding
+import com.D107.runmate.presentation.manager.viewmodel.CurriculumViewModel
 import com.D107.runmate.presentation.utils.LocationUtils.getLocation
 import com.D107.runmate.presentation.utils.PermissionChecker
 import com.bumptech.glide.Glide
 import com.google.android.material.navigation.NavigationView
 import com.ssafy.locket.presentation.base.BaseActivity
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.security.MessageDigest
@@ -56,12 +63,14 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         // 사용자 정보 관찰
         observeUserInfo()
 
-//        getKeyHash()
+        getKeyHash()
 
         // TODO 앱 초기 실행 시, 사용자 정보 서버로부터 가져와서 MainActivity의 ViewModel에 저장하기
         setDrawerWidth()
 
         checkPermission()
+
+        setNotificationChannel()
 
         binding.btnMenu.setOnClickListener {
             if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
@@ -70,11 +79,36 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                 binding.drawerLayout.openDrawer(GravityCompat.START)
             }
         }
+
+        // 뒤로가기 콜백 등록
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    // 1) 드로어가 열려 있으면 닫기
+                    binding.drawerLayout.closeDrawer(GravityCompat.START)
+                } else {
+                    // 2) 기본 뒤로가기 동작 호출
+                    // 콜백을 비활성화한 뒤, 다시 디스패처에 이벤트를 넘겨줌
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
     }
 
     private fun observeUserInfo() {
         lifecycleScope.launch {
             viewModel.nickname.collect { nickname ->
+                val navController = (supportFragmentManager
+                    .findFragmentById(R.id.nav_host_fragment) as NavHostFragment)
+                    .navController
+                val current = navController.currentDestination?.id ?: return@collect
+
+                if (current == R.id.splashFragment) {
+                    // 스플래시 화면일 때는 SplashFragment 에서 로직 처리
+                    return@collect
+                }
+
                 if (!nickname.isNullOrEmpty()) {
                     // 드로어 헤더의 이름 업데이트
                     Timber.d("nickname : $nickname")
@@ -83,18 +117,14 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                     headerBinding.tvName.text = nickname
                 } else {
                     Timber.d("delete nickname")
-                    val navHostFragment =
-                        supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-                    val navController = navHostFragment.navController
-
-                    navController.currentDestination?.id?.let { currentDestinationId ->
-                        val navigateOptions = NavOptions.Builder()
+                    navController.navigate(
+                        R.id.loginFragment,
+                        null,
+                        NavOptions.Builder()
                             .setLaunchSingleTop(true)
-                            .setPopUpTo(currentDestinationId, true)
+                            .setPopUpTo(current, true)
                             .build()
-
-                        navController.navigate(R.id.loginFragment)
-                    }
+                    )
                 }
             }
         }
@@ -184,20 +214,85 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
 
                 R.id.drawer_manager -> {
                     binding.navView.menu.findItem(R.id.drawer_manager).isChecked = true
-                    navController.navigate(
-                        R.id.AIManagerFragment,
-                        null,
-                        navigateOptions
-                    )
+
+                    // 일단 로딩창은 표시하지 않고, 바로 API 요청
+                    val curriculumViewModel = ViewModelProvider(this).get(CurriculumViewModel::class.java)
+
+                    // null 관련 문제를 추적하기 위한 로그 추가
+                    Timber.d("AI 매니저 메뉴 선택됨: 커리큘럼 조회 시작")
+
+                    lifecycleScope.launch {
+                        try {
+                            // 기존 결과 초기화
+                            curriculumViewModel.resetMyCurriculum()
+
+                            // 커리큘럼 조회 API 호출
+                            curriculumViewModel.getMyCurriculum()
+
+                            // 응답 대기 (최대 1초)
+                            var timeoutCounter = 0
+                            var hasCurriculum = false
+
+                            while (timeoutCounter < 10) {
+                                delay(100)
+                                timeoutCounter++
+
+                                val curriculumResult = curriculumViewModel.myCurriculum.value
+                                Timber.d("커리큘럼 조회 결과($timeoutCounter): $curriculumResult")
+
+                                // Result 객체가 있고, 성공한 경우만 확인
+                                if (curriculumResult != null) {
+                                    val curriculum = curriculumResult.getOrNull()
+
+                                    if (curriculum != null) {
+                                        // 커리큘럼이 있으면 AIManagerFragment로 이동
+                                        Timber.d("커리큘럼 확인됨: curriculumId=${curriculum.curriculumId}")
+                                        hasCurriculum = true
+
+                                        navController.navigate(
+                                            R.id.AIManagerFragment,
+                                            bundleOf("curriculumId" to curriculum.curriculumId),
+                                            navigateOptions
+                                        )
+                                        break
+                                    } else if (curriculumResult.isFailure) {
+                                        // API 호출은 완료되었지만 커리큘럼이 없는 경우
+                                        Timber.d("커리큘럼 조회 실패: ${curriculumResult.exceptionOrNull()?.message}")
+                                        break
+                                    }
+                                }
+                            }
+
+                            // 커리큘럼이 없거나 API 호출 타임아웃인 경우
+                            if (!hasCurriculum) {
+                                Timber.d("커리큘럼 없음: AIManagerIntroFragment로 이동")
+                                navController.navigate(
+                                    R.id.AIManagerIntroFragment,
+                                    null,
+                                    navigateOptions
+                                )
+                            }
+                        } catch (e: Exception) {
+                            // 예외 발생 시 로그 출력 및 IntroFragment로 이동
+                            Timber.e("AI 매니저 접근 오류: ${e.message}")
+                            navController.navigate(
+                                R.id.AIManagerIntroFragment,
+                                null,
+                                navigateOptions
+                            )
+                        }
+                    }
                 }
 
                 R.id.drawer_logout -> {
                     binding.navView.menu.findItem(R.id.drawer_logout).isChecked = true
                     showLogoutConfirmDialog()
                     binding.drawerLayout.closeDrawer(GravityCompat.START)
-                    hideHamburgerBtn()
+//                    hideHamburgerBtn()
                     return true
                 }
+
+                else -> {}
             }
         }
         true
@@ -226,6 +321,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         val btnLogout = dialog.findViewById<Button>(R.id.btn_confirm_short)
         btnLogout.setOnClickListener {
             performLogout()
+            hideHamburgerBtn()
             dialog.dismiss()
         }
         dialog.show()
@@ -236,15 +332,16 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
 
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-//        val navController = navHostFragment.navController
-//
-//        navController.navigate(
-//            R.id.loginFragment,
-//            null,
-//            NavOptions.Builder()
-//                .setPopUpTo(R.id.nav_graph, true)
-//                .build()
-//        )
+
+        val navController = navHostFragment.navController
+
+        navController.navigate(
+            R.id.loginFragment,
+            null,
+            NavOptions.Builder()
+                .setPopUpTo(R.id.nav_graph, true)
+                .build()
+        )
     }
 
     private val checker = PermissionChecker(this)
@@ -264,11 +361,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     private fun checkPermission() {
         if (!checker.checkPermission(this, runtimePermissions)) {
             checker.setOnGrantedListener {
+                Log.d(TAG, "checkPermission: checkBack")
                 checkBackgroundPermission()
             }
             checker.requestPermissionLauncher.launch(runtimePermissions)
             return
         }
+        Log.d(TAG, "checkPermission: checkBack2")
         checkBackgroundPermission()
     }
 
@@ -341,6 +440,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     private fun showHamburgerBtn(navController: NavController) {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             binding.btnMenu.visibility = when (destination.id) {
+                R.id.goalSettingFragment -> View.VISIBLE
                 R.id.runningFragment -> View.VISIBLE
                 R.id.groupFragment -> View.VISIBLE
                 R.id.historyFragment -> View.VISIBLE
@@ -383,6 +483,21 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                     Log.w("getKeyHash", "Unable to get MessageDigest. signature=$signature", e)
                 }
             }
+        }
+    }
+    fun setNotificationChannel(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channelId = "GROUP_RUN_TERMINATION_CHANNEL"
+            val channelName = "그룹 달리기 종료"
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val channel = NotificationChannel(channelId, channelName, importance).apply {
+                description = "그룹장이 그룹 달리기를 종료했을 때 알림을 받습니다."
+                // 필요하다면 진동, 소리 등 설정
+                // enableVibration(true)
+                // setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION), audioAttributes)
+            }
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
         }
     }
 }

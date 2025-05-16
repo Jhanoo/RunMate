@@ -2,17 +2,18 @@ package com.D107.runmate.presentation.running.view
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.D107.runmate.domain.model.running.RunningRecordState
 import com.D107.runmate.domain.model.running.TrackingStatus
 import com.D107.runmate.domain.model.running.UserLocationState
 import com.D107.runmate.presentation.MainViewModel
 import com.D107.runmate.presentation.R
+import com.D107.runmate.presentation.course.view.CourseAddDialog
 import com.D107.runmate.presentation.databinding.FragmentRunningEndBinding
 import com.D107.runmate.presentation.running.CourseViewModel
 import com.D107.runmate.presentation.running.RunningEndViewModel
@@ -40,6 +41,8 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
     FragmentRunningEndBinding::bind,
     R.layout.fragment_running_end
 ) {
+    private val args: RunningEndFragmentArgs by navArgs()
+    lateinit var sourceFragment:String
     private var kakaoMap: KakaoMap? = null
     private val mainViewModel: MainViewModel by activityViewModels()
     private val runningEndViewModel: RunningEndViewModel by viewModels()
@@ -56,7 +59,7 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        sourceFragment = args.sourceScreen
         initUI()
         initEvent()
         initMap()
@@ -120,7 +123,10 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
                     courseViewModel.updateCourseLike(it)
                 }
             }
-            findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
+            when (sourceFragment) {
+                "RUNNING_FRAGMENT"-> findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
+                "GROUP_RUNNING_FRAGMENT"-> findNavController().navigate(R.id.action_runningEndFragment_to_groupRrunningFragment)
+            }
         }
 
         binding.btnChart.setOnClickListener {

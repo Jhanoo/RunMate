@@ -4,7 +4,6 @@ import com.D107.runmate.data.remote.common.ApiResponse
 import com.D107.runmate.data.remote.datasource.course.CourseDataSource
 import com.D107.runmate.data.remote.request.course.CreateCourseRequest
 import com.D107.runmate.data.remote.response.course.CourseDetailResponse.Companion.toDomainModel
-import com.D107.runmate.data.remote.response.course.CourseItem
 import com.D107.runmate.data.remote.response.course.CourseItemResponse.Companion.toDomainModel
 import com.D107.runmate.data.remote.response.course.CourseLikeResponse.Companion.toDomainModel
 import com.D107.runmate.domain.model.base.NetworkError

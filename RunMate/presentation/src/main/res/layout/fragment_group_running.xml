@@ -282,6 +282,7 @@
         android:visibility="gone"
         app:constraint_referenced_ids="btn_restart, btn_end" />
     <ImageView
+        android:id="@+id/btn_finish_group"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/ic_running_btn_finish_group"
@@ -290,8 +291,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-
-
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

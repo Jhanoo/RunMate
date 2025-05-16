@@ -1,24 +1,29 @@
 package com.D107.runmate.presentation.group.view
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
+import com.D107.runmate.domain.model.running.LocationModel
 import com.D107.runmate.domain.model.running.RunningRecordState
 import com.D107.runmate.domain.model.running.TrackingStatus
 import com.D107.runmate.domain.model.running.UserLocationState
 import com.D107.runmate.domain.model.socket.MemberLocationData
+import com.D107.runmate.domain.model.socket.SocketAuth
 import com.D107.runmate.presentation.MainActivity
 import com.D107.runmate.presentation.MainViewModel
 import com.D107.runmate.presentation.R
@@ -26,8 +31,11 @@ import com.D107.runmate.presentation.RunningTrackingService
 import com.D107.runmate.presentation.databinding.FragmentGroupRunningBinding
 import com.D107.runmate.presentation.group.viewmodel.GroupUiEvent
 import com.D107.runmate.presentation.group.viewmodel.GroupViewModel
+import com.D107.runmate.presentation.group.viewmodel.SocketAuthParcelable
+import com.D107.runmate.presentation.running.RunningEndViewModel
 import com.D107.runmate.presentation.running.view.PaceSettingDialog
 import com.D107.runmate.presentation.utils.CommonUtils
+import com.D107.runmate.presentation.utils.CommonUtils.getActivityContext
 import com.D107.runmate.presentation.utils.LocationUtils
 import com.kakao.vectormap.GestureType
 import com.kakao.vectormap.KakaoMap
@@ -44,6 +52,7 @@ import com.ssafy.locket.presentation.base.BaseFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -59,13 +68,12 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
 ) {
     private var kakaoMap: KakaoMap? = null
     private val mainViewModel: MainViewModel by activityViewModels()
+    private val runningEndViewModel: RunningEndViewModel by viewModels()
     private val viewModel: GroupViewModel by activityViewModels()
     private var mContext: Context? = null
-    private var userLabel: Label? = null
-
     private lateinit var dialog: PaceSettingDialog
     private var setting: List<Int> = listOf()
-
+    var userLabels: HashMap<String, Label> = hashMapOf()
 
 
     override fun onAttach(context: Context) {
@@ -79,24 +87,41 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
         setClickListenner()
         initmap()
         observeViewModel()
-        viewModel.connectToServer()
+        viewModel.hasGroupHistory()
+        viewModel.connectToServer(
+            SocketAuth(
+                mainViewModel.userId.value!!,
+                mainViewModel.nickname.value!!,
+                mainViewModel.profileImage.value
+            )
+        )
     }
 
 
     private fun setClickListenner() {
 
         binding.bgRunningRecord.setOnClickListener {
-            findNavController().navigate(R.id.action_runningFragment_to_runningRecordFragment)
+            findNavController().navigate(R.id.action_groupRunningFragment_to_runningRecordFragment)
         }
 
         binding.btnLeaveGroup.setOnClickListener {
-            findNavController().navigate(R.id.action_runningFragment_to_courseSettingFragment)
+            viewModel.leaveGroupSocket()
+            viewModel.leaveGroup()
         }
 
         binding.btnStart.setOnClickListener {
             mContext?.let {
-                RunningTrackingService.startService(it)
-                (CommonUtils.getActivityContext(requireContext()) as MainActivity).hideHamburgerBtn()
+                RunningTrackingService.startService(
+                    context = it,
+                    groupId = viewModel.currentGroup.value?.groupId,
+                    groupLeaderId = viewModel.currentGroup.value?.leaderId,
+                    socketAuth = SocketAuthParcelable(
+                        userId = mainViewModel.userId.value!!,
+                        nickname = mainViewModel.nickname.value!!,
+                        profileImage = mainViewModel.profileImage.value
+                    )
+                )
+                (getActivityContext(requireContext()) as MainActivity).hideHamburgerBtn()
                 viewModel.joinGroupSocket()
                 binding.groupBtnRunning.visibility = View.VISIBLE
                 binding.groupBtnStart.visibility = View.INVISIBLE
@@ -108,7 +133,7 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
             binding.groupBtnPause.visibility = View.VISIBLE
             binding.groupBtnRunning.visibility = View.GONE
             mContext?.let {
-                RunningTrackingService.pauseService(it)
+                RunningTrackingService.pauseService(it, viewModel.currentGroup.value?.groupId)
             }
         }
 
@@ -116,15 +141,24 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
             binding.groupBtnPause.visibility = View.GONE
             binding.groupBtnRunning.visibility = View.VISIBLE
             mContext?.let {
-                RunningTrackingService.startService(it)
+                RunningTrackingService.startService(
+                    context = it,
+                    groupId = viewModel.currentGroup.value?.groupId,
+                    groupLeaderId = viewModel.currentGroup.value?.leaderId,
+                    socketAuth = SocketAuthParcelable(
+                        userId = mainViewModel.userId.value!!,
+                        nickname = mainViewModel.nickname.value!!,
+                        profileImage = mainViewModel.profileImage.value
+                    )
+                )
             }
         }
 
         binding.btnEnd.setOnClickListener {
             mContext?.let {
-                viewModel.disConnectSocket()
-                RunningTrackingService.stopService(it)
-//                findNavController().navigate(R.id.action_runningFragment_to_runningEndFragment)
+                Timber.d("Stop Group Running!")
+//                viewModel.disConnectSocket()
+                RunningTrackingService.stopService(it, viewModel.currentGroup.value?.groupId)
             }
         }
 
@@ -137,7 +171,6 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
 
                 binding.btnVibrate.setImageResource(R.drawable.ic_running_btn_vibrate_on)
             }
-//            mainViewModel.toggleVibrationEnabled()
         }
 
         binding.btnSound.setOnClickListener {
@@ -147,7 +180,6 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
             } else {
                 binding.btnSound.setImageResource(R.drawable.ic_running_btn_sound_on)
             }
-//            mainViewModel.toggleSoundEnabled()
         }
 
         binding.btnSetPace.setOnClickListener {
@@ -162,8 +194,10 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
             dialog.show(requireActivity().supportFragmentManager, "pace")
         }
 
-        binding.btnLeaveGroup.setOnClickListener {
-            viewModel.leaveGroup()
+
+        binding.btnFinishGroup.setOnClickListener {
+            viewModel.leaveGroupSocket()
+            viewModel.finishGroup()
         }
 
     }
@@ -172,41 +206,60 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    mainViewModel.userLocation.collect { state ->
-                        when (state) {
-                            is UserLocationState.Exist -> {
-                                val tmpUserLabel = userLabel
-                                if (tmpUserLabel != null) {
-                                    tmpUserLabel.moveTo(
-                                        LatLng.from(
-                                            state.locations.last().latitude,
-                                            state.locations.last().longitude
-                                        ), 500
-                                    )
-//                            kakaoMap?.trackingManager?.startTracking(userLabel)
-
-                                } else {
-                                    addMarker(
-                                        state.locations.last().latitude,
-                                        state.locations.last().longitude,
-                                        ""
-                                    )
-                                }
-                                val cameraUpdate = CameraUpdateFactory.newCenterPosition(
-                                    LatLng.from(
-                                        state.locations.last().latitude,
-                                        state.locations.last().longitude
+                    mContext?.let {
+                        val location =
+                            LocationUtils.getLocation(it, (getActivityContext(it) as MainActivity))
+                        mainViewModel.setUserLocation(
+                            UserLocationState.Exist(
+                                listOf(
+                                    LocationModel(
+                                        location.latitude,
+                                        location.longitude,
+                                        location.altitude,
+                                        location.speed
                                     )
                                 )
-                                kakaoMap?.moveCamera(cameraUpdate)
-                            }
-
-                            is UserLocationState.Initial -> {
-                                Timber.d("onViewCreated: initial")
-                            }
-                        }
+                            )
+                        )
                     }
                 }
+//                launch {
+//                    mainViewModel.userLocation.collect { state ->
+//                        when (state) {
+//                            is UserLocationState.Exist -> {
+//                                val tmpUserLabel = userLabels[mainViewModel.userId.value!!]
+//                                if (tmpUserLabel != null) {
+//                                    tmpUserLabel.moveTo(
+//                                        LatLng.from(
+//                                            state.locations.last().latitude,
+//                                            state.locations.last().longitude
+//                                        ), 500
+//                                    )
+////                            kakaoMap?.trackingManager?.startTracking(userLabel)
+//
+//                                } else {
+//                                    addMarker(
+//                                        state.locations.last().latitude,
+//                                        state.locations.last().longitude,
+//                                        mainViewModel.userId.value!!,
+//                                        mainViewModel.profileImage.value?:""
+//                                    )
+//                                }
+//                                val cameraUpdate = CameraUpdateFactory.newCenterPosition(
+//                                    LatLng.from(
+//                                        state.locations.last().latitude,
+//                                        state.locations.last().longitude
+//                                    )
+//                                )
+//                                kakaoMap?.moveCamera(cameraUpdate)
+//                            }
+//
+//                            is UserLocationState.Initial -> {
+//                                Timber.d("onViewCreated: initial")
+//                            }
+//                        }
+//                    }
+//                }
 
                 launch {
                     mainViewModel.time.collectLatest { it ->
@@ -238,25 +291,92 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
                                     .setLaunchSingleTop(true)
                                     .setPopUpTo(R.id.groupRunningFragment, true)
                                     .build()
-                                findNavController().navigate(R.id.groupFragment,null,navigateOptions)
+                                findNavController().navigate(
+                                    R.id.groupFragment,
+                                    null,
+                                    navigateOptions
+                                )
 
                             }
+
                             is GroupUiEvent.ShowToast -> {
                                 showToast(event.message)
                             }
+
+                            is GroupUiEvent.GoToGroupInfo -> {
+
+                            }
+                            is GroupUiEvent.ToggleGroupRunningFinishVisible ->{
+                                if(event.visible){
+                                    binding.btnFinishGroup.visibility = View.VISIBLE
+                                    binding.btnStart.visibility = View.GONE
+                                    binding.btnSetPace.visibility = View.GONE
+                                    binding.btnLeaveGroup.visibility = View.GONE
+
+                                }else{
+                                    binding.btnFinishGroup.visibility = View.GONE
+                                    binding.btnStart.visibility = View.VISIBLE
+                                    binding.btnSetPace.visibility = View.VISIBLE
+                                    binding.btnLeaveGroup.visibility = View.VISIBLE
+                                }
+                            }
+
                             else -> {}
 
                         }
                     }
                 }
 
-                launch{
-                    viewModel.groupMemberLocation.collect{ groupMemberLocation->
-                        groupMemberLocation?.let{
+                launch {
+                    viewModel.groupMemberLocation.collect { groupMemberLocation ->
+                        groupMemberLocation?.let {
                             Timber.d("onViewCreated: groupMemberLocation $it")
                             handleLocationUpdate(it)
                         }
 
+                    }
+                }
+
+                mainViewModel.trackingStatus.collectLatest { status ->
+                    when (mainViewModel.trackingStatus.value) {
+                        TrackingStatus.STOPPED -> {
+//                            viewModel.disConnectSocket()
+                            val action =
+                                GroupRunningFragmentDirections.actionGroupRunningFragmentToRunningEndFragment(
+                                    sourceScreen = "GROUP_RUNNING_FRAGMENT"
+                                )
+                            findNavController().navigate(action)
+                        }
+
+                        TrackingStatus.RUNNING -> {
+                            binding.groupBtnStart.visibility = View.INVISIBLE
+                            binding.groupRecord.visibility = View.VISIBLE
+                            binding.groupBtnPause.visibility = View.GONE
+                            binding.groupBtnRunning.visibility = View.VISIBLE
+                            mContext?.let {
+                                (getActivityContext(it) as MainActivity).hideHamburgerBtn()
+                            }
+                        }
+
+                        TrackingStatus.INITIAL -> {
+                            binding.groupBtnStart.visibility = View.VISIBLE
+                            binding.groupRecord.visibility = View.GONE
+                            binding.groupBtnPause.visibility = View.GONE
+                            binding.groupBtnRunning.visibility = View.GONE
+                            mContext?.let {
+                                (getActivityContext(it) as MainActivity).showHamburgerBtn()
+                            }
+                        }
+
+                        TrackingStatus.PAUSED -> {
+                            binding.groupBtnStart.visibility = View.INVISIBLE
+                            binding.groupRecord.visibility = View.VISIBLE
+                            binding.groupBtnPause.visibility = View.VISIBLE
+                            binding.groupBtnRunning.visibility = View.GONE
+                            mContext?.let {
+                                (getActivityContext(it) as MainActivity).hideHamburgerBtn()
+                            }
+                        }
                     }
                 }
             }
@@ -277,11 +397,8 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
         }, object : KakaoMapReadyCallback() {
             override fun onMapReady(p0: KakaoMap) {
                 kakaoMap = p0
-                p0.setOnCameraMoveStartListener { map, gestureType ->
-                    if (gestureType == GestureType.Pan) {
-//                        map.trackingManager?.stopTracking()
-                    }
-                }
+                loadLocationAndMove()
+                restoreOtherMemberMarkers()
             }
 
             override fun getPosition(): LatLng {
@@ -300,10 +417,19 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
 
     }
 
-    private fun addMarker(latitude: Double, longitude: Double, userId:String, userProfileUrl:String = "https://picsum.photos/200/300"){
+    private fun addMarker(
+        latitude: Double,
+        longitude: Double,
+        userId: String,
+        userProfileUrl: String = "https://picsum.photos/200/300"
+    ) {
         mContext?.let {
             CoroutineScope(Dispatchers.IO).launch {
-                val profileBitmap = getBitmapFromURL(userProfileUrl)
+                val profileBitmap: Bitmap? = if (userProfileUrl.isNullOrEmpty()) {
+                    BitmapFactory.decodeResource(resources, R.drawable.tonie)
+                } else {
+                    getBitmapFromURL(userProfileUrl)
+                }
                 profileBitmap?.let { bitmap ->
                     val markerBg =
                         BitmapFactory.decodeResource(
@@ -322,12 +448,80 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
                     val profilePng = bitmapToPng(combinedBitmap)
 
                     withContext(Dispatchers.Main) {
-                        val styles = kakaoMap!!.labelManager
-                            ?.addLabelStyles(LabelStyles.from(LabelStyle.from(profilePng)))
-                        val options = LabelOptions.from(LatLng.from(latitude, longitude))
-                            .setStyles(styles).setTexts(LabelTextBuilder().setTexts(userId))
-                        val layer = kakaoMap!!.labelManager!!.layer
-                        viewModel.userLabels[userId] = layer!!.addLabel(options)
+                        kakaoMap?.let { map ->
+                            userLabels[userId]?.let { userLabel ->
+                                userLabel.remove()
+                            }
+
+                            val styles = map.labelManager
+                                ?.addLabelStyles(LabelStyles.from(LabelStyle.from(profilePng)))
+                            val options = LabelOptions.from(LatLng.from(latitude, longitude))
+                                .setStyles(styles)
+                            val layer = map.labelManager!!.layer
+                            userLabels[userId] = layer!!.addLabel(options)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun restoreOtherMemberMarkers() {
+        if (kakaoMap == null) return
+        // ViewModel의 memberLastLocations (이것은 Repository를 통해 업데이트됨)
+        lifecycleScope.launch {
+            viewModel.groupMemberDatas.first().forEach { (userId, memberLocationData) ->
+
+                addMarker(
+                    memberLocationData.lat,
+                    memberLocationData.lng,
+                    userId,
+                    memberLocationData.profileImage ?: ""
+                )
+
+            }
+        }
+    }
+
+    private fun loadLocationAndMove() {
+        Timber.d("map ready and move")
+        viewLifecycleOwner.lifecycleScope.launch {
+            mainViewModel.userLocation.collectLatest { state ->
+                when (state) {
+                    is UserLocationState.Exist -> {
+                        Timber.d("UserLocationState Exist")
+                        val tmpUserLabel = userLabels[mainViewModel.userId.value]
+                        if (tmpUserLabel != null && viewModel.isUserLabel) {
+                            tmpUserLabel.moveTo(
+                                LatLng.from(
+                                    state.locations.last().latitude,
+                                    state.locations.last().longitude
+                                ), 800
+                            )
+                        } else {
+                            val cameraUpdate = CameraUpdateFactory.newCenterPosition(
+                                LatLng.from(
+                                    state.locations.last().latitude,
+                                    state.locations.last().longitude
+                                )
+                            )
+                            kakaoMap?.moveCamera(cameraUpdate)
+                            addMarker(
+                                state.locations.last().latitude,
+                                state.locations.last().longitude,
+                                mainViewModel.userId.value!!,
+                                mainViewModel.profileImage.value ?: ""
+                            )
+                            viewModel.isUserLabel = true
+                        }
+                    }
+
+                    is UserLocationState.Initial -> {
+                        Timber.d("UserLocationState Initial ")
+                    }
+
+                    else -> {
+                        Timber.d("UserLocationState else ")
                     }
                 }
             }
@@ -351,6 +545,9 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
                 binding.groupRecord.visibility = View.VISIBLE
                 binding.groupBtnPause.visibility = View.GONE
                 binding.groupBtnRunning.visibility = View.VISIBLE
+                mContext?.let {
+                    (getActivityContext(it) as MainActivity).hideHamburgerBtn()
+                }
             }
 
             TrackingStatus.INITIAL -> {
@@ -358,6 +555,9 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
                 binding.groupRecord.visibility = View.GONE
                 binding.groupBtnPause.visibility = View.GONE
                 binding.groupBtnRunning.visibility = View.GONE
+                mContext?.let {
+                    (getActivityContext(it) as MainActivity).showHamburgerBtn()
+                }
             }
 
             TrackingStatus.PAUSED -> {
@@ -365,6 +565,9 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
                 binding.groupRecord.visibility = View.VISIBLE
                 binding.groupBtnPause.visibility = View.VISIBLE
                 binding.groupBtnRunning.visibility = View.GONE
+                mContext?.let {
+                    (getActivityContext(it) as MainActivity).hideHamburgerBtn()
+                }
             }
         }
     }
@@ -373,15 +576,14 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
         super.onPause()
         binding.mapView.pause()
         viewModel.stopObservingLocationUpdates()
-        userLabel?.remove()
-        userLabel = null
+        viewModel.isUserLabel = false
+//        userLabels[mainViewModel.userId.value]?.remove()
 
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        userLabel?.remove()
-        userLabel = null
+//        userLabels[mainViewModel.userId.value]?.remove()
     }
 
 
@@ -415,6 +617,7 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
 
     private fun getBitmapFromURL(src: String): Bitmap? {
         try {
+            Timber.d("image src$src")
             val url = URL(src)
             val connection = (url.openConnection() as HttpURLConnection).apply {
                 doInput = true
@@ -423,6 +626,7 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
             val input = connection.inputStream
             return BitmapFactory.decodeStream(input)
         } catch (e: IOException) {
+            Timber.d("bitmap pharse error")
             e.printStackTrace()
             return null
         }
@@ -435,36 +639,36 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
         return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
     }
 
-    fun handleLocationUpdate(locationData: MemberLocationData) { // LocationData는 서버에서 받는 데이터 모델
+    fun handleLocationUpdate(locationData: MemberLocationData) {
         if (kakaoMap == null) {
             Timber.w("KakaoMap is not ready yet.")
             return
         }
 
-        // 자기 자신의 위치 업데이트는 별도로 처리하거나 여기서 제외
-        if (locationData.userId == viewModel.dummyAuth.userId) { // myUserId는 현재 클라이언트의 userId
-            // 내 위치 마커 업데이트 로직 (필요하다면)
+        if (locationData.userId == mainViewModel.userId.value) {
             return
         }
 
         val mapPoint = LatLng.from(locationData.lat, locationData.lng)
 
-        if (viewModel.userLabels.containsKey(locationData.userId)) {
-            // 기존 유저: Label 위치 업데이트
-            val label = viewModel.userLabels[locationData.userId]
-            label?.moveTo(mapPoint,500)
+        if (userLabels.containsKey(locationData.userId)) {
+            val label = userLabels[locationData.userId]
+            label?.moveTo(mapPoint, 500)
             Timber.d("Moved label for user ${locationData.userId} to ${locationData.lat}, ${locationData.lng}")
         } else {
             // 새로운 유저: Label 생성 및 추가
             val labelOptions = LabelOptions.from(mapPoint)
                 .setTexts(LabelTextBuilder().setTexts(locationData.nickname)) // 닉네임으로 Label 텍스트 설정
 
-            addMarker(locationData.lat,locationData.lng,locationData.userId)
-//            kakaoMap?.labelManager?.layer?.addLabel(labelOptions)?.let { newLabel ->
-//                viewModel.userLabels[locationData.userId] = newLabel
-//                Timber.d("Added new label for user ${locationData.userId} at ${locationData.lat}, ${locationData.lng}")
-//            }
+            addMarker(
+                locationData.lat,
+                locationData.lng,
+                locationData.userId,
+                locationData.profileImage ?: ""
+            )
         }
     }
 
+
 }
+

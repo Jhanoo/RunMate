@@ -14,6 +14,7 @@ import com.ssafy.locket.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @AndroidEntryPoint
 class LoginFragment : BaseFragment<FragmentLoginBinding>(
@@ -38,15 +39,18 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(
                     is LoginViewModel.LoginUiState.Initial -> {
                         // 초기 상태
                     }
+
                     is LoginViewModel.LoginUiState.Loading -> {
                         // 로딩 상태 - 프로그레스 표시
                         showLoading(true)
                     }
+
                     is LoginViewModel.LoginUiState.Success -> {
                         // 로그인 성공
                         showLoading(false)
                         navigateToMain()
                     }
+
                     is LoginViewModel.LoginUiState.Error -> {
                         // 로그인 실패
                         showLoading(false)
@@ -57,13 +61,13 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(
         }
 
         // 이미 로그인한 상태인지 확인
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.isLoggedIn.collectLatest { isLoggedIn ->
-                if (isLoggedIn) {
-                    navigateToMain()
-                }
-            }
-        }
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            viewModel.isLoggedIn.collectLatest { isLoggedIn ->
+//                if (isLoggedIn) {
+//                    navigateToMain()
+//                }
+//            }
+//        }
 
         // 에러 메시지 관찰
         viewModel.emailError.observe(viewLifecycleOwner) { errorMsg ->
@@ -95,15 +99,20 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(
     }
 
     private fun navigateToMain() {
-        findNavController().navigate(
-            R.id.runningFragment,
-            null,
-            androidx.navigation.NavOptions.Builder()
-                .setPopUpTo(R.id.loginFragment, true)
-                .build()
-        )
-    }
+        try {
+            // 현재 목적지 ID 확인
+            val currentDestId = findNavController().currentDestination?.id
 
+            // 현재 loginFragment에 있는 경우에만 네비게이션 수행
+            if (currentDestId == R.id.loginFragment) {
+                findNavController().navigate(R.id.action_loginFragment_to_runningFragment)
+            } else {
+                Timber.d("이미 다른 화면에 있습니다: $currentDestId")
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "네비게이션 오류: ${e.message}")
+        }
+    }
     override fun onDestroyView() {
         viewModel.resetState()
         super.onDestroyView()

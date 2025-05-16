@@ -15,6 +15,7 @@ interface RunningRepository {
         distance: Double,
         endTime: String,
         startLocation: String,
-        startTime: String
+        startTime: String,
+        groupId:String?
     ): Flow<ResponseStatus<EndRunning>>
 }

@@ -1,10 +1,13 @@
 package com.D107.runmate.data.di
 
 import com.D107.runmate.data.remote.api.CourseService
+import com.D107.runmate.data.remote.api.CurriculumService
 import com.D107.runmate.data.remote.api.RunningService
 import com.D107.runmate.data.remote.api.GroupService
 import com.D107.runmate.data.remote.api.HistoryService
 import com.D107.runmate.data.remote.api.KakaoLocalService
+import com.D107.runmate.data.remote.api.MarathonService
+import com.D107.runmate.data.remote.api.TodoService
 import com.D107.runmate.data.remote.api.UserService
 import dagger.Module
 import dagger.Provides
@@ -53,4 +56,21 @@ class ApiModule {
         return retrofit.create(HistoryService::class.java)
     }
 
+    @Provides
+    @Singleton
+    fun marathonService(@InterceptorRetrofit retrofit: Retrofit): MarathonService {
+        return retrofit.create(MarathonService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun curriculumService(@InterceptorRetrofit retrofit: Retrofit): CurriculumService {
+        return retrofit.create(CurriculumService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun todoService(@InterceptorRetrofit retrofit: Retrofit): TodoService {
+        return retrofit.create(TodoService::class.java)
+    }
 }

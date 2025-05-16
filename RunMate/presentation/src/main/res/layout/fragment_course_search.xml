@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".running.view.CourseSearchFragment">
+    tools:context=".course.view.CourseSearchFragment">
 
     <TextView
         android:id="@+id/tv_title"
@@ -46,6 +46,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btn_back" />
+
+    <ImageView
+        android:id="@+id/btn_clear"
+        android:visibility="gone"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:src="@drawable/ic_clear"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/et_search"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintEnd_toEndOf="@+id/et_search"
+        app:layout_constraintTop_toTopOf="@+id/et_search" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btn_filter"

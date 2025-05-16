@@ -308,6 +308,31 @@
                         app:layout_constraintTop_toBottomOf="@id/tv_footstrike_alert_insole" />
 
                     <TextView
+                        android:id="@+id/tv_gait_result_insole"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="팔짜 걸음"
+                        android:textColor="@android:color/white"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:background="@drawable/bg_insole_result"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tv_analysis_title_insole" />
+
+                    <ImageView
+                        android:id="@+id/iv_gait_insole"
+                        android:layout_width="160dp"
+                        android:layout_height="160dp"
+                        android:src="@drawable/img_neutral_toeing"
+                        android:layout_marginTop="8dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tv_gait_result_insole" />
+
+                    <TextView
                         android:id="@+id/tv_analysis_description_insole"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -316,7 +341,7 @@
                         android:textSize="14sp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tv_analysis_title_insole" />
+                        app:layout_constraintTop_toBottomOf="@id/iv_gait_insole" />
 
 
                 </androidx.constraintlayout.widget.ConstraintLayout>

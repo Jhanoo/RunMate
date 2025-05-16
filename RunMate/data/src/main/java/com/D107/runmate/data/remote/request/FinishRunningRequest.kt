@@ -13,5 +13,6 @@ data class FinishRunningRequest(
     val distance: Double,
     val endTime: String,
     val startLocation: String,
-    val startTime: String
+    val startTime: String,
+    val groupId:String?
 )

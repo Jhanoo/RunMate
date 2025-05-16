@@ -16,13 +16,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
-import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
-
-private const val TAG = "RunningTrackingRepository"
 
 class RunningTrackingRepositoryImpl @Inject constructor(
     private val gpxWriter: GpxWriter
@@ -99,13 +96,16 @@ class RunningTrackingRepositoryImpl @Inject constructor(
                     )
                     gpxWriter.createGpxFile(trackPoints, metadata)
                 }
-                if(gpxWriter.finishWriteGpxFile()) {
+                if (gpxWriter.finishWriteGpxFile()) {
                     emit(true)
-                }else {
+                } else {
                     emit(false)
                 }
             }
-            else -> {emit(false)}
+
+            else -> {
+                emit(false)
+            }
         }
     }
 

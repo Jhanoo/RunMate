@@ -4,7 +4,6 @@ import com.D107.runmate.data.remote.common.ApiResponse
 import com.D107.runmate.data.remote.datasource.running.RunningDataSource
 import com.D107.runmate.data.remote.request.FinishRunningRequest
 import com.D107.runmate.data.remote.response.EndRunningResponse.Companion.toDomainModel
-import com.D107.runmate.data.remote.response.user.LoginResponse.Companion.toDomainModel
 import com.D107.runmate.data.utils.GpxWriter
 import com.D107.runmate.domain.model.base.NetworkError
 import com.D107.runmate.domain.model.base.ResponseStatus
@@ -29,10 +28,11 @@ internal class RunningRepositoryImpl @Inject constructor(
         distance: Double,
         endTime: String,
         startLocation: String,
-        startTime: String
+        startTime: String,
+        groupId:String?
     ): Flow<ResponseStatus<EndRunning>> = flow {
         try {
-          when (val response = runningDataSource.endRunning(
+            when (val response = runningDataSource.endRunning(
                 FinishRunningRequest(
                     avgBpm = avgBpm,
                     avgCadence = avgCadence,
@@ -43,21 +43,27 @@ internal class RunningRepositoryImpl @Inject constructor(
                     distance = distance,
                     endTime = endTime,
                     startLocation = startLocation,
-                    startTime = startTime
+                    startTime = startTime,
+                    groupId = groupId
                 )
             )) {
                 is ApiResponse.Success -> {
                     Timber.d("response success: $response")
                     emit(ResponseStatus.Success(response.data.toDomainModel()))
                 }
+
                 is ApiResponse.Error -> {
                     Timber.d("response error: ${response.error.message}")
-                    emit(ResponseStatus.Error(NetworkError(
-                        error = response.error.error ?: "RUNNING_ERROR",
-                        code = response.error.code ?: "UNKNOWN_CODE",
-                        status = response.error.status ?: "ERROR",
-                        message = response.error.message ?: "달리기 종료에 실패하였습니다"
-                    )))
+                    emit(
+                        ResponseStatus.Error(
+                            NetworkError(
+                                error = response.error.error ?: "RUNNING_ERROR",
+                                code = response.error.code ?: "UNKNOWN_CODE",
+                                status = response.error.status ?: "ERROR",
+                                message = response.error.message ?: "달리기 종료에 실패하였습니다"
+                            )
+                        )
+                    )
                 }
             }
         } catch (e: Exception) {

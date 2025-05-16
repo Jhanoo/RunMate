@@ -17,5 +17,5 @@ class GroupDataSourceImpl @Inject constructor(
     override suspend fun joinGroup(inviteCode: String): ApiResponse<GroupJoinResponse?> = groupService.joinGroup(inviteCode)
     override suspend fun startGroup(): ApiResponse<Any?>  = groupService.groupStart()
     override suspend fun finishGroup(): ApiResponse<Any?> = groupService.groupFinish()
-
+    override suspend fun hasGroupHistoriy(): ApiResponse<Boolean> = groupService.hasGroupHistory()
 }

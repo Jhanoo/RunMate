@@ -2,10 +2,13 @@ package com.D107.runmate.data.di
 
 import android.content.Context
 import com.D107.runmate.data.remote.api.CourseService
+import com.D107.runmate.data.remote.api.CurriculumService
 import com.D107.runmate.data.remote.api.GroupService
 import com.D107.runmate.data.remote.api.HistoryService
 import com.D107.runmate.data.remote.api.KakaoLocalService
+import com.D107.runmate.data.remote.api.MarathonService
 import com.D107.runmate.data.remote.api.RunningService
+import com.D107.runmate.data.remote.api.TodoService
 import com.D107.runmate.data.remote.api.UserService
 import com.D107.runmate.data.remote.datasource.course.CourseDataSource
 import com.D107.runmate.data.remote.datasource.course.CourseDataSourceImpl
@@ -15,6 +18,12 @@ import com.D107.runmate.data.remote.datasource.group.KakaoLocalDataSource
 import com.D107.runmate.data.remote.datasource.group.KakaoLocalDataSourceImpl
 import com.D107.runmate.data.remote.datasource.history.HistoryDataSource
 import com.D107.runmate.data.remote.datasource.history.HistoryDataSourceImpl
+import com.D107.runmate.data.remote.datasource.manager.CurriculumDataSource
+import com.D107.runmate.data.remote.datasource.manager.CurriculumDataSourceImpl
+import com.D107.runmate.data.remote.datasource.manager.MarathonDataSource
+import com.D107.runmate.data.remote.datasource.manager.MarathonDataSourceImpl
+import com.D107.runmate.data.remote.datasource.manager.TodoDataSource
+import com.D107.runmate.data.remote.datasource.manager.TodoDataSourceImpl
 import com.D107.runmate.data.remote.datasource.running.RunningDataSource
 import com.D107.runmate.data.remote.datasource.running.RunningDataSourceImpl
 import com.D107.runmate.data.remote.datasource.socket.SocketService
@@ -70,6 +79,23 @@ object RemoteDataSourceModule {
         return SocketService()
     }
 
+    @Provides
+    @Singleton
+    fun provideMarathonDataSource(marathonService: MarathonService): MarathonDataSource {
+        return MarathonDataSourceImpl(marathonService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCurriculumDataSource(curriculumService: CurriculumService): CurriculumDataSource {
+        return CurriculumDataSourceImpl(curriculumService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTodoDataSource(todoService: TodoService): TodoDataSource {
+        return TodoDataSourceImpl(todoService)
+    }
     @Provides
     @Singleton
     fun provideCourseDataSource(
