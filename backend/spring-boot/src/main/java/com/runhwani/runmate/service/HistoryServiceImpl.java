@@ -1,10 +1,13 @@
 package com.runhwani.runmate.service;
 
+import com.runhwani.runmate.dao.GroupDao;
 import com.runhwani.runmate.dao.HistoryDao;
 import com.runhwani.runmate.dao.CourseDao;
 import com.runhwani.runmate.dto.response.history.*;
 import com.runhwani.runmate.exception.CustomException;
 import com.runhwani.runmate.exception.ErrorCode;
+import com.runhwani.runmate.model.Group;
+import com.runhwani.runmate.model.History;
 import com.runhwani.runmate.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +31,7 @@ public class HistoryServiceImpl implements HistoryService {
 
     private final HistoryDao historyDao;
     private final CourseDao courseDao;
+    private final GroupDao groupDao;
 
     @Override
     @Transactional(readOnly = true)
@@ -182,7 +186,18 @@ public class HistoryServiceImpl implements HistoryService {
                 .avgElevation(convertToDouble(runnerDetail.get("avgElevation")))
                 .build();
     }
-    
+
+    @Override
+    public boolean hasGroupHistory(UUID userId) {
+        Group group = groupDao.selectGroupByUserId(userId);
+        if (group == null) {
+            return false;
+        }
+
+        // ② 해당 그룹에서 과거 이력이 있는지
+        return historyDao.existsByUserIdAndGroupId(userId, group.getGroupId());
+    }
+
     /**
      * Map 형태의 히스토리 데이터를 HistoryResponse DTO로 변환
      */

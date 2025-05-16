@@ -97,4 +97,6 @@ public interface HistoryDao {
      * 히스토리 ID와 사용자 ID로 참여자 상세 기록 조회
      */
     Map<String, Object> findRunnerDetailByHistoryIdAndUserId(UUID historyId, UUID userId);
+
+    boolean existsByUserIdAndGroupId(UUID userId, UUID groupId);
 }

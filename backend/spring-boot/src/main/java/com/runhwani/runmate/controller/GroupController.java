@@ -9,8 +9,10 @@ import com.runhwani.runmate.dto.response.group.GroupResponse;
 import com.runhwani.runmate.dto.response.group.JoinGroupResponse;
 import com.runhwani.runmate.model.Course;
 import com.runhwani.runmate.model.Group;
+import com.runhwani.runmate.model.History;
 import com.runhwani.runmate.service.CourseService;
 import com.runhwani.runmate.service.GroupService;
+import com.runhwani.runmate.service.HistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +30,7 @@ public class GroupController implements GroupControllerDocs {
 
     private final GroupService groupService;
     private final CourseService courseService;
+    private final HistoryService historyService;
 
     @Override
     public ResponseEntity<CommonResponse<Group>> createGroup(
@@ -142,7 +145,7 @@ public class GroupController implements GroupControllerDocs {
         UUID userId = UUID.fromString(principal.getUsername());
 
         Group myGroup = groupService.getMyGroup(userId);
-        
+
         // 가입된 그룹이 없으면 404 반환
         if (myGroup == null) {
             return ResponseEntity
@@ -156,9 +159,17 @@ public class GroupController implements GroupControllerDocs {
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(CommonResponse.error("그룹장이 아닙니다."));
         }
-        
+
         groupService.updateStatus(myGroup.getGroupId(), 1);
-        
+
         return ResponseEntity.ok(CommonResponse.ok(null));
+    }
+
+    public ResponseEntity<CommonResponse<Boolean>> hasGroupHistory(UserDetails principal) {
+        UUID userId = UUID.fromString(principal.getUsername());
+
+        boolean hasHistory = historyService.hasGroupHistory(userId);
+
+        return ResponseEntity.ok(CommonResponse.ok(hasHistory));
     }
 }

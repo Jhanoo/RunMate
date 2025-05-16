@@ -19,6 +19,10 @@ public record CommonResponse<T>(
         return new CommonResponse<>("OK", data);
     }
 
+    public static <T> CommonResponse<T> ok(String msg, T data) {
+        return new CommonResponse<>(msg, data);
+    }
+
     /**
      * 실패 응답 생성
      */
