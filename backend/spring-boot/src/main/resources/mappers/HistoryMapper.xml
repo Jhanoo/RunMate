@@ -219,4 +219,10 @@
             AND h.user_id = #{userId}
     </select>
 
+    <select id="existsByUserIdAndGroupId" resultType="boolean">
+        SELECT CASE WHEN COUNT(*) > 0 THEN TRUE ELSE FALSE END
+        FROM histories
+        WHERE user_id = #{userId}
+          AND group_id = #{groupId}
+    </select>
 </mapper>

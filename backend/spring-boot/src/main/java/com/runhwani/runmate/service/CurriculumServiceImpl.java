@@ -194,7 +194,7 @@ public class CurriculumServiceImpl implements CurriculumService {
                 .append("부터 ").append(goalDate.format(fmt))
                 .append("까지 날짜별로 JSON 객체를 하루 하나씩 생성해주세요.\n")
                 .append("2. 달리기 거리 조언(예: 3km 달리기, 5km 달리기)을 제시할 때, " +
-                        "반드시 문장의 맨 앞이 ‘3km’, ‘5km’처럼 '<거리>km' 형태로 시작하도록 해주세요.\\n")
+                        "반드시 문장의 맨 앞이 ‘3km’, ‘5km’처럼 '<거리>km' 형태로 시작하도록 해주세요.\n")
                 .append("3. 출력은 반드시 다음과 같은 JSON 객체 형태로만 보여주세요:\n")
                 .append("""
                         ```json
@@ -255,7 +255,7 @@ public class CurriculumServiceImpl implements CurriculumService {
 
             // 3) ChatCompletion 파라미터 구성
             ChatCompletionCreateParams params = ChatCompletionCreateParams.builder()
-                    .model(ChatModel.O4_MINI)
+                    .model(ChatModel.GPT_4_1)
                     .maxCompletionTokens(8192)
                     .responseFormat(ResponseFormatJsonSchema.builder()
                             .jsonSchema(JsonSchema.builder()

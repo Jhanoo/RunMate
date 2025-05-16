@@ -161,4 +161,14 @@ public interface GroupControllerDocs {
     )
     @PostMapping("/start")
     ResponseEntity<CommonResponse<Void>> startGroup(@AuthenticationPrincipal UserDetails principal);
+
+    @Operation(
+            summary = "그룹 달리기 히스토리 여부 조회",
+            description = "사용자가 현재 가입한 그룹에서 달리기 기록이 있는지 여부 조회",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "조회 성공"),
+            }
+    )
+    @GetMapping("/hasGroupHistory")
+    ResponseEntity<CommonResponse<Boolean>> hasGroupHistory(@AuthenticationPrincipal UserDetails principal);
 }

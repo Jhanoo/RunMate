@@ -62,7 +62,8 @@
         FROM groups g
                  JOIN group_members gm ON g.group_id = gm.group_id
         WHERE gm.user_id = #{userId}
-        AND g.status != 2
+          AND g.status != 2
+          AND gm.is_finished = false
         LIMIT 1
     </select>
 

@@ -3,6 +3,7 @@ package com.runhwani.runmate.service;
 import com.runhwani.runmate.dto.response.history.HistoryDetailResponse;
 import com.runhwani.runmate.dto.response.history.HistoryListResponse;
 import com.runhwani.runmate.dto.response.history.RunnerDetailResponse;
+import com.runhwani.runmate.model.History;
 
 import java.util.UUID;
 
@@ -23,4 +24,6 @@ public interface HistoryService {
     HistoryDetailResponse getHistoryDetail(UUID historyId);
 
     RunnerDetailResponse getRunnerDetail(UUID historyId, UUID userId);
-} 
+
+    boolean hasGroupHistory(UUID userId);
+}

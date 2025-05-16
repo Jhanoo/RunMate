@@ -66,6 +66,9 @@ DB_PASSWORD=testPw
 # Redis
 REDIS_HOST=example.k12d107.p.ssafy.io
 REDIS_PORT=6379
+
+# OpenAI API Key
+OPENAI_API_KEY= # YOUR_API_KEY
 ```
 
 ## API 문서 (Swagger)
