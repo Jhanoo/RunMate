@@ -16,4 +16,9 @@ sealed class RunningRecordState {
     data class Exist(val runningRecords: List<PersonalRunningInfo>): RunningRecordState()
 }
 
+sealed class CadenceRecordState {
+    object Initial: CadenceRecordState()
+    data class Exist(val cadenceRecords: List<Int>): CadenceRecordState()
+}
+
 enum class TrackingStatus { INITIAL, RUNNING, PAUSED, STOPPED }

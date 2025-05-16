@@ -1,8 +1,10 @@
 package com.D107.runmate.presentation.utils
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.content.IntentSender
 import android.location.Location
 import android.location.LocationManager
 import android.os.Build
@@ -16,7 +18,9 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.location.LocationSettingsResponse
 import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.Task
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,7 +35,7 @@ import kotlin.coroutines.resumeWithException
 object LocationUtils {
     private const val TAG = "LocationUtils"
 
-    suspend fun getLocation(context: Context): Location = suspendCancellableCoroutine { cont ->
+    suspend fun getLocation(context: Context, activity: Activity): Location = suspendCancellableCoroutine { cont ->
         val locationRequest = LocationRequest.create().apply {
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         }
@@ -40,14 +44,24 @@ object LocationUtils {
             .addLocationRequest(locationRequest)
 
         val settingsClient = LocationServices.getSettingsClient(context)
+
         settingsClient.checkLocationSettings(builder.build())
             .addOnSuccessListener {
-                Log.d(TAG, "Location settings are satisfied")
                 fetchCurrentLocation(cont, context)
             }
             .addOnFailureListener { exception ->
                 if (exception is ResolvableApiException) {
-                    cont.resumeWithException(Exception("Location services disabled. Please enable."))
+                    Log.d(TAG, "OnFailure")
+                    try {
+                        exception.startResolutionForResult(
+                            activity,
+                            100
+                        )
+                        cont.resumeWithException(Exception("Location services disabled. Please enable."))
+                    } catch (sendEx: IntentSender.SendIntentException) {
+                        Log.d(TAG, sendEx.message.toString())
+                        cont.resumeWithException(exception)
+                    }
                 } else {
                     cont.resumeWithException(exception)
                 }
@@ -105,36 +119,12 @@ object LocationUtils {
         }
     }
 
-    fun isEnableLocationSystem(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
-            locationManager?.isLocationEnabled!!
-        }else{
-            val mode = Settings.Secure.getInt(context.contentResolver, Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF)
-            mode != Settings.Secure.LOCATION_MODE_OFF
-        }
-    }
-
     fun getFallbackLocation(): Location {
         val fallbackLocation = Location("fallback")
         fallbackLocation.latitude = 37.406960
         fallbackLocation.longitude = 127.115587
         return fallbackLocation
     }
-
-    fun showLocationEnableDialog(context: Context) {
-        AlertDialog.Builder(context)
-            .setTitle("위치 서비스 필요")
-            .setMessage("정확한 위치 확인을 위해 GPS를 활성화해 주세요")
-            .setPositiveButton("설정") { _, _ ->
-                startLocationSettings(context)
-            }
-            .setNegativeButton("취소") { dialog, _ ->
-                dialog.dismiss()
-            }
-            .create()
-            .show()
-    } // TODO UI 추후 수정
 
     private fun startLocationSettings(context: Context) {
         val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS).apply {
@@ -148,10 +138,16 @@ object LocationUtils {
     }
 
     fun getPaceFromSpeed(speed: Float): String {
+        if(speed == 0f) return "0'00\""
         val minPerMs = 16.6667 / speed
         val min = minPerMs.toInt()
         val sec = ((minPerMs - min) * 60).toInt()
         Log.d(TAG, "startLocationTracking getPaceFromSpeed: $speed $minPerMs $sec")
         return "%d'%02d\"".format(min, sec)
+    }
+
+    fun calculateSpeedMs(distanceKm: Double, timeSeconds: Double): Double {
+        require(timeSeconds > 0) { "시간은 0보다 커야 합니다." }
+        return (distanceKm * 1000) / timeSeconds
     }
 }

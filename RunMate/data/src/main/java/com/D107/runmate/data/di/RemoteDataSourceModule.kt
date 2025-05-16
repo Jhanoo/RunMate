@@ -5,6 +5,7 @@ import com.D107.runmate.data.remote.api.CurriculumService
 import com.D107.runmate.data.remote.api.GroupService
 import com.D107.runmate.data.remote.api.KakaoLocalService
 import com.D107.runmate.data.remote.api.MarathonService
+import com.D107.runmate.data.remote.api.RunningService
 import com.D107.runmate.data.remote.api.TodoService
 import com.D107.runmate.data.remote.api.UserService
 import com.D107.runmate.data.remote.datasource.group.GroupDataSource
@@ -17,14 +18,19 @@ import com.D107.runmate.data.remote.datasource.manager.MarathonDataSource
 import com.D107.runmate.data.remote.datasource.manager.MarathonDataSourceImpl
 import com.D107.runmate.data.remote.datasource.manager.TodoDataSource
 import com.D107.runmate.data.remote.datasource.manager.TodoDataSourceImpl
+import com.D107.runmate.data.remote.datasource.running.RunningDataSource
+import com.D107.runmate.data.remote.datasource.running.RunningDataSourceImpl
+import com.D107.runmate.data.remote.datasource.socket.SocketService
 import com.D107.runmate.data.remote.datasource.user.AuthDataSource
 import com.D107.runmate.data.remote.datasource.user.AuthDataSourceImpl
 import com.squareup.moshi.Moshi
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
 import javax.inject.Singleton
 
 @Module
@@ -54,6 +60,21 @@ object RemoteDataSourceModule {
 
     @Provides
     @Singleton
+    fun provideRunningDataSource(
+        @ApplicationContext context: Context,
+        runningService: RunningService
+    ): RunningDataSource {
+        return RunningDataSourceImpl(context, runningService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSocketService(): SocketService {
+        return SocketService()
+    }
+
+    @Provides
+    @Singleton
     fun provideMarathonDataSource(marathonService: MarathonService): MarathonDataSource {
         return MarathonDataSourceImpl(marathonService)
     }
@@ -69,4 +90,5 @@ object RemoteDataSourceModule {
     fun provideTodoDataSource(todoService: TodoService): TodoDataSource {
         return TodoDataSourceImpl(todoService)
     }
+
 }

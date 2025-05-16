@@ -1,5 +1,6 @@
 package com.D107.runmate.presentation.running.view
 
+import android.content.Context
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View
@@ -13,6 +14,7 @@ import com.D107.runmate.presentation.MainActivity
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentCourseSettingBinding
 import com.D107.runmate.presentation.running.adapter.CourseVPAdapter
+import com.D107.runmate.presentation.utils.CommonUtils.getActivityContext
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.ssafy.locket.presentation.base.BaseFragment
@@ -22,16 +24,24 @@ class CourseSettingFragment : BaseFragment<FragmentCourseSettingBinding>(
     FragmentCourseSettingBinding::bind,
     R.layout.fragment_course_setting
 ) {
+    private var mContext: Context? = null
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        mContext = context
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initTabLayout()
 
         binding.btnBack.setOnClickListener {
+
             findNavController().popBackStack()
         }
 
         binding.btnSearch.setOnClickListener {
-            // TODO 검색 화면으로 이동
+            findNavController().navigate(R.id.action_courseSettingFragment_to_courseSearchFragment)
         }
     }
 
@@ -50,11 +60,6 @@ class CourseSettingFragment : BaseFragment<FragmentCourseSettingBinding>(
             tab.text = if (position == 0) "최근에 달린 코스" else "내가 만든 코스"
         }.attach()
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-
-            }
-        }
 
         binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
@@ -86,6 +91,14 @@ class CourseSettingFragment : BaseFragment<FragmentCourseSettingBinding>(
             }
         }
         return null
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mContext?.let {
+            (getActivityContext(it) as MainActivity).hideHamburgerBtn()
+        }
+
     }
 
 }

@@ -31,8 +31,6 @@ import com.D107.runmate.presentation.databinding.ActivityMainBinding
 import com.D107.runmate.presentation.databinding.DrawerHeaderBinding
 import com.D107.runmate.presentation.manager.viewmodel.CurriculumViewModel
 import com.D107.runmate.presentation.utils.LocationUtils.getLocation
-import com.D107.runmate.presentation.utils.LocationUtils.isEnableLocationSystem
-import com.D107.runmate.presentation.utils.LocationUtils.showLocationEnableDialog
 import com.D107.runmate.presentation.utils.PermissionChecker
 import com.bumptech.glide.Glide
 import com.google.android.material.navigation.NavigationView
@@ -87,8 +85,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                     val headerView = binding.navView.getHeaderView(0)
                     val headerBinding = DrawerHeaderBinding.bind(headerView)
                     headerBinding.tvName.text = nickname
-                }
-                else {
+                } else {
                     Timber.d("delete nickname")
                     val navHostFragment =
                         supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
@@ -274,8 +271,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                 else -> {}
             }
         }
-//        true
-        hideHamburgerBtn(navController)
+        true
+        showHamburgerBtn(navController)
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
@@ -365,23 +362,20 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         lifecycleScope.launch {
             try {
                 mContext?.let {
-                    if (isEnableLocationSystem(it)) {
-                        val location = getLocation(it)
-                        viewModel.setUserLocation(
-                            UserLocationState.Exist(
-                                listOf(
-                                    LocationModel(
-                                        location.latitude,
-                                        location.longitude,
-                                        location.altitude,
-                                        location.speed
-                                    )
+                    val location = getLocation(it, this@MainActivity)
+                    viewModel.setUserLocation(
+                        UserLocationState.Exist(
+                            listOf(
+                                LocationModel(
+                                    location.latitude,
+                                    location.longitude,
+                                    location.altitude,
+                                    location.speed
                                 )
                             )
                         )
-                    } else {
-                        showLocationEnableDialog(it)
-                    }
+                    )
+                    Log.d(TAG, "onAllPermissionsGranted: location ${location}")
                 }
             } catch (e: Exception) {
                 Log.d(TAG, "onAllPermissionsGranted: ${e.message}")
@@ -417,7 +411,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         binding.navView.layoutParams = params
     }
 
-    private fun hideHamburgerBtn(navController: NavController) {
+    private fun showHamburgerBtn(navController: NavController) {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             binding.btnMenu.visibility = when (destination.id) {
                 R.id.goalSettingFragment -> View.VISIBLE
@@ -426,6 +420,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                 R.id.historyFragment -> View.VISIBLE
                 R.id.wearableFragment -> View.VISIBLE
                 R.id.AIManagerFragment -> View.VISIBLE
+                R.id.groupInfoFragment -> View.VISIBLE
+                R.id.groupRunningFragment -> View.VISIBLE
                 R.id.splashFragment -> View.GONE
                 R.id.loginFragment -> View.GONE
                 R.id.JoinFragment -> View.GONE
@@ -443,10 +439,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         binding.btnMenu.visibility = View.VISIBLE
     }
 
-    override fun onResume() {
-        super.onResume()
-//        checkPermission()
-    }
 
     fun getKeyHash() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {

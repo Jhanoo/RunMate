@@ -42,9 +42,9 @@ class GroupMemberAdapter() :
         fun bind(member: User) {
             binding.tvMemberName.text = member.nickname
 
-            if (!member.userProfileImg.isNullOrEmpty()) {
+            if (!member.profileImage.isNullOrEmpty()) {
                 Glide.with(binding.root.context)
-                    .load(member.userProfileImg)
+                    .load(member.profileImage)
                     .placeholder(R.drawable.ic_user_profile)
                     .into(binding.ivMemberProfile)
             }else{
@@ -57,7 +57,7 @@ class GroupMemberAdapter() :
 
     class GroupMemberDiffCallback : DiffUtil.ItemCallback<User>() {
         override fun areItemsTheSame(oldItem: User, newItem: User): Boolean {
-            return oldItem.userId == newItem.userId
+            return oldItem.memberId == newItem.memberId
         }
 
         override fun areContentsTheSame(oldItem: User, newItem: User): Boolean {

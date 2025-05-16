@@ -44,7 +44,7 @@
         tools:text="0.00km" />
 
     <TextView
-        android:id="@+id/tv_date"
+        android:id="@+id/tv_date_group_info"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:letterSpacing="-0.02"
@@ -68,6 +68,7 @@
 
     <ImageView
         android:id="@+id/btn_add_course"
+        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_all_course_add"
@@ -75,10 +76,23 @@
         app:layout_constraintEnd_toStartOf="@+id/btn_chart"
         app:layout_constraintTop_toBottomOf="@+id/tv_title" />
 
+    <ImageView
+        android:id="@+id/iv_like"
+        android:visibility="gone"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_chart"
+        app:layout_constraintEnd_toStartOf="@+id/btn_chart"
+        app:layout_constraintTop_toTopOf="@+id/btn_chart"
+        tools:src="@drawable/ic_course_like" />
+
+
     <TextView
         android:id="@+id/tv_time"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:autoSizeMaxTextSize="36sp"
         android:autoSizeMinTextSize="6sp"
         android:autoSizeTextType="uniform"
@@ -90,11 +104,12 @@
         android:textColor="@color/text"
         android:textSize="32sp"
         android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.05"
         app:layout_constraintBottom_toTopOf="@+id/tv_time_title"
         app:layout_constraintEnd_toStartOf="@+id/tv_calorie"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_date"
+        app:layout_constraintTop_toBottomOf="@+id/tv_date_group_info"
         tools:text="05:20" />
 
     <TextView
@@ -119,7 +134,7 @@
     <TextView
         android:id="@+id/tv_calorie"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:autoSizeMaxTextSize="36sp"
         android:autoSizeMinTextSize="6sp"
         android:autoSizeTextType="uniform"
@@ -131,6 +146,7 @@
         android:textSize="32sp"
         android:textStyle="bold"
         android:text="-"
+        app:layout_constraintHeight_percent="0.05"
         app:layout_constraintBottom_toTopOf="@+id/tv_time_title"
         app:layout_constraintEnd_toStartOf="@+id/tv_cadence"
         app:layout_constraintHorizontal_bias="0.5"
@@ -160,7 +176,7 @@
     <TextView
         android:id="@+id/tv_cadence"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:autoSizeMaxTextSize="36sp"
         android:autoSizeMinTextSize="6sp"
         android:autoSizeTextType="uniform"
@@ -172,6 +188,7 @@
         android:textColor="@color/text"
         android:textSize="32sp"
         android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.05"
         app:layout_constraintBottom_toTopOf="@+id/tv_cadence_title"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -190,7 +207,7 @@
         android:gravity="center"
         android:letterSpacing="-0.02"
         android:maxLines="1"
-        android:text="케이던스"
+        android:text="평균 케이던스"
         android:textColor="@color/caption"
         android:textSize="14sp"
         android:textStyle="bold"
@@ -198,13 +215,10 @@
         app:layout_constraintStart_toStartOf="@+id/tv_cadence"
         app:layout_constraintTop_toBottomOf="@+id/tv_cadence" />
 
-
-
-
     <TextView
         android:id="@+id/tv_avg_pace"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:autoSizeMaxTextSize="36sp"
         android:autoSizeMinTextSize="6sp"
         android:autoSizeTextType="uniform"
@@ -216,6 +230,7 @@
         android:textColor="@color/text"
         android:textSize="32sp"
         android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.05"
         app:layout_constraintBottom_toTopOf="@+id/tv_avg_pace_title"
         app:layout_constraintEnd_toStartOf="@+id/tv_calorie"
         app:layout_constraintHorizontal_bias="0.5"
@@ -245,7 +260,7 @@
     <TextView
         android:id="@+id/tv_bpm"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:autoSizeMaxTextSize="36sp"
         android:autoSizeMinTextSize="6sp"
         android:autoSizeTextType="uniform"
@@ -257,6 +272,7 @@
         android:textSize="32sp"
         android:textStyle="bold"
         android:text="-"
+        app:layout_constraintHeight_percent="0.05"
         app:layout_constraintBottom_toTopOf="@+id/tv_bpm_title"
         app:layout_constraintEnd_toStartOf="@+id/tv_cadence"
         app:layout_constraintHorizontal_bias="0.5"
@@ -286,7 +302,7 @@
     <TextView
         android:id="@+id/tv_altitude"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:autoSizeMaxTextSize="36sp"
         android:autoSizeMinTextSize="6sp"
         android:autoSizeTextType="uniform"
@@ -298,6 +314,7 @@
         android:textColor="@color/text"
         android:textSize="32sp"
         android:textStyle="bold"
+        app:layout_constraintHeight_percent="0.05"
         app:layout_constraintBottom_toTopOf="@+id/tv_altitude_title"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -334,10 +351,11 @@
         android:textColor="@color/white"
         android:textSize="16sp"
         android:textStyle="bold"
-        android:layout_marginTop="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="6.5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_avg_pace_title" />
+        app:layout_constraintTop_toTopOf="@+id/map_view"
+        app:layout_constraintVertical_bias="0.92" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

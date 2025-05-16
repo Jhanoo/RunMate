@@ -15,6 +15,7 @@ import com.bumptech.glide.Glide
 class CourseRVAdapter:
     ListAdapter<CourseInfo, CourseRVAdapter.CustomViewHolder>(CustomComparator) {
     private lateinit var context: Context
+    lateinit var itemClickListener: ItemClickListener
 
     interface ItemClickListener {
         fun onClick(view: View, data: CourseInfo, position: Int)
@@ -43,11 +44,19 @@ class CourseRVAdapter:
 
             Glide.with(context)
                 .load(item.creator.profileImage)
+                .circleCrop()
                 .into(binding.ivProfile)
 
-            binding.ivCourseLike.setImageResource(R.drawable.ic_course_like)
-//            binding.ivCourseLike.setImageResource(R.drawable.ic_course_like_inactive)
-            // TODO 분기처리, 사용자가 좋아요 눌렀는지 여부에 따라 이미지 바꾸기
+            if(item.liked) {
+                binding.ivCourseLike.setImageResource(R.drawable.ic_course_like)
+            } else {
+                binding.ivCourseLike.setImageResource(R.drawable.ic_course_like_inactive)
+            }
+
+            binding.root.setOnClickListener {
+                itemClickListener.onClick(it, item, adapterPosition)
+            }
+
         }
     }
 
@@ -56,10 +65,10 @@ class CourseRVAdapter:
         val binding =
             ItemCourseBinding.inflate(LayoutInflater.from(context), parent, false)
 
-        val displayMetrics = context.resources.displayMetrics
-        val screenHeight = displayMetrics.heightPixels
-        val itemHeight = (screenHeight * 0.26).toInt()
-        binding.root.layoutParams.height = itemHeight
+//        val displayMetrics = context.resources.displayMetrics
+//        val screenHeight = displayMetrics.heightPixels
+//        val itemHeight = (screenHeight * 0.26).toInt()
+//        binding.root.layoutParams.height = itemHeight
         return CustomViewHolder(binding)
     }
 

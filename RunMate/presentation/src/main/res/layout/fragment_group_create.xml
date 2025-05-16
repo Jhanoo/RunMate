@@ -131,7 +131,7 @@
         android:layout_marginEnd="16dp"
         android:background="@color/color_edit_text"
         android:backgroundTint="#F5F5F5"
-        android:hint="2025.05.01 09:00"
+        android:hint="시작 시간을 선택해주세요"
         android:inputType="datetime"
         android:padding="12dp"
         android:cursorVisible="false"

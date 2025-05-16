@@ -22,6 +22,7 @@
         android:name="com.D107.runmate.presentation.user.view.LoginFragment"
         android:label="fragment_login"
         tools:layout="@layout/fragment_login">
+
         <action
             android:id="@+id/action_loginFragment_to_runningFragment"
             app:destination="@id/runningFragment"
@@ -38,6 +39,7 @@
         android:name="com.D107.runmate.presentation.user.view.JoinFragment"
         android:label="fragment_join"
         tools:layout="@layout/fragment_id_pw_join">
+
         <action
             android:id="@+id/action_joinFragment_to_join2Fragment"
             app:destination="@id/Join2Fragment" />
@@ -48,6 +50,7 @@
         android:name="com.D107.runmate.presentation.user.view.Join2Fragment"
         android:label="fragment_join2"
         tools:layout="@layout/fragment_personal_join">
+
         <action
             android:id="@+id/action_join2Fragment_to_loginFragment"
             app:destination="@id/loginFragment"
@@ -139,7 +142,7 @@
         <action
             android:id="@+id/action_groupFragment_to_groupInfoFragment"
             app:destination="@id/groupInfoFragment"
-            app:launchSingleTop="true" />
+            app:launchSingleTop="true"/>
     </fragment>
     <fragment
         android:id="@+id/groupCreateFragment"
@@ -159,7 +162,13 @@
         android:id="@+id/placeSearchFragment"
         android:name="com.D107.runmate.presentation.group.view.PlaceSearchFragment"
         android:label="fragment_place_search"
-        tools:layout="@layout/fragment_place_search" />
+        tools:layout="@layout/fragment_place_search"/>
+    <fragment
+        android:id="@+id/placeSelectFragment"
+        android:name="com.D107.runmate.presentation.group.view.PlaceSelectFragment"
+        android:label="fragment_place_select"
+        tools:layout="@layout/fragment_place_select" />
+
 
     <fragment
         android:id="@+id/historyFragment"
@@ -191,12 +200,58 @@
         android:id="@+id/runningEndFragment"
         android:name="com.D107.runmate.presentation.running.view.RunningEndFragment"
         android:label="fragment_running_end"
-        tools:layout="@layout/fragment_running_end" />
+        tools:layout="@layout/fragment_running_end" >
+        <action
+            android:id="@+id/action_runningEndFragment_to_runningFragment"
+            app:destination="@id/runningFragment"
+            app:popUpTo="@id/runningEndFragment"
+            app:popUpToInclusive="true"/>
+        <action
+            android:id="@+id/action_runningEndFragment_to_chartFragment"
+            app:destination="@id/chartFragment" />
+    </fragment>
     <fragment
         android:id="@+id/courseSettingFragment"
         android:name="com.D107.runmate.presentation.running.view.CourseSettingFragment"
         android:label="fragment_course_setting"
-        tools:layout="@layout/fragment_course_setting" />
+        tools:layout="@layout/fragment_course_setting" >
+        <action
+            android:id="@+id/action_courseSettingFragment_to_courseSearchFragment"
+            app:destination="@id/courseSearchFragment" />
+        <action
+            android:id="@+id/action_courseSettingFragment_to_courseDetailFragment"
+            app:destination="@id/courseDetailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/courseSearchFragment"
+        android:name="com.D107.runmate.presentation.running.view.CourseSearchFragment"
+        android:label="fragment_course_search"
+        tools:layout="@layout/fragment_course_search" >
+        <action
+            android:id="@+id/action_courseSearchFragment_to_courseDetailFragment"
+            app:destination="@id/courseDetailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/courseDetailFragment"
+        android:name="com.D107.runmate.presentation.running.view.CourseDetailFragment"
+        android:label="fragment_course_detail"
+        tools:layout="@layout/fragment_course_detail" >
+        <argument
+            android:name="courseId"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/chartFragment"
+        android:name="com.D107.runmate.presentation.running.view.ChartFragment"
+        android:label="fragment_chart"
+        tools:layout="@layout/fragment_chart" />
+
+    <fragment
+        android:id="@+id/groupRunningFragment"
+        android:name="com.D107.runmate.presentation.group.view.GroupRunningFragment"
+        android:label="fragment_group_running"
+        tools:layout="@layout/fragment_group_running" />
+
 
 
 </navigation>

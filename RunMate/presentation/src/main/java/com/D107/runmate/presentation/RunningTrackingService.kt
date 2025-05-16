@@ -7,13 +7,26 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.D107.runmate.domain.model.base.ResponseStatus
 import com.D107.runmate.domain.model.running.LocationModel
+import com.D107.runmate.domain.model.running.RunningRecordState
 import com.D107.runmate.domain.model.running.TrackingStatus
+import com.D107.runmate.domain.model.running.UserLocationState
+import com.D107.runmate.domain.repository.running.RunningRepository
 import com.D107.runmate.domain.repository.running.RunningTrackingRepository
+import com.D107.runmate.domain.usecase.group.GetCoord2AddressUseCase
+import com.D107.runmate.domain.usecase.running.EndRunningUseCase
+import com.D107.runmate.presentation.running.Coord2AddressState
+import com.D107.runmate.presentation.running.RunningEndState
+import com.D107.runmate.presentation.utils.CommonUtils.convertDateTime
 import com.D107.runmate.presentation.utils.LocationUtils.trackingLocation
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -22,9 +35,14 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -36,9 +54,31 @@ class RunningTrackingService : Service() {
     @Inject
     lateinit var repository: RunningTrackingRepository
 
+    @Inject
+    lateinit var getCoord2AddressUseCase: GetCoord2AddressUseCase
+
+    @Inject
+    lateinit var endRunningUseCase: EndRunningUseCase
+
     private val serviceScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     var runningJob: RunningJobState = RunningJobState.Initial
     private var timeTrackingJob: Job? = null
+
+    private var sensorManager: SensorManager? = null
+    private var stepCountInWindow = 0 // 5초 동안의 걸음 수
+    private var windowStartTime = 0L
+    private val timeWindow = 5_000L
+    var cadence = 0
+        private set
+
+    private var isTracking = false
+
+    private val serviceJobIo = SupervisorJob()
+    private val serviceScopeIO = CoroutineScope(Dispatchers.IO + serviceJobIo)
+
+//    private val _coord2Address = MutableSharedFlow<Coord2AddressState>()
+
+    private val _endRunning = MutableSharedFlow<RunningEndState>()
 
     override fun onCreate() {
         super.onCreate()
@@ -64,23 +104,122 @@ class RunningTrackingService : Service() {
         startLocationTracking()
 
         startTimeTracking()
-
-        CadenceTracker.startTracking(this)
+        startTracking(this)
     }
 
     private fun stopService() {
         stopTimeTracking()
         stopLocationTracking()
-        CadenceTracker.stopTracking()
+        stopTracking()
 
-        stopForeground(true)
-        stopSelf()
+        CoroutineScope(Dispatchers.IO).launch {
+            repository.finishTracking().collectLatest {
+                if (it) {
+                    Timber.d("write finish")
+                    val record = repository.runningRecord.value
+                    val location = repository.userLocation.value
+                    val recordSize = repository.recordSize.value
+                    if (location is UserLocationState.Exist && record is RunningRecordState.Exist) {
+                        Timber.d("coord2Address recordSize ${recordSize}")
+                        val address = getAddress(
+                            location.locations.first().longitude,
+                            location.locations.first().latitude
+                        )
+                        address?.let {
+                            Timber.d("lastRecord")
+                            val lastRecord = record.runningRecords.last()
+                            endRunning(
+                                0.0,
+                                lastRecord.cadenceSum / recordSize,
+                                lastRecord.altitudeSum / recordSize,
+                                16.6667 / lastRecord.avgSpeed,
+                                0.0,
+                                null,
+                                (lastRecord.distance).toDouble(),
+                                convertDateTime(lastRecord.currentTime),
+                                it,
+                                convertDateTime(record.runningRecords.first().currentTime)
+                            )
+                        }
+                    }
+                } else {
+                    Timber.d("write fail")
+                }
+            }
+        }
+
+        CoroutineScope(Dispatchers.Default).launch {
+            _endRunning.collectLatest {
+                if (it is RunningEndState.Success) {
+                    Timber.d("running end ! stop service")
+                    repository.setTrackingStatus(TrackingStatus.PAUSED)
+                    stopForeground(true)
+                    stopSelf()
+                }
+            }
+        }
     }
 
     private fun pauseService() {
         stopTimeTracking()
         stopLocationTracking()
-        CadenceTracker.stopTracking()
+        stopTracking()
+    }
+
+    private suspend fun getAddress(lon: Double, lat: Double): String? {
+        return getCoord2AddressUseCase(lon, lat)
+            .first { it is ResponseStatus.Success }
+            .let { status ->
+                when (status) {
+                    is ResponseStatus.Success -> status.data.address_name
+                    else -> null
+                }
+            }
+    }
+
+    private suspend fun endRunning(
+        avgBpm: Double,
+        avgCadence: Double,
+        avgElevation: Double,
+        avgPace: Double,
+        calories: Double,
+        courseId: String?,
+        distance: Double,
+        endTime: String,
+        startLocation: String,
+        startTime: String
+    ) {
+        endRunningUseCase(
+            avgBpm,
+            avgCadence,
+            avgElevation,
+            avgPace,
+            calories,
+            courseId,
+            distance,
+            endTime,
+            startLocation,
+            startTime
+        )
+            .onStart {
+            }
+            .catch { e ->
+                Timber.e("runningend error catch ${e.message}")
+                _endRunning.emit(RunningEndState.Error(e.message ?: "알 수 없는 오류가 발생했습니다"))
+            }
+            .collect { status ->
+                when (status) {
+                    is ResponseStatus.Success -> {
+                        Timber.d("runningend success")
+                        _endRunning.emit(RunningEndState.Success)
+                    }
+
+                    is ResponseStatus.Error -> {
+                        Timber.d("runningend error ${status.error.message}")
+                        _endRunning.emit(RunningEndState.Error(status.error.message))
+                    }
+                }
+            }
     }
 
     private fun createNotificationChannel() {
@@ -136,14 +275,18 @@ class RunningTrackingService : Service() {
                         runningJob = RunningJobState.Error("위치 추적 중 오류 발생: ${e.message}")
                         repository.setTrackingStatus(TrackingStatus.PAUSED)
                     }
-                    .collect { location ->
+                    .collectLatest { location ->
                         val locationModel = LocationModel(
                             location.latitude,
                             location.longitude,
                             location.altitude,
                             location.speed
                         )
-                        repository.processLocationUpdate(locationModel)
+                        val currentTime = System.currentTimeMillis()
+                        if (currentTime - windowStartTime > timeWindow) {
+                            cadence = 0
+                        }
+                        repository.processLocationUpdate(locationModel, cadence)
                         repository.setTrackingStatus(TrackingStatus.RUNNING)
                     }
             } catch (e: Exception) {
@@ -160,7 +303,7 @@ class RunningTrackingService : Service() {
         if (runningJob is RunningJobState.Active) {
             (runningJob as RunningJobState.Active).job.cancel()
             runningJob = RunningJobState.None
-            repository.setTrackingStatus(TrackingStatus.PAUSED)
+//            repository.setTrackingStatus(TrackingStatus.PAUSED)
             updateNotification(runningJob)
         }
     }
@@ -175,7 +318,6 @@ class RunningTrackingService : Service() {
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
-
 
     sealed class RunningJobState {
         object Initial : RunningJobState()
@@ -290,6 +432,49 @@ class RunningTrackingService : Service() {
         val notification = getNotificationBuilder(state).build()
         (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
             .notify(NOTIFICATION_ID, notification)
+    }
+
+    fun startTracking(context: Context) {
+        if (isTracking) return
+        Timber.d("startTracking Cadence")
+        sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)?.let { sensor ->
+            sensorManager?.registerListener(stepListener, sensor, SensorManager.SENSOR_DELAY_UI)
+            isTracking = true
+            windowStartTime = System.currentTimeMillis()
+        }
+    }
+
+    fun stopTracking() {
+        Timber.d("stopTracking Cadence")
+        sensorManager?.unregisterListener(stepListener)
+        sensorManager = null
+        isTracking = false
+        stepCountInWindow = 0
+        cadence = 0
+    }
+
+    private val stepListener = object : SensorEventListener {
+        override fun onSensorChanged(event: SensorEvent) {
+            if (event.sensor.type == Sensor.TYPE_STEP_DETECTOR && event.values[0] == 1.0f) {
+                stepCountInWindow++
+                calculateCadence()
+            }
+        }
+
+        override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
+    }
+
+    private fun calculateCadence() {
+        val currentTime = System.currentTimeMillis()
+
+        // 5초마다 케이던스 계산
+        if (currentTime - windowStartTime >= timeWindow) {
+            cadence = (stepCountInWindow * 12) // 5초 걸음 수 → 분당 걸음 수(60/5=12)
+            stepCountInWindow = 0 // 윈도우 초기화
+            windowStartTime = currentTime // 다음 윈도우 시작 시간 업데이트
+            Log.d("Cadence", "Current Cadence: $cadence SPM")
+        }
     }
 
 }

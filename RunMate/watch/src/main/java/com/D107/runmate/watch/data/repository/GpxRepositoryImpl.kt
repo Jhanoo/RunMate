@@ -208,7 +208,7 @@ class GpxRepositoryImpl @Inject constructor(
 
         // 3. 두 목록을 합쳐서 시간순으로 정렬
         val allPoints = (memoryPoints + dbPoints).sortedBy { it.time }
-        Log.d("GpxTracking", "총 ${allPoints.size}개의 트랙 포인트 로드 (메모리: ${memoryPoints.size}, DB: ${dbPoints.size})")
+        Log.d("GpxTracking", "총 ${allPoints.size}개의 ㄴ트랙 포인트 로드 (메모리: ${memoryPoints.size}, DB: ${dbPoints.size})")
 
         return allPoints
     }
