@@ -16,6 +16,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @AndroidEntryPoint
 class SplashFragment : BaseFragment<FragmentSplashBinding>(
@@ -40,19 +41,9 @@ class SplashFragment : BaseFragment<FragmentSplashBinding>(
 
             viewModel.isLoggedIn.collectLatest { isLoggedIn ->
                 if (!isAdded || isDetached) return@collectLatest
-
-                val navOptions = NavOptions.Builder()
-                    .setPopUpTo(R.id.splashFragment, true)
-                    .setLaunchSingleTop(true)
-                    .build()
-
                 if (isLoggedIn) {
                     // 로그인된 상태면 메인 화면으로 이동
-                    findNavController().navigate(
-                        R.id.runningFragment,
-                        null,
-                        navOptions
-                    )
+                    findNavController().navigate(R.id.action_splashFragment_to_runningFragment)
                 } else {
                     // 로그인되지 않은 상태면 로그인 화면으로 이동
                     findNavController().navigate(R.id.action_splashFragment_to_loginFragment)

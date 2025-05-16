@@ -48,7 +48,7 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(
                     is LoginViewModel.LoginUiState.Success -> {
                         // 로그인 성공
                         showLoading(false)
-//                        navigateToMain()
+                        navigateToMain()
                     }
 
                     is LoginViewModel.LoginUiState.Error -> {
@@ -61,13 +61,13 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(
         }
 
         // 이미 로그인한 상태인지 확인
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.isLoggedIn.collectLatest { isLoggedIn ->
-                if (isLoggedIn) {
-                    navigateToMain()
-                }
-            }
-        }
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            viewModel.isLoggedIn.collectLatest { isLoggedIn ->
+//                if (isLoggedIn) {
+//                    navigateToMain()
+//                }
+//            }
+//        }
 
         // 에러 메시지 관찰
         viewModel.emailError.observe(viewLifecycleOwner) { errorMsg ->
