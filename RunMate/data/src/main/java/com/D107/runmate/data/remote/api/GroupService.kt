@@ -37,4 +37,7 @@ interface GroupService {
     @POST("groups/finish")
     suspend fun groupFinish(): ApiResponse<Any?>
 
+    @GET("groups/hasGroupHistory")
+    suspend fun hasGroupHistory(): ApiResponse<Boolean>
+
 }

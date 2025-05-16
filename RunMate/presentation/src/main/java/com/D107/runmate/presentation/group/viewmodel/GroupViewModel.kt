@@ -7,26 +7,33 @@ import com.D107.runmate.domain.model.group.GroupData
 import com.D107.runmate.domain.model.socket.ConnectionStatus
 import com.D107.runmate.domain.model.socket.MemberLocationData
 import com.D107.runmate.domain.model.socket.SocketAuth
+import com.D107.runmate.domain.usecase.group.FinishGroupUseCase
 import com.D107.runmate.domain.usecase.group.GetCurrentGroupUseCase
 import com.D107.runmate.domain.usecase.group.JoinGroupUseCase
 import com.D107.runmate.domain.usecase.group.LeaveGroupUseCase
 import com.D107.runmate.domain.usecase.group.StartGroupUseCase
 import com.D107.runmate.domain.usecase.socket.ConnectSocketUseCase
 import com.D107.runmate.domain.usecase.socket.DisconnectSocketUseCase
+import com.D107.runmate.domain.usecase.socket.HasGroupHistoryUseCase
 import com.D107.runmate.domain.usecase.socket.IsSocketConnectedUseCase
 import com.D107.runmate.domain.usecase.socket.JoinGroupSocketUseCase
 import com.D107.runmate.domain.usecase.socket.LeaveGroupSocketUseCase
 import com.D107.runmate.domain.usecase.socket.ObserveLocationUpdatesUseCase
+import com.D107.runmate.domain.usecase.socket.ObserveMemberLeavedUseCase
+import com.D107.runmate.domain.usecase.socket.ObserveMemberLocationDatasUsecase
 import com.D107.runmate.domain.usecase.socket.SendLocationUpdateUseCase
 import com.kakao.vectormap.label.Label
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -43,10 +50,14 @@ class GroupViewModel @Inject constructor(
     private val joinGroupSocketUseCase: JoinGroupSocketUseCase,
     private val sendLocationUseCase: SendLocationUpdateUseCase,
     private val leaveGroupSocketUseCase: LeaveGroupSocketUseCase,
-    private val observeLocationUpdatesUseCase: ObserveLocationUpdatesUseCase
+    private val observeLocationUpdatesUseCase: ObserveLocationUpdatesUseCase,
+    private val observeMemberLeavedUseCase: ObserveMemberLeavedUseCase,
+    private val observeMemberLocationDatasUseCase: ObserveMemberLocationDatasUsecase,
+    private val finishGroupUseCase: FinishGroupUseCase,
+    private val hasGroupHistoryUseCase : HasGroupHistoryUseCase
 ) : ViewModel() {
 
-    val dummyAuth = SocketAuth("\t13f28e4c-8c77-4a49-93d9-f52e038c5d97", "aa", "https://k12d107.p.ssafy.io/uploads/f6c85274.png")
+
 
     private val _currentGroup = MutableStateFlow<GroupData?>(null)
     val currentGroup = _currentGroup.asStateFlow()
@@ -56,14 +67,27 @@ class GroupViewModel @Inject constructor(
 
     private val _groupMemberLocation = MutableStateFlow<MemberLocationData?>(null) // 마지막 위치만 표시하거나 List로 관리
     val groupMemberLocation: StateFlow<MemberLocationData?> = _groupMemberLocation.asStateFlow()
-    var userLabels: HashMap<String, Label> = hashMapOf()
+
+    var groupMemberDatas : StateFlow<Map<String, MemberLocationData>> =
+    observeMemberLocationDatasUseCase()
+    .stateIn(
+    scope = viewModelScope,
+    started = SharingStarted.WhileSubscribed(5000),
+    initialValue = emptyMap()
+    )
+
+    var isUserLabel = true
 
     private var locationObserverJob: Job? = null
+
+    private var memberLeaveObserverJob: Job? = null
 
     private var connectionJob: Job? = null
 
     private val _uiEvent = MutableSharedFlow<GroupUiEvent>()
     val uiEvent = _uiEvent.asSharedFlow()
+
+
 
     fun getCurrentGroup() {
         Timber.d("GetCurrentGroup")
@@ -150,26 +174,49 @@ class GroupViewModel @Inject constructor(
         }
     }
 
-    fun connectToServer() {
-        if (isSocketConnectedUseCase()) {
+    fun finishGroup(){
+        viewModelScope.launch {
+            finishGroupUseCase().collect { result ->
+                if (result is ResponseStatus.Success) {
+                    Timber.d("FinishGroup Success")
+                    _uiEvent.emit(GroupUiEvent.GoToGroup)
+                }
+            }
+        }
+    }
+
+    fun hasGroupHistory(){
+        viewModelScope.launch {
+            hasGroupHistoryUseCase().collect{result->
+                if(result is ResponseStatus.Success){
+                    _uiEvent.emit(GroupUiEvent.ToggleGroupRunningFinishVisible(result.data))
+                }
+            }
+        }
+    }
+
+    fun connectToServer(socketAuth: SocketAuth) {
+        if (isSocketConnectedUseCase().value) {
             _connectionStatus.value = ConnectionStatus.AlreadyConnected
             Timber.i("Already connected to socket.")
-            startObservingLocationUpdates() // 이미 연결되어 있으면 관찰 시작
+            joinGroupSocket() // 이미 연결되어 있으면 관찰 시작
             return
         }
-//        val dummyAuth = SocketAuth("eea04884-e781-4181-9c70-2fc91d4d7644", "aaa", "https://k12d107.p.ssafy.io/uploads/f6c85274.png")
-        val dummyAuth = SocketAuth("\t13f28e4c-8c77-4a49-93d9-f52e038c5d97", "aa", "https://k12d107.p.ssafy.io/uploads/f6c85274.png")
+
         viewModelScope.launch {
-            connectSocketUseCase(dummyAuth)
+            connectSocketUseCase(socketAuth)
                 .catch { e ->
                     Timber.e(e, "Connection Flow Error")
                     _connectionStatus.value = ConnectionStatus.Error("Flow collection error: ${e.message}")
                 }
                 .collect { status ->
                     _connectionStatus.value = status
+                    Timber.d("SocketStatus : ${_connectionStatus.value}")
                     if (status is ConnectionStatus.Connected) {
-                        startObservingLocationUpdates()
+                        Timber.d("SocketConnected")
+                        joinGroupSocket()
                     } else if (status is ConnectionStatus.Disconnected || status is ConnectionStatus.Error) {
+                        Timber.d("SocketStop")
                         stopObservingLocationUpdates()
                     }
                 }
@@ -178,8 +225,10 @@ class GroupViewModel @Inject constructor(
 
     fun joinGroupSocket() {
         viewModelScope.launch {
-            if (isSocketConnectedUseCase() && (currentGroup.value?.status ?: 0) == 1) {
+            if ((currentGroup.value?.status ?: 0) == 1) {
                 joinGroupSocketUseCase(currentGroup.value?.groupId?:"")
+                startObservingLocationUpdates()
+                startObservingMemberLeave()
             } else {
                 Timber.w("Socket not connected. Cannot join group.")
             }
@@ -188,7 +237,7 @@ class GroupViewModel @Inject constructor(
 
     fun sendLocation(lat: Double, lng: Double) {
         viewModelScope.launch {
-            if (isSocketConnectedUseCase()) {
+            if (isSocketConnectedUseCase().value) {
                 sendLocationUseCase(lat, lng)
             } else {
                 Timber.w("Socket not connected. Cannot send location.")
@@ -198,17 +247,18 @@ class GroupViewModel @Inject constructor(
 
     fun leaveGroupSocket() {
         viewModelScope.launch {
-            if (isSocketConnectedUseCase()) {
+            if (isSocketConnectedUseCase().value) {
                 leaveGroupSocketUseCase()
             } else {
-                Timber.w("Socket not connected. Cannot leave group.")
+                Timber.e("Socket not connected. Cannot leave group.")
             }
         }
     }
 
     fun startObservingLocationUpdates() {
-        if (locationObserverJob?.isActive == true) return // 이미 관찰 중이면 중복 실행 방지
-
+        Timber.d("SocketObserveStart0")
+        if (locationObserverJob?.isActive == true) return
+        Timber.d("SocketObserveStart")
         locationObserverJob = viewModelScope.launch {
             observeLocationUpdatesUseCase()
                 .catch { e -> Timber.e(e, "Error observing location updates") }
@@ -217,6 +267,19 @@ class GroupViewModel @Inject constructor(
                     Timber.d("New location update received in ViewModel: $locationData")
                 }
         }
+    }
+
+    fun startObservingMemberLeave(){
+        if (locationObserverJob?.isActive == true) return
+        memberLeaveObserverJob = viewModelScope.launch {
+            observeMemberLeavedUseCase().collect{ memberLeavedData ->
+                if(memberLeavedData.userId == currentGroup.value?.leaderId){
+//                    _uiEvent.emit(GroupUiEvent.ShowFinishDialog)
+                }
+
+            }
+        }
+
     }
 
     fun stopObservingLocationUpdates() {
@@ -232,7 +295,6 @@ class GroupViewModel @Inject constructor(
         super.onCleared()
         Timber.i("ViewModel cleared. Disconnecting socket.")
         stopObservingLocationUpdates()
-//        disconnectSocketUseCase()
     }
 
 

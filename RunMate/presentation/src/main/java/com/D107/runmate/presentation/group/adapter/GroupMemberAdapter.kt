@@ -17,7 +17,7 @@ import com.D107.runmate.presentation.databinding.ItemGroupMemberBinding
 import com.bumptech.glide.Glide
 
 
-class GroupMemberAdapter() :
+class GroupMemberAdapter(val leaderId:String) :
     ListAdapter<User, GroupMemberAdapter.ViewHolder>(GroupMemberDiffCallback()){
 
 
@@ -41,6 +41,11 @@ class GroupMemberAdapter() :
 
         fun bind(member: User) {
             binding.tvMemberName.text = member.nickname
+            if(member.userId == leaderId){
+                binding.ivGroupLeader.visibility = View.VISIBLE
+            }else{
+                binding.ivGroupLeader.visibility = View.GONE
+            }
 
             if (!member.profileImage.isNullOrEmpty()) {
                 Glide.with(binding.root.context)
@@ -50,8 +55,6 @@ class GroupMemberAdapter() :
             }else{
                 binding.ivMemberProfile.setImageResource(R.drawable.ic_user_profile)
             }
-
-//            binding.imgMemberBadge.visibility = if (member.isLeader) View.VISIBLE else View.GONE
         }
     }
 

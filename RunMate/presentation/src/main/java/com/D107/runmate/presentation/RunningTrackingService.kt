@@ -1,5 +1,6 @@
 package com.D107.runmate.presentation
 
+import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -7,6 +8,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -15,15 +17,29 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import com.D107.runmate.domain.model.base.ResponseStatus
 import com.D107.runmate.domain.model.running.LocationModel
 import com.D107.runmate.domain.model.running.RunningRecordState
 import com.D107.runmate.domain.model.running.TrackingStatus
 import com.D107.runmate.domain.model.running.UserLocationState
+import com.D107.runmate.domain.model.socket.ConnectionStatus
+import com.D107.runmate.domain.model.socket.SocketAuth
 import com.D107.runmate.domain.repository.running.RunningRepository
 import com.D107.runmate.domain.repository.running.RunningTrackingRepository
 import com.D107.runmate.domain.usecase.group.GetCoord2AddressUseCase
 import com.D107.runmate.domain.usecase.running.EndRunningUseCase
+import com.D107.runmate.domain.usecase.socket.ConnectSocketUseCase
+import com.D107.runmate.domain.usecase.socket.DisconnectSocketUseCase
+import com.D107.runmate.domain.usecase.socket.IsSocketConnectedUseCase
+import com.D107.runmate.domain.usecase.socket.JoinGroupSocketUseCase
+import com.D107.runmate.domain.usecase.socket.LeaveGroupSocketUseCase
+import com.D107.runmate.domain.usecase.socket.ObserveLocationUpdatesUseCase
+import com.D107.runmate.domain.usecase.socket.ObserveMemberLeavedUseCase
+import com.D107.runmate.domain.usecase.socket.SendLocationUpdateUseCase
+import com.D107.runmate.presentation.group.viewmodel.SocketAuthParcelable
+import com.D107.runmate.presentation.group.viewmodel.toDomain
 import com.D107.runmate.presentation.running.Coord2AddressState
 import com.D107.runmate.presentation.running.RunningEndState
 import com.D107.runmate.presentation.utils.CommonUtils.convertDateTime
@@ -36,6 +52,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
@@ -60,6 +79,23 @@ class RunningTrackingService : Service() {
     @Inject
     lateinit var endRunningUseCase: EndRunningUseCase
 
+    @Inject
+    lateinit var connectSocketUseCase: ConnectSocketUseCase
+    @Inject
+    lateinit var disconnectSocketUseCase: DisconnectSocketUseCase
+    @Inject
+    lateinit var isSocketConnectedUseCase: IsSocketConnectedUseCase
+    @Inject
+    lateinit var joinGroupSocketUseCase: JoinGroupSocketUseCase
+    @Inject
+    lateinit var sendLocationUseCase: SendLocationUpdateUseCase
+    @Inject
+    lateinit var leaveGroupSocketUseCase: LeaveGroupSocketUseCase
+    @Inject
+    lateinit var observeLocationUpdatesUseCase: ObserveLocationUpdatesUseCase
+    @Inject
+    lateinit var observeMemberLeavedUseCase: ObserveMemberLeavedUseCase
+
     private val serviceScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     var runningJob: RunningJobState = RunningJobState.Initial
     private var timeTrackingJob: Job? = null
@@ -68,28 +104,88 @@ class RunningTrackingService : Service() {
     private var stepCountInWindow = 0 // 5초 동안의 걸음 수
     private var windowStartTime = 0L
     private val timeWindow = 5_000L
+    private var currentGroupId: String? = null
+    private var currentGroupLeaderId: String? = null
+    private var currentSocketAuth: SocketAuthParcelable? = null
+    private var isGroupRunningMode: Boolean = false
     var cadence = 0
         private set
 
     private var isTracking = false
+
+    private val _connectionStatus = MutableStateFlow<ConnectionStatus>(ConnectionStatus.Initial)
+    val connectionStatus: StateFlow<ConnectionStatus> = _connectionStatus.asStateFlow()
 
     private val serviceJobIo = SupervisorJob()
     private val serviceScopeIO = CoroutineScope(Dispatchers.IO + serviceJobIo)
 
 //    private val _coord2Address = MutableSharedFlow<Coord2AddressState>()
 
+    private var socketConnectionObserverJob: Job? = null
+
+    private var leaveGroupJob: Job? = null
+
+
     private val _endRunning = MutableSharedFlow<RunningEndState>()
 
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
+        observeSocketConnection()
+    }
+
+    private fun observeSocketConnection() {
+        if (socketConnectionObserverJob?.isActive == true) return
+
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
+        Timber.d("onStartCommand RunningService $currentGroupId")
 
         when (intent?.action) {
-            ACTION_START_SERVICE -> startForegroundService()
+            ACTION_START_SERVICE -> {
+                currentGroupId = intent.getStringExtra(EXTRA_GROUP_ID)
+                isGroupRunningMode = currentGroupId != null
+                currentGroupLeaderId = intent.getStringExtra(EXTRA_GROUP_LEADER_ID)
+                if (currentSocketAuth == null) {
+                    currentSocketAuth = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        intent.getParcelableExtra(
+                            EXTRA_SOCKET_AUTH,
+                            SocketAuthParcelable::class.java
+                        )
+                    } else {
+                        @Suppress("DEPRECATION")
+                        intent.getParcelableExtra<SocketAuthParcelable>(EXTRA_SOCKET_AUTH)
+                    }
+                }
+                startForegroundService()
+
+                if (isGroupRunningMode && currentGroupId != null) {
+                    if (!isSocketConnectedUseCase().value) { // 현재 연결 안되어있으면 연결 시도
+                        currentSocketAuth?.let { socketAuth ->
+                            val auth = socketAuth.toDomain()
+                            serviceScope.launch {
+                                connectSocketUseCase(auth).collectLatest { status ->
+                                    Timber.d("Connection attempt status for group $currentGroupId: $status")
+                                    if (status is ConnectionStatus.Connected) {
+                                        if (isSocketConnectedUseCase().value) {
+                                            joinGroupSocket()
+                                        } else {
+                                            Timber.w("Socket not connected. Cannot join group.")
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        joinGroupSocket()
+                        Timber.d("Socket already connected, ensuring group join for: $currentGroupId")
+
+                    }
+                }
+            }
+
             ACTION_PAUSE_SERVICE -> pauseService()
             ACTION_STOP_SERVICE -> stopService()
         }
@@ -138,10 +234,12 @@ class RunningTrackingService : Service() {
                                 (lastRecord.distance).toDouble(),
                                 convertDateTime(lastRecord.currentTime),
                                 it,
-                                convertDateTime(record.runningRecords.first().currentTime)
+                                convertDateTime(record.runningRecords.first().currentTime),
+                                currentGroupId
                             )
                         }
                     }
+
                 } else {
                     Timber.d("write fail")
                 }
@@ -187,7 +285,8 @@ class RunningTrackingService : Service() {
         distance: Double,
         endTime: String,
         startLocation: String,
-        startTime: String
+        startTime: String,
+        groupId: String? = null
     ) {
         endRunningUseCase(
             avgBpm,
@@ -199,7 +298,8 @@ class RunningTrackingService : Service() {
             distance,
             endTime,
             startLocation,
-            startTime
+            startTime,
+            groupId
         )
             .onStart {
             }
@@ -286,6 +386,9 @@ class RunningTrackingService : Service() {
                         if (currentTime - windowStartTime > timeWindow) {
                             cadence = 0
                         }
+                        if (isSocketConnectedUseCase().value) {
+                            sendLocationUseCase(location.latitude, location.longitude)
+                        }
                         repository.processLocationUpdate(locationModel, cadence)
                         repository.setTrackingStatus(TrackingStatus.RUNNING)
                     }
@@ -310,6 +413,7 @@ class RunningTrackingService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        disconnectFromGroupSocket()
         serviceScope.cancel()
         runningJob = RunningJobState.None
         repository.setTrackingStatus(TrackingStatus.STOPPED)
@@ -336,10 +440,27 @@ class RunningTrackingService : Service() {
         const val ACTION_START = "ACTION_START"
         const val ACTION_PAUSE = "ACTION_PAUSE"
         const val ACTION_STOP = "ACTION_STOP"
+        const val EXTRA_GROUP_ID = "EXTRA_GROUP_ID"
+        const val EXTRA_GROUP_LEADER_ID = "EXTRA_GROUP_LEADER_ID"
+        const val EXTRA_SOCKET_AUTH = "EXTRA_Socket_AUTH"
 
-        fun startService(context: Context) {
+
+        fun startService(
+            context: Context,
+            groupId: String? = null,
+            groupLeaderId: String? = null,
+            socketAuth: SocketAuthParcelable? = null
+        ) { // groupId를 nullable String으로 추가
             val intent = Intent(context, RunningTrackingService::class.java).apply {
                 action = ACTION_START_SERVICE
+                if (groupId != null && groupLeaderId != null) {
+                    putExtra(EXTRA_GROUP_ID, groupId)
+                    putExtra(EXTRA_GROUP_LEADER_ID, groupLeaderId)
+                }
+                if (socketAuth != null) {
+                    putExtra(EXTRA_SOCKET_AUTH, socketAuth)
+
+                }
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -349,22 +470,33 @@ class RunningTrackingService : Service() {
             }
         }
 
-        fun stopService(context: Context) {
+        fun stopService(context: Context, groupId: String? = null) {
             val intent = Intent(context, RunningTrackingService::class.java).apply {
                 action = ACTION_STOP_SERVICE
+                if (groupId != null) {
+                    putExtra(EXTRA_GROUP_ID, groupId)
+                }
             }
             context.startService(intent)
         }
 
-        fun pauseService(context: Context) {
+        fun pauseService(context: Context, groupId: String? = null) {
             val intent = Intent(context, RunningTrackingService::class.java).apply {
                 action = ACTION_PAUSE_SERVICE
+                if (groupId != null) {
+                    putExtra(EXTRA_GROUP_ID, groupId)
+                }
             }
             context.startService(intent)
         }
+
     }
 
-    private fun createPendingIntent(action: String, requestCode: Int): PendingIntent {
+    private fun createPendingIntent(
+        action: String,
+        requestCode: Int,
+        socketAuth: SocketAuthParcelable? = null
+    ): PendingIntent {
         val intent = Intent(this, NotificationReceiver::class.java).apply {
             this.action = action
         }
@@ -474,6 +606,65 @@ class RunningTrackingService : Service() {
             stepCountInWindow = 0 // 윈도우 초기화
             windowStartTime = currentTime // 다음 윈도우 시작 시간 업데이트
             Log.d("Cadence", "Current Cadence: $cadence SPM")
+        }
+    }
+
+    private fun connectToGroupSocket(groupId: String) {
+        // viewModel.joinGroupSocket() 같은 로직을 Service 내부에서 실행
+        // 또는 Service에서 Repository를 통해 소켓 연결 상태를 관리하고,
+        // Repository가 실제 소켓 통신을 담당하도록 설계 (더 클린한 접근)
+        Timber.d("그룹 소켓 연결 시도: $groupId")
+        // 실제 소켓 연결 코드...
+    }
+
+    private fun disconnectFromGroupSocket() {
+        if (isGroupRunningMode) {
+//            disconnectSocketUseCase()
+            currentGroupId = null
+            currentSocketAuth = null
+            currentGroupLeaderId = null
+        }
+    }
+
+    private fun joinGroupSocket() {
+        serviceScope.launch {
+            joinGroupSocketUseCase(currentGroupId!!)
+            Timber.d("here!!!!")
+            observeMemberLeavedUseCase().collect { leaveGroupMessage ->
+                Timber.d("${leaveGroupMessage}")
+                if(leaveGroupMessage.userId==currentGroupLeaderId){
+                    val channelId = "GROUP_RUN_TERMINATION_CHANNEL"
+                    val notificationId = System.currentTimeMillis().toInt()
+
+                    val intent = Intent(this@RunningTrackingService, MainActivity::class.java) // 결과 화면으로 이동
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    val pendingIntent = PendingIntent.getActivity(this@RunningTrackingService, 0, intent,
+                        PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE)
+
+                    val builder = NotificationCompat.Builder(this@RunningTrackingService, channelId)
+                        .setSmallIcon(R.drawable.tonie) // 적절한 아이콘
+                        .setContentTitle("그룹 달리기 종료")
+                        .setContentText("그룹장에 의해 그룹 달리기가 종료되었습니다. 기록이 저장됩니다.")
+                        .setPriority(NotificationCompat.PRIORITY_HIGH)
+                        .setCategory(NotificationCompat.CATEGORY_EVENT)
+                        .setAutoCancel(true) // 클릭 시 자동 삭제
+                        .setContentIntent(pendingIntent)
+                        .setFullScreenIntent(pendingIntent, true)
+
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        if (ContextCompat.checkSelfPermission(this@RunningTrackingService, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+                            NotificationManagerCompat.from(this@RunningTrackingService).notify(notificationId, builder.build())
+                        } else {
+                            Log.w("Notification", "POST_NOTIFICATIONS permission not granted for termination alert.")
+                        }
+                    } else {
+                        NotificationManagerCompat.from(this@RunningTrackingService).notify(notificationId, builder.build())
+                    }
+                    stopService()
+                }
+            }
+
         }
     }
 

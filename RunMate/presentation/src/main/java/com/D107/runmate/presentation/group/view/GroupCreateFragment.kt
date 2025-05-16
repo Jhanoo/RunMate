@@ -48,7 +48,9 @@ class GroupCreateFragment : BaseFragment<FragmentGroupCreateBinding>(
     private fun updateUI() {
         binding.etGroupName.setText(viewModel.groupName.value)
         binding.etLocation.setText(viewModel.selectedPlace.value?.address?:"")
-        binding.etDate.setText(CommonUtils.formatIsoDateToCustom((viewModel.selectedDate.value.toString())))
+        if(viewModel.selectedDate.value!=null) {
+            binding.etDate.setText(formatter.format(viewModel.selectedDate.value))
+        }
 
     }
 

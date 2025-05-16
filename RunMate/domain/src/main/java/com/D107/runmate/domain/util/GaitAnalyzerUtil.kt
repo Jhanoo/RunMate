@@ -31,7 +31,7 @@ class GaitAnalyzerUtil @Inject constructor() {
     private val FOOT_STRIKE_SIMULTANEOUS_MS = 0
     private val MIN_STEP_DURATION_MS = 0//100
     private val YAW_DIFF_IN_TOEING_THRESHOLD = 8.0f
-    private val YAW_DIFF_OUT_TOEING_THRESHOLD = 15.0f
+    private val YAW_DIFF_OUT_TOEING_THRESHOLD = 25.0f
 
     // --- 실시간 상태 관리 변수 ---
     private var isLeftStance = false

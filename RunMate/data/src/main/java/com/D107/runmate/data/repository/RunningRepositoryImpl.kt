@@ -27,7 +27,8 @@ internal class RunningRepositoryImpl @Inject constructor(
         distance: Double,
         endTime: String,
         startLocation: String,
-        startTime: String
+        startTime: String,
+        groupId:String?
     ): Flow<ResponseStatus<Unit>> = flow {
         try {
           when (val response = runningDataSource.endRunning(
@@ -41,7 +42,8 @@ internal class RunningRepositoryImpl @Inject constructor(
                     distance = distance,
                     endTime = endTime,
                     startLocation = startLocation,
-                    startTime = startTime
+                    startTime = startTime,
+                    groupId = groupId
                 )
             )) {
                 is ApiResponse.Success -> {
