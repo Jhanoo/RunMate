@@ -39,7 +39,6 @@ pipeline {
                     cd backend/nodejs
                     npm ci
                     npm run build
-                    # npm run start  # 주석 처리: Docker 컨테이너에서 실행되므로 여기서 실행할 필요 없음
                 '''
             }
         }
@@ -88,22 +87,10 @@ pipeline {
                             ${REMOTE}:${APPDIR}/backend/marathon-crawler/
                     """
                     
-                    // docker-compose.yml 파일 수정 (nginx에서 3000번 포트 매핑 제거)
+                    // docker-compose 재시작
                     sh """
                         ssh -o StrictHostKeyChecking=no ${REMOTE} \\
                             'cd ${APPDIR} &&
-                             echo "docker-compose.yml 파일 수정" &&
-                             sed -i "/nginx:/,/networks:/s/- \\"3000:3000\\"/# - \\"3000:3000\\"/" docker-compose.yml || echo "포트 매핑 제거 실패"
-                            '
-                    """
-                    
-                    // 포트 충돌 확인 및 해결 후 docker-compose 재시작
-                    sh """
-                        ssh -o StrictHostKeyChecking=no ${REMOTE} \\
-                            'cd ${APPDIR} &&
-                             echo "포트 3000을 사용 중인 프로세스 확인 및 종료" &&
-                             sudo lsof -i :3000 || echo "포트 3000을 사용 중인 프로세스가 없습니다." &&
-                             sudo fuser -k 3000/tcp || echo "종료할 프로세스가 없습니다." &&
                              echo "Docker 컨테이너 중지 및 제거" &&
                              docker-compose down --remove-orphans &&
                              echo "새 컨테이너 시작" &&
