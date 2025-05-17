@@ -51,6 +51,7 @@ class SocketService @Inject constructor() {
         }
 
         try {
+            Timber.d("New Socket (Received)")
             socket = IO.socket(SERVER_URL, opts)
         } catch (e: URISyntaxException) {
             Timber.e(e, "Socket URL Syntax Exception")
@@ -82,6 +83,10 @@ class SocketService @Inject constructor() {
             }
             _isConnectedStateFlow.value = false
             trySend(ConnectionStatus.Error(errorMessage))
+        }
+
+        socket?.on(SocketEvents.MEMBER_LEAVED) {
+            Timber.d("Received ${SocketEvents.MEMBER_LEAVED}: ${it.firstOrNull()}")
         }
 
         socket?.connect()

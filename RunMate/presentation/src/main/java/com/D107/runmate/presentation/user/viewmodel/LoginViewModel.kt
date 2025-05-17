@@ -48,22 +48,22 @@ class LoginViewModel @Inject constructor(
 
     fun login(email: String, password: String) {
         // 입력 유효성 검사
-        val isEmailValid = validateEmailUseCase(email)
-        val isPasswordValid = validatePasswordUseCase(password)
-
-        if (!isEmailValid) {
-            _emailError.value = "유효한 이메일 형식이 아닙니다."
-            return
-        } else {
-            _emailError.value = null
-        }
-
-        if (!isPasswordValid) {
-            _passwordError.value = "비밀번호는 8자 이상이어야 합니다."
-            return
-        } else {
-            _passwordError.value = null
-        }
+//        val isEmailValid = validateEmailUseCase(email)
+//        val isPasswordValid = validatePasswordUseCase(password)
+//
+//        if (!isEmailValid) {
+//            _emailError.value = "유효한 이메일 형식이 아닙니다."
+//            return
+//        } else {
+//            _emailError.value = null
+//        }
+//
+//        if (!isPasswordValid) {
+//            _passwordError.value = "비밀번호는 8자 이상이어야 합니다."
+//            return
+//        } else {
+//            _passwordError.value = null
+//        }
 
         // 로그인 시도
         viewModelScope.launch {

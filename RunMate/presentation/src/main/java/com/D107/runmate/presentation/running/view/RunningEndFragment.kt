@@ -15,6 +15,8 @@ import com.D107.runmate.domain.model.running.UserLocationState
 import com.D107.runmate.presentation.MainViewModel
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentRunningEndBinding
+import com.D107.runmate.presentation.group.viewmodel.GroupUiEvent
+import com.D107.runmate.presentation.group.viewmodel.GroupViewModel
 import com.D107.runmate.presentation.running.Coord2AddressState
 import com.D107.runmate.presentation.running.RunningEndState
 import com.D107.runmate.presentation.running.RunningEndViewModel
@@ -33,6 +35,7 @@ import com.ssafy.locket.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -44,7 +47,8 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
     R.layout.fragment_running_end
 ) {
     private val args: RunningEndFragmentArgs by navArgs()
-    lateinit var sourceFragment:String
+    lateinit var sourceFragment: String
+    private val groupViewModel: GroupViewModel by activityViewModels()
     private var kakaoMap: KakaoMap? = null
     private val mainViewModel: MainViewModel by activityViewModels()
     private val runningEndViewModel: RunningEndViewModel by viewModels()
@@ -65,19 +69,54 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
 
         viewLifecycleOwner.lifecycleScope.launch {
             mainViewModel.runningRecord.collectLatest {
-                if(it is RunningRecordState.Exist) {
+                if (it is RunningRecordState.Exist) {
                     val time = mainViewModel.time.value
                     val lastRecord = it.runningRecords.last()
                     val firstRecord = it.runningRecords.first()
-                    binding.tvDistance.text = getString(R.string.course_distance, lastRecord.distance)
-                    binding.tvDateGroupInfo.text = getString(R.string.running_date, firstRecord.currentTime, lastRecord.currentTime)
+                    binding.tvDistance.text =
+                        getString(R.string.course_distance, lastRecord.distance)
+                    binding.tvDateGroupInfo.text = getString(
+                        R.string.running_date,
+                        firstRecord.currentTime,
+                        lastRecord.currentTime
+                    )
                     binding.tvTime.text = getString(R.string.running_time, time / 60, time % 60)
                     binding.tvBpm.text = "-" // TODO 추후 HR 연결하여 데이터 수정
                     binding.tvAvgPace.text = getPaceFromSpeed(lastRecord.avgSpeed)
-                    binding.tvCadence.text = getString(R.string.running_avg_cadence, lastRecord.cadenceSum / it.runningRecords.size)
-                    binding.tvAltitude.text = getString(R.string.running_avg_altitude, lastRecord.altitudeSum / it.runningRecords.size)
+                    binding.tvCadence.text = getString(
+                        R.string.running_avg_cadence,
+                        lastRecord.cadenceSum / it.runningRecords.size
+                    )
+                    binding.tvAltitude.text = getString(
+                        R.string.running_avg_altitude,
+                        lastRecord.altitudeSum / it.runningRecords.size
+                    )
                     binding.tvCalorie.text = "0" // TODO 삼성헬스 연결하여 데이터 수정
                 }
+            }
+
+
+        }
+        if (sourceFragment == "GROUP_RUNNING_FRAGMENT") {
+            viewLifecycleOwner.lifecycleScope.launch {
+                groupViewModel.uiEvent.collect { event ->
+                    Timber.d("groupUiEvent $event")
+                    when (event) {
+                        is GroupUiEvent.GoToGroupRunning -> {
+                            findNavController().navigate(R.id.action_runningEndFragment_to_groupRrunningFragment)
+                        }
+
+                        is GroupUiEvent.GoToGroup -> {
+                            findNavController().navigate(R.id.action_runningEndFragment_to_groupFragment)
+                        }
+
+                        else -> {
+
+                        }
+                    }
+
+                }
+
             }
         }
     }
@@ -87,8 +126,8 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
             runningEndViewModel.deleteFile()
             mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
             when (sourceFragment) {
-                "RUNNING_FRAGMENT"-> findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
-                "GROUP_RUNNING_FRAGMENT"-> findNavController().navigate(R.id.action_runningEndFragment_to_groupRrunningFragment)
+                "RUNNING_FRAGMENT" -> findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
+                "GROUP_RUNNING_FRAGMENT" -> groupViewModel.getCurrentGroup()
             }
         }
 
@@ -100,8 +139,8 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
             dialog = CourseAddDialog()
             dialog.show(requireActivity().supportFragmentManager, "course_add")
         }
-        
-        binding.ivLike.setOnClickListener { 
+
+        binding.ivLike.setOnClickListener {
             // TODO 사용자가 이미 좋아요한 경우
             binding.ivLike.setImageResource(R.drawable.ic_course_like_inactive)
 

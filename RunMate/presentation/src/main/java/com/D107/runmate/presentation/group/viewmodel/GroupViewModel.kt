@@ -119,11 +119,13 @@ class GroupViewModel @Inject constructor(
 
                     } else {
                         _uiEvent.emit(GroupUiEvent.ToggleGroupFragmentVisible(true))
+                        _uiEvent.emit(GroupUiEvent.GoToGroup)
                     }
 
                 } else if (result is ResponseStatus.Error) {
                     Timber.d("GetCurrentGroup Fail")
                     _currentGroup.value = null
+                    _uiEvent.emit(GroupUiEvent.GoToGroup)
                     _uiEvent.emit(GroupUiEvent.ToggleGroupFragmentVisible(true))
 
                 }
@@ -196,12 +198,12 @@ class GroupViewModel @Inject constructor(
     }
 
     fun connectToServer(socketAuth: SocketAuth) {
-        if (isSocketConnectedUseCase().value) {
-            _connectionStatus.value = ConnectionStatus.AlreadyConnected
-            Timber.i("Already connected to socket.")
-            joinGroupSocket() // 이미 연결되어 있으면 관찰 시작
-            return
-        }
+//        if (isSocketConnectedUseCase().value) {
+//            _connectionStatus.value = ConnectionStatus.AlreadyConnected
+//            Timber.i("Already connected to socket.")
+//            joinGroupSocket() // 이미 연결되어 있으면 관찰 시작
+//            return
+//        }
 
         viewModelScope.launch {
             connectSocketUseCase(socketAuth)
@@ -270,9 +272,11 @@ class GroupViewModel @Inject constructor(
     }
 
     fun startObservingMemberLeave(){
-        if (locationObserverJob?.isActive == true) return
+//        if (memberLeaveObserverJob?.isActive == true) return
         memberLeaveObserverJob = viewModelScope.launch {
+            Timber.d("try register member listener")
             observeMemberLeavedUseCase().collect{ memberLeavedData ->
+                Timber.d("Received $memberLeavedData")
                 if(memberLeavedData.userId == currentGroup.value?.leaderId){
 //                    _uiEvent.emit(GroupUiEvent.ShowFinishDialog)
                 }

@@ -58,7 +58,7 @@ object CommonUtils {
     @RequiresApi(Build.VERSION_CODES.O)
     fun formatIsoDateToCustom(isoDateString: String): String {
         val offsetDateTime = OffsetDateTime.parse(isoDateString)
-        val outputFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd", Locale.getDefault())
+        val outputFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm", Locale.getDefault())
 
         return offsetDateTime.format(outputFormatter)
     }

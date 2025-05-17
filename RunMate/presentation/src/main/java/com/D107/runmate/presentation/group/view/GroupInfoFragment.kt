@@ -11,6 +11,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import com.D107.runmate.presentation.MainViewModel
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentGroupInfoBinding
 import com.D107.runmate.presentation.group.adapter.GroupMemberAdapter
@@ -19,7 +20,9 @@ import com.D107.runmate.presentation.group.viewmodel.GroupViewModel
 import com.D107.runmate.presentation.utils.CommonUtils
 import com.ssafy.locket.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @RequiresApi(Build.VERSION_CODES.O)
 @AndroidEntryPoint
@@ -29,6 +32,7 @@ class GroupInfoFragment : BaseFragment<FragmentGroupInfoBinding>(
 
     private lateinit var adapter: GroupMemberAdapter
     private val viewModel: GroupViewModel by activityViewModels()
+    private val mainViewModel: MainViewModel by activityViewModels()
     val navigateOptions = NavOptions.Builder()
         .setLaunchSingleTop(true)
         .setPopUpTo(R.id.groupInfoFragment, true)
@@ -38,6 +42,9 @@ class GroupInfoFragment : BaseFragment<FragmentGroupInfoBinding>(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.swipeRefreshLayoutGroupInfo.setOnRefreshListener {
+            viewModel.getCurrentGroup()
+        }
         setupRecyclerView()
         setClickListener()
         observeViewModel()
@@ -65,7 +72,7 @@ class GroupInfoFragment : BaseFragment<FragmentGroupInfoBinding>(
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch{
-                    viewModel.currentGroup.collect{group->
+                    viewModel.currentGroup.collectLatest {group->
                         if(group!=null) {
                             adapter.submitList(group.members)
                             binding.tvGroupNameGroupInfo.text = group.groupName
@@ -74,10 +81,9 @@ class GroupInfoFragment : BaseFragment<FragmentGroupInfoBinding>(
                             group.courseName?.let{
                                 binding.tvCourseNameGroupInfo.text = it
                                 binding.btnCourseDetailGroupInfo.visibility = View.VISIBLE
-
                             }
 
-                            if(true){
+                            if(group.leaderId==mainViewModel.userId.value){
                                 binding.btnStartGroupInfo.visibility = View.VISIBLE
                                 binding.btnExitGroupInfo.visibility = View.GONE
                                 binding.btnGroupDisperse.visibility = View.VISIBLE
@@ -95,7 +101,9 @@ class GroupInfoFragment : BaseFragment<FragmentGroupInfoBinding>(
                 launch {
                     viewModel.uiEvent.collect { event ->
                         when (event) {
-
+                            is GroupUiEvent.GoToGroupInfo->{
+                                binding.swipeRefreshLayoutGroupInfo.isRefreshing = false
+                            }
                             is GroupUiEvent.ShowToast -> {
                                 showToast(event.message)
                             }

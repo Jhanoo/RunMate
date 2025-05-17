@@ -224,6 +224,12 @@
             app:popUpTo="@id/runningEndFragment"
             app:popUpToInclusive="true" />
         <action
+            android:id="@+id/action_runningEndFragment_to_groupFragment"
+            app:destination="@id/groupFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/runningEndFragment"
+            app:popUpToInclusive="true" />
+        <action
             android:id="@+id/action_runningEndFragment_to_chartFragment"
             app:destination="@id/chartFragment" />
     </fragment>
@@ -271,9 +277,15 @@
 
         <action
             android:id="@+id/action_groupRunningFragment_to_runningRecordFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/groupRunningFragment"
+            app:popUpToInclusive="true"
             app:destination="@id/runningRecordFragment" />
         <action
             android:id="@+id/action_groupRunningFragment_to_runningEndFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/groupRunningFragment"
+            app:popUpToInclusive="true"
             app:destination="@id/runningEndFragment" />
     </fragment>
 

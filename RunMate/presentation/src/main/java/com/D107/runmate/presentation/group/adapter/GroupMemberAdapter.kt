@@ -51,6 +51,7 @@ class GroupMemberAdapter(val leaderId:String) :
                 Glide.with(binding.root.context)
                     .load(member.profileImage)
                     .placeholder(R.drawable.ic_user_profile)
+                    .circleCrop()
                     .into(binding.ivMemberProfile)
             }else{
                 binding.ivMemberProfile.setImageResource(R.drawable.ic_user_profile)

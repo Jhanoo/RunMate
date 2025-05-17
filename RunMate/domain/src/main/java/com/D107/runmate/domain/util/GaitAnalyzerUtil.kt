@@ -30,8 +30,8 @@ class GaitAnalyzerUtil @Inject constructor() {
     private val ACTIVE_SENSOR_COUNT_THRESHOLD = 1
     private val FOOT_STRIKE_SIMULTANEOUS_MS = 0
     private val MIN_STEP_DURATION_MS = 0//100
-    private val YAW_DIFF_IN_TOEING_THRESHOLD = 8.0f
-    private val YAW_DIFF_OUT_TOEING_THRESHOLD = 25.0f
+    private val YAW_DIFF_IN_TOEING_THRESHOLD = -5.0f
+    private val YAW_DIFF_OUT_TOEING_THRESHOLD = 15.0f
 
     // --- 실시간 상태 관리 변수 ---
     private var isLeftStance = false
@@ -369,11 +369,7 @@ class GaitAnalyzerUtil @Inject constructor() {
         }
 
 
-        var yawDifference =
-            if(avgLeftYaw>avgRightYaw)
-                avgRightYaw-avgLeftYaw
-            else
-                Math.abs(avgRightYaw - avgLeftYaw)
+        var yawDifference =avgRightYaw-avgLeftYaw
 
         // println("Yaw Difference (R-L): $yawDifference, Left: $avgLeftYaw, Right: $avgRightYaw") // 디버깅 로그
 

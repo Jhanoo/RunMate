@@ -39,6 +39,7 @@ class SocketRepositoryImpl @Inject constructor(
 
     override fun leaveGroup() {
         socketService.leaveGroup()
+        _memberLocationDatas.value = emptyMap()
     }
 
     override fun observeLocationUpdates(): Flow<MemberLocationData> = flow {
@@ -57,7 +58,11 @@ class SocketRepositoryImpl @Inject constructor(
         Timber.d("[SocketRepository] Cleared all member locations.")
     }
 
-    override fun observeMemberLeaved(): Flow<MemberLeavedData> = socketService.observeMemberLeaved()
+    override fun observeMemberLeaved(): Flow<MemberLeavedData> = flow{
+        socketService.observeMemberLeaved().collect{
+            emit(it)
+        }
+    }
     override fun connectionState(): StateFlow<Boolean> = socketService.isConnected()
 
 
