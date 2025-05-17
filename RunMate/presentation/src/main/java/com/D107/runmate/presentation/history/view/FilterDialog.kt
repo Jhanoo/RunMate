@@ -1,4 +1,4 @@
-package com.D107.runmate.presentation.course.view
+package com.D107.runmate.presentation.history.view
 
 import android.app.Dialog
 import android.content.Context
@@ -14,9 +14,10 @@ import com.D107.runmate.presentation.utils.CommonUtils
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class FilterDialog(private val setting: List<Int?>, private val callback: (List<Int?>) -> Unit): DialogFragment() {
+class FilterDialog(private val type: Int, private val setting: List<Int?>, private val callback: (List<Int?>) -> Unit): DialogFragment() {
     private var mContext: Context? = null
     private lateinit var binding: DialogFilterBinding
+    private var secondParam: Int? = null
     private val buttons by lazy {
         listOf(
             binding.btnDistance5,
@@ -63,8 +64,52 @@ class FilterDialog(private val setting: List<Int?>, private val callback: (List<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        secondParam = setting[1]
+
+        if(type == 0){
+            // 코스 검색
+            // 좋아요 여부 설정: 1, 아닐 경우: null
+            binding.tvLikeTitle.visibility = View.VISIBLE
+            binding.ivCourseLike.visibility = View.VISIBLE
+
+            binding.rgType.visibility = View.GONE
+
+            if(secondParam == 1) binding.ivCourseLike.setImageResource(R.drawable.ic_course_like)
+            else binding.ivCourseLike.setImageResource(R.drawable.ic_course_like_inactive)
+
+            binding.ivCourseLike.setOnClickListener {
+                if(secondParam == null) {
+                    binding.ivCourseLike.setImageResource(R.drawable.ic_course_like)
+                    secondParam = 1
+                } else {
+                    binding.ivCourseLike.setImageResource(R.drawable.ic_course_like_inactive)
+                    secondParam = null
+                }
+            }
+
+        } else {
+            // 히스토리
+            // 그룹, 개인 필터링 여부 0: 전체, 1: 그룹, 2: 개인
+            binding.tvLikeTitle.visibility = View.GONE
+            binding.ivCourseLike.visibility = View.INVISIBLE
+
+            binding.rgType.visibility = View.VISIBLE
+
+            if(secondParam == 0) binding.rbAll.isChecked = true
+            else if(secondParam == 1) binding.rbGroup.isChecked = true
+            else binding.rbIndiv.isChecked = true
+
+            binding.rgType.setOnCheckedChangeListener { _, checkedId ->
+                when(checkedId) {
+                    R.id.rb_all -> secondParam = 0
+                    R.id.rb_group -> secondParam = 1
+                    R.id.rb_indiv -> secondParam = 2
+                }
+            }
+        }
         var selectedKm = setting[0]
-        var isLiked = setting[1]
+
 
         when (selectedKm) {
             0 -> {
@@ -89,9 +134,6 @@ class FilterDialog(private val setting: List<Int?>, private val callback: (List<
             }
         }
 
-        if(isLiked == 1) binding.ivCourseLike.setImageResource(R.drawable.ic_course_like)
-        else binding.ivCourseLike.setImageResource(R.drawable.ic_course_like_inactive)
-
         buttons.forEach { button ->
             button.setOnClickListener {
                 if (button.isSelected) {
@@ -113,18 +155,10 @@ class FilterDialog(private val setting: List<Int?>, private val callback: (List<
             }
         }
 
-        binding.ivCourseLike.setOnClickListener {
-            if(isLiked == null) {
-                binding.ivCourseLike.setImageResource(R.drawable.ic_course_like)
-                isLiked = 1
-            } else {
-                binding.ivCourseLike.setImageResource(R.drawable.ic_course_like_inactive)
-                isLiked = null
-            }
-        }
+
 
         binding.btnConfirmShort.setOnClickListener {
-            val list = listOf<Int?>(selectedKm, isLiked)
+            val list = listOf<Int?>(selectedKm, secondParam)
             callback(list)
             dialog?.dismiss()
         }

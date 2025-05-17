@@ -13,6 +13,7 @@ import com.D107.runmate.presentation.databinding.FragmentCourseSearchBinding
 import com.D107.runmate.presentation.running.CourseSearchState
 import com.D107.runmate.presentation.running.CourseViewModel
 import com.D107.runmate.presentation.course.adapter.CourseRVAdapter
+import com.D107.runmate.presentation.history.view.FilterDialog
 import com.ssafy.locket.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -48,18 +49,20 @@ class CourseSearchFragment : BaseFragment<FragmentCourseSearchBinding>(
         }
 
         binding.btnFilter.setOnClickListener {
-            dialog = FilterDialog(setting) { value ->
+            dialog = FilterDialog(0, setting) { value ->
                 if (value.size != 0) {
-                    val isLiked = if(value[1] == 0) false else if(value[1] == 1) true else null
+                    val isLiked = if (value[1] == 0) false else if (value[1] == 1) true else null
 
                     val courseList = courseViewModel.courseList.value
-                    if(courseList is CourseSearchState.Success) {
-                        val minDistance = if(value[0] == null) null else distanceFilterList[value[0]!!]
-                        val maxDistance = if(value[0] == null) null else if(value[0] == distanceFilterList.size-1) null else distanceFilterList[value[0]!!+1]
-                        if(isLiked == null){
-                            if(minDistance == null && maxDistance == null) {
+                    if (courseList is CourseSearchState.Success) {
+                        val minDistance =
+                            if (value[0] == null) null else distanceFilterList[value[0]!!]
+                        val maxDistance =
+                            if (value[0] == null) null else if (value[0] == distanceFilterList.size - 1) null else distanceFilterList[value[0]!! + 1]
+                        if (isLiked == null) {
+                            if (minDistance == null && maxDistance == null) {
                                 courseRVAdapter.submitList(courseList.courseList)
-                            } else if(minDistance != null && maxDistance == null) {
+                            } else if (minDistance != null && maxDistance == null) {
                                 courseRVAdapter.submitList(
                                     courseList.courseList.filter {
                                         it.distance > minDistance
@@ -73,9 +76,9 @@ class CourseSearchFragment : BaseFragment<FragmentCourseSearchBinding>(
                                 )
                             }
                         } else {
-                            if(minDistance == null && maxDistance == null) {
+                            if (minDistance == null && maxDistance == null) {
                                 courseRVAdapter.submitList(courseList.courseList.filter { it.liked == isLiked })
-                            } else if(minDistance != null && maxDistance == null) {
+                            } else if (minDistance != null && maxDistance == null) {
                                 courseRVAdapter.submitList(
                                     courseList.courseList.filter {
                                         it.distance > minDistance && it.liked == isLiked

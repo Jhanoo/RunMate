@@ -5,10 +5,11 @@ import com.D107.runmate.data.remote.response.history.HistoryDetailResponse
 import com.D107.runmate.data.remote.response.history.HistoryResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface HistoryService {
     @GET("histories")
-    suspend fun getHistoryList(): ApiResponse<HistoryResponse>
+    suspend fun getHistoryList(@Query("size") size: Int): ApiResponse<HistoryResponse>
 
     @GET("histories/{historyId}")
     suspend fun getHistoryDetail(@Path("historyId") historyId: String): ApiResponse<HistoryDetailResponse>

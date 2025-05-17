@@ -179,9 +179,13 @@
 
     <fragment
         android:id="@+id/historyFragment"
-        android:name="com.D107.runmate.presentation.history.HistoryFragment"
+        android:name="com.D107.runmate.presentation.history.view.HistoryFragment"
         android:label="fragment_history"
-        tools:layout="@layout/fragment_history" />
+        tools:layout="@layout/fragment_history">
+        <action
+            android:id="@+id/action_historyFragment_to_groupHistoryFragment"
+            app:destination="@id/groupHistoryFragment" />
+    </fragment>
     <fragment
         android:id="@+id/wearableFragment"
         android:name="com.D107.runmate.presentation.wearable.WearableFragment"
@@ -280,6 +284,15 @@
         <action
             android:id="@+id/action_groupRunningFragment_to_runningEndFragment"
             app:destination="@id/runningEndFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/groupHistoryFragment"
+        android:name="com.D107.runmate.presentation.history.view.GroupHistoryFragment"
+        android:label="fragment_group_history"
+        tools:layout="@layout/fragment_group_history" >
+        <argument
+            android:name="historyId"
+            app:argType="string" />
     </fragment>
 
 

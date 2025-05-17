@@ -5,7 +5,7 @@ import com.D107.runmate.domain.model.base.BaseModel
 data class CourseItem(
     val avgElevation: Double,
     val courseId: String,
-    val courseName: String,
+    val courseName: String?,
     val creator: Creator,
     val distance: Double,
     val likeCount: Int,

@@ -12,6 +12,7 @@
     <string name="running_date">%1$s - %2$s</string>
     <string name="running_avg_altitude">%1$.2f</string>
     <string name="running_avg_cadence">%1$.2f</string>
+    <string name="running_distance_int">%1$d</string>
 
     <string name="course_altitude">%1$.2fm</string>
     <string name="course_like_cnt">%d개</string>

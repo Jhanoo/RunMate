@@ -4,11 +4,12 @@ import com.D107.runmate.data.mapper.DataMapper
 import com.D107.runmate.data.remote.common.BaseResponse
 import com.D107.runmate.data.remote.response.history.HistoryItem.Companion.toDomainModel
 import com.D107.runmate.domain.model.history.HistoryInfo
+import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class HistoryResponse(
-    val histories: List<HistoryItem>,
+    @Json(name="histories") val histories: List<HistoryItem>,
     val page: Int,
     val size: Int,
     val total: Int

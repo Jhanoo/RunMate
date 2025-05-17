@@ -14,6 +14,7 @@ import com.D107.runmate.domain.model.course.CourseLike
 import com.D107.runmate.domain.repository.course.CourseRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import timber.log.Timber
 import javax.inject.Inject
 
 class CourseRepositoryImpl @Inject constructor(
@@ -21,45 +22,68 @@ class CourseRepositoryImpl @Inject constructor(
 ) : CourseRepository {
     override suspend fun getAllCourseList(): Flow<ResponseStatus<List<CourseInfo>>> {
         return flow {
-            when (val response = courseDataSource.getAllCourseList()) {
-                is ApiResponse.Error -> emit(
+            try{
+                when (val response = courseDataSource.getAllCourseList()) {
+                    is ApiResponse.Error -> emit(
+                        ResponseStatus.Error(
+                            NetworkError(
+                                error = response.error.error ?: "UNKNOWN_ERROR",
+                                code = response.error.code ?: "UNKNOWN_CODE",
+                                status = response.error.status ?: "ERROR",
+                                message = response.error.message ?: "코스 전체 조회에 실패했습니다"
+                            )
+                        )
+                    )
+
+                    is ApiResponse.Success -> {
+                        val courseInfoList = response.data.map { it.toDomainModel() }
+                        emit(ResponseStatus.Success(courseInfoList))
+                    }
+                }
+            }catch (e: Exception) {
+                Timber.e("${e.message}")
+                emit(
                     ResponseStatus.Error(
                         NetworkError(
-                            error = response.error.error ?: "UNKNOWN_ERROR",
-                            code = response.error.code ?: "UNKNOWN_CODE",
-                            status = response.error.status ?: "ERROR",
-                            message = response.error.message ?: "코스 전체 조회에 실패했습니다"
+                            message = e.message ?: "",
                         )
                     )
                 )
-
-                is ApiResponse.Success -> {
-                    val courseInfoList = response.data.map { it.toDomainModel() }
-                    emit(ResponseStatus.Success(courseInfoList))
-                }
             }
         }
     }
 
     override suspend fun searchCourse(keyword: String): Flow<ResponseStatus<List<CourseInfo>>> {
         return flow {
-            when (val response = courseDataSource.searchCourseList(keyword = keyword)) {
-                is ApiResponse.Error -> emit(
+            try {
+                when (val response = courseDataSource.searchCourseList(keyword = keyword)) {
+                    is ApiResponse.Error -> emit(
+                        ResponseStatus.Error(
+                            NetworkError(
+                                error = response.error.error ?: "UNKNOWN_ERROR",
+                                code = response.error.code ?: "UNKNOWN_CODE",
+                                status = response.error.status ?: "ERROR",
+                                message = response.error.message ?: "코스 키워드 조회에 실패했습니다"
+                            )
+                        )
+                    )
+
+                    is ApiResponse.Success -> {
+                        val courseInfoList = response.data.map { it.toDomainModel() }
+                        emit(ResponseStatus.Success(courseInfoList))
+                    }
+                }
+            } catch (e: Exception) {
+                Timber.e("${e.message}")
+                emit(
                     ResponseStatus.Error(
                         NetworkError(
-                            error = response.error.error ?: "UNKNOWN_ERROR",
-                            code = response.error.code ?: "UNKNOWN_CODE",
-                            status = response.error.status ?: "ERROR",
-                            message = response.error.message ?: "코스 키워드 조회에 실패했습니다"
+                            message = e.message ?: "",
                         )
                     )
                 )
-
-                is ApiResponse.Success -> {
-                    val courseInfoList = response.data.map { it.toDomainModel() }
-                    emit(ResponseStatus.Success(courseInfoList))
-                }
             }
+
         }
     }
 

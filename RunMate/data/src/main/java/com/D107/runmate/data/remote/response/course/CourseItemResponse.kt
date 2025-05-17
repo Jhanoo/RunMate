@@ -11,7 +11,7 @@ import com.squareup.moshi.JsonClass
 data class CourseItemResponse(
     val avgElevation: Double,
     val courseId: String,
-    val courseName: String,
+    val courseName: String?,
     val creator: Creator,
     val distance: Double,
     val likeCount: Int,

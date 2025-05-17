@@ -7,9 +7,9 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class HistoryItem(
-    val courseName: String,
+    val courseName: String?,
     val duration: Int,
-    val groupName: String,
+    val groupName: String?,
     val historyId: String,
     val location: String,
     val members: List<String>,

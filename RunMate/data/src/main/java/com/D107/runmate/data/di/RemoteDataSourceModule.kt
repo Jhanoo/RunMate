@@ -10,6 +10,7 @@ import com.D107.runmate.data.remote.api.MarathonService
 import com.D107.runmate.data.remote.api.RunningService
 import com.D107.runmate.data.remote.api.TodoService
 import com.D107.runmate.data.remote.api.UserService
+import com.D107.runmate.data.remote.common.ApiResponseHandler
 import com.D107.runmate.data.remote.datasource.course.CourseDataSource
 import com.D107.runmate.data.remote.datasource.course.CourseDataSourceImpl
 import com.D107.runmate.data.remote.datasource.group.GroupDataSource
@@ -107,8 +108,10 @@ object RemoteDataSourceModule {
     @Provides
     @Singleton
     fun provideHistoryDataSource(
-        historyService: HistoryService
+        historyService: HistoryService,
+//        handler: ApiResponseHandler
     ): HistoryDataSource {
+//        return HistoryDataSourceImpl(historyService, handler)
         return HistoryDataSourceImpl(historyService)
     }
 
