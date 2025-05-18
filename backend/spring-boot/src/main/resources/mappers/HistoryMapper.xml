@@ -140,6 +140,8 @@
             h.avg_pace,
             h.avg_bpm,
             h.calories,
+            h.avg_cadence,
+            h.avg_elevation,
             h.course_id
         FROM 
             histories h

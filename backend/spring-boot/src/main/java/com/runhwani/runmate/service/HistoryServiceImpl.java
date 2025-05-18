@@ -284,6 +284,8 @@ public class HistoryServiceImpl implements HistoryService {
                 .avgPace(convertToDouble(map.get("avg_pace")))
                 .avgBpm(convertToDouble(map.get("avg_bpm")))
                 .calories(convertToDouble(map.get("calories")))
+                .avgCadence(convertToDouble(map.get("avg_cadence")))
+                .avgElevation(convertToDouble(map.get("avg_elevation")))
                 .addedToCourse(addedToCourse)
                 .courseLiked(courseLiked)
                 .courseLikes(courseLikes)
