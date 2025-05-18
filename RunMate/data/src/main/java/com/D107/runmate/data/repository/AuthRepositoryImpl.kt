@@ -1,13 +1,10 @@
 package com.D107.runmate.data.repository
 
-import com.D107.runmate.data.mapper.DataMapper
 import com.D107.runmate.data.remote.common.ApiResponse
 import com.D107.runmate.data.remote.datasource.user.AuthDataSource
 import com.D107.runmate.data.remote.request.user.LoginRequest
 import com.D107.runmate.data.remote.request.user.SignupRequest
-import com.D107.runmate.data.remote.response.user.LoginResponse
 import com.D107.runmate.data.remote.response.user.LoginResponse.Companion.toDomainModel
-import com.D107.runmate.data.remote.response.user.SignupResponse
 import com.D107.runmate.data.remote.response.user.SignupResponse.Companion.toDomainModel
 import com.D107.runmate.domain.model.base.NetworkError
 import com.D107.runmate.domain.model.base.ResponseStatus

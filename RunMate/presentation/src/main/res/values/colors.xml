@@ -24,6 +24,7 @@
     <color name="caption">#BBBAB9</color>
     <color name="login_background">#1D4F38</color>
     <color name="login_btn">#298E60</color>
+    <color name="primary_dark">#1F6A48</color>
 
 
 </resources>

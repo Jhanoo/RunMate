@@ -23,6 +23,52 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <ImageView
+        android:id="@+id/bg_todo"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="60dp"
+        android:background="@drawable/bg_running_record"
+        app:layout_constraintDimensionRatio="4.7760"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_daily_todo_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/pretendard_semi_bold"
+        android:text="TODO"
+        android:textColor="@color/text"
+        android:textSize="20sp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="@+id/bg_todo"
+        app:layout_constraintStart_toStartOf="@+id/bg_todo"
+        app:layout_constraintTop_toTopOf="@+id/bg_todo" />
+
+    <CheckBox
+        android:id="@+id/cb_daily_todo"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text"
+        android:textSize="16sp"
+        android:letterSpacing="-0.02"
+        android:textStyle="bold"
+        android:autoSizeMaxTextSize="16sp"
+        android:autoSizeMinTextSize="8sp"
+        android:autoSizeTextType="uniform"
+        android:ellipsize="none"
+        android:maxLines="1"
+        android:layout_marginEnd="24dp"
+        app:layout_constraintBottom_toBottomOf="@+id/bg_todo"
+        app:layout_constraintEnd_toEndOf="@+id/tv_daily_todo_title"
+        app:layout_constraintStart_toStartOf="@+id/tv_daily_todo_title"
+        app:layout_constraintTop_toBottomOf="@+id/tv_daily_todo_title"
+        tools:text="걷기 5분 + 달리기 3분 / 4회 반복" />
+
     <TextView
         android:id="@+id/tv_time"
         android:layout_width="0dp"
@@ -282,4 +328,9 @@
         android:visibility="gone"
         app:constraint_referenced_ids="btn_restart, btn_end" />
 
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/group_todo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="bg_todo, tv_daily_todo_title, cb_daily_todo"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

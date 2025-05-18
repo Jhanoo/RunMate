@@ -110,7 +110,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
 
         lifecycleScope.launch {
             viewModel.profileImage.collect { profileImageUrl ->
-                Timber.d("profileImage 변경 감지: $profileImageUrl")
                 val headerView = binding.navView.getHeaderView(0)
                 val headerBinding = DrawerHeaderBinding.bind(headerView)
 
@@ -421,14 +420,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         binding.navView.menu.findItem(R.id.drawer_running).isChecked = true
 
         // 초기 메뉴 아이템(달리기) 선택 상태로 설정
-//        onNavigationItemSelected(binding.navView.menu.findItem(R.id.drawer_running))
         binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
-
-        val headerView = binding.navView.getHeaderView(0)
-        val headerBinding = DrawerHeaderBinding.bind(headerView)
-
-        headerBinding.ivProfile.setImageResource(R.drawable.ic_drawer_profile) // TODO 사용자 프로필로 변경, 없을 경우 ic_drawer_profile 사용
-        headerBinding.tvName.text = "게스트"
     }
 
     private fun setDrawerWidth() {
@@ -455,7 +447,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                 R.id.AIManagerFragment -> View.VISIBLE
                 R.id.groupInfoFragment -> View.VISIBLE
                 R.id.groupRunningFragment -> View.VISIBLE
-                R.id.AIManagerIntroFragment -> View.VISIBLE
                 R.id.splashFragment -> View.GONE
                 R.id.loginFragment -> View.GONE
                 R.id.JoinFragment -> View.GONE
