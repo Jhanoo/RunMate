@@ -41,9 +41,9 @@ class AIManagerGoalFragment : BaseFragment<FragmentAIManagerGoalBinding>(
     val viewModel: MarathonViewModel by activityViewModels()
     val curriculumViewModel: CurriculumViewModel by activityViewModels()
 
-    private var selectedMarathonId = "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    private var selectedMarathonId = ""
     private var selectedDate: OffsetDateTime? = null
-    private var selectedDistance = "10km"
+    private var selectedDistance = ""
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
