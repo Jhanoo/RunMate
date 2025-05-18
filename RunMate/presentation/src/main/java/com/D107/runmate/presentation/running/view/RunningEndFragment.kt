@@ -16,6 +16,7 @@ import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.course.view.CourseAddDialog
 import com.D107.runmate.presentation.databinding.FragmentRunningEndBinding
 import com.D107.runmate.presentation.running.CourseViewModel
+import com.D107.runmate.presentation.running.HistoryDetailState
 import com.D107.runmate.presentation.running.RunningEndViewModel
 import com.D107.runmate.presentation.utils.CommonUtils.dateformatMMdd
 import com.D107.runmate.presentation.utils.CommonUtils.getGpxInputStream
@@ -92,14 +93,24 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
-            courseViewModel.courseLiked.collectLatest {
-                isLike = it
-                initIsLike = it
-                Timber.d("isLike ${isLike} ${it}")
-                if(it) {
-                    binding.ivLike.setImageResource(R.drawable.ic_course_like)
-                } else {
-                    binding.ivLike.setImageResource(R.drawable.ic_course_like_inactive)
+            courseViewModel.historyDetail.collectLatest { state ->
+                when (state) {
+                    is HistoryDetailState.Success -> {
+                        isLike = state.historyDetail.myRunItem.courseLiked
+                        initIsLike = state.historyDetail.myRunItem.courseLiked
+                        Timber.d("isLike ${isLike} ${state.historyDetail.myRunItem.courseLiked}")
+                        if(state.historyDetail.myRunItem.courseLiked) {
+                            binding.ivLike.setImageResource(R.drawable.ic_course_like)
+                        } else {
+                            binding.ivLike.setImageResource(R.drawable.ic_course_like_inactive)
+                        }
+                    }
+
+                    is HistoryDetailState.Error -> {
+                        Timber.d("getHistoryDetail Error {${state.message}}")
+                    }
+
+                    is HistoryDetailState.Initial -> {}
                 }
             }
         }
@@ -130,7 +141,11 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
         }
 
         binding.btnChart.setOnClickListener {
-            findNavController().navigate(R.id.action_runningEndFragment_to_chartFragment)
+            val historyDetail = courseViewModel.historyDetail.value
+            if(historyDetail is HistoryDetailState.Success) {
+                val action = RunningEndFragmentDirections.actionRunningEndFragmentToChartFragment(historyDetail.historyDetail.gpxFile)
+                findNavController().navigate(action)
+            }
         }
 
         binding.btnAddCourse.setOnClickListener {

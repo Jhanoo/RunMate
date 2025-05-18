@@ -205,41 +205,46 @@ class RunningTrackingService : Service() {
         stopLocationTracking()
         stopTracking()
 
-        CoroutineScope(Dispatchers.IO).launch {
-            repository.finishTracking().collectLatest {
-                if (it) {
-                    val record = repository.runningRecord.value
-                    val location = repository.userLocation.value
-                    val recordSize = repository.recordSize.value
-                    if (location is UserLocationState.Exist && record is RunningRecordState.Exist && recordSize > 0) {
-                        val address = getAddress(
-                            location.locations.first().longitude,
-                            location.locations.first().latitude
-                        )
-                        address?.let {
-                            val lastRecord = record.runningRecords.last()
-                            endRunning(
-                                0.0,
-                                lastRecord.cadenceSum / recordSize,
-                                lastRecord.altitudeSum / recordSize,
-                                16.6667 / lastRecord.avgSpeed,
-                                0.0,
-                                null,
-                                (lastRecord.distance).toDouble(),
-                                convertDateTime(lastRecord.currentTime),
-                                it,
-                                convertDateTime(record.runningRecords.first().currentTime),
-                                currentGroupId
+        if(repository.recordSize.value > 0) {
+            CoroutineScope(Dispatchers.IO).launch {
+                repository.finishTracking().collectLatest {
+                    if (it) {
+                        val record = repository.runningRecord.value
+                        val location = repository.userLocation.value
+                        val recordSize = repository.recordSize.value
+                        if (location is UserLocationState.Exist && record is RunningRecordState.Exist && recordSize > 0) {
+                            val address = getAddress(
+                                location.locations.first().longitude,
+                                location.locations.first().latitude
                             )
+                            address?.let {
+                                val lastRecord = record.runningRecords.last()
+                                Timber.d("courseId check ${repository.courseId.value}")
+                                endRunning(
+                                    0.0,
+                                    lastRecord.cadenceSum / recordSize,
+                                    lastRecord.altitudeSum / recordSize,
+                                    16.6667 / lastRecord.avgSpeed,
+                                    0.0,
+                                    repository.courseId.value,
+                                    (lastRecord.distance).toDouble(),
+                                    convertDateTime(lastRecord.currentTime),
+                                    it,
+                                    convertDateTime(record.runningRecords.first().currentTime),
+                                    currentGroupId
+                                )
+                            }
+                        } else {
+                            Timber.d("기록이 없습니다 recordSize 0")
                         }
-                    } else {
-                        Timber.d("기록이 없습니다 recordSize 0")
-                    }
 
-                } else {
-                    Timber.d("write fail")
+                    } else {
+                        Timber.d("write fail")
+                    }
                 }
             }
+        } else {
+            Timber.d("recordSize 0")
         }
 
         CoroutineScope(Dispatchers.Default).launch {
@@ -307,11 +312,13 @@ class RunningTrackingService : Service() {
                 when (status) {
                     is ResponseStatus.Success -> {
                         _endRunning.emit(RunningEndState.Success(status.data.historyId))
+                        repository.setCourseId(null)
                     }
 
                     is ResponseStatus.Error -> {
                         Timber.d("runningend error ${status.error.message}")
                         _endRunning.emit(RunningEndState.Error(status.error.message))
+                        repository.setCourseId(null)
                     }
                 }
             }

@@ -85,6 +85,10 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
 
         dailyTodoViewModel.getDailyTodo()
 
+        if(mainViewModel.courseId.value == null && mainViewModel.course.value.first != null){
+            mainViewModel.setCourse(null, null)
+        }
+
         if (mainViewModel.userLocation.value is UserLocationState.Initial) {
             viewLifecycleOwner.lifecycleScope.launch {
                 mContext?.let {
@@ -119,7 +123,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                 kakaoMap = p0
                 loadLocationAndMove()
                 viewLifecycleOwner.lifecycleScope.launch {
-                    if(mainViewModel.course.value.second != null){
+                    if(mainViewModel.course.value.second != null && mainViewModel.courseId.value != null){
                         withContext(Dispatchers.IO) {
                             drawGpxFile(GpxParser.getGpxInputStream(mainViewModel.course.value.second!!))
                         }
@@ -249,7 +253,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
 
         viewLifecycleOwner.lifecycleScope.launch {
             mainViewModel.course.collectLatest {
-                if(it.second != null) {
+                if(it.second != null && mainViewModel.courseId.value != null) {
                     Timber.d("course set ${it.second}")
                     withContext(Dispatchers.IO) {
                         drawGpxFile(GpxParser.getGpxInputStream(it.second!!))

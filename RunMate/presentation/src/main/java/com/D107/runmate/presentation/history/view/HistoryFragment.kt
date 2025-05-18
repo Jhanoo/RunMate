@@ -12,6 +12,7 @@ import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.course.adapter.CourseRVAdapter
 import com.D107.runmate.presentation.course.view.CourseSearchFragmentDirections
 import com.D107.runmate.presentation.databinding.FragmentHistoryBinding
+import com.D107.runmate.presentation.history.HistoryDetailState
 import com.D107.runmate.presentation.history.HistoryListState
 import com.D107.runmate.presentation.history.HistoryViewModel
 import com.D107.runmate.presentation.history.adapter.HistoryRVAdapter
@@ -54,6 +55,22 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>(
                     }
 
                     is HistoryListState.Initial -> {}
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            historyViewModel.historyDetail.collectLatest { state ->
+                when (state) {
+                    is HistoryDetailState.Success -> {
+                        val action = HistoryFragmentDirections.actionHistoryFragmentToChartFragment(state.historyDetail.gpxFile)
+                        findNavController().navigate(action)
+                        historyViewModel.resetHistoryDetail()
+                    }
+                    is HistoryDetailState.Error -> {
+                        Timber.d("getHistoryDetail Error {${state.message}}")
+                    }
+                    is HistoryDetailState.Initial -> {}
                 }
             }
         }
@@ -140,6 +157,7 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>(
                 Timber.d("history ${data}")
                 if(data.groupName == null) {
                     // 개인 기록화면으로 이동
+                    historyViewModel.getHistoryDetail(data.historyId)
                 } else {
                     // 그룹 기록화면으로 이동
                     val action = HistoryFragmentDirections.actionHistoryFragmentToGroupHistoryFragment(data.historyId)

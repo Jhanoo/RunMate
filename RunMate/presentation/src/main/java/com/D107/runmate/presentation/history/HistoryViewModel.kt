@@ -65,6 +65,10 @@ class HistoryViewModel @Inject constructor(
             }
         }
     }
+
+    fun resetHistoryDetail() {
+        _historyDetail.value = HistoryDetailState.Initial
+    }
 }
 
 sealed class HistoryListState {

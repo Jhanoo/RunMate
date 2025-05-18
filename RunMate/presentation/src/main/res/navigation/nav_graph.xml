@@ -185,6 +185,9 @@
         <action
             android:id="@+id/action_historyFragment_to_groupHistoryFragment"
             app:destination="@id/groupHistoryFragment" />
+        <action
+            android:id="@+id/action_historyFragment_to_chartFragment"
+            app:destination="@+id/chartFragment" />
     </fragment>
     <fragment
         android:id="@+id/wearableFragment"
@@ -270,7 +273,11 @@
         android:id="@+id/chartFragment"
         android:name="com.D107.runmate.presentation.running.view.ChartFragment"
         android:label="fragment_chart"
-        tools:layout="@layout/fragment_chart" />
+        tools:layout="@layout/fragment_chart" >
+        <argument
+            android:name="gpxFileUrl"
+            app:argType="string" />
+    </fragment>
 
     <fragment
         android:id="@+id/groupRunningFragment"
