@@ -21,6 +21,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.transition.Visibility
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentAIManagerGoalBinding
+import com.D107.runmate.presentation.manager.util.CurriculumPrefs
 import com.D107.runmate.presentation.manager.viewmodel.CurriculumViewModel
 import com.D107.runmate.presentation.manager.viewmodel.MarathonViewModel
 import com.ssafy.locket.presentation.base.BaseFragment
@@ -248,6 +249,8 @@ class AIManagerGoalFragment : BaseFragment<FragmentAIManagerGoalBinding>(
                     curriculumViewModel.curriculumCreationResult.collect { result ->
                         result?.fold(
                             onSuccess = { curriculumId ->
+                                CurriculumPrefs.saveRefreshTime(requireContext())
+
                                 // 성공 시 로딩 화면에서 AIManagerFragment로 이동
                                 Timber.d("커리큘럼 생성 성공: 생성된 ID = $curriculumId")
                                 findNavController().navigate(
@@ -352,10 +355,10 @@ class AIManagerGoalFragment : BaseFragment<FragmentAIManagerGoalBinding>(
         val goalDist = selectedDistance ?: "10km"
 
         // 선택된 마라톤 ID가 없는 경우 사용자에게 알림
-        if (selectedMarathonId.isEmpty()) {
-            Toast.makeText(requireContext(), "마라톤을 선택해주세요", Toast.LENGTH_SHORT).show()
-            return
-        }
+//        if (selectedMarathonId.isEmpty()) {
+//            Toast.makeText(requireContext(), "마라톤을 선택해주세요", Toast.LENGTH_SHORT).show()
+//            return
+//        }
 
         Timber.d("커리큘럼 생성 요청: marathonId=$selectedMarathonId, goalDist=$goalDist, goalDate=$goalDate")
 

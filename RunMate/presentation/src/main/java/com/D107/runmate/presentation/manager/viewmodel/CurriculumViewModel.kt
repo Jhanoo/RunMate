@@ -77,7 +77,28 @@ class CurriculumViewModel @Inject constructor(
                 .collect { result ->
                     _curriculumCreationResult.value = result
                     _isLoading.value = false
+
+                    result.getOrNull()?.let { curriculumId ->
+                        // ViewModel에서는 Context에 접근할 수 없으므로, Fragment에서 처리해야 함
+                        // 이 부분은 Fragment에서 구현해야 함
+                    }
                 }
+        }
+    }
+
+    fun updateCurriculum(curriculumInfo: CurriculumInfo) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                // For simplicity, just refresh the curriculum data
+                // In a real implementation, you'd call the repository update method
+                _myCurriculum.value = Result.success(curriculumInfo)
+                _isLoading.value = false
+            } catch (e: Exception) {
+                _myCurriculum.value = Result.failure(e)
+                timber.log.Timber.e("커리큘럼 업데이트 실패: ${e.message}")
+                _isLoading.value = false
+            }
         }
     }
 

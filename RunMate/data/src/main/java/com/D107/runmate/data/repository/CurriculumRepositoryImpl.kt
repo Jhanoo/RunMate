@@ -45,4 +45,8 @@ class CurriculumRepositoryImpl @Inject constructor(
             }
         }
     }
+
+    override suspend fun updateCurriculum(curriculumInfo: CurriculumInfo): Flow<Result<String>> {
+        TODO("Not yet implemented")
+    }
 }

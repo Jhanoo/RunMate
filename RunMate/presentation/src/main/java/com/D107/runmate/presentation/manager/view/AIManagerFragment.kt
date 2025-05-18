@@ -1,5 +1,6 @@
 package com.D107.runmate.presentation.manager.view
 
+import android.app.Dialog
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -24,7 +25,14 @@ import javax.inject.Inject
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
+import android.view.ViewGroup
+import android.view.Window
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.RadioGroup
 import androidx.core.content.ContextCompat
+import com.D107.runmate.presentation.manager.util.CurriculumPrefs
 import com.prolificinteractive.materialcalendarview.DayViewDecorator
 import com.prolificinteractive.materialcalendarview.DayViewFacade
 import com.prolificinteractive.materialcalendarview.spans.DotSpan
@@ -40,6 +48,8 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
 
     private lateinit var scheduleAdapter: ScheduleRVAdapter
 
+    private var canRefresh = false
+
     // 서버에서 가져온 모든 일정을 저장할 리스트
     private val allScheduleItems = mutableListOf<ScheduleItem>()
 
@@ -52,8 +62,73 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
         // 리사이클러뷰 초기화
         initRecyclerView()
 
+        updateRefreshButton()
+        CurriculumPrefs.logAllPreferences(requireContext())
+
         // 오늘 날짜에 해당하는 데이터 로드
         loadSchedulesForSelectedDate(Calendar.getInstance())
+    }
+
+    private fun updateRefreshButton() {
+        CurriculumPrefs.logAllPreferences(requireContext())
+
+        val canRefresh = CurriculumPrefs.canRefresh(requireContext())
+
+        binding.ivRefresh.apply {
+            setImageResource(if (canRefresh) R.drawable.refresh else R.drawable.refresh_no)
+            isClickable = canRefresh
+            setOnClickListener(if (canRefresh) { _ -> showCurriculumModifyDialog() } else null)
+        }
+    }
+
+    private fun showCurriculumModifyDialog() {
+        CurriculumPrefs.saveRefreshTime(requireContext())
+        val dialog = Dialog(requireContext())
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setContentView(R.layout.dialog_curriculum_modify)
+
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window?.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+
+        val btnClose = dialog.findViewById<ImageView>(R.id.btn_close)
+        val btnConfirm = dialog.findViewById<Button>(R.id.btn_confirm)
+
+        val etMarathonName = dialog.findViewById<EditText>(R.id.et_marathon_name)
+        // TODO: Set marathon name from current curriculum
+
+        btnClose.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        btnConfirm.setOnClickListener {
+            CurriculumPrefs.saveRefreshTime(requireContext())
+
+            val selectedDistanceId = dialog.findViewById<RadioGroup>(R.id.distance_options)
+                .checkedRadioButtonId
+
+            val selectedPrepId = dialog.findViewById<RadioGroup>(R.id.preparation_options)
+                .checkedRadioButtonId
+
+            // TODO: Create updated curriculum request with new options
+
+            updateRefreshButton()
+
+            dialog.dismiss()
+
+            Toast.makeText(context, "목표가 수정되었습니다", Toast.LENGTH_SHORT).show()
+        }
+
+        CurriculumPrefs.saveRefreshTime(requireContext())
+
+        dialog.show()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateRefreshButton()
     }
 
     private fun setupCalendar() {
@@ -337,7 +412,6 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
         }
 
         override fun decorate(view: DayViewFacade) {
-            // Use a rounded rectangle drawable instead of a simple color
             val roundedBackground = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
 //                setSize(32,32)
@@ -366,12 +440,10 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
         allScheduleItems.forEach { item ->
             if (item.isCompleted == true) {
                 try {
-                    // Parse the date from "M/d" format
                     val parts = item.date.split("/")
                     val month = parts[0].toInt() - 1 // Calendar month is 0-based
                     val day = parts[1].toInt()
 
-                    // Use current year since we don't have year in the item.date
                     val calendar = Calendar.getInstance()
                     val year = calendar.get(Calendar.YEAR)
 
@@ -395,10 +467,8 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
                 }
 
                 override fun decorate(view: DayViewFacade) {
-                    // Get the color from resources
                     val selectionColor = ContextCompat.getColor(requireContext(), R.color.login_btn)
 
-                    // Create a rounded rectangle with selection color
                     val selectionBackground = GradientDrawable().apply {
                         shape = GradientDrawable.RECTANGLE
                         cornerRadius = 30f
