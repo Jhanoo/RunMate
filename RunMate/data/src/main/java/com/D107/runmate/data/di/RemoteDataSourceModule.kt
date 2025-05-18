@@ -1,17 +1,24 @@
 package com.D107.runmate.data.di
 
 import android.content.Context
+import com.D107.runmate.data.remote.api.CourseService
 import com.D107.runmate.data.remote.api.CurriculumService
 import com.D107.runmate.data.remote.api.GroupService
+import com.D107.runmate.data.remote.api.HistoryService
 import com.D107.runmate.data.remote.api.KakaoLocalService
 import com.D107.runmate.data.remote.api.MarathonService
 import com.D107.runmate.data.remote.api.RunningService
 import com.D107.runmate.data.remote.api.TodoService
 import com.D107.runmate.data.remote.api.UserService
+import com.D107.runmate.data.remote.common.ApiResponseHandler
+import com.D107.runmate.data.remote.datasource.course.CourseDataSource
+import com.D107.runmate.data.remote.datasource.course.CourseDataSourceImpl
 import com.D107.runmate.data.remote.datasource.group.GroupDataSource
 import com.D107.runmate.data.remote.datasource.group.GroupDataSourceImpl
 import com.D107.runmate.data.remote.datasource.group.KakaoLocalDataSource
 import com.D107.runmate.data.remote.datasource.group.KakaoLocalDataSourceImpl
+import com.D107.runmate.data.remote.datasource.history.HistoryDataSource
+import com.D107.runmate.data.remote.datasource.history.HistoryDataSourceImpl
 import com.D107.runmate.data.remote.datasource.manager.CurriculumDataSource
 import com.D107.runmate.data.remote.datasource.manager.CurriculumDataSourceImpl
 import com.D107.runmate.data.remote.datasource.manager.MarathonDataSource
@@ -89,6 +96,23 @@ object RemoteDataSourceModule {
     @Singleton
     fun provideTodoDataSource(todoService: TodoService): TodoDataSource {
         return TodoDataSourceImpl(todoService)
+    }
+    @Provides
+    @Singleton
+    fun provideCourseDataSource(
+        courseService: CourseService
+    ): CourseDataSource {
+        return CourseDataSourceImpl(courseService)
+    }
+
+    @Provides
+    @Singleton
+    fun provideHistoryDataSource(
+        historyService: HistoryService,
+//        handler: ApiResponseHandler
+    ): HistoryDataSource {
+//        return HistoryDataSourceImpl(historyService, handler)
+        return HistoryDataSourceImpl(historyService)
     }
 
 }

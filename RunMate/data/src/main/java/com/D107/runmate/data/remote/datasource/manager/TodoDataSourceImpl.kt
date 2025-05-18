@@ -3,6 +3,7 @@ package com.D107.runmate.data.remote.datasource.manager
 import com.D107.runmate.data.remote.api.TodoService
 import com.D107.runmate.data.remote.common.ApiResponse
 import com.D107.runmate.data.remote.common.ErrorResponse
+import com.D107.runmate.data.remote.response.manager.DailyTodoResponse
 import com.D107.runmate.data.remote.response.manager.TodoResponse
 import javax.inject.Inject
 
@@ -22,5 +23,9 @@ class TodoDataSourceImpl @Inject constructor(
                 )
             )
         }
+    }
+
+    override suspend fun getTodayTodo(): ApiResponse<DailyTodoResponse> {
+        return todoService.getTodayTodo()
     }
 }

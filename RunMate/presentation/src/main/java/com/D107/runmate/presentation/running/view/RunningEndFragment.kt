@@ -2,7 +2,6 @@ package com.D107.runmate.presentation.running.view
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -14,15 +13,14 @@ import com.D107.runmate.domain.model.running.TrackingStatus
 import com.D107.runmate.domain.model.running.UserLocationState
 import com.D107.runmate.presentation.MainViewModel
 import com.D107.runmate.presentation.R
+import com.D107.runmate.presentation.course.view.CourseAddDialog
 import com.D107.runmate.presentation.databinding.FragmentRunningEndBinding
-import com.D107.runmate.presentation.running.Coord2AddressState
-import com.D107.runmate.presentation.running.RunningEndState
+import com.D107.runmate.presentation.running.CourseViewModel
 import com.D107.runmate.presentation.running.RunningEndViewModel
-import com.D107.runmate.presentation.utils.CommonUtils.convertDateTime
+import com.D107.runmate.presentation.utils.CommonUtils.dateformatMMdd
 import com.D107.runmate.presentation.utils.CommonUtils.getGpxInputStream
 import com.D107.runmate.presentation.utils.GpxParser.parseGpx
 import com.D107.runmate.presentation.utils.KakaoMapUtil.addCourseLine
-import com.D107.runmate.presentation.utils.LocationUtils
 import com.D107.runmate.presentation.utils.LocationUtils.getPaceFromSpeed
 import com.kakao.vectormap.KakaoMap
 import com.kakao.vectormap.KakaoMapReadyCallback
@@ -48,8 +46,11 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
     private var kakaoMap: KakaoMap? = null
     private val mainViewModel: MainViewModel by activityViewModels()
     private val runningEndViewModel: RunningEndViewModel by viewModels()
+    private val courseViewModel: CourseViewModel by viewModels()
     private lateinit var dialog: CourseAddDialog
     private var mContext: Context? = null
+    private var isLike = false
+    private var initIsLike = false
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -63,12 +64,17 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
         initEvent()
         initMap()
 
+        mainViewModel.historyId.value?.let {
+            courseViewModel.getHistoryDetail(it)
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             mainViewModel.runningRecord.collectLatest {
                 if(it is RunningRecordState.Exist) {
                     val time = mainViewModel.time.value
                     val lastRecord = it.runningRecords.last()
                     val firstRecord = it.runningRecords.first()
+                    val startLocation = mainViewModel.userLocation.value
                     binding.tvDistance.text = getString(R.string.course_distance, lastRecord.distance)
                     binding.tvDateGroupInfo.text = getString(R.string.running_date, firstRecord.currentTime, lastRecord.currentTime)
                     binding.tvTime.text = getString(R.string.running_time, time / 60, time % 60)
@@ -77,6 +83,31 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
                     binding.tvCadence.text = getString(R.string.running_avg_cadence, lastRecord.cadenceSum / it.runningRecords.size)
                     binding.tvAltitude.text = getString(R.string.running_avg_altitude, lastRecord.altitudeSum / it.runningRecords.size)
                     binding.tvCalorie.text = "0" // TODO 삼성헬스 연결하여 데이터 수정
+
+                    if(startLocation is UserLocationState.Exist) {
+                        courseViewModel.getAddressFromLatLng(startLocation.locations.last().longitude, startLocation.locations.last().latitude)
+                    }
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            courseViewModel.courseLiked.collectLatest {
+                isLike = it
+                initIsLike = it
+                Timber.d("isLike ${isLike} ${it}")
+                if(it) {
+                    binding.ivLike.setImageResource(R.drawable.ic_course_like)
+                } else {
+                    binding.ivLike.setImageResource(R.drawable.ic_course_like_inactive)
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            courseViewModel.courseCreate.collectLatest {
+                if(it) {
+                    binding.btnAddCourse.visibility = View.GONE
                 }
             }
         }
@@ -86,6 +117,12 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
         binding.btnNext.setOnClickListener {
             runningEndViewModel.deleteFile()
             mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
+            mainViewModel.resetHistoryId()
+            if(isLike != initIsLike) {
+                mainViewModel.course.value.first?.let {
+                    courseViewModel.updateCourseLike(it)
+                }
+            }
             when (sourceFragment) {
                 "RUNNING_FRAGMENT"-> findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
                 "GROUP_RUNNING_FRAGMENT"-> findNavController().navigate(R.id.action_runningEndFragment_to_groupRrunningFragment)
@@ -97,17 +134,31 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
         }
 
         binding.btnAddCourse.setOnClickListener {
-            dialog = CourseAddDialog()
+            dialog = CourseAddDialog() {
+                val record = mainViewModel.runningRecord.value
+                if(record is RunningRecordState.Exist) {
+                    val lastRecord = record.runningRecords.last()
+
+                    var name = "${mainViewModel.nickname} ${dateformatMMdd(record.runningRecords.first().currentTime)}"
+
+                    if(it.first.isNotEmpty()) {
+                        name = it.first
+                    }
+                    courseViewModel.createCourse(lastRecord.altitudeSum/mainViewModel.recordSize.value, lastRecord.distance,
+                        mainViewModel.historyId.value!!, name, it.second, courseViewModel.address.value!!)
+                }
+            }
             dialog.show(requireActivity().supportFragmentManager, "course_add")
         }
         
-        binding.ivLike.setOnClickListener { 
-            // TODO 사용자가 이미 좋아요한 경우
-            binding.ivLike.setImageResource(R.drawable.ic_course_like_inactive)
-
-            // TODO 사용자가 처음 좋아요하는 경우
-            binding.ivLike.setImageResource(R.drawable.ic_course_like)
-
+        binding.ivLike.setOnClickListener {
+            if(isLike == false) {
+                binding.ivLike.setImageResource(R.drawable.ic_course_like)
+                isLike = true
+            } else {
+                binding.ivLike.setImageResource(R.drawable.ic_course_like_inactive)
+                isLike = false
+            }
         }
     }
 
@@ -129,7 +180,7 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
     }
 
     private fun initUI() {
-        if (mainViewModel.courseId.value == null) {
+        if (mainViewModel.course.value.first == null) {
             // 프리 모드인 경우
             binding.btnAddCourse.visibility = View.VISIBLE
             binding.ivLike.visibility = View.GONE

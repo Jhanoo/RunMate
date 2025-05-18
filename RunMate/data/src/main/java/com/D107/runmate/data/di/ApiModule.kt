@@ -1,8 +1,10 @@
 package com.D107.runmate.data.di
 
+import com.D107.runmate.data.remote.api.CourseService
 import com.D107.runmate.data.remote.api.CurriculumService
 import com.D107.runmate.data.remote.api.RunningService
 import com.D107.runmate.data.remote.api.GroupService
+import com.D107.runmate.data.remote.api.HistoryService
 import com.D107.runmate.data.remote.api.KakaoLocalService
 import com.D107.runmate.data.remote.api.MarathonService
 import com.D107.runmate.data.remote.api.TodoService
@@ -12,7 +14,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Module(includes = [NetworkModule::class, DataStoreModule::class])
@@ -41,6 +42,18 @@ class ApiModule {
     @Singleton
     fun userService(@InterceptorRetrofit retrofit: Retrofit): UserService {
         return retrofit.create(UserService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCourseService(@InterceptorRetrofit retrofit: Retrofit): CourseService {
+        return retrofit.create(CourseService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideHistoryService(@InterceptorRetrofit retrofit: Retrofit): HistoryService {
+        return retrofit.create(HistoryService::class.java)
     }
 
     @Provides

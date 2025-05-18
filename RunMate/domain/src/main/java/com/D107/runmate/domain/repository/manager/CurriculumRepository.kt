@@ -1,6 +1,8 @@
 package com.D107.runmate.domain.repository.manager
 
+import com.D107.runmate.domain.model.base.ResponseStatus
 import com.D107.runmate.domain.model.manager.CurriculumInfo
+import com.D107.runmate.domain.model.manager.TodoItem
 import kotlinx.coroutines.flow.Flow
 
 interface CurriculumRepository {
