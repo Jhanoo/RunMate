@@ -17,7 +17,7 @@ class CurriculumViewModel @Inject constructor(
     private val createCurriculumUseCase: CreateCurriculumUseCase,
     private val getMyCurriculumUseCase: GetMyCurriculumUseCase
 ) : ViewModel() {
-    private val _runExp = MutableStateFlow(true)
+    private val _runExp = MutableStateFlow(false)
     val runExp = _runExp.asStateFlow()
 
     private val _freqExp = MutableStateFlow("1~2회")

@@ -455,6 +455,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                 R.id.AIManagerFragment -> View.VISIBLE
                 R.id.groupInfoFragment -> View.VISIBLE
                 R.id.groupRunningFragment -> View.VISIBLE
+                R.id.AIManagerIntroFragment -> View.VISIBLE
                 R.id.splashFragment -> View.GONE
                 R.id.loginFragment -> View.GONE
                 R.id.JoinFragment -> View.GONE

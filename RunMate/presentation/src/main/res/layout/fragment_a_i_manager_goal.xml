@@ -47,10 +47,10 @@
             android:id="@+id/et_target_marathon"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:color/darker_gray"
-            android:backgroundTint="#F5F5F5"
             android:layout_marginLeft="26dp"
             android:layout_marginRight="26dp"
+            android:background="@android:color/darker_gray"
+            android:backgroundTint="#F5F5F5"
             android:clickable="true"
             android:focusable="false"
             android:hint="달려라하니 마라톤"
@@ -61,9 +61,10 @@
             android:id="@+id/btn_close_marathon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:padding="8dp"
+            android:layout_marginRight="40dp"
             android:src="@drawable/ic_all_close" />
     </RelativeLayout>
 
@@ -104,14 +105,14 @@
             android:padding="12dp"
             android:textSize="16sp" />
 
-        <ImageView
-            android:id="@+id/btn_close_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:padding="8dp"
-            android:src="@drawable/ic_all_close" />
+<!--        <ImageView-->
+<!--            android:id="@+id/btn_close_date"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_alignParentRight="true"-->
+<!--            android:layout_centerVertical="true"-->
+<!--            android:layout_marginRight="40dp"-->
+<!--            android:src="@drawable/ic_all_close" />-->
 
     </RelativeLayout>
 
@@ -130,83 +131,28 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/target_layout" />
 
-    <RadioGroup
+    <com.google.android.flexbox.FlexboxLayout
         android:id="@+id/rg_max_distance"
-        android:layout_width="0dp"
-        android:layout_height="32dp"
-        android:layout_marginTop="16dp"
-        android:orientation="horizontal"
-        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="26dp"
         android:layout_marginRight="26dp"
+        app:alignItems="flex_start"
+        app:flexWrap="wrap"
+        app:justifyContent="flex_start"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_goal_setting">
-
-        <RadioButton
-            android:id="@+id/rb_distance_5km"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-
-            android:background="@drawable/radio_selector"
-            android:button="@null"
-            android:gravity="center"
-            android:padding="6dp"
-            android:text="5km"
-            android:textSize="16sp" />
-
-        <RadioButton
-            android:id="@+id/rb_distance_10km"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_weight="1"
-            android:background="@drawable/radio_selector"
-            android:button="@null"
-            android:checked="true"
-            android:gravity="center"
-            android:padding="6dp"
-            android:text="10km"
-            android:textColor="@color/white"
-            android:textSize="16sp" />
-
-        <RadioButton
-            android:id="@+id/rb_distance_half"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_weight="1"
-            android:background="@drawable/radio_selector"
-            android:button="@null"
-            android:gravity="center"
-            android:padding="6dp"
-            android:text="하프"
-            android:textSize="16sp" />
-
-        <RadioButton
-            android:id="@+id/rb_distance_full"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_weight="1"
-            android:background="@drawable/radio_selector"
-            android:button="@null"
-            android:gravity="center"
-            android:padding="6dp"
-            android:text="풀"
-            android:textSize="16sp" />
-    </RadioGroup>
+        app:layout_constraintTop_toBottomOf="@+id/tv_goal_setting" />
 
     <Button
         android:id="@+id/btn_confirm_goal"
         style="@style/GreenButtonStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="20dp"
         android:layout_marginLeft="26dp"
+        android:layout_marginTop="20dp"
         android:layout_marginRight="26dp"
+        android:layout_marginBottom="20dp"
         android:background="@drawable/bg_all_btn_short"
         android:text="설정하기"
         android:textStyle="bold"

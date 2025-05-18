@@ -24,6 +24,9 @@ class AIManagerExpMarathonFragment : BaseFragment<FragmentAIManagerExpMarathonBi
     }
 
     private fun setupListeners() {
+
+        binding.cbMarathonExperience.isChecked = curriculumViewModel.runExp.value
+
         binding.cbMarathonExperience.setOnCheckedChangeListener { _, isChecked ->
             curriculumViewModel.setRunExp(isChecked)
         }

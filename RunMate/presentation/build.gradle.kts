@@ -94,6 +94,8 @@ dependencies {
 
     implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
     implementation("com.squareup.okhttp3:okhttp-urlconnection:4.10.0")
+
+    implementation ("com.google.android.flexbox:flexbox:3.0.0")
 }
 
 kapt {
