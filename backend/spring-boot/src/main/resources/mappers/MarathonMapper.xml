@@ -19,4 +19,17 @@
         ORDER BY date
     </select>
 
+    <select id="findById"
+            parameterType="java.util.UUID"
+            resultType="com.runhwani.runmate.model.Marathon">
+        SELECT
+            marathon_id AS marathonId,
+            name,
+            date,
+            location,
+            created_at AS createdAt
+        FROM marathons
+        WHERE marathon_id = #{marathonId}
+    </select>
+
 </mapper>

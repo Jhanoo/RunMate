@@ -12,6 +12,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -47,5 +48,24 @@ public class MarathonServiceImpl implements MarathonService{
             );
         }
         return result;
+    }
+
+    @Override
+    public MarathonResponse getMarathon(UUID marathonId) {
+        Marathon m = marathonDao.findById(marathonId);
+        List<MarathonDistance> mdList = distanceDao.findByMarathonId(marathonId);
+
+        List<String> distList = new ArrayList<>();
+        for (MarathonDistance md : mdList) {
+            distList.add(md.getDistance());
+        }
+
+        return MarathonResponse.builder()
+                .marathonId(m.getMarathonId())
+                .name(m.getName())
+                .date(m.getDate().toLocalDate())
+                .location(m.getLocation())
+                .distance(distList)
+                .build();
     }
 }

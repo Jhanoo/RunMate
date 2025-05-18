@@ -7,9 +7,11 @@ import com.runhwani.runmate.service.MarathonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,6 +22,14 @@ public class MarathonController implements MarathonControllerDocs {
     @Override
     public ResponseEntity<CommonResponse<List<MarathonResponse>>> getMarathons() {
         List<MarathonResponse> data = marathonService.getUpcomingMarathons();
+        return ResponseEntity.ok(CommonResponse.ok(data));
+    }
+
+    @Override
+    public ResponseEntity<CommonResponse<MarathonResponse>> getMarathon(
+            @PathVariable("marathonId") UUID marathonId
+    ) {
+        MarathonResponse data = marathonService.getMarathon(marathonId);
         return ResponseEntity.ok(CommonResponse.ok(data));
     }
 }
