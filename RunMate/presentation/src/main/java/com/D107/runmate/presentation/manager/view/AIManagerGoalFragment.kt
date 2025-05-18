@@ -278,6 +278,10 @@ class AIManagerGoalFragment : BaseFragment<FragmentAIManagerGoalBinding>(
     }
 
     private fun setClickListeners() {
+        binding.toolbarGoalTitle.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
+
         binding.etTargetMarathon.setOnClickListener {
             binding.etTargetMarathon.setText("")
             binding.etTargetDate.setText("")
