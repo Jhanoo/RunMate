@@ -119,7 +119,7 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
             mainViewModel.setTrackingStatus(TrackingStatus.INITIAL)
             mainViewModel.resetHistoryId()
             if(isLike != initIsLike) {
-                mainViewModel.courseId.value?.let {
+                mainViewModel.course.value.first?.let {
                     courseViewModel.updateCourseLike(it)
                 }
             }
@@ -180,7 +180,7 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
     }
 
     private fun initUI() {
-        if (mainViewModel.courseId.value == null) {
+        if (mainViewModel.course.value.first == null) {
             // 프리 모드인 경우
             binding.btnAddCourse.visibility = View.VISIBLE
             binding.ivLike.visibility = View.GONE

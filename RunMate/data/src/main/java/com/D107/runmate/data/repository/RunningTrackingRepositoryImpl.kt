@@ -45,6 +45,9 @@ class RunningTrackingRepositoryImpl @Inject constructor(
     private val _historyId = MutableStateFlow<String?>(null)
     override val historyId: StateFlow<String?> = _historyId.asStateFlow()
 
+    private val _courseId = MutableStateFlow<String?>(null)
+    override val courseId: StateFlow<String?> = _courseId.asStateFlow()
+
     override fun setTrackingStatus(status: TrackingStatus) {
         if(status == TrackingStatus.INITIAL) {
             _time.value = 0
@@ -115,6 +118,10 @@ class RunningTrackingRepositoryImpl @Inject constructor(
 
     override fun setHistoryId(historyId: String?) {
         _historyId.value = historyId
+    }
+
+    override fun setCourseId(courseId: String?) {
+        _courseId.value = courseId
     }
 
     private var isVibrationEnabled = true

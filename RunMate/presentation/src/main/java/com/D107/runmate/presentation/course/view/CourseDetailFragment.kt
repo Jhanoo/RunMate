@@ -55,8 +55,13 @@ class CourseDetailFragment : BaseFragment<FragmentCourseDetailBinding>(
         courseViewModel.getCourseDetail(args.courseId)
 
         binding.btnNext.setOnClickListener {
-            mainViewModel.setCourseId(args.courseId)
-            findNavController().navigate(R.id.action_courseDetailFragment_to_runningFragment)
+            val courseDetail = courseViewModel.courseDetail.value
+            if(courseDetail is CourseDetailState.Success) {
+                mainViewModel.setCourse(args.courseId, courseDetail.courseDetail.gpxFile)
+                findNavController().navigate(R.id.action_courseDetailFragment_to_runningFragment)
+            } else {
+                findNavController().navigate(R.id.action_courseDetailFragment_to_runningFragment)
+            }
         }
 
         viewLifecycleOwner.lifecycleScope.launch {

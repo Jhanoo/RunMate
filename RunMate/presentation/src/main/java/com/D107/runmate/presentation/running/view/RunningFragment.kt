@@ -25,9 +25,15 @@ import com.D107.runmate.presentation.MainViewModel
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.RunningTrackingService
 import com.D107.runmate.presentation.databinding.FragmentRunningBinding
+import com.D107.runmate.presentation.running.DailyTodoState
+import com.D107.runmate.presentation.running.DailyTodoViewModel
 import com.D107.runmate.presentation.running.RunningEndViewModel
 import com.D107.runmate.presentation.utils.CommonUtils
 import com.D107.runmate.presentation.utils.CommonUtils.getActivityContext
+import com.D107.runmate.presentation.utils.CommonUtils.getGpxInputStream
+import com.D107.runmate.presentation.utils.GpxParser
+import com.D107.runmate.presentation.utils.GpxParser.parseGpx
+import com.D107.runmate.presentation.utils.KakaoMapUtil.addCourseLine
 import com.D107.runmate.presentation.utils.KakaoMapUtil.addCoursePoint
 import com.D107.runmate.presentation.utils.LocationUtils
 import com.kakao.vectormap.KakaoMap
@@ -49,6 +55,7 @@ import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -62,6 +69,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
     private var kakaoMap: KakaoMap? = null
     private val mainViewModel: MainViewModel by activityViewModels()
     private val runningEndViewModel: RunningEndViewModel by viewModels()
+    private val dailyTodoViewModel: DailyTodoViewModel by viewModels()
     private var mContext: Context? = null
     private var userLabel: Label? = null
     private lateinit var dialog: PaceSettingDialog
@@ -75,9 +83,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mainViewModel.courseId.value?.let {
-            Timber.d("courseId ${it}")
-        }
+        dailyTodoViewModel.getDailyTodo()
 
         if (mainViewModel.userLocation.value is UserLocationState.Initial) {
             viewLifecycleOwner.lifecycleScope.launch {
@@ -112,6 +118,13 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
             override fun onMapReady(p0: KakaoMap) {
                 kakaoMap = p0
                 loadLocationAndMove()
+                viewLifecycleOwner.lifecycleScope.launch {
+                    if(mainViewModel.course.value.second != null){
+                        withContext(Dispatchers.IO) {
+                            drawGpxFile(GpxParser.getGpxInputStream(mainViewModel.course.value.second!!))
+                        }
+                    }
+                }
             }
 
             override fun getPosition(): LatLng {
@@ -146,6 +159,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
 
                         TrackingStatus.RUNNING -> {
                             binding.groupBtnStart.visibility = View.INVISIBLE
+                            binding.groupTodo.visibility = View.GONE
                             binding.groupRecord.visibility = View.VISIBLE
                             binding.groupBtnPause.visibility = View.GONE
                             binding.groupBtnRunning.visibility = View.VISIBLE
@@ -156,6 +170,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
 
                         TrackingStatus.INITIAL -> {
                             binding.groupBtnStart.visibility = View.VISIBLE
+                            binding.groupTodo.visibility = View.VISIBLE
                             binding.groupRecord.visibility = View.GONE
                             binding.groupBtnPause.visibility = View.GONE
                             binding.groupBtnRunning.visibility = View.GONE
@@ -167,6 +182,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
 
                         TrackingStatus.PAUSED -> {
                             binding.groupBtnStart.visibility = View.INVISIBLE
+                            binding.groupTodo.visibility = View.GONE
                             binding.groupRecord.visibility = View.VISIBLE
                             binding.groupBtnPause.visibility = View.VISIBLE
                             binding.groupBtnRunning.visibility = View.GONE
@@ -215,6 +231,34 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                 }
             }
         }
+        viewLifecycleOwner.lifecycleScope.launch {
+            dailyTodoViewModel.dailyTodo.collectLatest { state ->
+                when(state) {
+                    is DailyTodoState.Success -> {
+                        binding.cbDailyTodo.text = state.todo.content
+                    }
+                    is DailyTodoState.Error -> {
+                        Timber.d("getDailyTodo Error {${state.message}}")
+                    }
+                    is DailyTodoState.Initial -> {
+
+                    }
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            mainViewModel.course.collectLatest {
+                if(it.second != null) {
+                    Timber.d("course set ${it.second}")
+                    withContext(Dispatchers.IO) {
+                        drawGpxFile(GpxParser.getGpxInputStream(it.second!!))
+                    }
+                } else {
+                    Timber.d("course null")
+                }
+            }
+        }
     }
 
     private fun initEvent() {
@@ -233,6 +277,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                 binding.groupBtnRunning.visibility = View.VISIBLE
                 binding.groupBtnStart.visibility = View.INVISIBLE
                 binding.groupRecord.visibility = View.VISIBLE
+                binding.groupTodo.visibility = View.GONE
             }
         }
 
@@ -255,7 +300,6 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
         binding.btnEnd.setOnClickListener {
             mContext?.let {
                 RunningTrackingService.stopService(it)
-//                findNavController().navigate(R.id.action_runningFragment_to_runningEndFragment)
             }
         }
 
@@ -281,10 +325,8 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
             dialog = PaceSettingDialog(setting) { value ->
                 if (value.size != 0) {
                     mainViewModel.setGoalPace(value[0] * 60 + value[1])
-                    Log.d(TAG, "onViewCreated: value ${value[0]} ${value[1]}")
                 } else {
                     mainViewModel.setGoalPace(null)
-                    Log.d(TAG, "onViewCreated: value is empty")
                 }
                 setting = value
             }
@@ -295,7 +337,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
     private fun addMarker(latitude: Double, longitude: Double) {
         mContext?.let {
             CoroutineScope(Dispatchers.IO).launch {
-                val profileUrl = "https://picsum.photos/200/300" // 테스트 이미지, 추후 사용자 프로필 이미지로 변경 예정
+                val profileUrl = mainViewModel.profileImage.value ?: "https://picsum.photos/200/300" // 테스트 이미지, 추후 사용자 프로필 이미지로 변경 예정
                 val profileBitmap = getBitmapFromURL(profileUrl)
                 profileBitmap?.let { bitmap ->
                     val markerBg =
@@ -342,6 +384,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
 
             TrackingStatus.RUNNING -> {
                 binding.groupBtnStart.visibility = View.INVISIBLE
+                binding.groupTodo.visibility = View.GONE
                 binding.groupRecord.visibility = View.VISIBLE
                 binding.groupBtnPause.visibility = View.GONE
                 binding.groupBtnRunning.visibility = View.VISIBLE
@@ -352,6 +395,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
 
             TrackingStatus.INITIAL -> {
                 binding.groupBtnStart.visibility = View.VISIBLE
+                binding.groupTodo.visibility = View.VISIBLE
                 binding.groupRecord.visibility = View.GONE
                 binding.groupBtnPause.visibility = View.GONE
                 binding.groupBtnRunning.visibility = View.GONE
@@ -363,6 +407,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
 
             TrackingStatus.PAUSED -> {
                 binding.groupBtnStart.visibility = View.INVISIBLE
+                binding.groupTodo.visibility = View.GONE
                 binding.groupRecord.visibility = View.VISIBLE
                 binding.groupBtnPause.visibility = View.VISIBLE
                 binding.groupBtnRunning.visibility = View.GONE
@@ -378,7 +423,6 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
             mainViewModel.userLocation.collectLatest { state ->
                 when (state) {
                     is UserLocationState.Exist -> {
-                        Timber.d("loadLocationAndMove UserLocationState Exist")
                         val tmpUserLabel = userLabel
                         if (tmpUserLabel != null) {
                             tmpUserLabel.moveTo(
@@ -467,5 +511,28 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
         val byteArray = stream.toByteArray()
         return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+    }
+
+    private fun drawGpxFile(inputStream: InputStream) {
+        CoroutineScope(Dispatchers.IO).launch {
+            mContext?.let {
+                val trackPoints = parseGpx(inputStream)
+                withContext(Dispatchers.Main) {
+                    val startPoint = trackPoints[0]
+                    Timber.d("startPoint ${startPoint.lat}, ${startPoint.lon}")
+                    val cameraUpdate = CameraUpdateFactory.newCenterPosition(
+                        LatLng.from(
+                            startPoint.lat,
+                            startPoint.lon
+                        )
+                    )
+                    kakaoMap?.let { map ->
+                        Timber.d("addCourseLine")
+                        map.moveCamera(cameraUpdate)
+                        addCourseLine(it, map, trackPoints)
+                    }
+                }
+            }
+        }
     }
 }

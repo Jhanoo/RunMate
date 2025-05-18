@@ -26,11 +26,12 @@ class MainViewModel @Inject constructor(
     private val _isSoundEnabled = MutableStateFlow(true)
     val isSoundEnabled = _isSoundEnabled.asStateFlow()
 
-    private val _courseId = MutableStateFlow<String?>(null) // course 설정 안 한 경우 null
-    val courseId = _courseId.asStateFlow()
+    private val _course = MutableStateFlow(Pair<String?, String?>(null, null)) // course 설정 안 한 경우 null, first: courseId, second: gpxFile
+    val course = _course.asStateFlow()
 
     private val _goalPace = MutableStateFlow<Int?>(null) // 페이스 설정 안 한 경우 null
     val goalPace = _goalPace.asStateFlow()
+
     private val _userId = MutableStateFlow<String?>(null)
     val userId: StateFlow<String?> = _userId
 
@@ -68,9 +69,6 @@ class MainViewModel @Inject constructor(
         }
     }
 
-//    private val _isRunning = MutableStateFlow(false)
-//    val isRunning = _isRunning.asStateFlow()
-
     val runningRecord = repository.runningRecord
     val userLocation = repository.userLocation
     val time = repository.time
@@ -92,8 +90,9 @@ class MainViewModel @Inject constructor(
         repository.setHistoryId(null)
     }
 
-    fun setCourseId(id: String?) {
-        _courseId.value = id
+    fun setCourse(courseId: String?, gpxFile: String) {
+        _course.value = Pair(courseId, gpxFile)
+        repository.setCourseId(courseId)
     }
 
     fun setGoalPace(pace: Int?) {
