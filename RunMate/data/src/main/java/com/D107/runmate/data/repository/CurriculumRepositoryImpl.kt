@@ -46,7 +46,23 @@ class CurriculumRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateCurriculum(curriculumInfo: CurriculumInfo): Flow<Result<String>> {
-        TODO("Not yet implemented")
+    override suspend fun updateCurriculum(curriculumInfo: CurriculumInfo): Flow<Result<String>> = flow {
+        val request = CurriculumRequest(
+            marathonId = curriculumInfo.marathonId,
+            goalDist = curriculumInfo.goalDist,
+            goalDate = curriculumInfo.goalDate,
+            runExp = curriculumInfo.runExp,
+            distExp = curriculumInfo.distExp,
+            freqExp = curriculumInfo.freqExp
+        )
+
+        when (val response = curriculumDataSource.createCurriculum(request)) {
+            is ApiResponse.Success -> {
+                emit(Result.success(response.data.curriculumId))
+            }
+            is ApiResponse.Error -> {
+                emit(Result.failure(Exception(response.error.message)))
+            }
+        }
     }
 }

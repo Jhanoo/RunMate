@@ -373,7 +373,7 @@ class AIManagerGoalFragment : BaseFragment<FragmentAIManagerGoalBinding>(
         )
 
         viewLifecycleOwner.lifecycleScope.launch {
-            delay(30000) // 30초 후
+            delay(10000) // 30초 후
             // 성공 응답이 왔으나 화면이 전환되지 않은 경우를 위한 안전장치
             if (findNavController().currentDestination?.id == R.id.AIManagerLoadingFragment) {
                 // 현재 로딩 화면에 있다면 강제로 다음 화면으로 이동

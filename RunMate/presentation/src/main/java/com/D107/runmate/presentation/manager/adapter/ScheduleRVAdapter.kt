@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.D107.runmate.domain.model.manager.ScheduleItem
-import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.ItemCheckListBinding
 
 class ScheduleRVAdapter :
