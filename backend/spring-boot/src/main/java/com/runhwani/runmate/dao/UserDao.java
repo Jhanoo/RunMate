@@ -17,4 +17,6 @@ public interface UserDao {
     Double findAvgPaceByUserId(UUID userId);
     // 사용자별 평균 페이스 업데이트
     void updateAvgPace(UUID userId, Double avgPace);
+    // FCM 토큰 업데이트
+    void updateFcmToken(@Param("userId") UUID userId, @Param("fcmToken") String fcmToken);
 }

@@ -84,11 +84,19 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public TokenResponse login(LoginRequest request) {
         User user = userDao.findByEmail(request.getEmail());
 
         if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new CustomException(ErrorCode.INVALID_PASSWORD);
+        }
+
+        // FCM 토큰 업데이트 (요청에 토큰이 있는 경우)
+        if (request.getFcmToken() != null && !request.getFcmToken().isEmpty()) {
+            user.setFcmToken(request.getFcmToken());
+            userDao.updateFcmToken(user.getUserId(), request.getFcmToken());
+            log.info("사용자 FCM 토큰 업데이트: {}", user.getUserId());
         }
 
         String token = jwtProvider.generateToken(String.valueOf(user.getUserId()));

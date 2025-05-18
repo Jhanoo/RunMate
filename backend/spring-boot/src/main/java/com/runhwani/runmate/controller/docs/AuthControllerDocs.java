@@ -41,7 +41,8 @@ public interface AuthControllerDocs {
                                     value = """
                                     {
                                         "email": "user@example.com",
-                                        "password": "Password123!"
+                                        "password": "Password123!",
+                                        "fcmToken": "eEw23SDFsdf..."
                                     }
                                     """
                             )

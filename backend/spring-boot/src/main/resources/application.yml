@@ -102,3 +102,11 @@ app:
 
 openai:
   api-key: ${OPENAI_API_KEY}
+
+# Firebase 설정
+firebase:
+  config-file: classpath:runmate-e11b0-firebase-adminsdk-fbsvc-358767a133.json
+  notification:
+    default-topic: all-users
+    default-icon: notification_icon
+    default-color: "#4CAF50"
