@@ -56,36 +56,6 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
         loadSchedulesForSelectedDate(Calendar.getInstance())
     }
 
-//    private class CircleSpan(private val color: Int) : android.text.style.LineBackgroundSpan {
-//        override fun drawBackground(
-//            canvas: android.graphics.Canvas,
-//            paint: android.graphics.Paint,
-//            left: Int,
-//            right: Int,
-//            top: Int,
-//            baseline: Int,
-//            bottom: Int,
-//            text: CharSequence,
-//            start: Int,
-//            end: Int,
-//            lnum: Int
-//        ) {
-//            val oldColor = paint.color
-//            paint.color = color
-//
-//            // Calculate center and radius
-//            val centerX = (left + right) / 2
-//            val centerY = (top + bottom) / 2
-//            val radius = (right - left) / 2
-//
-//            // Draw the circle
-//            canvas.drawCircle(centerX.toFloat(), centerY.toFloat(), radius.toFloat(), paint)
-//
-//            // Restore original color
-//            paint.color = oldColor
-//        }
-//    }
-
     private fun setupCalendar() {
         // 캘린더 타이틀 형식 설정
         binding.calendar.setTitleFormatter { day ->
@@ -133,12 +103,13 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
     // 선택한 날짜에 해당하는 일정 로드
     private fun loadSchedulesForSelectedDate(selectedDate: Calendar) {
         // allScheduleItems 초기화 - 중요!
-        allScheduleItems.clear()
+//        allScheduleItems.clear()
+        scheduleAdapter.submitList(emptyList())
 
-        lifecycleScope.launch(Dispatchers.Main) {
-            // UI 즉시 비우기
-            scheduleAdapter.submitList(emptyList())
-        }
+//        lifecycleScope.launch(Dispatchers.Main) {
+//            // UI 즉시 비우기
+//            scheduleAdapter.submitList(emptyList())
+//        }
 
         // 선택한 날짜가 속한 주의 월요일과 일요일 구하기
         val monday = getWeekMonday(selectedDate)

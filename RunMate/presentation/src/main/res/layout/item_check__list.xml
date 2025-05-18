@@ -17,6 +17,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
+        android:layout_gravity="center_vertical"
         android:layout_marginRight="20dp"
         android:orientation="vertical">
 
@@ -43,7 +44,21 @@
         android:id="@+id/checkbox_schedule"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
         android:fontFamily="@font/pretendard_regular"
-        android:text="걷기 5분 + 달리기 3분 / 4회 반복"
+        android:enabled="false"
         android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/checkbox_label"
+        style="@style/customTextViewFontStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_gravity="center_vertical"
+        android:ellipsize="end"
+        android:enabled="false"
+        android:maxLines="5"
+        android:textColor="@color/black"
+        android:text="걷기 5분 + 달리기 3분 / 4회 반복"/>
 </LinearLayout>
