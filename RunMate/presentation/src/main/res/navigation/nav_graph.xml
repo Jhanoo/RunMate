@@ -82,9 +82,7 @@
         tools:layout="@layout/fragment_a_i_manager_exp_marathon">
         <action
             android:id="@+id/action_aiManagerExp_to_aiManagerGoal"
-            app:destination="@id/AIManagerGoalFragment"
-            app:popUpTo="@id/AIManagerExpMarathonFragment"
-            app:popUpToInclusive="true" />
+            app:destination="@id/AIManagerGoalFragment" />
     </fragment>
 
     <fragment

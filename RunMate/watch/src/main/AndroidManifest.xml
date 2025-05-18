@@ -37,7 +37,7 @@
     <application
         android:name=".presentation.WatchApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_logo"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:hardwareAccelerated="true"

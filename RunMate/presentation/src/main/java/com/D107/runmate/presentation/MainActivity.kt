@@ -59,9 +59,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
 
         mContext = this
 
-        initDrawerHeader()
-        // 사용자 정보 관찰
         observeUserInfo()
+        initDrawerHeader()
 
         getKeyHash()
 
@@ -99,38 +98,16 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     private fun observeUserInfo() {
         lifecycleScope.launch {
             viewModel.nickname.collect { nickname ->
-                val navController = (supportFragmentManager
-                    .findFragmentById(R.id.nav_host_fragment) as NavHostFragment)
-                    .navController
-                val current = navController.currentDestination?.id ?: return@collect
-
-                Timber.d("current : $current  Splash ${R.id.splashFragment}  running ${R.id.runningFragment}")
-                if (current == R.id.splashFragment) {
-                    // 스플래시 화면일 때는 SplashFragment 에서 로직 처리
-                    return@collect
-                }
-
+                Timber.d("nickname 변경 감지: $nickname")
                 if (!nickname.isNullOrEmpty()) {
                     // 드로어 헤더의 이름 업데이트
-                    Timber.d("nickname : $nickname")
                     val headerView = binding.navView.getHeaderView(0)
                     val headerBinding = DrawerHeaderBinding.bind(headerView)
                     headerBinding.tvName.text = nickname
-                } else {
-                    Timber.d("delete nickname")
-                    navController.navigate(
-                        R.id.loginFragment,
-                        null,
-                        NavOptions.Builder()
-                            .setLaunchSingleTop(true)
-                            .setPopUpTo(current, true)
-                            .build()
-                    )
                 }
             }
         }
 
-        // 프로필 이미지 변경 관찰
         lifecycleScope.launch {
             viewModel.profileImage.collect { profileImageUrl ->
                 val headerView = binding.navView.getHeaderView(0)
@@ -147,6 +124,34 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                 } else {
                     // 기본 이미지 설정
                     headerBinding.ivProfile.setImageResource(R.drawable.ic_drawer_profile)
+                }
+            }
+        }
+
+        // 별도의 코루틴으로 로그인 상태 확인
+        lifecycleScope.launch {
+            viewModel.userId.collect { userId ->
+                Timber.d("userId 변경 감지: $userId")
+                val navController = (supportFragmentManager
+                    .findFragmentById(R.id.nav_host_fragment) as NavHostFragment)
+                    .navController
+                val current = navController.currentDestination?.id ?: return@collect
+
+                if (current == R.id.splashFragment) {
+                    // 스플래시 화면일 때는 SplashFragment 에서 로직 처리
+                    return@collect
+                }
+
+                if (userId.isNullOrEmpty()) {
+                    Timber.d("userId가 없음 - 로그인 화면으로 이동")
+                    navController.navigate(
+                        R.id.loginFragment,
+                        null,
+                        NavOptions.Builder()
+                            .setLaunchSingleTop(true)
+                            .setPopUpTo(current, true)
+                            .build()
+                    )
                 }
             }
         }
@@ -459,6 +464,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         binding.btnMenu.visibility = View.VISIBLE
     }
 
+
     fun getKeyHash() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val packageInfo = this.packageManager.getPackageInfo(
@@ -479,6 +485,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
             }
         }
     }
+
+
+
     fun setNotificationChannel(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channelId = "GROUP_RUN_TERMINATION_CHANNEL"

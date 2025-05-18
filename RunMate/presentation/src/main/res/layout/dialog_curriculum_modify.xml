@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_running_dialog">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:text="목표 수정하기"
+        android:textColor="@color/text"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/btn_close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:src="@drawable/ic_all_close"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- 마라톤 섹션 -->
+    <TextView
+        android:id="@+id/tv_marathon_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:text="마라톤"
+        android:textColor="@color/text"
+        android:textSize="16sp"
+        android:fontFamily="@font/pretendard_medium"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_title" />
+
+    <RelativeLayout
+        android:id="@+id/marathon_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_all_et"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_marathon_label">
+
+        <EditText
+            android:id="@+id/et_marathon_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:hint="마라톤 이름"
+            android:padding="12dp"
+            android:textColor="@color/text"
+            android:textSize="16sp"
+            android:focusable="false"
+            android:clickable="true" />
+
+        <ImageView
+            android:id="@+id/btn_clear_marathon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="12dp"
+            android:src="@drawable/ic_all_close" />
+    </RelativeLayout>
+
+    <!-- 거리 섹션 -->
+    <TextView
+        android:id="@+id/tv_distance_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:text="거리"
+        android:textColor="@color/text"
+        android:textSize="16sp"
+        android:fontFamily="@font/pretendard_medium"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/marathon_layout" />
+
+    <RadioGroup
+        android:id="@+id/distance_options"
+        android:layout_width="0dp"
+        android:paddingHorizontal="26dp"
+        android:layout_height="32dp"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_distance_label">
+
+        <RadioButton
+            android:id="@+id/rb_run_0"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/radio_selector"
+            android:textSize="16sp"
+            android:button="@null"
+            android:gravity="center"
+            android:text="~5km" />
+
+        <RadioButton
+            android:id="@+id/rb_run_1_2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/radio_selector"
+            android:button="@null"
+            android:checked="true"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:text="~10km"
+            android:textColor="@color/white"/>
+
+        <RadioButton
+            android:id="@+id/rb_run_3_4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/radio_selector"
+            android:button="@null"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:text="~하프" />
+
+        <RadioButton
+            android:id="@+id/rb_run_5_more"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/radio_selector"
+            android:button="@null"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:text="~풀" />
+    </RadioGroup>
+
+    <!-- 준비기간 섹션 -->
+    <TextView
+        android:id="@+id/tv_preparation_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:text="준비기간"
+        android:textColor="@color/text"
+        android:textSize="16sp"
+        android:fontFamily="@font/pretendard_medium"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/distance_options" />
+
+    <RadioGroup
+        android:id="@+id/preparation_options"
+        android:layout_width="0dp"
+        android:paddingHorizontal="26dp"
+        android:layout_height="32dp"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_preparation_label">
+
+        <RadioButton
+            android:id="@+id/rb_prev_0"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/radio_selector"
+            android:textSize="16sp"
+            android:button="@null"
+            android:gravity="center"
+            android:text="4주" />
+
+        <RadioButton
+            android:id="@+id/rb_prev_1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/radio_selector"
+            android:button="@null"
+            android:checked="true"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:text="6주"
+            android:textColor="@color/white"/>
+
+        <RadioButton
+            android:id="@+id/rb_prev_3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/radio_selector"
+            android:button="@null"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:text="8주" />
+
+        <RadioButton
+            android:id="@+id/rb_prev_4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/radio_selector"
+            android:button="@null"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:text="12주" />
+
+        <RadioButton
+            android:id="@+id/rb_prev_5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/radio_selector"
+            android:button="@null"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:text="20주" />
+    </RadioGroup>
+
+    <!-- 완료 버튼 -->
+    <Button
+        android:id="@+id/btn_confirm"
+        style="@style/DarkGreenButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="24dp"
+        android:text="완료"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/preparation_options" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
