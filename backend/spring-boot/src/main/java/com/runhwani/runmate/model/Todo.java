@@ -28,4 +28,9 @@ public class Todo {
     private Boolean isDone;
     /** 수행 날짜 */
     private OffsetDateTime date;
+    
+    // isDone이 null인 경우 false를 반환하는 안전한 getter
+    public boolean isDoneOrFalse() {
+        return isDone != null && isDone;
+    }
 }

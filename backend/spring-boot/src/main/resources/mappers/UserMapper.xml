@@ -12,6 +12,9 @@
         <result column="birthday" property="birthday"/>
         <result column="gender" property="gender"/>
         <result column="created_at" property="createdAt"/>
+        <result column="fcm_token" property="fcmToken"/>
+        <result column="height" property="height"/>
+        <result column="weight" property="weight"/>
     </resultMap>
 
     <select id="findByEmail" resultMap="UserMap">
@@ -36,9 +39,10 @@
 
     <insert id="insert">
         INSERT INTO users (user_id, email, password, nickname,
-                         profile_image, avg_pace, birthday, gender, created_at)
+                         profile_image, avg_pace, birthday, gender, height, weight, fcm_token, created_at)
         VALUES (#{userId}, #{email}, #{password}, #{nickname},
-                #{profileImage}, #{avgPace}, #{birthday}, #{gender}::gender_enum, #{createdAt})
+                #{profileImage}, #{avgPace}, #{birthday}, #{gender}::gender_enum, 
+                #{height}, #{weight}, #{fcmToken}, #{createdAt})
     </insert>
 
 <!--    사용자별 평균 페이스 조회-->
@@ -51,6 +55,13 @@
     <update id="updateAvgPace">
         UPDATE users
         SET avg_pace = #{avgPace}
+        WHERE user_id = #{userId}
+    </update>
+    
+<!--    FCM 토큰 업데이트-->
+    <update id="updateFcmToken">
+        UPDATE users
+        SET fcm_token = #{fcmToken}
         WHERE user_id = #{userId}
     </update>
 </mapper> 
