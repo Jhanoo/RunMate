@@ -21,6 +21,13 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import javax.inject.Inject
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.GradientDrawable
+import androidx.core.content.ContextCompat
+import com.prolificinteractive.materialcalendarview.DayViewDecorator
+import com.prolificinteractive.materialcalendarview.DayViewFacade
+import com.prolificinteractive.materialcalendarview.spans.DotSpan
 
 @RequiresApi(Build.VERSION_CODES.O)
 @AndroidEntryPoint
@@ -49,6 +56,36 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
         loadSchedulesForSelectedDate(Calendar.getInstance())
     }
 
+//    private class CircleSpan(private val color: Int) : android.text.style.LineBackgroundSpan {
+//        override fun drawBackground(
+//            canvas: android.graphics.Canvas,
+//            paint: android.graphics.Paint,
+//            left: Int,
+//            right: Int,
+//            top: Int,
+//            baseline: Int,
+//            bottom: Int,
+//            text: CharSequence,
+//            start: Int,
+//            end: Int,
+//            lnum: Int
+//        ) {
+//            val oldColor = paint.color
+//            paint.color = color
+//
+//            // Calculate center and radius
+//            val centerX = (left + right) / 2
+//            val centerY = (top + bottom) / 2
+//            val radius = (right - left) / 2
+//
+//            // Draw the circle
+//            canvas.drawCircle(centerX.toFloat(), centerY.toFloat(), radius.toFloat(), paint)
+//
+//            // Restore original color
+//            paint.color = oldColor
+//        }
+//    }
+
     private fun setupCalendar() {
         // 캘린더 타이틀 형식 설정
         binding.calendar.setTitleFormatter { day ->
@@ -60,6 +97,9 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
         // 현재 날짜 가져오기
         val today = CalendarDay.today()
 
+        // Make selection color transparent to disable default rectangle selection
+        binding.calendar.setSelectionColor(Color.TRANSPARENT)
+
         // 현재 날짜 이후의 날짜는 선택 불가능하게 설정
         binding.calendar.setDateSelected(today, true)
 
@@ -68,6 +108,7 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
             val selectedCalendar = Calendar.getInstance().apply {
                 set(date.year, date.month, date.day)
             }
+            binding.calendar.removeDecorators()
             loadSchedulesForSelectedDate(selectedCalendar)
         }
     }
@@ -177,22 +218,6 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
             try {
                 timber.log.Timber.d("일정 변환 시도: ${todo.todoId}, date=${todo.date}")
 
-                // ISO 날짜 문자열에서 날짜 추출 (예: 2025-05-16T00:00:00+09:00)
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.getDefault())
-//                val date = dateFormat.parse(todo.date) ?: return@mapNotNull null
-
-//                if (date == null) {
-//                    timber.log.Timber.w("날짜 파싱 실패: ${todo.date}")
-//                    return@mapNotNull null
-//                }
-
-                // 표시용 날짜 및 요일 포맷
-//                val dayFormat = SimpleDateFormat("M/d", Locale.getDefault())
-//                val weekDayFormat = SimpleDateFormat("E", Locale.KOREAN)
-
-//                val formattedDate = dayFormat.format(date)
-//                val formattedDay = weekDayFormat.format(date)4
-
                 val date = java.time.OffsetDateTime.parse(todo.date)
                 val formattedDate = "${date.monthValue}/${date.dayOfMonth}"
                 val formattedDay = when(date.dayOfWeek) {
@@ -211,8 +236,9 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
                     date = formattedDate,
                     day = formattedDay,
                     scheduleText = todo.content,
+//                    isCompleted = true,
                     isCompleted = todo.isDone ?: false,
-                    todoId = todo.todoId
+//                    todoId = todo.todoId
                 )
             } catch (e: Exception) {
                 android.util.Log.e("AIManagerFragment", "날짜 변환 오류: ${e.message}, 날짜: ${todo.date}")
@@ -287,6 +313,8 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
                 }
             }
 
+            updateCalendarWithCompletedTasks()
+
         } catch (e: Exception) {
             timber.log.Timber.e("일정 필터링 중 오류: ${e.message}")
             timber.log.Timber.e(e)
@@ -324,5 +352,92 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
 
         result.add(Calendar.DAY_OF_MONTH, -daysToSubtract)
         return result
+    }
+
+    private class CompletedDayDecorator(
+        private val dates: Collection<CalendarDay>,
+        private val selectedDate: CalendarDay?
+    ) : DayViewDecorator {
+        private val lightGreenColor = Color.parseColor(("#FFEBF8F2"))
+
+        override fun shouldDecorate(day: CalendarDay): Boolean {
+            // Only decorate completed days that are NOT the selected date
+            return dates.contains(day) && day != selectedDate
+        }
+
+        override fun decorate(view: DayViewFacade) {
+            // Use a rounded rectangle drawable instead of a simple color
+            val roundedBackground = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+//                setSize(32,32)
+                cornerRadius = 4f  // Rounded corners
+                setColor(lightGreenColor)
+
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+//                    setPadding(2,2,2,2)
+//                }
+            }
+            val insetDrawable = android.graphics.drawable.InsetDrawable(
+                roundedBackground,
+                1,  // 왼쪽 여백
+                1,  // 위쪽 여백
+                1,  // 오른쪽 여백
+                1   // 아래쪽 여백
+            )
+            view.setBackgroundDrawable(insetDrawable)
+        }
+    }
+
+    private fun updateCalendarWithCompletedTasks() {
+        val completedDays = mutableSetOf<CalendarDay>()
+        val selectedDate = binding.calendar.selectedDate
+
+        allScheduleItems.forEach { item ->
+            if (item.isCompleted == true) {
+                try {
+                    // Parse the date from "M/d" format
+                    val parts = item.date.split("/")
+                    val month = parts[0].toInt() - 1 // Calendar month is 0-based
+                    val day = parts[1].toInt()
+
+                    // Use current year since we don't have year in the item.date
+                    val calendar = Calendar.getInstance()
+                    val year = calendar.get(Calendar.YEAR)
+
+                    completedDays.add(CalendarDay.from(year, month, day))
+                } catch (e: Exception) {
+                    timber.log.Timber.e("Error parsing date: ${item.date}")
+                }
+            }
+        }
+
+//        binding.calendar.removeDecorators()
+
+        if (completedDays.isNotEmpty()) {
+            binding.calendar.addDecorator(CompletedDayDecorator(completedDays, binding.calendar.selectedDate))
+        }
+
+        if (selectedDate != null) {
+            binding.calendar.addDecorator(object : DayViewDecorator {
+                override fun shouldDecorate(day: CalendarDay): Boolean {
+                    return day == selectedDate
+                }
+
+                override fun decorate(view: DayViewFacade) {
+                    // Get the color from resources
+                    val selectionColor = ContextCompat.getColor(requireContext(), R.color.login_btn)
+
+                    // Create a rounded rectangle with selection color
+                    val selectionBackground = GradientDrawable().apply {
+                        shape = GradientDrawable.RECTANGLE
+                        cornerRadius = 30f
+                        setColor(selectionColor)
+                    }
+                    view.setSelectionDrawable(selectionBackground)
+                }
+            })
+        }
+
+        binding.calendar.setDateSelected(selectedDate, true)
     }
 }
