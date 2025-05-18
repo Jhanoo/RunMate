@@ -5,6 +5,7 @@ import com.D107.runmate.data.remote.api.RunningService
 import com.D107.runmate.data.remote.common.ApiResponse
 import com.D107.runmate.data.remote.common.ErrorResponse
 import com.D107.runmate.data.remote.request.FinishRunningRequest
+import com.D107.runmate.data.remote.response.EndRunningResponse
 import dagger.hilt.android.qualifiers.ApplicationContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -17,10 +18,9 @@ class RunningDataSourceImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val runningService: RunningService
 ): RunningDataSource {
-    override suspend fun endRunning(request: FinishRunningRequest): ApiResponse<Any> {
+    override suspend fun endRunning(request: FinishRunningRequest): ApiResponse<EndRunningResponse> {
         val fileName = "running_tracking.gpx"
         val file = File(context.filesDir, fileName)
-//        val file = context.assets.open("test_3.gpx")
         if (!file.exists()) {
             return ApiResponse.Error(
                 ErrorResponse(

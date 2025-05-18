@@ -40,7 +40,7 @@ class RunningEndViewModel @Inject constructor(
 }
 
 sealed class RunningEndState {
-    object Success : RunningEndState()
+    data class Success(val historyId: String) : RunningEndState()
     data class Error(val message: String) : RunningEndState()
 }
 

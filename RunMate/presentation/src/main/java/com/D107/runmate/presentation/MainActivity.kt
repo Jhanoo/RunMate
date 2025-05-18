@@ -100,10 +100,33 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     private fun observeUserInfo() {
         lifecycleScope.launch {
             viewModel.nickname.collect { nickname ->
+                val navController = (supportFragmentManager
+                    .findFragmentById(R.id.nav_host_fragment) as NavHostFragment)
+                    .navController
+                val current = navController.currentDestination?.id ?: return@collect
+
+                Timber.d("current : $current  Splash ${R.id.splashFragment}  running ${R.id.runningFragment}")
+                if (current == R.id.splashFragment) {
+                    // 스플래시 화면일 때는 SplashFragment 에서 로직 처리
+                    return@collect
+                }
+
                 if (!nickname.isNullOrEmpty()) {
+                    // 드로어 헤더의 이름 업데이트
+                    Timber.d("nickname : $nickname")
                     val headerView = binding.navView.getHeaderView(0)
                     val headerBinding = DrawerHeaderBinding.bind(headerView)
                     headerBinding.tvName.text = nickname
+                } else {
+                    Timber.d("delete nickname")
+                    navController.navigate(
+                        R.id.loginFragment,
+                        null,
+                        NavOptions.Builder()
+                            .setLaunchSingleTop(true)
+                            .setPopUpTo(current, true)
+                            .build()
+                    )
                 }
             }
         }
@@ -393,14 +416,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         binding.navView.menu.findItem(R.id.drawer_running).isChecked = true
 
         // 초기 메뉴 아이템(달리기) 선택 상태로 설정
-//        onNavigationItemSelected(binding.navView.menu.findItem(R.id.drawer_running))
         binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
-
-        val headerView = binding.navView.getHeaderView(0)
-        val headerBinding = DrawerHeaderBinding.bind(headerView)
-
-        headerBinding.ivProfile.setImageResource(R.drawable.ic_drawer_profile) // TODO 사용자 프로필로 변경, 없을 경우 ic_drawer_profile 사용
-        headerBinding.tvName.text = "게스트"
     }
 
     private fun setDrawerWidth() {
@@ -463,7 +479,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         binding.btnMenu.visibility = View.VISIBLE
     }
 
-
     fun getKeyHash() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val packageInfo = this.packageManager.getPackageInfo(
@@ -484,9 +499,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
             }
         }
     }
-
-
-
     fun setNotificationChannel(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channelId = "GROUP_RUN_TERMINATION_CHANNEL"

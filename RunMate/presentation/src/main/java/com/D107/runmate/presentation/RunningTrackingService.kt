@@ -17,6 +17,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
+import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -44,6 +45,7 @@ import com.D107.runmate.presentation.group.viewmodel.SocketAuthParcelable
 import com.D107.runmate.presentation.group.viewmodel.toDomain
 import com.D107.runmate.presentation.running.Coord2AddressState
 import com.D107.runmate.presentation.running.RunningEndState
+import com.D107.runmate.presentation.utils.CommonUtils
 import com.D107.runmate.presentation.utils.CommonUtils.convertDateTime
 import com.D107.runmate.presentation.utils.LocationUtils.trackingLocation
 import dagger.hilt.android.AndroidEntryPoint
@@ -117,11 +119,6 @@ class RunningTrackingService : Service() {
 
     private val _connectionStatus = MutableStateFlow<ConnectionStatus>(ConnectionStatus.Initial)
     val connectionStatus: StateFlow<ConnectionStatus> = _connectionStatus.asStateFlow()
-
-    private val serviceJobIo = SupervisorJob()
-    private val serviceScopeIO = CoroutineScope(Dispatchers.IO + serviceJobIo)
-
-//    private val _coord2Address = MutableSharedFlow<Coord2AddressState>()
 
     private var socketConnectionObserverJob: Job? = null
 
@@ -213,18 +210,15 @@ class RunningTrackingService : Service() {
         CoroutineScope(Dispatchers.IO).launch {
             repository.finishTracking().collectLatest {
                 if (it) {
-                    Timber.d("write finish")
                     val record = repository.runningRecord.value
                     val location = repository.userLocation.value
                     val recordSize = repository.recordSize.value
-                    if (location is UserLocationState.Exist && record is RunningRecordState.Exist) {
-                        Timber.d("coord2Address recordSize ${recordSize}")
+                    if (location is UserLocationState.Exist && record is RunningRecordState.Exist && recordSize > 0) {
                         val address = getAddress(
                             location.locations.first().longitude,
                             location.locations.first().latitude
                         )
                         address?.let {
-                            Timber.d("lastRecord")
                             val lastRecord = record.runningRecords.last()
                             endRunning(
                                 0.0,
@@ -240,6 +234,8 @@ class RunningTrackingService : Service() {
                                 currentGroupId
                             )
                         }
+                    } else {
+                        Timber.d("기록이 없습니다 recordSize 0")
                     }
 
                 } else {
@@ -251,8 +247,8 @@ class RunningTrackingService : Service() {
         CoroutineScope(Dispatchers.Default).launch {
             _endRunning.collectLatest {
                 if (it is RunningEndState.Success) {
-                    Timber.d("running end ! stop service")
                     repository.setTrackingStatus(TrackingStatus.PAUSED)
+                    repository.setHistoryId(it.historyId)
                     stopForeground(true)
                     stopSelf()
                 }
@@ -312,8 +308,7 @@ class RunningTrackingService : Service() {
             .collect { status ->
                 when (status) {
                     is ResponseStatus.Success -> {
-                        Timber.d("runningend success")
-                        _endRunning.emit(RunningEndState.Success)
+                        _endRunning.emit(RunningEndState.Success(status.data.historyId))
                     }
 
                     is ResponseStatus.Error -> {
@@ -408,7 +403,6 @@ class RunningTrackingService : Service() {
         if (runningJob is RunningJobState.Active) {
             (runningJob as RunningJobState.Active).job.cancel()
             runningJob = RunningJobState.None
-//            repository.setTrackingStatus(TrackingStatus.PAUSED)
             updateNotification(runningJob)
         }
     }

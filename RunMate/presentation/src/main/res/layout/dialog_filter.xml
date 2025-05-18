@@ -97,6 +97,7 @@
 
     <TextView
         android:id="@+id/tv_like_title"
+        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:letterSpacing="-0.02"
@@ -110,6 +111,7 @@
 
     <ImageView
         android:id="@+id/iv_course_like"
+        android:visibility="invisible"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="8dp"
@@ -119,6 +121,36 @@
         app:layout_constraintDimensionRatio="1"
         app:layout_constraintStart_toEndOf="@+id/tv_like_title"
         app:layout_constraintTop_toBottomOf="@+id/btn_distance_5" />
+    
+    <RadioGroup
+        android:id="@+id/rg_type"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/btn_distance_5"
+        app:layout_constraintStart_toStartOf="@+id/btn_distance_5"
+        android:orientation="horizontal"
+        app:buttonTint="@color/primary">
+
+        <RadioButton
+            android:id="@+id/rb_all"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="전체" />
+
+        <RadioButton
+            android:id="@+id/rb_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="그룹"/>
+
+        <RadioButton
+            android:id="@+id/rb_indiv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="개인"/>
+
+    </RadioGroup>
 
 
     <androidx.appcompat.widget.AppCompatButton

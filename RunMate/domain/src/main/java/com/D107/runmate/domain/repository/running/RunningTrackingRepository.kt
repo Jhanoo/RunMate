@@ -15,6 +15,8 @@ interface RunningTrackingRepository {
     val time: StateFlow<Int>
     val recordSize: StateFlow<Int>
     val trackingStatus: StateFlow<TrackingStatus>
+    val historyId: StateFlow<String?>
+    val courseId: StateFlow<String?>
 
     fun incrementTime()
     fun processLocationUpdate(location: LocationModel, cadence: Int)
@@ -23,5 +25,7 @@ interface RunningTrackingRepository {
     fun finishTracking(): Flow<Boolean>
 
     fun deleteFile(): Flow<Boolean>
+    fun setHistoryId(historyId: String?)
+    fun setCourseId(courseId: String?)
 
 }
