@@ -27,6 +27,12 @@ public class MyRunDetailResponse {
     @Schema(description = "소모 칼로리", example = "300.0")
     private Double calories;
     
+    @Schema(description = "평균 케이던스", example = "160.0")
+    private Double avgCadence;
+    
+    @Schema(description = "평균 고도", example = "9.7")
+    private Double avgElevation;
+    
     @Schema(description = "코스 추가 여부", example = "true")
     private boolean addedToCourse;
     
