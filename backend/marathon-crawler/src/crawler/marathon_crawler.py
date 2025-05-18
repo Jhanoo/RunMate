@@ -90,70 +90,88 @@ class MarathonCrawler:
     def _save_marathon(self, marathon_data):
         """마라톤 정보를 데이터베이스에 저장"""
         try:
-            # 거리가 하나도 없으면 마라톤 자체를 저장하지 않음
+            # 1) 거리 정보가 없으면 저장 안 함
             if 'distances' not in marathon_data or not marathon_data['distances']:
                 self.logger.warning(
                     f"거리 정보가 없어 마라톤 저장을 건너뜁니다: {marathon_data.get('name','이름 없음')}"
                 )
                 return False
-            
-            # 필수 필드 확인
-            if not all(key in marathon_data and marathon_data[key] for key in ['name', 'date', 'location']):
-                self.logger.warning(f"필수 필드 누락: {marathon_data.get('name', '이름 없음')}")
+
+            # 2) 필수 필드 확인
+            if not all(key in marathon_data and marathon_data[key]
+                       for key in ['name', 'date', 'location']):
+                self.logger.warning(
+                    f"필수 필드 누락: {marathon_data.get('name', '이름 없음')}"
+                )
                 return False
-                
-            # 이미 존재하는 마라톤인지 확인 (이름과 날짜 기준)
+
+            # 3) 이미 존재하는 마라톤 조회 (이름 + 날짜 기준)
             existing_marathon = self.session.query(Marathon).filter_by(
-                name=marathon_data['name'], 
+                name=marathon_data['name'],
                 date=marathon_data['date']
             ).first()
-            
-            if not existing_marathon:
-                # 새 마라톤 추가
+
+            if existing_marathon:
+                # -- 기존에 저장된 거리 리스트 추출
+                existing_distances = [d.distance for d in existing_marathon.distances]
+
+                # -- 새로 들어온 거리 리스트 중, 이미 DB에 모두 있는지 검사
+                new_distances = [
+                    d for d in marathon_data['distances']
+                    if d not in existing_distances
+                ]
+
+                if not new_distances:
+                    # >>> 모든 거리가 이미 DB에 존재하면 저장 건너뜀 <<<
+                    self.logger.info(
+                        f"'{marathon_data['name']}'는 새로운 거리 정보가 없어 저장을 건너뜁니다."
+                    )
+                    return False
+
+                # -- 추가할 거리 정보가 있을 경우만 뒤에서 저장 처리
+                self.logger.info(
+                    f"기존 마라톤 '{marathon_data['name']}'에 "
+                    f"{len(new_distances)}개의 새 거리 정보를 추가합니다."
+                )
+
+                # 4) 새로운 거리 정보만 DB에 추가
+                for distance_value in new_distances:
+                    distance = MarathonDistance(
+                        marathon_id=existing_marathon.marathon_id,
+                        distance=distance_value
+                    )
+                    self.session.add(distance)
+
+            else:
+                # --- 완전 신규 마라톤인 경우 ---
                 new_marathon = Marathon(
                     name=marathon_data['name'],
                     date=marathon_data['date'],
                     location=marathon_data['location']
                 )
                 self.session.add(new_marathon)
-                self.session.flush()  # ID 생성을 위해 flush
-                
-                # 거리 정보 추가
-                if 'distances' in marathon_data and marathon_data['distances']:
-                    for distance_value in marathon_data['distances']:
-                        distance = MarathonDistance(
-                            marathon_id=new_marathon.marathon_id,
-                            distance=distance_value
-                        )
-                        self.session.add(distance)
-                
+                self.session.flush()  # ID 발급 위해 flush
+
+                # 5) 신규 마라톤에 모든 거리 정보 추가
+                for distance_value in marathon_data['distances']:
+                    distance = MarathonDistance(
+                        marathon_id=new_marathon.marathon_id,
+                        distance=distance_value
+                    )
+                    self.session.add(distance)
+
                 self.logger.info(f"DB에 새 마라톤 추가: {marathon_data['name']}")
                 self.total_marathons += 1
-            else:
-                self.logger.info(f"이미 존재하는 마라톤: {marathon_data['name']}")
-                
-                # 기존 마라톤의 거리 정보 업데이트 (필요시)
-                if 'distances' in marathon_data and marathon_data['distances']:
-                    # 기존 거리 정보 조회
-                    existing_distances = [d.distance for d in existing_marathon.distances]
-                    
-                    # 새로운 거리 정보 추가
-                    for distance_value in marathon_data['distances']:
-                        if distance_value not in existing_distances:
-                            distance = MarathonDistance(
-                                marathon_id=existing_marathon.marathon_id,
-                                distance=distance_value
-                            )
-                            self.session.add(distance)
-                            self.logger.info(f"기존 마라톤 '{marathon_data['name']}'에 새 거리 '{distance_value}' 추가")
-            
+
+            # 6) 변경사항 커밋
             self.session.commit()
             return True
-        
+
         except Exception as e:
             self.session.rollback()
             self.logger.error(f"DB 저장 실패: {str(e)}")
             return False
+
     
     def crawl(self):
         """전체 크롤링 수행"""
