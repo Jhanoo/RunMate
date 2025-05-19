@@ -46,7 +46,7 @@ class AIManagerLoadingFragment : BaseFragment<FragmentAIManagerLoadingBinding>(
                 curriculumViewModel.myCurriculum.value?.getOrNull()?.let { curriculum ->
                     Timber.d("타임아웃 후 커리큘럼 발견: ${curriculum.curriculumId}")
                     findNavController().navigate(
-                        R.id.AIManagerFragment,
+                        R.id.action_aiManagerLoading_to_aiManager,
                         bundleOf("curriculumId" to curriculum.curriculumId)
                     )
                 } ?: run {

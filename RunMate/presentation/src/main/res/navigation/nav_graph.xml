@@ -101,17 +101,26 @@
     </fragment>
 
     <fragment
+        android:id="@+id/AIManagerLoadingFragment"
+        android:name="com.D107.runmate.presentation.manager.view.AIManagerLoadingFragment"
+        android:label="fragment_a_i_manager_loading"
+        tools:layout="@layout/fragment_a_i_manager_loading">
+
+        <action
+            android:id="@+id/action_aiManagerLoading_to_aiManager"
+            app:destination="@id/AIManagerFragment"
+            app:popUpTo="@id/AIManagerLoadingFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
         android:id="@+id/AIManagerFragment"
         android:name="com.D107.runmate.presentation.manager.view.AIManagerFragment"
         android:label="fragment_a_i_manager"
         tools:layout="@layout/fragment_a_i_manager" />
 
 
-    <fragment
-        android:id="@+id/AIManagerLoadingFragment"
-        android:name="com.D107.runmate.presentation.manager.view.AIManagerLoadingFragment"
-        android:label="fragment_a_i_manager_loading"
-        tools:layout="@layout/fragment_a_i_manager_loading" />
+
 
     <fragment
         android:id="@+id/AIManagerSearchMarathonFragment"
