@@ -31,5 +31,20 @@ data class GpxEntity(
     val avgHeartRate: Int,
 
     @ColumnInfo(name = "max_heart_rate")
-    val maxHeartRate: Int
+    val maxHeartRate: Int,
+
+    @ColumnInfo(name = "avg_pace")
+    val avgPace: String = "",
+
+    @ColumnInfo(name = "avg_cadence")
+    val avgCadence: Int = 0,
+
+    @ColumnInfo(name = "start_time")
+    val startTime: Long = 0,
+
+    @ColumnInfo(name = "end_time")
+    val endTime: Long = 0,
+
+    @ColumnInfo(name = "avg_elevation")
+    val avgElevation: Double = 0.0
 )
