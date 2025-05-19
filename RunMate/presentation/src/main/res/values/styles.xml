@@ -164,4 +164,31 @@
         <item name="android:fontFamily">@font/pretendard_bold</item>
     </style>
 
+    <!--  TimePicker  -->
+    <style name="BaseTheme.TimePicker" parent="ThemeOverlay.MaterialComponents.TimePicker">
+        <item name="materialClockStyle">@style/AppTheme.Widget.TimePicker.Clock</item>
+        <item name="chipStyle">@style/BaseTheme.Widget.Chip</item>
+        <item name="materialButtonOutlinedStyle">@style/AppTheme.Widget.TimePicker.Clock.AmPmButton
+        </item>
+        <item name="colorSurface">@color/white</item>
+    </style>
+
+    <style name="BaseTheme.Widget.Chip" parent="Widget.MaterialComponents.TimePicker.Display">
+        <item name="android:textColor">@color/primary</item>
+        <item name="chipBackgroundColor">@color/primary</item>
+    </style>
+
+    <style name="AppTheme.Widget.TimePicker.Clock" parent="Widget.MaterialComponents.TimePicker.Clock">
+        <item name="clockFaceBackgroundColor">@color/gray_stroke</item>
+        <item name="clockHandColor">@color/gray_stroke</item>
+        <item name="clockNumberTextColor">@color/primary</item>
+    </style>
+
+    <style name="AppTheme.Widget.TimePicker.Clock.AmPmButton" parent="Widget.MaterialComponents.TimePicker.Button">
+        <item name="backgroundTint">@color/gray_stroke</item>
+        <item name="strokeColor">@color/primary</item>
+        <item name="android:textColor">@color/primary</item>
+    </style>
+
+
 </resources>

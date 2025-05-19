@@ -195,7 +195,9 @@ class GroupCreateFragment : BaseFragment<FragmentGroupCreateBinding>(
             .setHour(hour)
             .setMinute(minute)
             .setTitleText("시간 선택")
+            .setTheme(R.style.BaseTheme_TimePicker)
             .build()
+
 
         picker.addOnPositiveButtonClickListener {
             val selectedHour = picker.hour
