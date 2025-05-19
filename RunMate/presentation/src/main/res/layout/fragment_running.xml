@@ -116,15 +116,15 @@
     <TextView
         android:id="@+id/tv_time_title"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:autoSizeMaxTextSize="14sp"
+        android:layout_height="0dp"
+        android:autoSizeMaxTextSize="12sp"
         android:autoSizeMinTextSize="6sp"
         android:autoSizeTextType="uniform"
         android:ellipsize="none"
         android:maxLines="1"
         android:text="시간"
         android:textColor="@color/caption"
-        android:textSize="14sp"
+        android:textSize="12sp"
         android:textStyle="bold"
         android:letterSpacing="-0.02"
         android:gravity="center"
@@ -158,15 +158,15 @@
     <TextView
         android:id="@+id/tv_pace_title"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:autoSizeMaxTextSize="14sp"
+        android:layout_height="0dp"
+        android:autoSizeMaxTextSize="12sp"
         android:autoSizeMinTextSize="6sp"
         android:autoSizeTextType="uniform"
         android:ellipsize="none"
         android:maxLines="1"
         android:text="현재 페이스"
         android:textColor="@color/caption"
-        android:textSize="14sp"
+        android:textSize="12sp"
         android:textStyle="bold"
         android:letterSpacing="-0.02"
         android:gravity="center"
@@ -200,15 +200,15 @@
     <TextView
         android:id="@+id/tv_distance_title"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:autoSizeMaxTextSize="14sp"
+        android:layout_height="0dp"
+        android:autoSizeMaxTextSize="12sp"
         android:autoSizeMinTextSize="6sp"
         android:autoSizeTextType="uniform"
         android:ellipsize="none"
         android:maxLines="1"
         android:text="거리(km)"
         android:textColor="@color/caption"
-        android:textSize="14sp"
+        android:textSize="12sp"
         android:textStyle="bold"
         android:letterSpacing="-0.02"
         android:gravity="center"
@@ -339,7 +339,7 @@
         android:id="@+id/group_record"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
+
         android:background="@color/primary"
         app:constraint_referenced_ids="bg_running_record, tv_distance, tv_distance_title, tv_pace, tv_pace_title, tv_time, tv_time_title" />
 
@@ -351,6 +351,7 @@
         app:constraint_referenced_ids="btn_restart, btn_end" />
 
     <androidx.constraintlayout.widget.Group
+        android:visibility="gone"
         android:id="@+id/group_todo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

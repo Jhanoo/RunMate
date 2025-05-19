@@ -77,10 +77,8 @@ class RunningTrackingService : Service() {
 
     @Inject
     lateinit var getCoord2AddressUseCase: GetCoord2AddressUseCase
-
     @Inject
     lateinit var endRunningUseCase: EndRunningUseCase
-
     @Inject
     lateinit var connectSocketUseCase: ConnectSocketUseCase
     @Inject
@@ -121,7 +119,6 @@ class RunningTrackingService : Service() {
     private var socketConnectionObserverJob: Job? = null
 
     private var leaveGroupJob: Job? = null
-
 
     private val _endRunning = MutableSharedFlow<RunningEndState>()
 
@@ -219,7 +216,6 @@ class RunningTrackingService : Service() {
                             )
                             address?.let {
                                 val lastRecord = record.runningRecords.last()
-                                Timber.d("courseId check ${repository.courseId.value}")
                                 endRunning(
                                     0.0,
                                     lastRecord.cadenceSum / recordSize,
@@ -237,7 +233,6 @@ class RunningTrackingService : Service() {
                         } else {
                             Timber.d("기록이 없습니다 recordSize 0")
                         }
-
                     } else {
                         Timber.d("write fail")
                     }
@@ -245,12 +240,16 @@ class RunningTrackingService : Service() {
             }
         } else {
             Timber.d("recordSize 0")
+            // 종료시키기
+            stopForeground(true)
+            stopSelf()
+            repository.setTrackingStatus(TrackingStatus.INITIAL)
         }
 
         CoroutineScope(Dispatchers.Default).launch {
             _endRunning.collectLatest {
                 if (it is RunningEndState.Success) {
-                    repository.setTrackingStatus(TrackingStatus.PAUSED)
+                    repository.setTrackingStatus(TrackingStatus.STOPPED)
                     repository.setHistoryId(it.historyId)
                     stopForeground(true)
                     stopSelf()
@@ -417,7 +416,7 @@ class RunningTrackingService : Service() {
         disconnectFromGroupSocket()
         serviceScope.cancel()
         runningJob = RunningJobState.None
-        repository.setTrackingStatus(TrackingStatus.STOPPED)
+//        repository.setTrackingStatus(TrackingStatus.STOPPED)
     }
 
     override fun onBind(intent: Intent?): IBinder? {

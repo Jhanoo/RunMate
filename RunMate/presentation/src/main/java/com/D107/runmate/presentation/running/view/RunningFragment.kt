@@ -30,7 +30,6 @@ import com.D107.runmate.presentation.running.DailyTodoViewModel
 import com.D107.runmate.presentation.running.RunningEndViewModel
 import com.D107.runmate.presentation.utils.CommonUtils
 import com.D107.runmate.presentation.utils.CommonUtils.getActivityContext
-import com.D107.runmate.presentation.utils.CommonUtils.getGpxInputStream
 import com.D107.runmate.presentation.utils.GpxParser
 import com.D107.runmate.presentation.utils.GpxParser.parseGpx
 import com.D107.runmate.presentation.utils.KakaoMapUtil.addCourseLine
@@ -83,8 +82,6 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        dailyTodoViewModel.getDailyTodo()
 
         if(mainViewModel.courseId.value == null && mainViewModel.course.value.first != null){
             mainViewModel.setCourse(null, null)
@@ -190,11 +187,19 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                         }
 
                         TrackingStatus.INITIAL -> {
+                            Timber.d("trackingStatus initial")
                             binding.groupBtnStart.visibility = View.VISIBLE
                             binding.groupTodo.visibility = View.VISIBLE
                             binding.groupRecord.visibility = View.GONE
                             binding.groupBtnPause.visibility = View.GONE
                             binding.groupBtnRunning.visibility = View.GONE
+                            if(dailyTodoViewModel.dailyTodo.value is DailyTodoState.Success) {
+                                binding.tvNoCurriculum.visibility = View.GONE
+                                binding.cbDailyTodo.visibility = View.VISIBLE
+                            } else {
+                                binding.tvNoCurriculum.visibility = View.VISIBLE
+                                binding.cbDailyTodo.visibility = View.GONE
+                            }
                             mContext?.let {
                                 (getActivityContext(it) as MainActivity).showHamburgerBtn()
                             }
@@ -258,6 +263,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
             dailyTodoViewModel.dailyTodo.collectLatest { state ->
                 when(state) {
                     is DailyTodoState.Success -> {
+                        Timber.d("getDailyTodo Success {${state.todo}}")
                         binding.cbDailyTodo.text = state.todo.content
                         binding.tvNoCurriculum.visibility = View.GONE
                         binding.cbDailyTodo.visibility = View.VISIBLE
@@ -268,7 +274,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                         binding.cbDailyTodo.visibility = View.GONE
                     }
                     is DailyTodoState.Initial -> {
-
+                        Timber.d("getDailyTodo Initial")
                     }
                 }
             }
@@ -414,6 +420,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
     override fun onResume() {
         super.onResume()
         binding.mapView.resume()
+        dailyTodoViewModel.getDailyTodo()
 
         when (mainViewModel.trackingStatus.value) {
             TrackingStatus.STOPPED -> {
@@ -439,6 +446,13 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                 binding.groupRecord.visibility = View.GONE
                 binding.groupBtnPause.visibility = View.GONE
                 binding.groupBtnRunning.visibility = View.GONE
+                if(dailyTodoViewModel.dailyTodo.value is DailyTodoState.Success) {
+                    binding.tvNoCurriculum.visibility = View.GONE
+                    binding.cbDailyTodo.visibility = View.VISIBLE
+                } else {
+                    binding.tvNoCurriculum.visibility = View.VISIBLE
+                    binding.cbDailyTodo.visibility = View.GONE
+                }
                 mContext?.let {
                     (getActivityContext(it) as MainActivity).showHamburgerBtn()
                 }

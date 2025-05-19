@@ -77,9 +77,6 @@ dependencies {
     // GPX parser
     implementation(libs.android.gpx.parser)
 
-    // LifecycleService
-    implementation(libs.androidx.lifecycle.service)
-
     implementation(libs.androidx.media)
 
     //Timber
@@ -94,6 +91,9 @@ dependencies {
 
     implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
     implementation("com.squareup.okhttp3:okhttp-urlconnection:4.10.0")
+
+    implementation("com.google.android.gms:play-services-wearable:18.1.0")
+
 }
 
 kapt {

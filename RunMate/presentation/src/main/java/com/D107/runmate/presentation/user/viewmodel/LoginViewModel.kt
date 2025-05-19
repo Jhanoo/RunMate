@@ -10,6 +10,7 @@ import com.D107.runmate.domain.usecase.user.IsLoggedInUseCase
 import com.D107.runmate.domain.usecase.user.LoginUseCase
 import com.D107.runmate.domain.usecase.user.ValidateEmailUseCase
 import com.D107.runmate.domain.usecase.user.ValidatePasswordUseCase
+import com.D107.runmate.presentation.utils.WatchDataUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -71,7 +72,9 @@ class LoginViewModel @Inject constructor(
 
             loginUseCase(email, password).collectLatest { result ->
                 _loginState.value = when (result) {
-                    is ResponseStatus.Success -> LoginUiState.Success(result.data)
+                    is ResponseStatus.Success -> {
+                        LoginUiState.Success(result.data)
+                    }
                     is ResponseStatus.Error -> LoginUiState.Error(result.error.message)
                 }
             }

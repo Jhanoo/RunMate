@@ -10,6 +10,7 @@ import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentLoginBinding
 import com.D107.runmate.presentation.user.viewmodel.JoinViewModel
 import com.D107.runmate.presentation.user.viewmodel.LoginViewModel
+import com.D107.runmate.presentation.utils.WatchDataUtils
 import com.ssafy.locket.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -47,6 +48,7 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(
 
                     is LoginViewModel.LoginUiState.Success -> {
                         // 로그인 성공
+                        WatchDataUtils.sendTokenToWatch(requireContext(), state.data.accessToken)
                         showLoading(false)
                         navigateToMain()
                     }
