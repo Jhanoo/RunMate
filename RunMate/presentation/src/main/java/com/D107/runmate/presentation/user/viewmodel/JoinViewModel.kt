@@ -12,11 +12,13 @@ import com.D107.runmate.domain.model.base.ResponseStatus
 import com.D107.runmate.domain.model.user.ProfileImageSource
 import com.D107.runmate.domain.model.user.SignupData
 import com.D107.runmate.domain.model.user.UserInfo
+import com.D107.runmate.domain.repository.user.AuthRepository
 import com.D107.runmate.domain.usecase.user.SaveUserInfoUseCase
 import com.D107.runmate.domain.usecase.user.SignupUseCase
 import com.D107.runmate.domain.usecase.user.ValidateEmailUseCase
 import com.D107.runmate.domain.usecase.user.ValidatePasswordUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,7 +32,8 @@ class JoinViewModel @Inject constructor(
     private val signupUseCase: SignupUseCase,
     private val validateEmailUseCase: ValidateEmailUseCase,
     private val validatePasswordUseCase: ValidatePasswordUseCase,
-    private val saveUserInfoUseCase: SaveUserInfoUseCase
+    private val saveUserInfoUseCase: SaveUserInfoUseCase,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _signupState = MutableStateFlow<SignupUiState>(SignupUiState.Initial)
@@ -111,7 +114,7 @@ class JoinViewModel @Inject constructor(
         _profileImageUri.value = uri
     }
 
-    private fun validateEmail(email: String): Boolean {
+    fun validateEmail(email: String): Boolean {
         val isValid = validateEmailUseCase(email)
         if (!isValid) {
             _emailError.value = "유효한 이메일 형식이 아닙니다."
@@ -181,6 +184,10 @@ class JoinViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    suspend fun checkEmailAvailability(email: String): Flow<ResponseStatus<Boolean>> {
+        return authRepository.checkEmail(email)
     }
 
     override fun onCleared() {
