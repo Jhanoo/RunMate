@@ -116,9 +116,7 @@ class Join2Fragment : BaseFragment<FragmentPersonalJoinBinding>(
         binding.signupButton.setOnClickListener {
             val nickname = binding.idEditText.text.toString()
             val weightText = binding.weightText.text.toString()
-            val weight: Double = weightText.toDoubleOrNull() ?: 0.0
             val heightText = binding.heightText.text.toString()
-            val height: Double = heightText.toDoubleOrNull() ?: 0.0
 
             if (nickname.isBlank()) {
                 showToast("닉네임을 입력해주세요.")
@@ -142,6 +140,28 @@ class Join2Fragment : BaseFragment<FragmentPersonalJoinBinding>(
 
             if (heightText.isBlank()) {
                 showToast("키를 입력해주세요.")
+                return@setOnClickListener
+            }
+
+            val weight = weightText.toDoubleOrNull()
+            if (weight == null) {
+                showToast("올바른 체중을 입력해주세요.")
+                return@setOnClickListener
+            }
+
+            val height = heightText.toDoubleOrNull()
+            if (height == null) {
+                showToast("올바른 키를 입력해주세요.")
+                return@setOnClickListener
+            }
+
+            if (weight <= 20 || weight > 300) {
+                showToast("체중을 다시 확인해주세요.")
+                return@setOnClickListener
+            }
+
+            if (height <= 100 || height > 350) {
+                showToast("키를 다시 확인해주세요")
                 return@setOnClickListener
             }
 
