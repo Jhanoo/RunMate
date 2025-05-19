@@ -137,10 +137,10 @@ public class CourseServiceImpl implements CourseService {
         boolean liked = courseDao.existsCourseLike(userId, courseId);
 
         // 2. 평균 페이스 조회
-        Double avgPace = courseDao.getAverageUserPace(); // 전체 사용자
+        Double avgPace = 6.5; // 전체 사용자
         Double userPace = courseDao.getUserPace(userId); // 로그인 사용자
 
-        Integer avgEstimatedTime = (avgPace != null && course.getDistance() != null)
+        Integer avgEstimatedTime = course.getDistance() != null
                 ? (int) (avgPace * course.getDistance() * 60)
                 : null;
         Integer userEstimatedTime = (userPace != null && course.getDistance() != null)
