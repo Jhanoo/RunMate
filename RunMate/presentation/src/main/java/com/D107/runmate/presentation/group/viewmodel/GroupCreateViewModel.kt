@@ -225,6 +225,10 @@ class GroupCreateViewModel @Inject constructor(
         _queryResult.value = emptyList()
     }
 
+    fun clearCourse(){
+        _selectedCourse.value = null
+
+    }
 
     fun clearSelectedData(){
         clearQuery()
