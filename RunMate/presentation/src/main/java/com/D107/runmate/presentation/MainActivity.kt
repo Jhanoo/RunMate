@@ -273,6 +273,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                             // 커리큘럼이 없거나 API 호출 타임아웃인 경우
                             if (!hasCurriculum) {
                                 Timber.d("커리큘럼 없음: AIManagerIntroFragment로 이동")
+//                                showHamburgerBtn(navController)
                                 navController.navigate(
                                     R.id.AIManagerIntroFragment,
                                     null,
@@ -282,6 +283,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                         } catch (e: Exception) {
                             // 예외 발생 시 로그 출력 및 IntroFragment로 이동
                             Timber.e("AI 매니저 접근 오류: ${e.message}")
+//                            showHamburgerBtn(navController)
                             navController.navigate(
                                 R.id.AIManagerIntroFragment,
                                 null,
@@ -467,6 +469,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                 R.id.AIManagerFragment -> View.VISIBLE
                 R.id.groupInfoFragment -> View.VISIBLE
                 R.id.groupRunningFragment -> View.VISIBLE
+                R.id.AIManagerIntroFragment -> View.VISIBLE
                 R.id.splashFragment -> View.GONE
                 R.id.loginFragment -> View.GONE
                 R.id.JoinFragment -> View.GONE
