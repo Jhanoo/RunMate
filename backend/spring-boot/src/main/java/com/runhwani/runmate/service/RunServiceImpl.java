@@ -70,7 +70,7 @@ public class RunServiceImpl implements RunService {
         log.debug("User({}) avg_pace updated to {}", userId, updatedAvgPace);
 
         Todo todo = curriculumDao.selectTodayTodoByUserId(userId);
-        if (todo != null) {
+        if (todo != null && todo.getIsDone() == false) {
             Pattern p = Pattern.compile("^([0-9]+(?:\\.[0-9]+)?)km.*");
             Matcher m = p.matcher(todo.getContent());
 

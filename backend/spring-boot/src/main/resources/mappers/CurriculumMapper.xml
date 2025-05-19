@@ -107,7 +107,6 @@
         FROM todos
         WHERE date::date = CURRENT_DATE
           AND user_id = #{userId}
-          AND is_done = FALSE
         LIMIT 1
     </select>
 
