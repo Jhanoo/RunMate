@@ -11,5 +11,7 @@ data class SignupRequest(
     @Json(name = "nickname") val nickname: String,
     @Json(name = "birthday") val birthday: String,
     @Json(name = "gender") val gender: String,
-    @Json(name = "profileImage") val profileImage: String? = null
+    @Json(name = "profileImage") val profileImage: String? = null,
+    @Json(name = "weight") val weight: Double,
+    @Json(name = "height") val height: Double,
 )

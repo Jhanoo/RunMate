@@ -6,5 +6,7 @@ data class LoginData(
     val accessToken: String,
     val userId: String? = null,
     val nickname: String? = null,
-    val profileImage: String? = null
+    val profileImage: String? = null,
+    val weight: Double? = null,
+    val height: Double? = null
 ) : BaseModel
