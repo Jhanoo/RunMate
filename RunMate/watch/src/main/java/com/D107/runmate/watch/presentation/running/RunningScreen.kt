@@ -1,6 +1,9 @@
 package com.D107.runmate.watch.presentation.running
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -43,6 +46,14 @@ enum class DisplayMode(val label: String) {
     DISTANCE("km")
 }
 
+@SuppressLint("ServiceCast")
+fun vibrateWatch(context: Context) {
+    val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+    val vibrationEffect = VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE)
+    vibrator.vibrate(vibrationEffect)
+}
+
+
 @SuppressLint("DefaultLocale")
 @Composable
 fun RunningScreen(
@@ -59,6 +70,12 @@ fun RunningScreen(
 
     // 시간 측정
     val formattedTime by viewModel.formattedTime.collectAsState()
+
+    // 이전 시간을 기억하기 위한 상태
+    var lastVibrateMinute by remember { mutableStateOf(-1) }
+    var lastVibrateSecond by remember { mutableStateOf(-1) }
+
+    val localContext = LocalContext.current
 
     var topDisplayIndex by remember { mutableStateOf(savedState?.first ?: 0) }
     var leftDisplayIndex by remember { mutableStateOf(savedState?.second ?: 1) }
@@ -85,8 +102,6 @@ fun RunningScreen(
     // pace가 "0:00"이 아닌지 확인
     val isPaceFixed = pace != "0:00"
 
-    val localContext = LocalContext.current
-
     // 화면 진입시 모니터링 시작
     LaunchedEffect(Unit) {
         viewModel.startMonitoring()
@@ -106,6 +121,40 @@ fun RunningScreen(
 
     LaunchedEffect(bpm) {
 //        Log.d("sensor","심박수 변경됨 : $bpm")
+    }
+
+    // 시간 변경 시 30초마다 진동 확인
+    LaunchedEffect(formattedTime) {
+        // 시간 형식 파싱 (MM:SS 또는 H:MM:SS)
+        val timeParts = formattedTime.split(":")
+
+        val minutes: Int
+        val seconds: Int
+
+        if (timeParts.size == 2) {
+            // MM:SS 형식
+            minutes = timeParts[0].toInt()
+            seconds = timeParts[1].toInt()
+        } else if (timeParts.size == 3) {
+            // H:MM:SS 형식
+            val hours = timeParts[0].toInt()
+            minutes = timeParts[1].toInt()
+            seconds = timeParts[2].toInt()
+        } else {
+            // 예상치 못한 형식
+            return@LaunchedEffect
+        }
+
+        // 30초마다 진동 (0초, 30초)
+        if (!isPaused && (seconds == 0 || seconds == 30)) {
+            // 같은 시간에 중복 진동 방지
+            if (lastVibrateMinute != minutes || lastVibrateSecond != seconds) {
+                vibrateWatch(localContext)
+                lastVibrateMinute = minutes
+                lastVibrateSecond = seconds
+                Log.d("Vibration", "진동 발생: $formattedTime")
+            }
+        }
     }
 
     Box(
