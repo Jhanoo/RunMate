@@ -120,6 +120,11 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     testImplementation("androidx.arch.core:core-testing:2.2.0")
 
+    // 폰과 연동
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation ("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
+
+
     // Android 테스트 의존성
     androidTestImplementation("androidx.test:runner:1.5.2")
     androidTestImplementation("androidx.test:rules:1.5.0")

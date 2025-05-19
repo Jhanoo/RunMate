@@ -25,12 +25,16 @@ import android.content.Context
 import android.content.Intent
 import com.D107.runmate.watch.data.repository.CadenceRepositoryImpl
 import com.D107.runmate.watch.domain.repository.CadenceRepository
+import com.D107.runmate.watch.domain.repository.GpxRepository
 import com.D107.runmate.watch.domain.usecase.cadence.GetCadenceUseCase
 import com.D107.runmate.watch.domain.usecase.gpx.CreateGpxFileUseCase
+import com.D107.runmate.watch.presentation.data.TokenManager
+import com.D107.runmate.watch.presentation.service.BluetoothService
 import com.D107.runmate.watch.presentation.service.LocationTrackingService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
+import java.util.Date
 import kotlin.coroutines.cancellation.CancellationException
 
 
@@ -46,7 +50,9 @@ class RunningViewModel @Inject constructor(
     private val stopDistanceMonitoringUseCase: StopDistanceMonitoringUseCase,
     private val distanceRepository: DistanceRepository,
     private val getCadenceUseCase: GetCadenceUseCase,
-    private val cadenceRepository: CadenceRepository
+    private val cadenceRepository: CadenceRepository,
+    private val bluetoothService: BluetoothService,
+    private val gpxRepository: GpxRepository
 ) : ViewModel() {
     // 심박수
     private val _heartRate = MutableStateFlow(0)
@@ -109,6 +115,18 @@ class RunningViewModel @Inject constructor(
     val cadence: StateFlow<Int> = _cadence.asStateFlow()
     private var cadenceJob: Job? = null
 
+    // 폰 연결
+//    private val _isPhoneConnected = MutableStateFlow(false)
+//    val isPhoneConnected: StateFlow<Boolean> = _isPhoneConnected.asStateFlow()
+
+    // 시작여부 받기
+//    private val _hasValidToken = MutableStateFlow(false)
+//    val hasValidToken: StateFlow<Boolean> = _hasValidToken.asStateFlow()
+
+    // 블루투스 연결 상태
+    private val _bluetoothConnected = MutableStateFlow(false)
+    val bluetoothConnected: StateFlow<Boolean> = _bluetoothConnected.asStateFlow()
+
     init {
 //        Log.d("sensor", "ViewModel init")
         viewModelScope.launch {
@@ -117,6 +135,14 @@ class RunningViewModel @Inject constructor(
             collectDistance() // 여기에 추가
             Log.d("Cadence", "ViewModel init: 케이던스 모니터링 시작")
         }
+
+        viewModelScope.launch {
+            bluetoothService.connectionState.collect { isConnected ->
+                _bluetoothConnected.value = isConnected
+            }
+        }
+
+
         observeHeartRateAndPaceForTracking()
     }
 
@@ -183,7 +209,7 @@ class RunningViewModel @Inject constructor(
         LocationTrackingService.updateHeartRate(_heartRate.value)
 
         val intent = Intent(context, LocationTrackingService::class.java)
-        intent.action = LocationTrackingService.ACTION_START_HEART_RATE_ONLY
+//        intent.action = LocationTrackingService.ACTION_START_HEART_RATE_ONLY
         context.startService(intent)
         _isLocationTrackingActive.value = true
     }
@@ -480,13 +506,24 @@ class RunningViewModel @Inject constructor(
         // 위치 추적 서비스 중지
         stopLocationTracking(context)
 
+        // 트랙 포인트에서 시작/종료 시간 및 평균 고도 계산
+        val trackPoints = gpxRepository.getSessionTrackPoints()
+        val startTime = trackPoints.minByOrNull { it.time }?.time ?: Date()
+        val endTime = trackPoints.maxByOrNull { it.time }?.time ?: Date()
+        val avgElevation = trackPoints.map { it.elevation }.average()
+
         // GPX 파일 생성
         return createGpxFileUseCase(
             runName = runName,
             totalDistance = _distance.value,
             totalTime = _runningTime.value,
             avgHeartRate = _avgHeartRate.value,
-            maxHeartRate = _maxHeartRate.value
+            maxHeartRate = _maxHeartRate.value,
+            avgPace = _avgPace.value,
+            avgCadence = _cadence.value,
+            startTime = startTime,
+            endTime = endTime,
+            avgElevation = avgElevation
         )
     }
 

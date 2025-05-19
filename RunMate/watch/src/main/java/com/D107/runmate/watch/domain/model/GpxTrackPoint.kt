@@ -38,5 +38,12 @@ data class GpxFile(
     val totalDistance: Double,    // 총 거리 (km)
     val totalTime: Long,          // 총 시간 (밀리초)
     val avgHeartRate: Int,        // 평균 심박수
-    val maxHeartRate: Int         // 최대 심박수
+    val maxHeartRate: Int,         // 최대 심박수
+
+    // 추가 필드들
+    val avgPace: String = "",     // 평균 페이스
+    val avgCadence: Int = 0,      // 평균 케이던스
+    val startTime: Date = Date(), // 시작 시간
+    val endTime: Date = Date(),   // 종료 시간
+    val avgElevation: Double = 0.0 // 평균 고도
 )

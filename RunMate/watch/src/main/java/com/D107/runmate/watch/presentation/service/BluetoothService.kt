@@ -8,6 +8,9 @@ import android.content.Context
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.util.UUID
@@ -24,6 +27,9 @@ class BluetoothService @Inject constructor(
     private val SERVICE_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB") // 기본 SPP UUID
 
     private var connectedDeviceAddress: String? = null
+
+    private val _connectionState = MutableStateFlow(false)
+    val connectionState: StateFlow<Boolean> = _connectionState.asStateFlow()
 
     // 블루투스 연결 상태 확인
     fun isConnected(): Boolean {
@@ -53,6 +59,9 @@ class BluetoothService @Inject constructor(
                 // 연결된 기기 주소 저장
                 connectedDeviceAddress = deviceAddress
                 Log.d(TAG, "Successfully connected to device: $deviceAddress")
+
+                _connectionState.value = true
+
                 true
             } catch (e: IOException) {
                 // 연결 실패 시 로그 출력 및 소켓 정리
@@ -92,9 +101,38 @@ class BluetoothService @Inject constructor(
             bluetoothSocket?.close()
             bluetoothSocket = null
             connectedDeviceAddress = null
+            _connectionState.value = false
             Log.d(TAG, "Disconnected")
         } catch (e: IOException) {
             Log.e(TAG, "Error closing socket: ${e.message}")
+        }
+    }
+
+    // 연결 상태 확인
+    fun observeConnectionState(): StateFlow<Boolean> {
+        return connectionState
+    }
+
+    // 러닝 데이터 전송 (심박수)
+    suspend fun sendRunningData(heartRate: Int, pace: String, distance: Double, cadence: Int): Boolean {
+        Log.d(TAG, "Heart rate measured: $heartRate, 연결 상태: ${isConnected()}")
+
+        if (bluetoothSocket?.isConnected != true) {
+            return false
+        }
+
+        return withContext(Dispatchers.IO) {
+            try {
+                // 데이터를 JSON 형태로 구성
+                val runningData = """{"hr":$heartRate,"pace":"$pace","distance":$distance,"cadence":$cadence}"""
+                val message = "DATA:$runningData"
+                bluetoothSocket?.outputStream?.write(message.toByteArray())
+                Log.d(TAG, "Running data sent: $message")
+                true
+            } catch (e: IOException) {
+                Log.e(TAG, "Failed to send running data: ${e.message}")
+                false
+            }
         }
     }
 }

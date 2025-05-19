@@ -64,12 +64,8 @@ class LocationTrackingService : Service() {
         private const val CHANNEL_ID = "location_tracking_channel"
         private const val TAG = "LocationTrackingService"
 
-        // 앱에서 기록 or 워치에서 기록
-        const val ACTION_START_WITH_RECORDING = "com.D107.runmate.watch.START_WITH_RECORDING"
-        const val ACTION_START_HEART_RATE_ONLY = "com.D107.runmate.watch.START_HEART_RATE_ONLY"
-
         // 기록 모드 (true: GPX 파일 생성, false: 심박수만 전송)
-        private var recordingMode = true
+//        private var recordingMode = true
 
         // 위치 수집 간격 (5초)
         private const val LOCATION_UPDATE_INTERVAL = 5000L
@@ -105,54 +101,56 @@ class LocationTrackingService : Service() {
     // 위치 업데이트 콜백
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
-            locationResult.lastLocation?.let { location ->
+//            locationResult.lastLocation?.let { location ->
 
-                val now = Date()
-                val currentCadence = cadenceRepository.getCurrentCadence()
 
-                // 심박수 데이터 전송 (항상 실행)
+            val location = locationResult.lastLocation ?: return
+
+            val now = Date()
+            val currentCadence = cadenceRepository.getCurrentCadence()
+
+            // 심박수 데이터 전송 (항상 실행)
+            serviceScope.launch {
+                try {
+                    // 심박수만 전송
+                    bluetoothService.sendHeartRate(lastHeartRate)
+                } catch (e: Exception) {
+                    Log.e("HeartRate", "심박수 전송 실패: ${e.message}", e)
+                }
+            }
+
+            // GPX 기록 모드인 경우에만 트랙 포인트 저장
+            if (!bluetoothService.isConnected()) {
+                // 위치 데이터 수집 (5초마다 호출됨)
+                val trackPoint = GpxTrackPoint(
+                    latitude = location.latitude,
+                    longitude = location.longitude,
+                    elevation = location.altitude,
+                    time = now,
+                    heartRate = lastHeartRate,
+                    cadence = currentCadence,
+                    pace = currentPace
+                )
+
+                Log.d(
+                    "GpxTracking",
+                    "위치 포인트 수집: lat=${location.latitude}, lon=${location.longitude}, hr=${lastHeartRate}, pace=${currentPace}"
+                )
+
+                // Repository에 트랙 포인트 추가
                 serviceScope.launch {
                     try {
-                        // 심박수만 전송
-                        bluetoothService.sendHeartRate(lastHeartRate)
+                        gpxRepository.addTrackPoint(trackPoint)
+                        Log.d("GpxTracking", "트랙 포인트 저장 성공")
                     } catch (e: Exception) {
-                        Log.e("HeartRate", "심박수 전송 실패: ${e.message}", e)
+                        Log.e("GpxTracking", "트랙 포인트 저장 실패: ${e.message}", e)
                     }
                 }
+            } else {
+                Log.d("HeartRateOnly", "심박수만 전송 모드: HR=${lastHeartRate}")
+            }
 
-                // GPX 기록 모드인 경우에만 트랙 포인트 저장
-                if (recordingMode) {
-                    // 위치 데이터 수집 (5초마다 호출됨)
-                    val trackPoint = GpxTrackPoint(
-                        latitude = location.latitude,
-                        longitude = location.longitude,
-                        elevation = location.altitude,
-                        time = now,
-                        heartRate = lastHeartRate,
-                        cadence = currentCadence,
-                        pace = currentPace
-                    )
-
-                    Log.d(
-                        "GpxTracking",
-                        "위치 포인트 수집: lat=${location.latitude}, lon=${location.longitude}, hr=${lastHeartRate}, pace=${currentPace}"
-                    )
-
-                    // Repository에 트랙 포인트 추가
-                    serviceScope.launch {
-                        try {
-                            gpxRepository.addTrackPoint(trackPoint)
-                            Log.d("GpxTracking", "트랙 포인트 저장 성공")
-                        } catch (e: Exception) {
-                            Log.e("GpxTracking", "트랙 포인트 저장 실패: ${e.message}", e)
-                        }
-                    }
-                } else {
-                    Log.d("HeartRateOnly", "심박수만 전송 모드: HR=${lastHeartRate}")
-                }
-
-                lastLocation = location
-            } ?: Log.e("LocationService", "위치 결과가 null입니다")
+//            } ?: Log.e("LocationService", "위치 결과가 null입니다")
         }
     }
 
@@ -164,15 +162,11 @@ class LocationTrackingService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
-            ACTION_START -> start()
-            ACTION_START_WITH_RECORDING -> {
-                recordingMode = true
+            ACTION_START -> {
+//                recordingMode = true
                 start()
             }
-            ACTION_START_HEART_RATE_ONLY -> {
-                recordingMode = false
-                start()
-            }
+
             ACTION_PAUSE -> pause()
             ACTION_RESUME -> resume()
             ACTION_STOP -> stop()
@@ -211,16 +205,26 @@ class LocationTrackingService : Service() {
         Log.d(TAG, "위치 추적 서비스 시작됨")
     }
 
+    // LocationTrackingService.kt의 startHeartRateTransmission 함수 수정
+
     private fun startHeartRateTransmission() {
+        heartRateJob?.cancel() // 기존 작업이 있으면 취소
+
         heartRateJob = serviceScope.launch {
             while (isActive) {
                 try {
-                    // 심박수 전송
-                    bluetoothService.sendHeartRate(lastHeartRate)
-                    Log.d(TAG, "심박수 전송: $lastHeartRate")
+                    if (bluetoothService.isConnected()) {
+                        // 블루투스 연결된 경우 - 심박수만 전송
+                        bluetoothService.sendHeartRate(lastHeartRate)
+                        Log.d("HeartRateTransmission", "심박수 전송: HR=$lastHeartRate (블루투스 연결됨)")
+                    } else {
+                        // 블루투스 연결 안된 경우 - 심박수 기록만 (GPX 생성용)
+                        Log.d("HeartRateTransmission", "심박수 기록만: HR=$lastHeartRate (블루투스 연결 안됨)")
+                    }
                     delay(5000) // 5초 간격으로 전송
                 } catch (e: Exception) {
                     Log.e(TAG, "심박수 전송 실패: ${e.message}", e)
+                    delay(1000) // 오류 발생 시 1초 후 재시도
                 }
             }
         }

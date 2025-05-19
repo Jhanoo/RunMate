@@ -2,6 +2,10 @@ package com.D107.runmate.watch.presentation
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -11,10 +15,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.BlendMode.Companion.Screen
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
@@ -22,6 +28,7 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
@@ -34,6 +41,7 @@ import com.D107.runmate.watch.presentation.running.RunningData
 import com.D107.runmate.watch.presentation.running.RunningScreen
 import com.D107.runmate.watch.presentation.running.RunningViewModel
 import com.D107.runmate.watch.presentation.service.BluetoothService
+import com.D107.runmate.watch.presentation.service.DataLayerListenerService
 import com.D107.runmate.watch.presentation.splash.SplashScreen
 import com.D107.runmate.watch.presentation.theme.RunMateTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -50,6 +58,12 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
     private lateinit var runningViewModel: RunningViewModel
 
+    private lateinit var runningStateReceiver: BroadcastReceiver
+
+    private var shouldNavigateToRunning = false
+    private var shouldNavigateToPause = false
+    private var shouldNavigateToResult = false
+
     @Inject
     lateinit var bluetoothService: BluetoothService
 
@@ -58,13 +72,18 @@ class MainActivity : ComponentActivity() {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
 
+        // ble 연동 관련
+        registerRunningStateReceiver()
+        handleNavigationIntent(intent)
+
         splashScreen.setKeepOnScreenCondition { false }
 
         setTheme(android.R.style.Theme_DeviceDefault)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT)
-                != PackageManager.PERMISSION_GRANTED) {
+                != PackageManager.PERMISSION_GRANTED
+            ) {
                 ActivityCompat.requestPermissions(
                     this,
                     arrayOf(Manifest.permission.BLUETOOTH_CONNECT),
@@ -90,6 +109,8 @@ class MainActivity : ComponentActivity() {
             )
         }
 
+
+
         setContent {
             RunMateTheme {
                 val navController = rememberSwipeDismissableNavController()
@@ -103,6 +124,32 @@ class MainActivity : ComponentActivity() {
                 var savedRunningData by remember { mutableStateOf(RunningData()) }
 
                 this@MainActivity.runningViewModel = runningViewModel
+
+                LaunchedEffect(shouldNavigateToRunning, shouldNavigateToPause, shouldNavigateToResult) {
+                    when {
+                        shouldNavigateToRunning -> {
+                            navController.navigate("running") {
+                                popUpTo("menu") { inclusive = true }
+                            }
+                            shouldNavigateToRunning = false
+                        }
+                        shouldNavigateToPause -> {
+                            // 현재 화면 상태에 따라 적절한 파라미터로 pause 화면으로 이동
+                            // 간단한 구현을 위해 기본값 사용
+                            navController.navigate("pause/TIME/0:00:00") {
+                                popUpTo("running") { inclusive = true }
+                            }
+                            shouldNavigateToPause = false
+                        }
+                        shouldNavigateToResult -> {
+                            // 결과 화면으로 이동 (기본값 사용)
+                            navController.navigate("result/0.0/0:00:00/--'--\"/0/0") {
+                                popUpTo(0) { inclusive = true }
+                            }
+                            shouldNavigateToResult = false
+                        }
+                    }
+                }
 
                 SwipeDismissableNavHost(
                     navController = navController,
@@ -312,6 +359,90 @@ class MainActivity : ComponentActivity() {
 
     }
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        intent?.let { handleNavigationIntent(it) }
+    }
+
+    private fun handleNavigationIntent(intent: Intent) {
+        when (intent.action) {
+            "navigate_to_running" -> {
+                // 런닝 화면으로 이동 로직
+                // SwipeDismissableNavHost 내부에서 사용할 수 있도록 플래그 설정
+                // setContent 블록 내부에서 참조할 수 있는 플래그 변수
+                shouldNavigateToRunning = true
+            }
+
+            "navigate_to_pause" -> {
+                shouldNavigateToPause = true
+            }
+
+            "navigate_to_result" -> {
+                shouldNavigateToResult = true
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        // 리시버 해제
+        LocalBroadcastManager.getInstance(this)
+            .unregisterReceiver(runningStateReceiver)
+    }
+
+    private fun registerRunningStateReceiver() {
+        runningStateReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                // 액티비티 내에서 setContent 블록 안에 있는 navController에 직접 접근할 수 없음
+                // 대신 화면 전환을 위한 Intent를 사용
+                when (intent.action) {
+                    DataLayerListenerService.ACTION_START_RUNNING -> {
+                        // RunningScreen으로 전환하는 로직
+                        val runningIntent =
+                            Intent(this@MainActivity, MainActivity::class.java).apply {
+                                action = "navigate_to_running"
+                                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                            }
+                        startActivity(runningIntent)
+                    }
+
+                    DataLayerListenerService.ACTION_PAUSE_RUNNING -> {
+                        // PauseScreen으로 전환하는 로직
+                        val pauseIntent =
+                            Intent(this@MainActivity, MainActivity::class.java).apply {
+                                action = "navigate_to_pause"
+                                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                            }
+                        startActivity(pauseIntent)
+                    }
+
+                    DataLayerListenerService.ACTION_FINISH_RUNNING -> {
+                        // ResultScreen으로 전환하는 로직
+                        val resultIntent =
+                            Intent(this@MainActivity, MainActivity::class.java).apply {
+                                action = "navigate_to_result"
+                                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                            }
+                        startActivity(resultIntent)
+                    }
+                }
+            }
+        }
+
+        // 리시버 등록
+        val filter = IntentFilter().apply {
+            addAction(DataLayerListenerService.ACTION_START_RUNNING)
+            addAction(DataLayerListenerService.ACTION_PAUSE_RUNNING)
+            addAction(DataLayerListenerService.ACTION_RESUME_RUNNING)
+            addAction(DataLayerListenerService.ACTION_FINISH_RUNNING)
+        }
+
+        LocalBroadcastManager.getInstance(this)
+            .registerReceiver(runningStateReceiver, filter)
+    }
+
+
     // M권한 요청 결과 처리
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -326,7 +457,8 @@ class MainActivity : ComponentActivity() {
                             grantResults[0] == PackageManager.PERMISSION_GRANTED &&
                             grantResults.size >= 3 &&
                             grantResults[1] == PackageManager.PERMISSION_GRANTED &&
-                            grantResults[2] == PackageManager.PERMISSION_GRANTED)) {
+                            grantResults[2] == PackageManager.PERMISSION_GRANTED)
+                ) {
                     Log.d("Permission", "센서 및 위치 권한 승인됨")
                     // 권한이 승인되었을 때 필요한 초기화 작업
                 } else {
@@ -334,6 +466,7 @@ class MainActivity : ComponentActivity() {
                     // 권한이 거부되었을 때 사용자에게 알림
                 }
             }
+
             BLUETOOTH_PERMISSION_REQUEST_CODE -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Log.d("Bluetooth", "블루투스 권한 승인됨")
