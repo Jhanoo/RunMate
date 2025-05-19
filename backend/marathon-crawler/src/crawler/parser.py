@@ -193,7 +193,8 @@ def parse_marathon_detail(html_content):
                 break
 
         if raw_distance:
-            parts = re.split(r'[,\.\s]+', raw_distance)
+            raw_distance = re.sub(r'(\d+)\s*km', r'\1km', raw_distance, flags=re.IGNORECASE)
+            parts = re.split(r'[,\s]+', raw_distance)
             
             filtered = []
             for part in parts:
