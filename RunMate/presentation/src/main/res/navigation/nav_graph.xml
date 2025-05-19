@@ -144,6 +144,9 @@
         <action
             android:id="@+id/action_runningFragment_to_courseSettingFragment"
             app:destination="@id/courseSettingFragment" />
+        <action
+            android:id="@+id/action_runningFragment_to_AIManagerIntroFragment"
+            app:destination="@+id/AIManagerIntroFragment"/>
     </fragment>
     <fragment
         android:id="@+id/groupFragment"
@@ -199,6 +202,9 @@
         <action
             android:id="@+id/action_historyFragment_to_groupHistoryFragment"
             app:destination="@id/groupHistoryFragment" />
+        <action
+            android:id="@+id/action_historyFragment_to_personalHistoryFragment"
+            app:destination="@id/personalHistoryFragment" />
     </fragment>
     <fragment
         android:id="@+id/wearableFragment"
@@ -295,7 +301,11 @@
         android:id="@+id/chartFragment"
         android:name="com.D107.runmate.presentation.running.view.ChartFragment"
         android:label="fragment_chart"
-        tools:layout="@layout/fragment_chart" />
+        tools:layout="@layout/fragment_chart" >
+        <argument
+            android:name="gpxFileUrl"
+            app:argType="string" />
+    </fragment>
 
     <fragment
         android:id="@+id/groupRunningFragment"
@@ -318,6 +328,24 @@
         android:name="com.D107.runmate.presentation.history.view.GroupHistoryFragment"
         android:label="fragment_group_history"
         tools:layout="@layout/fragment_group_history" >
+        <argument
+            android:name="historyId"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_groupHistoryFragment_to_personalHistoryFragment"
+            app:destination="@id/personalHistoryFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/personalHistoryFragment"
+        android:name="com.D107.runmate.presentation.history.view.PersonalHistoryFragment"
+        android:label="fragment_personal_history"
+        tools:layout="@layout/fragment_personal_history" >
+        <action
+            android:id="@+id/action_personalHistoryFragment_to_chartFragment"
+            app:destination="@id/chartFragment" />
+        <argument
+            android:name="userId"
+            app:argType="string" />
         <argument
             android:name="historyId"
             app:argType="string" />

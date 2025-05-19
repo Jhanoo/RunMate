@@ -10,6 +10,8 @@ class SaveUserInfoUseCase @Inject constructor(
     suspend operator fun invoke(userInfo: UserInfo) {
         dataStoreRepository.saveUserId(userInfo.userId)
         dataStoreRepository.saveNickname(userInfo.nickname)
+        dataStoreRepository.saveHeight(userInfo.height)
+        dataStoreRepository.saveWeight(userInfo.weight)
         userInfo.profileImage?.let { profileImageUrl ->
             dataStoreRepository.saveProfileImage(profileImageUrl)
         }

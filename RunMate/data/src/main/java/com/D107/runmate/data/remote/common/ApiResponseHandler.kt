@@ -1,30 +1,27 @@
 package com.D107.runmate.data.remote.common
 
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import retrofit2.Response
 import timber.log.Timber
 import java.io.IOException
-
 class ApiResponseHandler(private val moshi: Moshi) {
 
     suspend fun <T : Any> handle(
-        apiCall: suspend () -> Response<T>
+        apiCall: suspend () -> Response<ServerResponse<T>>
     ): ApiResponse<T> {
         return try {
             val response = apiCall()
-            Timber.d("response")
             if (response.isSuccessful) {
-                Timber.d("response success")
                 parseSuccessResponse(response)
             } else {
-                Timber.d("response error")
                 parseErrorResponse(response)
             }
         } catch (e: IOException) {
             createNetworkError(e)
         } catch (e: JsonDataException) {
-            Timber.d("jsonDataException occur")
             createUnknownError(e)
         }
         catch (e: Exception) {
@@ -32,18 +29,20 @@ class ApiResponseHandler(private val moshi: Moshi) {
         }
     }
 
-    private fun <T : Any> parseSuccessResponse(response: Response<T>): ApiResponse<T> {
-        val body = response.body()
-        Timber.d("parseSuccessResponse")
-        return if (body != null) {
-            Timber.d("parseSuccessResponse ${body}")
-            ApiResponse.Success(body)
+    private fun <T : Any> parseSuccessResponse(response: Response<ServerResponse<T>>): ApiResponse<T> {
+        val serverResponse = response.body()
+        if (serverResponse != null) {
+            if(serverResponse.data == null){
+                return ApiResponse.Success(serverResponse.message, null)
+            } else {
+                return ApiResponse.Success(serverResponse.message, serverResponse.data)
+            }
         } else {
-            ApiResponse.Error(createEmptyBodyError(response))
+            return ApiResponse.Error(createEmptyBodyError(response))
         }
     }
 
-    private fun <T : Any> parseErrorResponse(response: Response<T>): ApiResponse<T> {
+    private fun <T : Any> parseErrorResponse(response: Response<ServerResponse<T>>): ApiResponse<T> {
         return try {
             val errorBody = response.errorBody()?.source()
             val errorAdapter = moshi.adapter(ErrorResponse::class.java)
@@ -105,3 +104,9 @@ class ApiResponseHandler(private val moshi: Moshi) {
         )
     }
 }
+
+@JsonClass(generateAdapter = true)
+data class ServerResponse<T>(
+    @Json(name = "message") val message: String,
+    @Json(name = "data") val data: T?
+)

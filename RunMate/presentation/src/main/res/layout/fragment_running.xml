@@ -53,6 +53,7 @@
         android:id="@+id/cb_daily_todo"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         android:textColor="@color/text"
         android:textSize="16sp"
         android:letterSpacing="-0.02"
@@ -63,11 +64,32 @@
         android:ellipsize="none"
         android:maxLines="1"
         android:layout_marginEnd="24dp"
+        android:enabled="false"
         app:layout_constraintBottom_toBottomOf="@+id/bg_todo"
         app:layout_constraintEnd_toEndOf="@+id/tv_daily_todo_title"
         app:layout_constraintStart_toStartOf="@+id/tv_daily_todo_title"
         app:layout_constraintTop_toBottomOf="@+id/tv_daily_todo_title"
         tools:text="걷기 5분 + 달리기 3분 / 4회 반복" />
+
+    <TextView
+        android:id="@+id/tv_no_curriculum"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text"
+        android:textSize="16sp"
+        android:letterSpacing="-0.02"
+        android:textStyle="bold"
+        android:autoSizeMaxTextSize="16sp"
+        android:autoSizeMinTextSize="8sp"
+        android:autoSizeTextType="uniform"
+        android:ellipsize="none"
+        android:maxLines="1"
+        android:layout_marginEnd="24dp"
+        android:text="커리큘럼이 존재하지 않습니다. 지금 시작해볼까요?"
+        app:layout_constraintBottom_toBottomOf="@+id/bg_todo"
+        app:layout_constraintEnd_toEndOf="@+id/tv_daily_todo_title"
+        app:layout_constraintStart_toStartOf="@+id/tv_daily_todo_title"
+        app:layout_constraintTop_toBottomOf="@+id/tv_daily_todo_title"/>
 
     <TextView
         android:id="@+id/tv_time"
@@ -94,15 +116,15 @@
     <TextView
         android:id="@+id/tv_time_title"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:autoSizeMaxTextSize="14sp"
+        android:layout_height="0dp"
+        android:autoSizeMaxTextSize="12sp"
         android:autoSizeMinTextSize="6sp"
         android:autoSizeTextType="uniform"
         android:ellipsize="none"
         android:maxLines="1"
         android:text="시간"
         android:textColor="@color/caption"
-        android:textSize="14sp"
+        android:textSize="12sp"
         android:textStyle="bold"
         android:letterSpacing="-0.02"
         android:gravity="center"
@@ -136,15 +158,15 @@
     <TextView
         android:id="@+id/tv_pace_title"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:autoSizeMaxTextSize="14sp"
+        android:layout_height="0dp"
+        android:autoSizeMaxTextSize="12sp"
         android:autoSizeMinTextSize="6sp"
         android:autoSizeTextType="uniform"
         android:ellipsize="none"
         android:maxLines="1"
         android:text="현재 페이스"
         android:textColor="@color/caption"
-        android:textSize="14sp"
+        android:textSize="12sp"
         android:textStyle="bold"
         android:letterSpacing="-0.02"
         android:gravity="center"
@@ -178,15 +200,15 @@
     <TextView
         android:id="@+id/tv_distance_title"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:autoSizeMaxTextSize="14sp"
+        android:layout_height="0dp"
+        android:autoSizeMaxTextSize="12sp"
         android:autoSizeMinTextSize="6sp"
         android:autoSizeTextType="uniform"
         android:ellipsize="none"
         android:maxLines="1"
         android:text="거리(km)"
         android:textColor="@color/caption"
-        android:textSize="14sp"
+        android:textSize="12sp"
         android:textStyle="bold"
         android:letterSpacing="-0.02"
         android:gravity="center"
@@ -329,8 +351,10 @@
         app:constraint_referenced_ids="btn_restart, btn_end" />
 
     <androidx.constraintlayout.widget.Group
+        android:visibility="gone"
         android:id="@+id/group_todo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:constraint_referenced_ids="bg_todo, tv_daily_todo_title, cb_daily_todo"/>
+        app:constraint_referenced_ids="bg_todo, tv_daily_todo_title"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

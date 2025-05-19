@@ -51,8 +51,8 @@ object RemoteDataSourceModule {
 
     @Provides
     @Singleton
-    fun provideGroupDataSource(groupService: GroupService): GroupDataSource {
-        return GroupDataSourceImpl(groupService)
+    fun provideGroupDataSource(groupService: GroupService, handler: ApiResponseHandler): GroupDataSource {
+        return GroupDataSourceImpl(groupService, handler)
     }
 
     @Provides
@@ -60,18 +60,20 @@ object RemoteDataSourceModule {
     fun provideAuthDataSource(
         userService: UserService,
         moshi: Moshi,
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
+        handler: ApiResponseHandler
     ): AuthDataSource {
-        return AuthDataSourceImpl(userService, moshi, context)
+        return AuthDataSourceImpl(userService, moshi, context, handler)
     }
 
     @Provides
     @Singleton
     fun provideRunningDataSource(
         @ApplicationContext context: Context,
-        runningService: RunningService
+        runningService: RunningService,
+        handler: ApiResponseHandler
     ): RunningDataSource {
-        return RunningDataSourceImpl(context, runningService)
+        return RunningDataSourceImpl(context, runningService, handler)
     }
 
     @Provides
@@ -82,37 +84,37 @@ object RemoteDataSourceModule {
 
     @Provides
     @Singleton
-    fun provideMarathonDataSource(marathonService: MarathonService): MarathonDataSource {
-        return MarathonDataSourceImpl(marathonService)
+    fun provideMarathonDataSource(marathonService: MarathonService, handler: ApiResponseHandler): MarathonDataSource {
+        return MarathonDataSourceImpl(marathonService, handler)
     }
 
     @Provides
     @Singleton
-    fun provideCurriculumDataSource(curriculumService: CurriculumService): CurriculumDataSource {
-        return CurriculumDataSourceImpl(curriculumService)
+    fun provideCurriculumDataSource(curriculumService: CurriculumService, handler: ApiResponseHandler): CurriculumDataSource {
+        return CurriculumDataSourceImpl(curriculumService, handler)
     }
 
     @Provides
     @Singleton
-    fun provideTodoDataSource(todoService: TodoService): TodoDataSource {
-        return TodoDataSourceImpl(todoService)
+    fun provideTodoDataSource(todoService: TodoService, handler: ApiResponseHandler): TodoDataSource {
+        return TodoDataSourceImpl(todoService, handler)
     }
     @Provides
     @Singleton
     fun provideCourseDataSource(
-        courseService: CourseService
+        courseService: CourseService,
+        handler: ApiResponseHandler
     ): CourseDataSource {
-        return CourseDataSourceImpl(courseService)
+        return CourseDataSourceImpl(courseService, handler)
     }
 
     @Provides
     @Singleton
     fun provideHistoryDataSource(
         historyService: HistoryService,
-//        handler: ApiResponseHandler
+        handler: ApiResponseHandler
     ): HistoryDataSource {
-//        return HistoryDataSourceImpl(historyService, handler)
-        return HistoryDataSourceImpl(historyService)
+        return HistoryDataSourceImpl(historyService, handler)
     }
 
 }

@@ -35,4 +35,16 @@ class DataStoreRepositoryImpl @Inject constructor(
     override val savedGaitAnalysisResult: Flow<GaitAnalysisResult?> = dataStore.savedGaitAnalysisResult
 
     override suspend fun saveGaitAnalysisResult(gaitAnalysisResult: GaitAnalysisResult) = dataStore.saveGaitAnalysisResult(gaitAnalysisResult)
+
+    override val weight: Flow<Double?> = dataStore.weight
+
+    override suspend fun saveWeight(weight: Double) {
+        dataStore.saveWeight(weight)
+    }
+
+    override val height: Flow<Double?> = dataStore.height
+
+    override suspend fun saveHeight(height: Double) {
+        dataStore.saveHeight(height)
+    }
 }

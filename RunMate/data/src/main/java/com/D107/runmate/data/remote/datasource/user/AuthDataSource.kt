@@ -11,5 +11,5 @@ import com.D107.runmate.domain.model.user.ProfileImageSource
 interface AuthDataSource {
     suspend fun login(loginRequest: LoginRequest): ApiResponse<LoginResponse>
     suspend fun signup(request: SignupRequest, profileImageSource: ProfileImageSource?): ApiResponse<SignupResponse>
-    suspend fun checkEmail(email: String): ApiResponse<CheckEmailResponse>
+    suspend fun checkEmail(email: String): ApiResponse<Boolean>
 }

@@ -8,17 +8,19 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 data class MyRunItem(
     val addedToCourse: Boolean,
-    val avgBpm: Int,
-    val avgPace: Int,
-    val calories: Int,
+    val avgBpm: Double,
+    val avgPace: Double,
+    val avgCadence: Double,
+    val avgElevation: Double,
+    val calories: Double,
     val courseLiked: Boolean,
     val courseLikes: Int,
-    val distance: Int,
-    val time: Int
+    val distance: Double,
+    val time: Long
 ): BaseResponse {
     companion object: DataMapper<MyRunItem, MyRun> {
         override fun MyRunItem.toDomainModel(): MyRun {
-            return MyRun(addedToCourse, avgBpm, avgPace, calories, courseLiked, courseLikes, distance, time)
+            return MyRun(addedToCourse, avgBpm, avgPace, calories, avgCadence, avgElevation, courseLiked, courseLikes, distance, time)
         }
     }
 }

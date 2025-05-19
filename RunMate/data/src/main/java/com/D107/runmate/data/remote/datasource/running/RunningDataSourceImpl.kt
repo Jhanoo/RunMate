@@ -3,6 +3,7 @@ package com.D107.runmate.data.remote.datasource.running
 import android.content.Context
 import com.D107.runmate.data.remote.api.RunningService
 import com.D107.runmate.data.remote.common.ApiResponse
+import com.D107.runmate.data.remote.common.ApiResponseHandler
 import com.D107.runmate.data.remote.common.ErrorResponse
 import com.D107.runmate.data.remote.request.FinishRunningRequest
 import com.D107.runmate.data.remote.response.EndRunningResponse
@@ -16,36 +17,27 @@ import javax.inject.Inject
 
 class RunningDataSourceImpl @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val runningService: RunningService
+    private val runningService: RunningService,
+    private val handler: ApiResponseHandler
 ): RunningDataSource {
     override suspend fun endRunning(request: FinishRunningRequest): ApiResponse<EndRunningResponse> {
-        val fileName = "running_tracking.gpx"
-        val file = File(context.filesDir, fileName)
-        if (!file.exists()) {
-            return ApiResponse.Error(
-                ErrorResponse(
-                    status = "400",
-                    error = "FILE_NOT_FOUND",
-                    code = "FILE_NOT_FOUND",
-                    message = "트래킹 파일이 존재하지 않습니다."
+        return handler.handle {
+            val fileName = "running_tracking.gpx"
+            val file = File(context.filesDir, fileName)
+            if (!file.exists()) {
+                ApiResponse.Error(
+                    ErrorResponse(
+                        status = "400",
+                        error = "FILE_NOT_FOUND",
+                        code = "FILE_NOT_FOUND",
+                        message = "트래킹 파일이 존재하지 않습니다."
+                    )
                 )
-            )
-        }
-
-        return try {
+            }
             Timber.d("request ${request}")
             val requestBody = file.asRequestBody("application/octet-stream".toMediaTypeOrNull())
             val filePart = MultipartBody.Part.createFormData("gpxFile", file.name, requestBody)
             runningService.endRunning(filePart, request)
-        } catch (e: Exception) {
-            ApiResponse.Error(
-                ErrorResponse(
-                    status = "500",
-                    error = "FILE_READ_ERROR",
-                    code = "FILE_READ_ERROR",
-                    message = "파일 처리 중 오류가 발생했습니다: ${e.localizedMessage}"
-                )
-            )
         }
     }
 }

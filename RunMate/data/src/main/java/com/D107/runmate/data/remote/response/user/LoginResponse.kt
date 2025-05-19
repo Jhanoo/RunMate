@@ -12,7 +12,9 @@ data class LoginResponse(
     @Json(name = "accessToken") val accessToken: String,
     @Json(name = "userId") val userId: String? = null,
     @Json(name = "nickname") val nickname: String? = null,
-    @Json(name = "profileImageUrl") val profileImage: String? = null
+    @Json(name = "profileImageUrl") val profileImage: String? = null,
+    @Json(name = "weight") val weight: Double? = null,
+    @Json(name = "height") val height: Double? = null
 ) : BaseResponse {
     companion object : DataMapper<LoginResponse, LoginData> {
         override fun LoginResponse.toDomainModel(): LoginData {
@@ -21,7 +23,9 @@ data class LoginResponse(
                 accessToken = accessToken,
                 userId = userId,
                 nickname = nickname,
-                profileImage = profileImage
+                profileImage = profileImage,
+                weight = weight,
+                height = height
             )
         }
     }

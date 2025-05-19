@@ -129,13 +129,16 @@ class GroupRepositoryImpl @Inject constructor(
 
     override suspend fun hasGroupHistory(): Flow<ResponseStatus<Boolean>> = flow{
         try{
-            val response = groupDataSource.hasGroupHistoriy()
+            val response = groupDataSource.hasGroupHistory()
             if(response is ApiResponse.Success){
-                emit(ResponseStatus.Success(response.data))
+                if(response.data == null){
+                    emit(ResponseStatus.Success(false))
+                } else {
+                    emit(ResponseStatus.Success(response.data))
+                }
             }else if(response is ApiResponse.Error){
                 emit(ResponseStatus.Error(NetworkError(message = response.error.message?:"Unknown Error")))
             }
-
         }catch (e:Exception){
             Timber.e("${e.message}")
             emit(ResponseStatus.Error(NetworkError(message = e.message?:"")))
