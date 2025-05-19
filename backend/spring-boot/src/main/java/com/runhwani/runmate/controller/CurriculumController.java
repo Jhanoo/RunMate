@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -74,7 +75,16 @@ public class CurriculumController implements CurriculumControllerDocs {
     @Override
     public ResponseEntity<CommonResponse<TodoResponse>> getTodayTodo(UserDetails principal) {
         UUID userId = UUID.fromString(principal.getUsername());
-        Todo todo = curriculumService.getTodayTodo(userId);
+        Todo todo;
+        try {
+            todo = curriculumService.getTodayTodo(userId);
+        } catch (ResponseStatusException e) {
+            // ex.getStatusCode() → 404, ex.getReason() → "현재 가입한 그룹이 없습니다."
+            return ResponseEntity
+                    .status(e.getStatusCode())
+                    .body(CommonResponse.error(e.getReason()));
+        }
+
         TodoResponse response = TodoResponse.builder()
                 .todoId(todo.getTodoId())
                 .content(todo.getContent())
