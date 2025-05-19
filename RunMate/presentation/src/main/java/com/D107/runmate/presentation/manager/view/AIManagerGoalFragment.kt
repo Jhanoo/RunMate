@@ -257,7 +257,8 @@ class AIManagerGoalFragment : BaseFragment<FragmentAIManagerGoalBinding>(
                                     R.id.AIManagerFragment,
                                     bundleOf("curriculumId" to curriculumId),
                                     NavOptions.Builder()
-                                        .setPopUpTo(R.id.AIManagerIntroFragment, true)
+                                        .setPopUpTo(R.id.nav_graph, false)
+//                                        .setPopUpTo(R.id.AIManagerIntroFragment, true)
                                         .build()
                                 )
                             },

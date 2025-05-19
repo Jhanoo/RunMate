@@ -178,7 +178,7 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
         }
 
         binding.btnVibrate.setOnClickListener {
-            viewModel.sendLocation(36.104342, 128.418323)
+//            viewModel.sendLocation(36.104342, 128.418323)
             if (mainViewModel.isVibrationEnabled.value) {
 
                 binding.btnVibrate.setImageResource(R.drawable.ic_running_btn_vibrate_off)
@@ -189,7 +189,7 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
         }
 
         binding.btnSound.setOnClickListener {
-            viewModel.sendLocation(36.108355, 128.415780)
+//            viewModel.sendLocation(36.108355, 128.415780)
             if (mainViewModel.isSoundEnabled.value) {
                 binding.btnSound.setImageResource(R.drawable.ic_running_btn_sound_off)
             } else {
@@ -315,15 +315,7 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
                     }
                 }
 
-                launch {
-                    viewModel.groupMemberLocation.collect { groupMemberLocation ->
-                        groupMemberLocation?.let {
-                            Timber.d("onViewCreated: groupMemberLocation $it")
-                            handleLocationUpdate(it)
-                        }
 
-                    }
-                }
 
                 launch {
                     mainViewModel.trackingStatus.collectLatest { status ->
@@ -370,44 +362,59 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
                         }
                     }
                 }
-                launch{
-                    mainViewModel.runningRecord.collectLatest { state ->
-                        if (state is RunningRecordState.Exist) {
-                            if (state.runningRecords.size > 1) {
-                                val locationValue = mainViewModel.userLocation.value
-                                if (locationValue is UserLocationState.Exist) {
-                                    val currentLocation = LatLng.from(
-                                        locationValue.locations.last().latitude,
-                                        locationValue.locations.last().longitude
-                                    )
-                                    val prevLocation = LatLng.from(
-                                        locationValue.locations[locationValue.locations.size - 2].latitude,
-                                        locationValue.locations[locationValue.locations.size - 2].longitude
-                                    )
-                                    mContext?.let {
-                                        kakaoMap?.let {
-                                            addCoursePoint(
-                                                mContext!!,
-                                                kakaoMap!!,
-                                                prevLocation,
-                                                currentLocation
-                                            )
-                                        }
-                                    }
-
-                                }
-                            }
-                            binding.tvDistance.text =
-                                getString(R.string.running_distance, state.runningRecords.last().distance)
-                            binding.tvPace.text =
-                                LocationUtils.getPaceFromSpeed(state.runningRecords.last().currentSpeed)
-                        } else {
-                            Timber.d( "onViewCreated: state else")
-                        }
-                    }
-                }
                 viewModel.currentGroup.value?.courseId?.let{
                     viewModel.getCourseDetail(it)
+                }
+            }
+
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            launch {
+                viewModel.groupMemberLocation.collect { groupMemberLocation ->
+                    groupMemberLocation?.let {
+                        Timber.d("onViewCreated: groupMemberLocation $it")
+                        handleLocationUpdate(it)
+                    }
+
+                }
+            }
+            launch {
+                mainViewModel.runningRecord.collectLatest { state ->
+                    if (state is RunningRecordState.Exist) {
+                        if (state.runningRecords.size > 1) {
+                            val locationValue = mainViewModel.userLocation.value
+                            if (locationValue is UserLocationState.Exist) {
+                                val currentLocation = LatLng.from(
+                                    locationValue.locations.last().latitude,
+                                    locationValue.locations.last().longitude
+                                )
+                                val prevLocation = LatLng.from(
+                                    locationValue.locations[locationValue.locations.size - 2].latitude,
+                                    locationValue.locations[locationValue.locations.size - 2].longitude
+                                )
+                                mContext?.let {
+                                    kakaoMap?.let {
+                                        addCoursePoint(
+                                            mContext!!,
+                                            kakaoMap!!,
+                                            prevLocation,
+                                            currentLocation
+                                        )
+                                    }
+                                }
+
+                            }
+                        }
+                        binding.tvDistance.text =
+                            getString(
+                                R.string.running_distance,
+                                state.runningRecords.last().distance
+                            )
+                        binding.tvPace.text =
+                            LocationUtils.getPaceFromSpeed(state.runningRecords.last().currentSpeed)
+                    } else {
+                        Timber.d("onViewCreated: state else")
+                    }
                 }
             }
 

@@ -16,6 +16,8 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
 import android.content.Context
+import com.D107.runmate.data.remote.response.user.CheckEmailResponse
+import timber.log.Timber
 
 class AuthDataSourceImpl @Inject constructor(
     private val userService: UserService,
@@ -66,6 +68,52 @@ class AuthDataSourceImpl @Inject constructor(
                 ErrorResponse(
                     message = e.message ?: "회원가입에 실패했습니다.",
                     status = "ERROR"
+                )
+            )
+        }
+    }
+
+    override suspend fun checkEmail(email: String): ApiResponse<CheckEmailResponse> {
+        return try {
+            val response = userService.checkEmail(email)
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body != null) {
+                    ApiResponse.Success(
+                        CheckEmailResponse(
+                            isDuplicated = body.data,
+                            message = body.message
+                        )
+                    )
+                } else {
+                    ApiResponse.Error(
+                        ErrorResponse(
+                            status = "ERROR",
+                            error = "NULL_RESPONSE",
+                            code = "NULL_RESPONSE",
+                            message = "응답이 비어있습니다."
+                        )
+                    )
+                }
+            } else {
+                ApiResponse.Error(
+                    ErrorResponse(
+                        status = "ERROR",
+                        error = "HTTP_ERROR",
+                        code = response.code().toString(),
+                        message = "HTTP 에러: ${response.code()}"
+                    )
+                )
+            }
+        } catch (e: Exception) {
+            Timber.e("Email check exception: ${e.message}")
+            e.printStackTrace()
+            ApiResponse.Error(
+                ErrorResponse(
+                    status = "NETWORK_ERROR",
+                    error = "CONNECTION_FAILED",
+                    code = "NETWORK_ERROR",
+                    message = "서버에 연결할 수 없습니다: ${e.message}"
                 )
             )
         }

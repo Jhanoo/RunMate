@@ -74,10 +74,30 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
         initRecyclerView()
 
         updateRefreshButton()
+
+        updateGoalDist()
+
         CurriculumPrefs.logAllPreferences(requireContext())
 
         // 오늘 날짜에 해당하는 데이터 로드
         loadSchedulesForSelectedDate(Calendar.getInstance())
+    }
+
+    private fun updateGoalDist() {
+        val curriculumViewModel = ViewModelProvider(requireActivity()).get(CurriculumViewModel::class.java)
+
+        // 현재 커리큘럼 정보 가져오기
+        lifecycleScope.launch {
+            curriculumViewModel.myCurriculum.collect { result ->
+                result?.getOrNull()?.let { curriculum ->
+                    // goalDist 값 가져오기
+                    val goalDist = curriculum.goalDist
+
+                    // TextView에 설정
+                    binding.tvGoalValue.text = goalDist
+                }
+            }
+        }
     }
 
     private fun updateRefreshButton() {
