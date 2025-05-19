@@ -327,6 +327,10 @@ public class CurriculumServiceImpl implements CurriculumService {
 
     @Override
     public Todo getTodayTodo(UUID userId) {
-        return curriculumDao.selectTodayTodoByUserId(userId);
+        Todo todayTodo = curriculumDao.selectTodayTodoByUserId(userId);
+        if (todayTodo == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "오늘의 Todo가 없습니다.");
+        }
+        return todayTodo;
     }
 }
