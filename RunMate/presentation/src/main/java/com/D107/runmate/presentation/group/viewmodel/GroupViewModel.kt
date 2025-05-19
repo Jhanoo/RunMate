@@ -116,7 +116,7 @@ class GroupViewModel @Inject constructor(
                                     _uiEvent.emit(GroupUiEvent.GoToGroupRunning)
                                 }
                                 else -> {
-                                    _uiEvent.emit(GroupUiEvent.ToggleGroupFragmentVisible(false))
+                                    _uiEvent.emit(GroupUiEvent.ToggleGroupFragmentVisible(true))
 
                                 }
                             }

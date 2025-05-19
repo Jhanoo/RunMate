@@ -42,7 +42,7 @@
         android:layout_marginEnd="16dp"
         android:background="@android:color/darker_gray"
         android:backgroundTint="#F5F5F5"
-        android:hint="런메이트"
+        android:hint="그룹명"
         android:inputType="text"
         android:padding="12dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -84,7 +84,7 @@
         android:layout_marginEnd="16dp"
         android:background="@android:color/darker_gray"
         android:backgroundTint="#F5F5F5"
-        android:hint="달리러닝 코스"
+        android:hint="러닝 코스"
         android:inputType="text"
         android:padding="12dp"
         android:cursorVisible="false"
@@ -94,6 +94,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_course_label" />
+    <ImageView
+        android:id="@+id/iv_clear_course"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:src="@drawable/ic_clear"
+        android:padding="8dp"
+        android:contentDescription="텍스트 지우기"
+        android:visibility="visible"
+        app:layout_constraintTop_toTopOf="@+id/et_course"
+        app:layout_constraintBottom_toBottomOf="@+id/et_course"
+        app:layout_constraintEnd_toEndOf="@+id/et_course"
+        android:layout_marginEnd="8dp" />
 
     <!-- 일시 -->
     <TextView
@@ -114,7 +126,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:text="코스를 선택하지 않은 경우, 입력해주세요"
+        android:text="그룹의 모임 시간을 입력해주세요"
         android:textColor="#757575"
         android:textSize="12sp"
         android:fontFamily="@font/pretendard_regular"
@@ -162,7 +174,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:text="코스를 선택하지 않은 경우, 입력해주세요"
+        android:text="그룹 모임 장소"
         android:textColor="@color/description_text"
         android:textSize="12sp"
         android:fontFamily="@font/pretendard_regular"
