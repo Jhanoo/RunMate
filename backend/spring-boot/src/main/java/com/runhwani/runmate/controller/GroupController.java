@@ -9,7 +9,6 @@ import com.runhwani.runmate.dto.response.group.GroupResponse;
 import com.runhwani.runmate.dto.response.group.JoinGroupResponse;
 import com.runhwani.runmate.model.Course;
 import com.runhwani.runmate.model.Group;
-import com.runhwani.runmate.model.History;
 import com.runhwani.runmate.service.CourseService;
 import com.runhwani.runmate.service.GroupService;
 import com.runhwani.runmate.service.HistoryService;
@@ -23,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -69,6 +69,16 @@ public class GroupController implements GroupControllerDocs {
 
         // 2) 조회한 그룹의 ID 로 멤버 리스트 조회
         List<GroupMemberResponse> memberList = groupService.getGroupMembers(myGroup.getGroupId());
+
+        UUID leaderId = myGroup.getLeaderId();
+
+        memberList = memberList.stream()
+                .sorted((a, b) -> {
+                    if (a.getUserId().equals(leaderId)) return -1;
+                    if (b.getUserId().equals(leaderId)) return 1;
+                    return 0;
+                })
+                .collect(Collectors.toList());
 
         // 3) 도메인 → 응답 DTO 매핑
         GroupResponse groupRes = GroupResponse.builder()
