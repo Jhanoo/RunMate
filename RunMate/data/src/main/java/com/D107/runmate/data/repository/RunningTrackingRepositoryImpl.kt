@@ -48,6 +48,15 @@ class RunningTrackingRepositoryImpl @Inject constructor(
     private val _courseId = MutableStateFlow<String?>(null)
     override val courseId: StateFlow<String?> = _courseId.asStateFlow()
 
+    private val _goalPace = MutableStateFlow<Int?>(null)
+    override val goalPace: StateFlow<Int?> = _goalPace.asStateFlow()
+
+    private val _isSound = MutableStateFlow<Boolean>(true)
+    override val isSound: StateFlow<Boolean> = _isSound.asStateFlow()
+
+    private val _isVibration = MutableStateFlow<Boolean>(true)
+    override val isVibration: StateFlow<Boolean> = _isVibration.asStateFlow()
+
     override fun setTrackingStatus(status: TrackingStatus) {
         if(status == TrackingStatus.INITIAL) {
             _time.value = 0
@@ -123,8 +132,17 @@ class RunningTrackingRepositoryImpl @Inject constructor(
         _courseId.value = courseId
     }
 
-    private var isVibrationEnabled = true
-    private var isSoundEnabled = true
+    override fun setGoalPace(goalPace: Int) {
+        _goalPace.value = goalPace
+    }
+
+    override fun toggleIsSound() {
+        _isSound.value = !_isSound.value
+    }
+
+    override fun toggleIsVibration() {
+        _isVibration.value = !_isVibration.value
+    }
 
     override fun incrementTime() {
         _time.value += 1

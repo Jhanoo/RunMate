@@ -21,17 +21,17 @@ class MainViewModel @Inject constructor(
     private val repository: RunningTrackingRepository,
     private val dataStoreRepository: DataStoreRepository
 ): ViewModel() {
-    private val _isVibrationEnabled = MutableStateFlow(true)
-    val isVibrationEnabled = _isVibrationEnabled.asStateFlow()
-
-    private val _isSoundEnabled = MutableStateFlow(true)
-    val isSoundEnabled = _isSoundEnabled.asStateFlow()
+//    private val _isVibrationEnabled = MutableStateFlow(true)
+//    val isVibrationEnabled = _isVibrationEnabled.asStateFlow()
+//
+//    private val _isSoundEnabled = MutableStateFlow(true)
+//    val isSoundEnabled = _isSoundEnabled.asStateFlow()
 
     private val _course = MutableStateFlow(Pair<String?, String?>(null, null)) // course 설정 안 한 경우 null, first: courseId, second: gpxFile
     val course = _course.asStateFlow()
 
-    private val _goalPace = MutableStateFlow<Int?>(null) // 페이스 설정 안 한 경우 null
-    val goalPace = _goalPace.asStateFlow()
+//    private val _goalPace = MutableStateFlow<Int?>(null) // 페이스 설정 안 한 경우 null
+//    val goalPace = _goalPace.asStateFlow()
 
     private val _userId = MutableStateFlow<String?>(null)
     val userId: StateFlow<String?> = _userId
@@ -80,6 +80,9 @@ class MainViewModel @Inject constructor(
     val trackingStatus = repository.trackingStatus
     val historyId = repository.historyId
     val courseId = repository.courseId
+    val goalPace = repository.goalPace
+    val isSound = repository.isSound
+    val isVibration = repository.isVibration
 
     fun setUserLocation(state: UserLocationState) {
         if (state is UserLocationState.Exist) {
@@ -101,7 +104,8 @@ class MainViewModel @Inject constructor(
     }
 
     fun setGoalPace(pace: Int?) {
-        _goalPace.value = pace
+//        _goalPace.value = pace
+        repository.setGoalPace(pace ?: 0)
     }
 
     fun setSourceScreen(sourceScreen: String) {

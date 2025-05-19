@@ -16,6 +16,10 @@ import android.hardware.SensorManager
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
@@ -67,11 +71,12 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.util.Locale
 import javax.inject.Inject
 import kotlin.time.times
 
 @AndroidEntryPoint
-class RunningTrackingService : Service() {
+class RunningTrackingService : Service(), TextToSpeech.OnInitListener {
     private val TAG = "RunningService"
     private val NOTIFICATION_ID = 1001
     private val CHANNEL_ID = "running_tracker_channel"
@@ -129,10 +134,18 @@ class RunningTrackingService : Service() {
 
     private val _endRunning = MutableSharedFlow<RunningEndState>()
 
+    private var tts: TextToSpeech? = null
+    private var ttsJob: Job? = null
+
+    private var vibrateJob: Job? = null
+    private lateinit var vibrator: Vibrator
+
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
         observeSocketConnection()
+        tts = TextToSpeech(this, this)
+        initVibrator()
     }
 
     private fun observeSocketConnection() {
@@ -189,6 +202,8 @@ class RunningTrackingService : Service() {
 
             ACTION_PAUSE_SERVICE -> pauseService()
             ACTION_STOP_SERVICE -> stopService()
+            ACTION_SOUND -> toggleSound()
+            ACTION_VIBRATE -> toggleVibrate()
         }
 
         return START_STICKY
@@ -202,6 +217,18 @@ class RunningTrackingService : Service() {
 
         startTimeTracking()
         startTracking(this)
+
+        if(repository.isSound.value) {
+            startTts()
+        } else {
+            stopTts()
+        }
+
+        if(repository.isVibration.value) {
+            startVibration()
+        } else {
+            stopVibration()
+        }
     }
 
     private fun stopService() {
@@ -425,12 +452,81 @@ class RunningTrackingService : Service() {
         }
     }
 
+    private fun toggleSound() {
+        repository.toggleIsSound()
+        if(repository.isSound.value && repository.goalPace.value != null) {
+            startTts()
+        }else if(repository.isSound.value == false && repository.goalPace.value != null) {
+            stopTts()
+        }
+    }
+
+    private fun initVibrator() {
+        vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            vibratorManager.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            getSystemService(VIBRATOR_SERVICE) as Vibrator
+        }
+    }
+
+    private fun toggleVibrate() {
+        repository.toggleIsVibration()
+        if(repository.isVibration.value && repository.goalPace.value != null) {
+            startVibration()
+        } else if(repository.isVibration.value == false && repository.goalPace.value != null) {
+            stopVibration()
+        }
+    }
+
+    private fun startVibration() {
+        val goalPace = repository.goalPace.value
+        if(repository.isVibration.value && goalPace != null) {
+            vibrateJob = CoroutineScope(Dispatchers.Main).launch {
+                repository.runningRecord.collectLatest { state ->
+                    if(state is RunningRecordState.Exist) {
+                        state.runningRecords.last().let {
+                            val avgPace = 16.6667 / it.avgSpeed
+                            if(goalPace > avgPace) {
+                                Timber.d("goalPace: first $goalPace, avgPace: $avgPace")
+                                triggerVibration()
+                            } else if(goalPace < avgPace) {
+                                Timber.d("goalPace: second $goalPace, avgPace: $avgPace")
+                                triggerVibration()
+                            } else {
+                                Timber.d("정상속도거나 너무 빠르거나 느림")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun stopVibration() {
+        vibrator.cancel()
+        vibrateJob?.cancel()
+    }
+
+    private fun triggerVibration() {
+        Timber.d("vibration")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val effect = VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE)
+            vibrator.vibrate(effect)
+        } else {
+            @Suppress("DEPRECATION")
+            vibrator.vibrate(500)
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         disconnectFromGroupSocket()
         serviceScope.cancel()
         runningJob = RunningJobState.None
-//        repository.setTrackingStatus(TrackingStatus.STOPPED)
+        tts?.stop()
+        tts?.shutdown()
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -504,6 +600,19 @@ class RunningTrackingService : Service() {
             context.startService(intent)
         }
 
+        fun toggleSoundService(context: Context) {
+            val intent = Intent(context, RunningTrackingService::class.java).apply {
+                action = ACTION_SOUND
+            }
+            context.startService(intent)
+        }
+
+        fun toggleVibrateService(context: Context) {
+            val intent = Intent(context, RunningTrackingService::class.java).apply {
+                action = ACTION_VIBRATE
+            }
+            context.startService(intent)
+        }
     }
 
     private fun createPendingIntent(
@@ -582,7 +691,6 @@ class RunningTrackingService : Service() {
 
     fun startTracking(context: Context) {
         if (isTracking) return
-        Timber.d("startTracking Cadence")
         sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)?.let { sensor ->
             sensorManager?.registerListener(stepListener, sensor, SensorManager.SENSOR_DELAY_UI)
@@ -592,7 +700,6 @@ class RunningTrackingService : Service() {
     }
 
     fun stopTracking() {
-        Timber.d("stopTracking Cadence")
         sensorManager?.unregisterListener(stepListener)
         sensorManager = null
         isTracking = false
@@ -619,7 +726,6 @@ class RunningTrackingService : Service() {
             cadence = (stepCountInWindow * 12) // 5초 걸음 수 → 분당 걸음 수(60/5=12)
             stepCountInWindow = 0 // 윈도우 초기화
             windowStartTime = currentTime // 다음 윈도우 시작 시간 업데이트
-            Log.d("Cadence", "Current Cadence: $cadence SPM")
         }
     }
 
@@ -681,7 +787,42 @@ class RunningTrackingService : Service() {
                     stopService()
                 }
             }
+        }
+    }
 
+    private fun startTts() {
+        val goalPace = repository.goalPace.value
+        if(goalPace != null) {
+            ttsJob = CoroutineScope(Dispatchers.Main).launch {
+                repository.runningRecord.collectLatest { state ->
+                    if(state is RunningRecordState.Exist) {
+                        state.runningRecords.last().let {
+                            val avgPace = 16.6667 / it.avgSpeed
+                            if(goalPace > avgPace) {
+                                tts?.speak("${goalPace - avgPace} 보다 빨라요", TextToSpeech.QUEUE_FLUSH, null, "tts1")
+                            } else if(goalPace < avgPace) {
+                                tts?.speak("${avgPace - goalPace} 보다 느려요", TextToSpeech.QUEUE_FLUSH, null, "tts2")
+                            } else {
+                                Timber.d("정상속도거나 너무 빠르거나 느림")
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            Timber.d("페이스 설정 안함")
+        }
+    }
+
+    private fun stopTts() {
+        ttsJob?.cancel()
+        ttsJob = null
+        tts?.stop()
+    }
+
+    override fun onInit(status: Int) {
+        if (status == TextToSpeech.SUCCESS) {
+            tts?.language = Locale.KOREAN
         }
     }
 

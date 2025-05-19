@@ -179,7 +179,7 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
 
         binding.btnVibrate.setOnClickListener {
 //            viewModel.sendLocation(36.104342, 128.418323)
-            if (mainViewModel.isVibrationEnabled.value) {
+            if (mainViewModel.isVibration.value) {
 
                 binding.btnVibrate.setImageResource(R.drawable.ic_running_btn_vibrate_off)
             } else {
@@ -190,7 +190,7 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
 
         binding.btnSound.setOnClickListener {
 //            viewModel.sendLocation(36.108355, 128.415780)
-            if (mainViewModel.isSoundEnabled.value) {
+            if (mainViewModel.isSound.value) {
                 binding.btnSound.setImageResource(R.drawable.ic_running_btn_sound_off)
             } else {
                 binding.btnSound.setImageResource(R.drawable.ic_running_btn_sound_on)
