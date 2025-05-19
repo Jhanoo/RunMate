@@ -13,11 +13,13 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.D107.runmate.presentation.MainViewModel
 import com.D107.runmate.presentation.R
+import com.D107.runmate.presentation.course.view.CourseSettingFragmentDirections
 import com.D107.runmate.presentation.databinding.FragmentGroupInfoBinding
 import com.D107.runmate.presentation.group.adapter.GroupMemberAdapter
 import com.D107.runmate.presentation.group.viewmodel.GroupUiEvent
 import com.D107.runmate.presentation.group.viewmodel.GroupViewModel
 import com.D107.runmate.presentation.utils.CommonUtils
+import com.D107.runmate.presentation.utils.SourceScreen
 import com.ssafy.locket.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -65,6 +67,14 @@ class GroupInfoFragment : BaseFragment<FragmentGroupInfoBinding>(
         }
         binding.btnStartGroupInfo.setOnClickListener {
             viewModel.startGroup()
+        }
+        binding.btnCourseDetailGroupInfo.setOnClickListener {
+            mainViewModel.setSourceScreen(SourceScreen.GROUP_INFO_FRAGMENT)
+            val actions =
+                GroupInfoFragmentDirections.actionGroupInfoFragmentToCourseDetailFragment(
+                    viewModel.currentGroup.value!!.courseId!!
+                )
+            findNavController().navigate(actions)
         }
     }
 

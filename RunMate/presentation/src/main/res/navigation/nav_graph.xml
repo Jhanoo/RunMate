@@ -159,12 +159,19 @@
         <action
             android:id="@+id/action_groupCreateFragment_to_placeSearchFragment"
             app:destination="@id/placeSearchFragment" />
+        <action
+            android:id="@+id/action_groupCreateFragment_to_courseSettingFragment"
+            app:destination="@id/courseSettingFragment" />
     </fragment>
     <fragment
         android:id="@+id/groupInfoFragment"
         android:name="com.D107.runmate.presentation.group.view.GroupInfoFragment"
         android:label="fragment_group_info"
-        tools:layout="@layout/fragment_group_info" />
+        tools:layout="@layout/fragment_group_info">
+        <action
+            android:id="@+id/action_groupInfoFragment_to_courseDetailFragment"
+            app:destination="@id/courseDetailFragment" />
+    </fragment>
     <fragment
         android:id="@+id/placeSearchFragment"
         android:name="com.D107.runmate.presentation.group.view.PlaceSearchFragment"
@@ -271,6 +278,11 @@
             app:destination="@id/runningFragment"
             app:popUpTo="@id/runningFragment"
             app:popUpToInclusive="true"/>
+        <action
+            android:id="@+id/action_courseDetailFragment_to_groupCreateFragment"
+            app:destination="@id/groupCreateFragment"
+            app:popUpTo="@id/groupCreateFragment"
+            app:popUpToInclusive="true"/>
     </fragment>
     <fragment
         android:id="@+id/chartFragment"
@@ -286,9 +298,6 @@
 
         <action
             android:id="@+id/action_groupRunningFragment_to_runningRecordFragment"
-            app:launchSingleTop="true"
-            app:popUpTo="@id/groupRunningFragment"
-            app:popUpToInclusive="true"
             app:destination="@id/runningRecordFragment" />
         <action
             android:id="@+id/action_groupRunningFragment_to_runningEndFragment"

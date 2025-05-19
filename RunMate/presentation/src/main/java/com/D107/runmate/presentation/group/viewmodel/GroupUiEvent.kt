@@ -6,6 +6,7 @@ sealed class GroupUiEvent {
     object GoToGroup: GroupUiEvent()
     object GoToGroupRunning: GroupUiEvent()
     object ShowFinishDialog : GroupUiEvent()
+    object DrawCourse:GroupUiEvent()
     data class ToggleGroupFragmentVisible(val visible: Boolean):GroupUiEvent()
     data class ToggleGroupRunningFinishVisible(val visible: Boolean):GroupUiEvent()
     data class ShowToast(val message: String) : GroupUiEvent()

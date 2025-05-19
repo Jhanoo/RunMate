@@ -7,6 +7,7 @@ import com.D107.runmate.domain.model.group.GroupData
 import com.D107.runmate.domain.model.socket.ConnectionStatus
 import com.D107.runmate.domain.model.socket.MemberLocationData
 import com.D107.runmate.domain.model.socket.SocketAuth
+import com.D107.runmate.domain.usecase.course.GetCourseDetailUseCase
 import com.D107.runmate.domain.usecase.group.FinishGroupUseCase
 import com.D107.runmate.domain.usecase.group.GetCurrentGroupUseCase
 import com.D107.runmate.domain.usecase.group.JoinGroupUseCase
@@ -22,6 +23,7 @@ import com.D107.runmate.domain.usecase.socket.ObserveLocationUpdatesUseCase
 import com.D107.runmate.domain.usecase.socket.ObserveMemberLeavedUseCase
 import com.D107.runmate.domain.usecase.socket.ObserveMemberLocationDatasUsecase
 import com.D107.runmate.domain.usecase.socket.SendLocationUpdateUseCase
+import com.D107.runmate.presentation.running.CourseDetailState
 import com.kakao.vectormap.label.Label
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -54,7 +56,8 @@ class GroupViewModel @Inject constructor(
     private val observeMemberLeavedUseCase: ObserveMemberLeavedUseCase,
     private val observeMemberLocationDatasUseCase: ObserveMemberLocationDatasUsecase,
     private val finishGroupUseCase: FinishGroupUseCase,
-    private val hasGroupHistoryUseCase : HasGroupHistoryUseCase
+    private val hasGroupHistoryUseCase : HasGroupHistoryUseCase,
+    private val getCourseDetailUseCase: GetCourseDetailUseCase,
 ) : ViewModel() {
 
 
@@ -67,6 +70,9 @@ class GroupViewModel @Inject constructor(
 
     private val _groupMemberLocation = MutableStateFlow<MemberLocationData?>(null) // 마지막 위치만 표시하거나 List로 관리
     val groupMemberLocation: StateFlow<MemberLocationData?> = _groupMemberLocation.asStateFlow()
+
+    private val _courseDetail = MutableStateFlow<CourseDetailState>(CourseDetailState.Initial)
+    val courseDetail = _courseDetail.asStateFlow()
 
     var groupMemberDatas : StateFlow<Map<String, MemberLocationData>> =
     observeMemberLocationDatasUseCase()
@@ -182,6 +188,7 @@ class GroupViewModel @Inject constructor(
                 if (result is ResponseStatus.Success) {
                     Timber.d("FinishGroup Success")
                     _uiEvent.emit(GroupUiEvent.GoToGroup)
+                    _courseDetail.value = CourseDetailState.Initial
                 }
             }
         }
@@ -230,7 +237,6 @@ class GroupViewModel @Inject constructor(
             if ((currentGroup.value?.status ?: 0) == 1) {
                 joinGroupSocketUseCase(currentGroup.value?.groupId?:"")
                 startObservingLocationUpdates()
-                startObservingMemberLeave()
             } else {
                 Timber.w("Socket not connected. Cannot join group.")
             }
@@ -284,6 +290,22 @@ class GroupViewModel @Inject constructor(
             }
         }
 
+    }
+
+    fun getCourseDetail(courseId: String) {
+        viewModelScope.launch {
+            getCourseDetailUseCase(courseId).collect { status ->
+                when (status) {
+                    is ResponseStatus.Success -> {
+                        Timber.d("getCourseDetail Success {${status.data}}")
+                        _courseDetail.value = CourseDetailState.Success(status.data)
+                        _uiEvent.emit(GroupUiEvent.DrawCourse)
+                    }
+
+                    is ResponseStatus.Error -> Timber.d("getCourseDetail Error {${status.error}}")
+                }
+            }
+        }
     }
 
     fun stopObservingLocationUpdates() {

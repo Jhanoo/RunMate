@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ArrayAdapter
@@ -24,8 +25,8 @@ import com.D107.runmate.domain.model.smartinsole.InsoleConnectionState
 import com.D107.runmate.domain.model.smartinsole.SmartInsole
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentWearableBinding
+import com.D107.runmate.presentation.utils.ManagerAnalysisProcessState
 import com.D107.runmate.presentation.wearable.state.InsoleCardState
-import com.D107.runmate.presentation.wearable.viewmodel.AnalysisProcessState
 import com.D107.runmate.presentation.wearable.viewmodel.InsoleViewModel
 import com.google.android.material.button.MaterialButton
 import com.ssafy.locket.presentation.base.BaseFragment
@@ -157,6 +158,7 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
         } else {
             // 블루투스 켜져 있으면 스캔 시작
             startActualScan()
+            showDeviceSelectionDialog()
         }
     }
 
@@ -183,11 +185,11 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
                 // --- 스캔 상태 관찰 (Dialog 관련) ---
                 launch {
                     viewModel.scanState.collect { isScanning ->
-                        if (isScanning && (deviceListDialog == null || !deviceListDialog!!.isShowing)) {
-                            showDeviceSelectionDialog()
-                        } else if (!isScanning && deviceListDialog != null && deviceListDialog!!.isShowing) {
-                            deviceListDialog?.dismiss()
-                        }
+//                        if (isScanning && (deviceListDialog == null || !deviceListDialog!!.isShowing)) {
+//                            showDeviceSelectionDialog()
+//                        } else if (!isScanning && deviceListDialog != null && deviceListDialog!!.isShowing) {
+//                            deviceListDialog?.dismiss()
+//                        }
                     }
                 }
                 // --- 연결 상태 (세부 텍스트 업데이트 등에 사용 가능) ---
@@ -222,17 +224,13 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
                     viewModel.analysisProcessState.collect { state ->
                         Timber.d("AnalysisState collected: $state")
                         when (state) {
-                            AnalysisProcessState.ANALYZING -> showDiagnosisProgressDialog()
-                            AnalysisProcessState.CALIBRATING->{
+                            ManagerAnalysisProcessState.ANALYZING -> showDiagnosisProgressDialog()
+                            ManagerAnalysisProcessState.CALIBRATING->{
                                 showCalibrationInstructionDialog()
                             }
                             else -> {
                                 dismissCalibrationInstructionDialog()
                                 dismissDiagnosisProgressDialog()
-                                // 분석 완료(STOPPED) 시 최신 결과로 UI 업데이트
-                                if (state == AnalysisProcessState.STOPPED) {
-                                    updateDiagnosisResultUI(viewModel.realTimeAnalysisResult.value)
-                                }
                             }
 
                         }
@@ -243,11 +241,6 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
                 launch {
                     viewModel.scanState.collect { isScanning ->
                         binding.btnFindInsole.isEnabled = !isScanning
-                        if (isScanning && (deviceListDialog == null || !deviceListDialog!!.isShowing)) {
-                            showDeviceSelectionDialog()
-                        } else if (!isScanning && deviceListDialog != null && deviceListDialog!!.isShowing) {
-                            deviceListDialog?.dismiss()
-                        }
                     }
                 }
                 // 스캔된 기기 목록 dialog에 표기
@@ -316,10 +309,7 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
 //            var analysisText = "걸음걸이 패턴: ${getGaitPatternString(result.overallGaitPattern)}\n" // 수정
 //            analysisText += "- 왼쪽 평균 Yaw: ${result.averageLeftYaw?.let { String.format("%.1f°", it) } ?: "N/A"}\n"
 //            analysisText += "- 오른쪽 평균 Yaw: ${result.averageRightYaw?.let { String.format("%.1f°", it) } ?: "N/A"}\n"
-            var gaitDiff:Float =0f
-            if(result.averageLeftYaw!=null&&result.averageRightYaw!=null) {
-                gaitDiff = if(result.averageLeftYaw!!>result.averageRightYaw!!) result.averageRightYaw!! - result.averageLeftYaw!! else Math.abs(result.averageRightYaw!! - result.averageLeftYaw!!)
-            }
+            var gaitDiff:Float =result.averageRightYaw!!-result.averageLeftYaw!!
             val gaitResultDescriptionString = getGaitPatternString(gaitDiff,result.overallGaitPattern)
 
 
@@ -327,16 +317,16 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
             when(result.overallGaitPattern){
                 GaitPatternType.IN_TOEING -> {
                     binding.tvGaitResultInsole.text = "안짱걸음"
-                    binding.ivFootstrikeInsole.setImageResource(R.drawable.img_in_toeing)
+                    binding.ivGaitInsole.setImageResource(R.drawable.img_in_toeing)
                     binding.ivFootstrikeInsole.visibility = View.VISIBLE
                 }
                 GaitPatternType.OUT_TOEING->{
                     binding.tvGaitResultInsole.text = "팔짜걸음"
-                    binding.ivFootstrikeInsole.setImageResource(R.drawable.img_out_toeing)
+                    binding.ivGaitInsole.setImageResource(R.drawable.img_out_toeing)
                     binding.ivFootstrikeInsole.visibility = View.VISIBLE
                 }GaitPatternType.NEUTRAL->{
                     binding.tvGaitResultInsole.text = "정상걸음"
-                    binding.ivFootstrikeInsole.setImageResource(R.drawable.img_neutral_toeing)
+                    binding.ivGaitInsole.setImageResource(R.drawable.img_neutral_toeing)
                     binding.ivFootstrikeInsole.visibility = View.VISIBLE
                 }else->{
                     binding.tvGaitResultInsole.text = "알수 없음"
@@ -410,10 +400,10 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
     }
 
 
-    private fun getGaitPatternString(gaitResultDescription:Float, pattern:GaitPatternType): String {
+    private fun getGaitPatternString(gaitResultDescription:Float, pattern:GaitPatternType): CharSequence {
         return when (pattern) {
-            GaitPatternType.IN_TOEING -> String.format("현제 발의 각도는 %.1f으로 ", gaitResultDescription)+"안짱걸음으로 진단되었습니다.\n"+getString(R.string.in_toeing_description)
-            GaitPatternType.OUT_TOEING -> String.format("현제 발의 각도는 %.1f으로 ", gaitResultDescription)+"팔자걸음으로 진단되었습니다.\n"+getString(R.string.out_toeing_description)
+            GaitPatternType.IN_TOEING -> TextUtils.concat(String.format("현제 발의 각도는 %.1f으로 ", gaitResultDescription)+"안짱걸음으로 진단되었습니다.\n",getText(R.string.in_toeing_description))
+            GaitPatternType.OUT_TOEING -> TextUtils.concat(String.format("현제 발의 각도는 %.1f으로 ", gaitResultDescription)+"팔자걸음으로 진단되었습니다.\n",getText(R.string.out_toeing_description))
             GaitPatternType.NEUTRAL -> String.format("현제 발의 각도는 %.1f으로 ", gaitResultDescription)+"정상걸음으로 진단되었습니다.\n"
             GaitPatternType.UNKNOWN -> "알 수 없음"
         }

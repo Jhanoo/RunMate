@@ -23,7 +23,9 @@ class GaitAnalyzerUtil @Inject constructor() {
     private val CALIBRATION_DURATION_MS = 2000L // 예: 2초 동안 캘리브레이션
     private var calibrationStartTime: Long = 0
 
-    private var currentMode: AnalysisState = AnalysisState.IDLE
+    private var _currentMode = MutableStateFlow(AnalysisState.IDLE) // ViewModel에서 사용하던 AnalysisProcessState와 유사한 역할
+    val currentMode: StateFlow<AnalysisState> = _currentMode.asStateFlow()
+
 
     // --- 상수 및 임계값 (AnalyzeGaitUseCase와 동일하게 또는 별도 관리) ---
     private val MIN_PRESSURE_THRESHOLD = 1000
@@ -52,39 +54,37 @@ class GaitAnalyzerUtil @Inject constructor() {
     private var totalRightSteps: Int = 0
     private var analysisStartTime: Long = 0
     private var lastDataTimestamp: Long = 0
+    private var lastResultTimestamp: Long = 0 // 결과 생성 시점 타임스탬프
 
     // --- 실시간 분석 결과 Flow ---
-    // UI 업데이트 빈도를 조절하기 위해 내부 StateFlow 사용 가능
     private val _currentAnalysisResult = MutableStateFlow(createEmptyResult())
     val currentAnalysisResult: StateFlow<GaitAnalysisResult> = _currentAnalysisResult.asStateFlow()
 
 
-    fun getCalibrationDurationMs(): Long { // 또는 그냥 상수를 public으로
+    fun getCalibrationDurationMs(): Long {
         return CALIBRATION_DURATION_MS
     }
 
     fun startCalibration(): Boolean {
-        if (currentMode != AnalysisState.IDLE) {
-            // 이미 캘리브레이션 중이거나 분석 중이면 시작 안 함
+        if (_currentMode.value != AnalysisState.IDLE) {
             println("Calibration or Analysis already in progress.")
             return false
         }
         println("Starting calibration for ${CALIBRATION_DURATION_MS}ms...")
-        currentMode = AnalysisState.CALIBRATING
+        _currentMode.value = AnalysisState.CALIBRATING
         isCalibrated = false
         leftYawOffset = 0f
         rightYawOffset = 0f
         calibrationDataPoints.clear()
-        calibrationStartTime = System.currentTimeMillis() // 또는 첫 데이터의 timestamp 사용
+        calibrationStartTime = System.currentTimeMillis()
         return true
     }
 
     private fun processCalibrationData(leftYaw: Float?, rightYaw: Float?) {
-        if (currentMode != AnalysisState.CALIBRATING) return
+        if (_currentMode.value != AnalysisState.CALIBRATING) return
 
         calibrationDataPoints.add(Pair(leftYaw, rightYaw))
 
-        // 캘리브레이션 시간이 경과했는지 확인 (첫 데이터 수신 후 시작하도록 수정 가능)
         if (System.currentTimeMillis() - calibrationStartTime >= CALIBRATION_DURATION_MS && calibrationDataPoints.isNotEmpty()) {
             finishCalibration()
         }
@@ -93,8 +93,7 @@ class GaitAnalyzerUtil @Inject constructor() {
     private fun finishCalibration() {
         if (calibrationDataPoints.isEmpty()) {
             println("Calibration failed: No data points collected.")
-            currentMode = AnalysisState.IDLE // 실패 시 IDLE로
-            // 사용자에게 알림 필요
+            _currentMode.value = AnalysisState.IDLE
             return
         }
 
@@ -108,10 +107,9 @@ class GaitAnalyzerUtil @Inject constructor() {
             rightYawOffset = validRightYaws.average().toFloat()
         }
         isCalibrated = true
-        currentMode = AnalysisState.IDLE // 캘리브레이션 완료 후 IDLE (분석 시작 대기)
-        calibrationDataPoints.clear() // 데이터 정리
+        _currentMode.value = AnalysisState.IDLE // 또는 READY_TO_ANALYZE 같은 상태
+        calibrationDataPoints.clear()
         println("Calibration finished. LeftOffset: $leftYawOffset, RightOffset: $rightYawOffset")
-        // 캘리브레이션 완료 이벤트 발행하여 ViewModel에 알릴 수 있음
     }
 
 
@@ -133,50 +131,57 @@ class GaitAnalyzerUtil @Inject constructor() {
         totalRightSteps = 0
         analysisStartTime = 0
         lastDataTimestamp = 0
+        lastResultTimestamp = 0
         calibrationDataPoints.clear()
         isCalibrated = false
-        currentMode = AnalysisState.IDLE
-        _currentAnalysisResult.value = createEmptyResult()
-
-        // 초기 상태로 결과 Flow 업데이트
+        leftYawOffset = 0f // 리셋 시 오프셋도 초기화
+        rightYawOffset = 0f
+        _currentMode.value = AnalysisState.IDLE
         _currentAnalysisResult.value = createEmptyResult()
     }
 
     fun startAnalysis(): Boolean {
         if (!isCalibrated) {
             println("Cannot start analysis: Calibration not done.")
-            return false // 또는 자동 캘리브레이션 시작?
+            return false
         }
-        if (currentMode == AnalysisState.RUNNING) {
+        if (_currentMode.value == AnalysisState.RUNNING) {
             println("Analysis already running.")
             return false
         }
         println("Starting gait analysis...")
-        currentMode = AnalysisState.RUNNING
-        analysisStartTime = 0L // 분석 데이터 기준 시간 초기화
+        _currentMode.value = AnalysisState.RUNNING
+        analysisStartTime = 0L
         lastDataTimestamp = 0L
-        // 누적 결과 변수들도 여기서 한번 더 초기화 (reset에서 이미 했지만, 명시적으로)
+        lastResultTimestamp = System.currentTimeMillis() // 분석 시작 시 타임스탬프 설정
+
         leftFootStrikeCounts.clear()
         rightFootStrikeCounts.clear()
         leftYawSum = 0.0; rightYawSum = 0.0
         leftYawCount = 0; rightYawCount = 0
         totalLeftSteps = 0; totalRightSteps = 0
-        _currentAnalysisResult.value = createEmptyResult().copy(overallGaitPattern = GaitPatternType.UNKNOWN) // 분석 시작시 결과 초기화
-
+        _currentAnalysisResult.value = createEmptyResult().copy(
+            overallGaitPattern = GaitPatternType.UNKNOWN,
+            timestamp = lastResultTimestamp // 생성 시점 기록
+        )
         return true
     }
 
     fun stopAnalysis() {
-        if (currentMode == AnalysisState.RUNNING) {
+        if (_currentMode.value == AnalysisState.RUNNING) {
             println("Stopping gait analysis.")
-            // 최종 결과는 _currentAnalysisResult.value 에 이미 있음
+            // 최종 결과 업데이트 시 타임스탬프 갱신
+            _currentAnalysisResult.value = _currentAnalysisResult.value.copy(timestamp = System.currentTimeMillis())
         }
-        currentMode = AnalysisState.IDLE
+        _currentMode.value = AnalysisState.IDLE // 또는 STOPPED
     }
+
+    fun isRunning(): Boolean = _currentMode.value == AnalysisState.RUNNING
+    fun isCalibrating(): Boolean = _currentMode.value == AnalysisState.CALIBRATING
 
 
     fun processData(data: CombinedInsoleData) {
-        when (currentMode) {
+        when (_currentMode.value) {
             AnalysisState.CALIBRATING -> {
                 processCalibrationData(data.left?.yaw, data.right?.yaw)
             }
@@ -186,19 +191,14 @@ class GaitAnalyzerUtil @Inject constructor() {
                 }
                 lastDataTimestamp = data.timestamp
 
-                // 보정된 Yaw 값 사용
                 val calibratedLeftData = data.left?.let { it.copy(yaw = it.yaw - leftYawOffset) }
                 val calibratedRightData = data.right?.let { it.copy(yaw = it.yaw - rightYawOffset) }
-
-                // println("Calibrated Data: L Yaw=${calibratedLeftData?.yaw}, R Yaw=${calibratedRightData?.yaw}")
 
                 handleFootData(calibratedLeftData, InsoleSide.LEFT, data.timestamp)
                 handleFootData(calibratedRightData, InsoleSide.RIGHT, data.timestamp)
             }
-            AnalysisState.ERROR,AnalysisState.STOPPED->{
-
-            }
-            AnalysisState.IDLE -> {
+            AnalysisState.ERROR,AnalysisState.STOPPED, AnalysisState.IDLE -> {
+                // Do nothing or log
             }
         }
     }
@@ -221,26 +221,23 @@ class GaitAnalyzerUtil @Inject constructor() {
             currentStepData = currentRightStepData
         }
 
-        if (isActive && !isStance) { // 스텝 시작 (Swing -> Stance)
+        if (isActive && !isStance) {
             isStance = true
             startTime = timestamp
             currentStepData.clear()
             insoleData?.let { currentStepData.add(it) }
-        } else if (isActive && isStance) { // 스텝 진행 중 (Stance 유지)
+        } else if (isActive && isStance) {
             insoleData?.let { currentStepData.add(it) }
-        } else if (!isActive && isStance) { // 스텝 종료 (Stance -> Swing)
+        } else if (!isActive && isStance) {
             isStance = false
             val endTime = timestamp
             if (currentStepData.isNotEmpty() && (endTime - startTime >= MIN_STEP_DURATION_MS)) {
-                // --- 스텝 완료 시점: 이 스텝 분석 및 결과 누적 ---
                 analyzeAndAccumulateStep(side, currentStepData.toList(), startTime, endTime)
-                // --- 분석 완료 후 현재 누적 결과 업데이트 ---
                 updateCurrentAnalysisResult()
             }
-            currentStepData.clear() // 분석 후 데이터 삭제
+            currentStepData.clear()
         }
 
-        // 변경된 상태 업데이트
         if (side == InsoleSide.LEFT) {
             isLeftStance = isStance
             leftStartTime = startTime
@@ -254,15 +251,10 @@ class GaitAnalyzerUtil @Inject constructor() {
     private fun analyzeAndAccumulateStep(side: InsoleSide, stepDataPoints: List<InsoleData>, startTime: Long, endTime: Long) {
         if (stepDataPoints.isEmpty()) return
 
-        // 1. 착지 유형 분석
         val footStrikeType = determineFootStrike(stepDataPoints)
-//        println(footStrikeType)
-
-        // 2. Yaw 평균 계산
         val validYaws = stepDataPoints.mapNotNull { it.yaw.takeIf { y -> y.isFinite() } }
         val averageYaw = if (validYaws.isNotEmpty()) validYaws.average() else null
 
-        // 3. 결과 누적
         if (side == InsoleSide.LEFT) {
             totalLeftSteps++
             leftFootStrikeCounts[footStrikeType] = (leftFootStrikeCounts[footStrikeType] ?: 0) + 1
@@ -288,7 +280,6 @@ class GaitAnalyzerUtil @Inject constructor() {
         val dominantLeftStrike = findDominantStrike(leftFootStrikeCounts)
         val dominantRightStrike = findDominantStrike(rightFootStrikeCounts)
 
-
         val overallPattern = determineOverallGaitPattern(avgLeftYaw, avgRightYaw)
 
         val duration = if (analysisStartTime > 0 && lastDataTimestamp > analysisStartTime) {
@@ -296,21 +287,23 @@ class GaitAnalyzerUtil @Inject constructor() {
         } else {
             0L
         }
+        lastResultTimestamp = System.currentTimeMillis() // 결과 업데이트 시점 갱신
 
         val result = GaitAnalysisResult(
             dominantLeftFootStrike = dominantLeftStrike,
             leftFootStrikeDistribution = leftFootStrikeCounts.toMap(),
-            averageLeftYaw = avgLeftYaw, // 개별 Yaw 값도 여전히 유용할 수 있음
+            averageLeftYaw = avgLeftYaw,
             totalLeftSteps = totalLeftSteps,
             dominantRightFootStrike = dominantRightStrike,
             rightFootStrikeDistribution = rightFootStrikeCounts.toMap(),
-            averageRightYaw = avgRightYaw, // 개별 Yaw 값도 여전히 유용할 수 있음
+            averageRightYaw = avgRightYaw,
             totalRightSteps = totalRightSteps,
             overallGaitPattern = overallPattern,
-            analysisDurationMs = duration
+            analysisDurationMs = duration,
+            timestamp = lastResultTimestamp // 생성 시점 기록
         )
-        println(result.toString())
-        _currentAnalysisResult.value = result // StateFlow 업데이트
+        // println(result.toString()) //Timber로 대체 권장
+        _currentAnalysisResult.value = result
     }
 
 
@@ -324,9 +317,8 @@ class GaitAnalyzerUtil @Inject constructor() {
     }
 
     private fun determineFootStrike(dataPoints: List<InsoleData>): FootStrikeType {
-        // AnalyzeGaitUseCase의 determineFootStrike 로직과 동일하게 구현
         if (dataPoints.size < 2) return FootStrikeType.UNKNOWN
-        val initialPoints = dataPoints.take(max(2, dataPoints.size / 5)) // 스텝 초반 20% 또는 최소 2개
+        val initialPoints = dataPoints.take(max(2, dataPoints.size / 5))
         val firstTimestamp = initialPoints.first().timestamp
         val activationTimes = mutableMapOf<String, Long>()
 
@@ -334,7 +326,6 @@ class GaitAnalyzerUtil @Inject constructor() {
             if (!activationTimes.containsKey("heel") && point.heel >= MIN_PRESSURE_THRESHOLD) activationTimes["heel"] = point.timestamp
             if (!activationTimes.containsKey("forefoot") && (point.bigToe >= MIN_PRESSURE_THRESHOLD || point.smallToe >= MIN_PRESSURE_THRESHOLD)) activationTimes["forefoot"] = point.timestamp
             if (!activationTimes.containsKey("arch") && (point.archLeft >= MIN_PRESSURE_THRESHOLD || point.archRight >= MIN_PRESSURE_THRESHOLD)) activationTimes["arch"] = point.timestamp
-            // 모든 부위가 활성화 시간 기록되면 일찍 멈춰도 됨 (최적화)
             if (activationTimes.size == 3) break
         }
 
@@ -352,7 +343,7 @@ class GaitAnalyzerUtil @Inject constructor() {
             isHeelEarly && !isForefootEarly && !isArchEarly -> FootStrikeType.REARFOOT
             isForefootEarly && !isHeelEarly && !isArchEarly -> FootStrikeType.FOREFOOT
             isHeelEarly && isForefootEarly -> FootStrikeType.MIDFOOT
-            isArchEarly -> FootStrikeType.MIDFOOT
+            isArchEarly -> FootStrikeType.MIDFOOT // 아치 우선 순위 적용 시
             else -> FootStrikeType.UNKNOWN
         }
     }
@@ -365,14 +356,9 @@ class GaitAnalyzerUtil @Inject constructor() {
 
     private fun determineOverallGaitPattern(avgLeftYaw: Float?, avgRightYaw: Float?): GaitPatternType {
         if (avgLeftYaw == null || avgRightYaw == null) {
-            return GaitPatternType.UNKNOWN // 데이터 부족
+            return GaitPatternType.UNKNOWN
         }
-
-
-        var yawDifference =avgRightYaw-avgLeftYaw
-
-        // println("Yaw Difference (R-L): $yawDifference, Left: $avgLeftYaw, Right: $avgRightYaw") // 디버깅 로그
-
+        val yawDifference = avgRightYaw - avgLeftYaw
         return when {
             yawDifference < YAW_DIFF_IN_TOEING_THRESHOLD -> GaitPatternType.IN_TOEING
             yawDifference > YAW_DIFF_OUT_TOEING_THRESHOLD -> GaitPatternType.OUT_TOEING
@@ -385,7 +371,8 @@ class GaitAnalyzerUtil @Inject constructor() {
             dominantLeftFootStrike = FootStrikeType.UNKNOWN, leftFootStrikeDistribution = emptyMap(),
             averageLeftYaw = null,  totalLeftSteps = 0,
             dominantRightFootStrike = FootStrikeType.UNKNOWN, rightFootStrikeDistribution = emptyMap(),
-            averageRightYaw = null, totalRightSteps = 0, overallGaitPattern = GaitPatternType.UNKNOWN
+            averageRightYaw = null, totalRightSteps = 0, overallGaitPattern = GaitPatternType.UNKNOWN,
+            timestamp = System.currentTimeMillis() // 생성 시점 기록
         )
     }
 }

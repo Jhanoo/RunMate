@@ -11,6 +11,7 @@ import androidx.navigation.fragment.navArgs
 import com.D107.runmate.presentation.MainViewModel
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentCourseDetailBinding
+import com.D107.runmate.presentation.group.viewmodel.GroupCreateViewModel
 import com.D107.runmate.presentation.running.CourseDetailState
 import com.D107.runmate.presentation.running.CourseViewModel
 import com.D107.runmate.presentation.utils.CommonUtils.formatSecondsToHMS
@@ -18,6 +19,7 @@ import com.D107.runmate.presentation.utils.GpxParser.getGpxInputStream
 import com.D107.runmate.presentation.utils.GpxParser.parseGpx
 import com.D107.runmate.presentation.utils.KakaoMapUtil.addCourseLine
 import com.D107.runmate.presentation.utils.LocationUtils
+import com.D107.runmate.presentation.utils.SourceScreen
 import com.kakao.vectormap.KakaoMap
 import com.kakao.vectormap.KakaoMapReadyCallback
 import com.kakao.vectormap.LatLng
@@ -42,6 +44,7 @@ class CourseDetailFragment : BaseFragment<FragmentCourseDetailBinding>(
     private val courseViewModel: CourseViewModel by viewModels()
     private var mContext: Context? = null
     private val mainViewModel: MainViewModel by activityViewModels()
+    val groupCreateViewModel: GroupCreateViewModel by activityViewModels()
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -54,13 +57,41 @@ class CourseDetailFragment : BaseFragment<FragmentCourseDetailBinding>(
 
         courseViewModel.getCourseDetail(args.courseId)
 
-        binding.btnNext.setOnClickListener {
-            val courseDetail = courseViewModel.courseDetail.value
-            if(courseDetail is CourseDetailState.Success) {
-                mainViewModel.setCourse(args.courseId, courseDetail.courseDetail.gpxFile)
-                findNavController().navigate(R.id.action_courseDetailFragment_to_runningFragment)
-            } else {
-                findNavController().navigate(R.id.action_courseDetailFragment_to_runningFragment)
+        if(mainViewModel.sourceScreen.value==SourceScreen.GROUP_INFO_FRAGMENT){
+            binding.btnNext.text = "돌아가기"
+            binding.btnNext.setOnClickListener {
+                findNavController().popBackStack()
+            }
+        }else {
+            binding.btnNext.setOnClickListener {
+                val courseDetail = courseViewModel.courseDetail.value
+                if (courseDetail is CourseDetailState.Success) {
+                    when (mainViewModel.sourceScreen.value) {
+                        SourceScreen.RUNNING_FRAGMENT -> {
+                            mainViewModel.setCourse(
+                                args.courseId,
+                                courseDetail.courseDetail.gpxFile
+                            )
+                            findNavController().navigate(R.id.action_courseDetailFragment_to_runningFragment)
+                        }
+
+                        SourceScreen.GROUP_CREATE_FRAGMENT -> {
+                            groupCreateViewModel.setCourse(courseDetail.courseDetail)
+                            findNavController().navigate(R.id.action_courseDetailFragment_to_groupCreateFragment)
+                        }
+                    }
+
+                } else {
+                    when (mainViewModel.sourceScreen.value) {
+                        SourceScreen.RUNNING_FRAGMENT -> {
+                            findNavController().navigate(R.id.action_courseDetailFragment_to_runningFragment)
+                        }
+
+                        SourceScreen.GROUP_CREATE_FRAGMENT -> {
+                            findNavController().navigate(R.id.action_courseDetailFragment_to_groupCreateFragment)
+                        }
+                    }
+                }
             }
         }
 
@@ -149,4 +180,6 @@ class CourseDetailFragment : BaseFragment<FragmentCourseDetailBinding>(
             }
         }
     }
+
+
 }

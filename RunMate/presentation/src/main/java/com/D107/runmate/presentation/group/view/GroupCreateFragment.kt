@@ -14,15 +14,18 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.D107.runmate.presentation.MainViewModel
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentGroupCreateBinding
 import com.D107.runmate.presentation.group.viewmodel.GroupUiEvent
 import com.D107.runmate.presentation.group.viewmodel.GroupCreateViewModel
 import com.D107.runmate.presentation.utils.CommonUtils
+import com.D107.runmate.presentation.utils.SourceScreen
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import com.ssafy.locket.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -42,6 +45,7 @@ class GroupCreateFragment : BaseFragment<FragmentGroupCreateBinding>(
 
     private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm", Locale.getDefault())
     val viewModel: GroupCreateViewModel by activityViewModels()
+    val mainViewModel : MainViewModel by activityViewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -106,6 +110,11 @@ class GroupCreateFragment : BaseFragment<FragmentGroupCreateBinding>(
                         }
                     }
                 }
+                launch{
+                    viewModel.selectedCourse.collect{courseDetail->
+                        binding.etCourse.setText(courseDetail?.name?:"")
+                    }
+                }
 
             }
         }
@@ -116,6 +125,10 @@ class GroupCreateFragment : BaseFragment<FragmentGroupCreateBinding>(
         binding.toolbarGroupCreate.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
+        binding.etCourse.setOnClickListener{
+            mainViewModel.setSourceScreen(SourceScreen.GROUP_CREATE_FRAGMENT)
+            findNavController().navigate(R.id.action_groupCreateFragment_to_courseSettingFragment)
+        }
         binding.etLocation.setOnClickListener{
             findNavController().navigate(R.id.action_groupCreateFragment_to_placeSearchFragment)
         }
@@ -124,7 +137,6 @@ class GroupCreateFragment : BaseFragment<FragmentGroupCreateBinding>(
         }
         binding.btnCreateGroup.setOnClickListener{
             viewModel.createGroup()
-
         }
         binding.etGroupName.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}

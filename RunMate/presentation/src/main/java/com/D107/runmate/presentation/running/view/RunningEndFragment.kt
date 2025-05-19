@@ -26,6 +26,7 @@ import com.D107.runmate.presentation.utils.CommonUtils.getGpxInputStream
 import com.D107.runmate.presentation.utils.GpxParser.parseGpx
 import com.D107.runmate.presentation.utils.KakaoMapUtil.addCourseLine
 import com.D107.runmate.presentation.utils.LocationUtils.getPaceFromSpeed
+import com.D107.runmate.presentation.utils.SourceScreen
 import com.kakao.vectormap.KakaoMap
 import com.kakao.vectormap.KakaoMapReadyCallback
 import com.kakao.vectormap.LatLng
@@ -132,7 +133,7 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
 
 
         }
-        if (sourceFragment == "GROUP_RUNNING_FRAGMENT") {
+        if (sourceFragment == SourceScreen.GROUP_RUNNING_FRAGMENT) {
             viewLifecycleOwner.lifecycleScope.launch {
                 groupViewModel.uiEvent.collect { event ->
                     Timber.d("groupUiEvent $event")
@@ -167,8 +168,8 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
                 }
             }
             when (sourceFragment) {
-                "RUNNING_FRAGMENT" -> findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
-                "GROUP_RUNNING_FRAGMENT" -> groupViewModel.getCurrentGroup()
+                SourceScreen.RUNNING_FRAGMENT -> findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
+                SourceScreen.GROUP_RUNNING_FRAGMENT -> groupViewModel.getCurrentGroup()
             }
         }
 
