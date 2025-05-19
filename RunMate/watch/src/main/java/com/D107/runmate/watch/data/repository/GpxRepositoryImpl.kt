@@ -19,7 +19,9 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
+import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -142,21 +144,22 @@ class GpxRepositoryImpl @Inject constructor(
     }
 
     override suspend fun uploadGpxFile(file: File): Boolean {
-        return try {
-            // API 서비스를 통해 파일 업로드
-            val requestBody = file.asRequestBody("application/gpx+xml".toMediaTypeOrNull())
-            val filePart = MultipartBody.Part.createFormData("gpx_file", file.name, requestBody)
-            val response = gpxApiService.uploadGpxFile(filePart)
-            response.isSuccessful
-        } catch (e: Exception) {
-            false
-        }
+        return true
+        //        return try {
+//            // API 서비스를 통해 파일 업로드
+//            val requestBody = file.asRequestBody("application/gpx+xml".toMediaTypeOrNull())
+//            val filePart = MultipartBody.Part.createFormData("gpx_file", file.name, requestBody)
+//            val response = gpxApiService.uploadGpxFile(filePart)
+//            response.isSuccessful
+//        } catch (e: Exception) {
+//            false
+//        }
     }
 
     override suspend fun getGpxFileById(id: Long): GpxFile? {
         val entity = gpxDao.getGpxFileById(id) ?: return null
 
-        return GpxFile(
+        val result = GpxFile(
             id = entity.id,
             filePath = entity.filePath,
             status = GpxUploadStatus.valueOf(entity.status),
@@ -165,8 +168,26 @@ class GpxRepositoryImpl @Inject constructor(
             totalDistance = entity.totalDistance,
             totalTime = entity.totalTime,
             avgHeartRate = entity.avgHeartRate,
-            maxHeartRate = entity.maxHeartRate
+            maxHeartRate = entity.maxHeartRate,
+            avgPace = entity.avgPace,
+            avgCadence = entity.avgCadence,
+            startTime = Date(entity.startTime),
+            endTime = Date(entity.endTime),
+            avgElevation = entity.avgElevation
         )
+
+        Log.d("GPX", "최근 GPX 파일 정보: ID=${result.id}, 경로=${result.filePath}")
+        Log.d("GPX", "러닝 통계: 거리=${result.totalDistance}km, 시간=${result.totalTime}ms, " +
+                "평균 심박수=${result.avgHeartRate}bpm, 최대 심박수=${result.maxHeartRate}bpm")
+        Log.d("GPX", "추가 정보: 평균 페이스=${result.avgPace}, 평균 케이던스=${result.avgCadence}, " +
+                "시작 시간=${formatDate(result.startTime)}, 종료 시간=${formatDate(result.endTime)}, " +
+                "평균 고도=${result.avgElevation}m")
+
+        return result
+    }
+
+    private fun formatDate(date: Date): String {
+        return SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(date)
     }
 
     override suspend fun saveTrackPointsBatch(trackPoints: List<GpxTrackPoint>) {
@@ -208,7 +229,10 @@ class GpxRepositoryImpl @Inject constructor(
 
         // 3. 두 목록을 합쳐서 시간순으로 정렬
         val allPoints = (memoryPoints + dbPoints).sortedBy { it.time }
-        Log.d("GpxTracking", "총 ${allPoints.size}개의 ㄴ트랙 포인트 로드 (메모리: ${memoryPoints.size}, DB: ${dbPoints.size})")
+        Log.d(
+            "GpxTracking",
+            "총 ${allPoints.size}개의 ㄴ트랙 포인트 로드 (메모리: ${memoryPoints.size}, DB: ${dbPoints.size})"
+        )
 
         return allPoints
     }
