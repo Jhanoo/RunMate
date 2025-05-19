@@ -8,20 +8,11 @@ spring:
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
+      connection-init-sql: SET TIME ZONE 'Asia/Seoul'
       connection-timeout: 30000
       maximum-pool-size: 10
       minimum-idle: 5
       connection-test-query: SELECT 1
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-    database: postgresql
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
 
   data:
     redis:
