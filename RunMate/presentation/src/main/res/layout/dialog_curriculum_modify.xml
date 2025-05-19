@@ -67,14 +67,6 @@
             android:focusable="false"
             android:clickable="true" />
 
-        <ImageView
-            android:id="@+id/btn_clear_marathon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="12dp"
-            android:src="@drawable/ic_all_close" />
     </RelativeLayout>
 
     <!-- 거리 섹션 -->

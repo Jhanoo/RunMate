@@ -79,10 +79,10 @@ class AIManagerExpMarathonFragment : BaseFragment<FragmentAIManagerExpMarathonBi
 
         binding.rgMaxDistance.setOnCheckedChangeListener { _, checkedId ->
             val distExp = when (checkedId) {
-                R.id.rb_distance_5km -> "~5km"
-                R.id.rb_distance_10km -> "~10km"
-                R.id.rb_distance_half -> "~하프"
-                R.id.rb_distance_full -> "~풀"
+                R.id.rb_distance_5km -> "5km"
+                R.id.rb_distance_10km -> "10km"
+                R.id.rb_distance_half -> "하프"
+                R.id.rb_distance_full -> "풀"
                 else -> "~10km"
             }
             curriculumViewModel.setDistExp(distExp)
