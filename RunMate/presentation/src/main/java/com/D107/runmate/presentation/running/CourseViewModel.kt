@@ -6,6 +6,7 @@ import com.D107.runmate.domain.model.base.ResponseStatus
 import com.D107.runmate.domain.model.course.CourseDetail
 import com.D107.runmate.domain.model.course.CourseFilter
 import com.D107.runmate.domain.model.course.CourseInfo
+import com.D107.runmate.domain.model.history.HistoryDetail
 import com.D107.runmate.domain.usecase.course.CreateCourseUseCase
 import com.D107.runmate.domain.usecase.course.GetAllCourseUseCase
 import com.D107.runmate.domain.usecase.course.GetCourseDetailUseCase
@@ -40,7 +41,6 @@ class CourseViewModel @Inject constructor(
     private val getMyCourseUseCase: GetMyCourseUseCase,
     private val getRecentCourseUseCase: GetRecentCourseUseCase,
     private val getCourseDetailUseCase: GetCourseDetailUseCase,
-    private val getInputStreamFromUrlUseCase: GetInputStreamFromUrlUseCase,
     private val createCourseUseCase: CreateCourseUseCase,
     private val updateCourseLikeUseCase: UpdateCourseLikeUseCase,
     private val coord2AddressUseCase: GetCoord2AddressUseCase,
@@ -64,8 +64,11 @@ class CourseViewModel @Inject constructor(
     private val _courseCreate = MutableSharedFlow<Boolean>()
     val courseCreate = _courseCreate.asSharedFlow()
 
-    private val _courseLiked = MutableSharedFlow<Boolean>()
-    val courseLiked = _courseLiked.asSharedFlow()
+//    private val _courseLiked = MutableSharedFlow<Boolean>()
+//    val courseLiked = _courseLiked.asSharedFlow()
+
+    private val _historyDetail = MutableStateFlow<HistoryDetailState>(HistoryDetailState.Initial)
+    val historyDetail = _historyDetail.asStateFlow()
 
     fun getAllCourseList() {
         viewModelScope.launch {
@@ -145,22 +148,12 @@ class CourseViewModel @Inject constructor(
                     is ResponseStatus.Success -> {
                         Timber.d("getCourseDetail Success {${status.data}}")
                         _courseDetail.value = CourseDetailState.Success(status.data)
-//                        withContext(Dispatchers.IO) {
-//                            getInputStreamFromUrlUseCase(status.data.gpxFile).collectLatest {
-//                                Timber.d("getInputStream Before")
-//                                try{
-//                                    val trackPointList = parseGpx(it)
-//                                    Timber.d("getInputStream Success {${trackPointList}}")
-//                                    _courseDetail.value = CourseDetailState.Success(status.data)
-//                                }catch (e: Exception) {
-//                                    Timber.e("getInputStream Error {${e.message}}")
-//                                }
-//
-//                            }
-//                        }
                     }
 
-                    is ResponseStatus.Error -> Timber.d("getCourseDetail Error {${status.error}}")
+                    is ResponseStatus.Error -> {
+                        Timber.d("getCourseDetail Error {${status.error}}")
+                        _courseDetail.value = CourseDetailState.Error(status.error.message)
+                    }
                 }
             }
         }
@@ -230,10 +223,11 @@ class CourseViewModel @Inject constructor(
                 when (response) {
                     is ResponseStatus.Success -> {
                         Timber.d("getHistoryDetail Success {${response.data}}")
-                        _courseLiked.emit(response.data.myRunItem.courseLiked)
+                        _historyDetail.value = HistoryDetailState.Success(response.data)
                     }
                     is ResponseStatus.Error -> {
                         Timber.d("getHistoryDetail Error {${response.error}}")
+                        _historyDetail.value = HistoryDetailState.Error(response.error.message)
                     }
                 }
             }
@@ -251,4 +245,10 @@ sealed class CourseDetailState {
     object Initial : CourseDetailState()
     data class Success(val courseDetail: CourseDetail) : CourseDetailState()
     data class Error(val message: String) : CourseDetailState()
+}
+
+sealed class HistoryDetailState {
+    object Initial : HistoryDetailState()
+    data class Success(val historyDetail: HistoryDetail) : HistoryDetailState()
+    data class Error(val message: String) : HistoryDetailState()
 }

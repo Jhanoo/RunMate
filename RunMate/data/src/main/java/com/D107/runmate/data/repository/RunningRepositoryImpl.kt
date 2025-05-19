@@ -49,7 +49,7 @@ internal class RunningRepositoryImpl @Inject constructor(
             )) {
                 is ApiResponse.Success -> {
                     Timber.d("response success: $response")
-                    emit(ResponseStatus.Success(response.data.toDomainModel()))
+                    emit(ResponseStatus.Success(response.data!!.toDomainModel()))
                 }
 
                 is ApiResponse.Error -> {

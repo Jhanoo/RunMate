@@ -19,7 +19,7 @@ class TodoRepositoryImpl @Inject constructor(
     override suspend fun getTodoList(year: Int, month: Int): Flow<Result<List<TodoItem>>> = flow {
         when (val response = todoDataSource.getTodoList(year, month)) {
             is ApiResponse.Success -> {
-                val todoItems = response.data.map { todoResponse ->
+                val todoItems = response.data!!.map { todoResponse ->
                     TodoItem(
                         todoId = todoResponse.todoId,
                         content = todoResponse.content,
@@ -37,7 +37,7 @@ class TodoRepositoryImpl @Inject constructor(
 
     override suspend fun getDailyTodo(): Flow<ResponseStatus<TodoItem>> {
         return flow {
-            try {
+//            try {
                 when (val response = todoDataSource.getTodayTodo()) {
                     is ApiResponse.Error -> emit(
                         ResponseStatus.Error(
@@ -51,19 +51,19 @@ class TodoRepositoryImpl @Inject constructor(
                     )
 
                     is ApiResponse.Success -> {
-                        emit(ResponseStatus.Success(response.data.toDomainModel()))
+                        emit(ResponseStatus.Success(response.data!!.toDomainModel()))
                     }
                 }
-            } catch (e: Exception) {
-                Timber.e("${e.message}")
-                emit(
-                    ResponseStatus.Error(
-                        NetworkError(
-                            message = e.message ?: "",
-                        )
-                    )
-                )
-            }
+//            } catch (e: Exception) {
+//                Timber.e("${e.message}")
+//                emit(
+//                    ResponseStatus.Error(
+//                        NetworkError(
+//                            message = e.message ?: "",
+//                        )
+//                    )
+//                )
+//            }
         }
     }
 }

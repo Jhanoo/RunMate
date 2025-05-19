@@ -10,6 +10,7 @@ import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentLoginBinding
 import com.D107.runmate.presentation.user.viewmodel.JoinViewModel
 import com.D107.runmate.presentation.user.viewmodel.LoginViewModel
+import com.D107.runmate.presentation.utils.WatchDataUtils
 import com.ssafy.locket.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -47,6 +48,7 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(
 
                     is LoginViewModel.LoginUiState.Success -> {
                         // 로그인 성공
+                        WatchDataUtils.sendTokenToWatch(requireContext(), state.data.accessToken)
                         showLoading(false)
                         navigateToMain()
                     }
@@ -59,15 +61,6 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(
                 }
             }
         }
-
-        // 이미 로그인한 상태인지 확인
-//        viewLifecycleOwner.lifecycleScope.launch {
-//            viewModel.isLoggedIn.collectLatest { isLoggedIn ->
-//                if (isLoggedIn) {
-//                    navigateToMain()
-//                }
-//            }
-//        }
 
         // 에러 메시지 관찰
         viewModel.emailError.observe(viewLifecycleOwner) { errorMsg ->

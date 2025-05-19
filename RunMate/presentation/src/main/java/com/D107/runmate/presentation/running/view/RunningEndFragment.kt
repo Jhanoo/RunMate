@@ -20,6 +20,7 @@ import com.D107.runmate.presentation.group.viewmodel.GroupViewModel
 import com.D107.runmate.presentation.running.Coord2AddressState
 import com.D107.runmate.presentation.running.RunningEndState
 import com.D107.runmate.presentation.running.CourseViewModel
+import com.D107.runmate.presentation.running.HistoryDetailState
 import com.D107.runmate.presentation.running.RunningEndViewModel
 import com.D107.runmate.presentation.utils.CommonUtils.dateformatMMdd
 import com.D107.runmate.presentation.utils.CommonUtils.getGpxInputStream
@@ -102,7 +103,7 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
                         R.string.running_avg_altitude,
                         lastRecord.altitudeSum / it.runningRecords.size
                     )
-                    binding.tvCalorie.text = "0" // TODO 삼성헬스 연결하여 데이터 수정
+                    binding.tvCalorie.text = "0"
 
                     if(startLocation is UserLocationState.Exist) {
                         courseViewModel.getAddressFromLatLng(startLocation.locations.last().longitude, startLocation.locations.last().latitude)
@@ -112,14 +113,23 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
-            courseViewModel.courseLiked.collectLatest {
-                isLike = it
-                initIsLike = it
-                Timber.d("isLike ${isLike} ${it}")
-                if(it) {
-                    binding.ivLike.setImageResource(R.drawable.ic_course_like)
-                } else {
-                    binding.ivLike.setImageResource(R.drawable.ic_course_like_inactive)
+            courseViewModel.historyDetail.collectLatest { state ->
+                when (state) {
+                    is HistoryDetailState.Success -> {
+                        isLike = state.historyDetail.myRunItem.courseLiked
+                        initIsLike = state.historyDetail.myRunItem.courseLiked
+                        if(state.historyDetail.myRunItem.courseLiked) {
+                            binding.ivLike.setImageResource(R.drawable.ic_course_like)
+                        } else {
+                            binding.ivLike.setImageResource(R.drawable.ic_course_like_inactive)
+                        }
+                    }
+
+                    is HistoryDetailState.Error -> {
+                        Timber.d("getHistoryDetail Error {${state.message}}")
+                    }
+
+                    is HistoryDetailState.Initial -> {}
                 }
             }
         }
@@ -174,7 +184,11 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
         }
 
         binding.btnChart.setOnClickListener {
-            findNavController().navigate(R.id.action_runningEndFragment_to_chartFragment)
+            val historyDetail = courseViewModel.historyDetail.value
+            if(historyDetail is HistoryDetailState.Success) {
+                val action = RunningEndFragmentDirections.actionRunningEndFragmentToChartFragment(historyDetail.historyDetail.gpxFile)
+                findNavController().navigate(action)
+            }
         }
 
         binding.btnAddCourse.setOnClickListener {

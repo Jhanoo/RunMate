@@ -15,7 +15,7 @@
     <string name="running_distance_int">%1$d</string>
 
     <string name="course_altitude">%1$.2fm</string>
-    <string name="course_like_cnt">%d개</string>
+    <string name="course_like_cnt">%d</string>
     <string name="course_distance">%1$.2fkm</string>
 
     <!-- TODO: Remove or change this placeholder text -->

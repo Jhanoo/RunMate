@@ -29,6 +29,7 @@ import com.D107.runmate.domain.model.running.TrackingStatus
 import com.D107.runmate.domain.model.running.UserLocationState
 import com.D107.runmate.domain.model.socket.ConnectionStatus
 import com.D107.runmate.domain.model.socket.SocketAuth
+import com.D107.runmate.domain.repository.DataStoreRepository
 import com.D107.runmate.domain.repository.running.RunningRepository
 import com.D107.runmate.domain.repository.running.RunningTrackingRepository
 import com.D107.runmate.domain.usecase.group.GetCoord2AddressUseCase
@@ -67,6 +68,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.time.times
 
 @AndroidEntryPoint
 class RunningTrackingService : Service() {
@@ -78,11 +80,12 @@ class RunningTrackingService : Service() {
     lateinit var repository: RunningTrackingRepository
 
     @Inject
-    lateinit var getCoord2AddressUseCase: GetCoord2AddressUseCase
+    lateinit var dataStoreRepository: DataStoreRepository
 
     @Inject
+    lateinit var getCoord2AddressUseCase: GetCoord2AddressUseCase
+    @Inject
     lateinit var endRunningUseCase: EndRunningUseCase
-
     @Inject
     lateinit var connectSocketUseCase: ConnectSocketUseCase
     @Inject
@@ -123,7 +126,6 @@ class RunningTrackingService : Service() {
     private var socketConnectionObserverJob: Job? = null
 
     private var leaveGroupJob: Job? = null
-
 
     private val _endRunning = MutableSharedFlow<RunningEndState>()
 
@@ -207,47 +209,61 @@ class RunningTrackingService : Service() {
         stopLocationTracking()
         stopTracking()
 
-        CoroutineScope(Dispatchers.IO).launch {
-            repository.finishTracking().collectLatest {
-                if (it) {
-                    val record = repository.runningRecord.value
-                    val location = repository.userLocation.value
-                    val recordSize = repository.recordSize.value
-                    if (location is UserLocationState.Exist && record is RunningRecordState.Exist && recordSize > 0) {
-                        val address = getAddress(
-                            location.locations.first().longitude,
-                            location.locations.first().latitude
-                        )
-                        address?.let {
-                            val lastRecord = record.runningRecords.last()
-                            endRunning(
-                                0.0,
-                                lastRecord.cadenceSum / recordSize,
-                                lastRecord.altitudeSum / recordSize,
-                                16.6667 / lastRecord.avgSpeed,
-                                0.0,
-                                null,
-                                (lastRecord.distance).toDouble(),
-                                convertDateTime(lastRecord.currentTime),
-                                it,
-                                convertDateTime(record.runningRecords.first().currentTime),
-                                currentGroupId
+        if(repository.recordSize.value > 0) {
+            CoroutineScope(Dispatchers.IO).launch {
+                repository.finishTracking().collectLatest {
+                    if (it) {
+                        val record = repository.runningRecord.value
+                        val location = repository.userLocation.value
+                        val recordSize = repository.recordSize.value
+                        if (location is UserLocationState.Exist && record is RunningRecordState.Exist && recordSize > 0) {
+                            val address = getAddress(
+                                location.locations.first().longitude,
+                                location.locations.first().latitude
                             )
+                            address?.let {
+                                val lastRecord = record.runningRecords.last()
+                                val avgPace = 16.6667 / lastRecord.avgSpeed
+                                val met = if(avgPace > 20*60) 1.0
+                                else if(avgPace > 10*60) 2.5
+                                else if(avgPace > 7.5*60) 5.0
+                                else if(avgPace > 5*60) 7.0
+                                else 10.0
+                                val weight = dataStoreRepository.weight.first() ?: 0.0
+                                val calories = (repository.time.value/60) * met * 3.5 * weight / 200
+                                endRunning(
+                                    0.0,
+                                    lastRecord.cadenceSum / recordSize,
+                                    lastRecord.altitudeSum / recordSize,
+                                    avgPace,
+                                    calories,
+                                    repository.courseId.value,
+                                    (lastRecord.distance).toDouble(),
+                                    convertDateTime(lastRecord.currentTime),
+                                    it,
+                                    convertDateTime(record.runningRecords.first().currentTime),
+                                    currentGroupId
+                                )
+                            }
+                        } else {
+                            Timber.d("기록이 없습니다 recordSize 0")
                         }
                     } else {
-                        Timber.d("기록이 없습니다 recordSize 0")
+                        Timber.d("write fail")
                     }
-
-                } else {
-                    Timber.d("write fail")
                 }
             }
+        } else {
+            // 종료시키기
+            stopForeground(true)
+            stopSelf()
+            repository.setTrackingStatus(TrackingStatus.INITIAL)
         }
 
         CoroutineScope(Dispatchers.Default).launch {
             _endRunning.collectLatest {
                 if (it is RunningEndState.Success) {
-                    repository.setTrackingStatus(TrackingStatus.PAUSED)
+                    repository.setTrackingStatus(TrackingStatus.STOPPED)
                     repository.setHistoryId(it.historyId)
                     stopForeground(true)
                     stopSelf()
@@ -309,11 +325,13 @@ class RunningTrackingService : Service() {
                 when (status) {
                     is ResponseStatus.Success -> {
                         _endRunning.emit(RunningEndState.Success(status.data.historyId))
+                        repository.setCourseId(null)
                     }
 
                     is ResponseStatus.Error -> {
                         Timber.d("runningend error ${status.error.message}")
                         _endRunning.emit(RunningEndState.Error(status.error.message))
+                        repository.setCourseId(null)
                     }
                 }
             }
@@ -338,7 +356,7 @@ class RunningTrackingService : Service() {
     private fun createNotification(): Notification {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("러닝 준비 중")
-            .setSmallIcon(R.drawable.ic_drawer_menu)
+            .setSmallIcon(R.drawable.image_tonie_small)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -412,7 +430,7 @@ class RunningTrackingService : Service() {
         disconnectFromGroupSocket()
         serviceScope.cancel()
         runningJob = RunningJobState.None
-        repository.setTrackingStatus(TrackingStatus.STOPPED)
+//        repository.setTrackingStatus(TrackingStatus.STOPPED)
     }
 
     override fun onBind(intent: Intent?): IBinder? {

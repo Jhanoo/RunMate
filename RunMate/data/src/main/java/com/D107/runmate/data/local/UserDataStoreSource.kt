@@ -2,6 +2,7 @@ package com.D107.runmate.data.local
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -28,6 +29,8 @@ class UserDataStoreSource @Inject constructor(
         val LEFT_INSOLE_ADDRESS = stringPreferencesKey("left_insole_address")
         val RIGHT_INSOLE_ADDRESS = stringPreferencesKey("right_insole_address")
         val GAIT_ANALYSIS_RESULT = stringPreferencesKey("gait_analysis_result")
+        val WEIGHT = doublePreferencesKey("weight")
+        val HEIGHT = doublePreferencesKey("height")
     }
 
     suspend fun saveNickname(nickname: String) {
@@ -63,7 +66,18 @@ class UserDataStoreSource @Inject constructor(
         dataStore.edit { preferences ->
             preferences[GAIT_ANALYSIS_RESULT] = jsonString
         }
+    }
 
+    suspend fun saveWeight(weight: Double) {
+        dataStore.edit { preferences ->
+            preferences[WEIGHT] = weight
+        }
+    }
+
+    suspend fun saveHeight(height: Double) {
+        dataStore.edit { preferences ->
+            preferences[HEIGHT] = height
+        }
     }
 
     val nickname: Flow<String?> = dataStore.data.map { preferences ->
@@ -80,6 +94,14 @@ class UserDataStoreSource @Inject constructor(
 
     val accessToken: Flow<String?> = dataStore.data.map { preferences ->
         preferences[ACCESS_TOKEN]
+    }
+
+    val height: Flow<Double?> = dataStore.data.map { preferences ->
+        preferences[HEIGHT]
+    }
+
+    val weight: Flow<Double?> = dataStore.data.map { preferences ->
+        preferences[WEIGHT]
     }
 
     val leftInsoleAddressFlow: Flow<String?> = dataStore.data

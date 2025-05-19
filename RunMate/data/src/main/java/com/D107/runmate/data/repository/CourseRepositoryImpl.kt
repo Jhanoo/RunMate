@@ -36,7 +36,7 @@ class CourseRepositoryImpl @Inject constructor(
                     )
 
                     is ApiResponse.Success -> {
-                        val courseInfoList = response.data.map { it.toDomainModel() }
+                        val courseInfoList = response.data!!.map { it.toDomainModel() }
                         emit(ResponseStatus.Success(courseInfoList))
                     }
                 }
@@ -69,7 +69,7 @@ class CourseRepositoryImpl @Inject constructor(
                     )
 
                     is ApiResponse.Success -> {
-                        val courseInfoList = response.data.map { it.toDomainModel() }
+                        val courseInfoList = response.data!!.map { it.toDomainModel() }
                         emit(ResponseStatus.Success(courseInfoList))
                     }
                 }
@@ -102,7 +102,7 @@ class CourseRepositoryImpl @Inject constructor(
                         )
                     )
 
-                    is ApiResponse.Success -> emit(ResponseStatus.Success(response.data.toDomainModel()))
+                    is ApiResponse.Success -> emit(ResponseStatus.Success(response.data!!.toDomainModel()))
                 }
             } catch (e: Exception) {
                 Timber.e("${e.message}")
@@ -132,7 +132,7 @@ class CourseRepositoryImpl @Inject constructor(
                         )
                     )
 
-                    is ApiResponse.Success -> emit(ResponseStatus.Success(response.data.toDomainModel()))
+                    is ApiResponse.Success -> emit(ResponseStatus.Success(response.data!!.toDomainModel()))
                 }
             } catch (e:Exception) {
                 Timber.e("${e.message}")
@@ -167,7 +167,7 @@ class CourseRepositoryImpl @Inject constructor(
                     )
 
                     is ApiResponse.Success -> {
-                        val courseInfoList = response.data.map { it.toDomainModel() }
+                        val courseInfoList = response.data!!.map { it.toDomainModel() }
                         emit(ResponseStatus.Success(courseInfoList))
                     }
                 }
@@ -200,7 +200,7 @@ class CourseRepositoryImpl @Inject constructor(
                     )
 
                     is ApiResponse.Success -> {
-                        val courseInfoList = response.data.map { it.toDomainModel() }
+                        val courseInfoList = response.data!!.map { it.toDomainModel() }
                         emit(ResponseStatus.Success(courseInfoList))
                     }
                 }
@@ -241,7 +241,7 @@ class CourseRepositoryImpl @Inject constructor(
                         )
                     )
 
-                    is ApiResponse.Success -> emit(ResponseStatus.Success(response.data.courseId))
+                    is ApiResponse.Success -> emit(ResponseStatus.Success(response.data!!.courseId))
                 }
             }catch (e: Exception) {
                 Timber.e("${e.message}")

@@ -17,15 +17,15 @@ class LoginUseCase @Inject constructor(
             if (result is ResponseStatus.Success) {
                 // 로그인 성공 시 토큰 저장
                 result.data.userId?.let { dataStoreRepository.saveUserId(it) }
-//                println("!!!!!!!!!!!!!!!!!!!${result.data}")
                 result.data.profileImage?.let {
-                    println("!!!!!!!!!!!!!!!!!!!!!$it")
                     dataStoreRepository.saveProfileImage(it) }
                 result.data.nickname?.let { dataStoreRepository.saveNickname(it) }
-
+                result.data.height?.let { dataStoreRepository.saveHeight(it) }
+                result.data.weight?.let {
+                    dataStoreRepository.saveWeight(it)
+                    println("weight is ${it}")
+                }
                 dataStoreRepository.saveAccessToken(result.data.accessToken)
-
-
             }
         }
     }

@@ -28,7 +28,7 @@ class AuthRepositoryImpl @Inject constructor(
         when (val response = authDataSource.login(request)) {
             is ApiResponse.Success -> {
                 Timber.d("login ${response}")
-                emit(ResponseStatus.Success(response.data.toDomainModel()))
+                emit(ResponseStatus.Success(response.data!!.toDomainModel()))
             }
             is ApiResponse.Error -> {
                 emit(ResponseStatus.Error(
@@ -57,7 +57,7 @@ class AuthRepositoryImpl @Inject constructor(
         try {
             when (val response = authDataSource.signup(request, signupData.profileImageSource)) {
                 is ApiResponse.Success -> {
-                    val userInfo = response.data.toDomainModel()
+                    val userInfo = response.data!!.toDomainModel()
                     emit(ResponseStatus.Success(userInfo))
                 }
                 is ApiResponse.Error -> {
@@ -88,9 +88,8 @@ class AuthRepositoryImpl @Inject constructor(
             Timber.d("Checking email: $email")
             when (val response = authDataSource.checkEmail(email)) {
                 is ApiResponse.Success -> {
-                    Timber.d("Email check success: isDuplicated=${response.data.isDuplicated}, message=${response.data.message}")
                     // API 응답의 data 필드가 true면 중복된 이메일, false면 사용 가능한 이메일
-                    val isEmailAvailable = !response.data.isDuplicated // true면 사용 가능, false면 중복
+                    val isEmailAvailable = !response.data!! // true면 사용 가능, false면 중복
                     emit(ResponseStatus.Success(isEmailAvailable))
                 }
                 is ApiResponse.Error -> {

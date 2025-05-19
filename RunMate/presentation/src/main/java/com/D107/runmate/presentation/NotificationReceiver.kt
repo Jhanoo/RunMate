@@ -26,17 +26,13 @@ class NotificationReceiver : BroadcastReceiver() {
             }
 
             ACTION_PAUSE -> {
-                Timber.d("onReceive: ACTION_PAUSE")
                 context?.let {
                     RunningTrackingService.pauseService(it)
                     repository.setTrackingStatus(TrackingStatus.PAUSED)
                 }
-                // running, record fragment ui 수정
-                //
             }
 
             ACTION_START -> {
-                Timber.d("onReceive: ACTION_START")
                 context?.let {
                     RunningTrackingService.startService(it)
                     repository.setTrackingStatus(TrackingStatus.RUNNING)
@@ -44,10 +40,9 @@ class NotificationReceiver : BroadcastReceiver() {
             }
 
             ACTION_STOP -> {
-                Timber.d("onReceive: ACTION_STOP")
                 context?.let {
                     RunningTrackingService.stopService(it)
-//                    repository.setTrackingStatus(TrackingStatus.STOPPED)
+                    repository.setTrackingStatus(TrackingStatus.STOPPED)
                 }
             }
         }

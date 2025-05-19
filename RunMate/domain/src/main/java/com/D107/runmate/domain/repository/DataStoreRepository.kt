@@ -25,4 +25,10 @@ interface DataStoreRepository {
     val savedGaitAnalysisResult: Flow<GaitAnalysisResult?>
     suspend fun saveGaitAnalysisResult(gaitAnalysisResult: GaitAnalysisResult)
 
+    val weight: Flow<Double?>
+    suspend fun saveWeight(weight: Double)
+
+    val height: Flow<Double?>
+    suspend fun saveHeight(height: Double)
+
 }

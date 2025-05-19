@@ -61,35 +61,48 @@ class CourseSearchFragment : BaseFragment<FragmentCourseSearchBinding>(
                             if (value[0] == null) null else if (value[0] == distanceFilterList.size - 1) null else distanceFilterList[value[0]!! + 1]
                         if (isLiked == null) {
                             if (minDistance == null && maxDistance == null) {
-                                courseRVAdapter.submitList(courseList.courseList)
+                                courseRVAdapter.submitList(courseList.courseList){
+                                    binding.rvCourse.scrollToPosition(0)
+                                }
                             } else if (minDistance != null && maxDistance == null) {
                                 courseRVAdapter.submitList(
                                     courseList.courseList.filter {
                                         it.distance > minDistance
                                     }
-                                )
+                                ){
+                                    binding.rvCourse.scrollToPosition(0)
+                                }
                             } else {
                                 courseRVAdapter.submitList(
                                     courseList.courseList.filter {
                                         it.distance >= minDistance!! && it.distance < maxDistance!!
                                     }
-                                )
+                                ){
+                                    binding.rvCourse.scrollToPosition(0)
+                                }
                             }
                         } else {
                             if (minDistance == null && maxDistance == null) {
-                                courseRVAdapter.submitList(courseList.courseList.filter { it.liked == isLiked })
+                                courseRVAdapter.submitList(courseList.courseList.filter { it.liked == isLiked }){
+                                    binding.rvCourse.scrollToPosition(0)
+                                }
+
                             } else if (minDistance != null && maxDistance == null) {
                                 courseRVAdapter.submitList(
                                     courseList.courseList.filter {
                                         it.distance > minDistance && it.liked == isLiked
                                     }
-                                )
+                                ){
+                                    binding.rvCourse.scrollToPosition(0)
+                                }
                             } else {
                                 courseRVAdapter.submitList(
                                     courseList.courseList.filter {
                                         it.distance >= minDistance!! && it.distance < maxDistance!! && it.liked == isLiked
                                     }
-                                )
+                                ){
+                                    binding.rvCourse.scrollToPosition(0)
+                                }
                             }
                         }
                     }
@@ -137,6 +150,8 @@ class CourseSearchFragment : BaseFragment<FragmentCourseSearchBinding>(
             layoutManager = LinearLayoutManager(requireContext())
             courseRVAdapter.submitList(listOf())
         }
+
+        binding.rvCourse.itemAnimator = null
 
         courseRVAdapter.itemClickListener = object : CourseRVAdapter.ItemClickListener {
             override fun onClick(view: View, data: CourseInfo, position: Int) {
