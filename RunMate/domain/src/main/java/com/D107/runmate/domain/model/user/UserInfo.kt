@@ -8,5 +8,7 @@ data class UserInfo(
     val nickname: String,
     val profileImage: String?,
     val birthday: String,
-    val gender: String
+    val gender: String,
+    val weight: Double,
+    val height: Double
 ): BaseModel

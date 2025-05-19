@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.math.sign
 
 class AuthRepositoryImpl @Inject constructor(
     private val authDataSource: AuthDataSource
@@ -47,7 +48,9 @@ class AuthRepositoryImpl @Inject constructor(
             password = signupData.password,
             nickname = signupData.nickname,
             birthday = signupData.birthday,
-            gender = signupData.gender
+            gender = signupData.gender,
+            weight = signupData.weight,
+            height = signupData.height
         )
 
         try {

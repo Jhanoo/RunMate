@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -53,10 +52,10 @@
 
     <TextView
         android:id="@+id/idTextView"
-        android:fontFamily="@font/pretendard_medium"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
+        android:fontFamily="@font/pretendard_medium"
         android:text="이름(닉네임)"
         android:textSize="16sp"
         app:layout_constraintTop_toBottomOf="@+id/profileImg"
@@ -67,17 +66,17 @@
         style="@style/GrayEditTextStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
         android:hint="달려라화니"
         app:layout_constraintTop_toBottomOf="@+id/idTextView"
         tools:ignore="HardcodedText,MissingConstraints" />
 
     <TextView
         android:id="@+id/pwTextView"
-        android:fontFamily="@font/pretendard_medium"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/pretendard_medium"
         android:text="생년월일"
         android:textSize="16sp"
         app:layout_constraintTop_toBottomOf="@+id/idEditText"
@@ -88,21 +87,21 @@
         style="@style/GrayLineButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
         android:text="생년월일을 입력해주세요"
         app:layout_constraintTop_toBottomOf="@+id/pwTextView"
         tools:ignore="HardcodedText,MissingConstraints" />
 
     <TextView
         android:id="@+id/pwCheckTextView"
-        android:fontFamily="@font/pretendard_medium"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="성별"
-        android:textSize="16sp"
+        android:layout_marginTop="16dp"
         android:clickable="true"
         android:focusable="true"
+        android:fontFamily="@font/pretendard_medium"
+        android:text="성별"
+        android:textSize="16sp"
         app:layout_constraintTop_toBottomOf="@+id/birthDateButton"
         tools:ignore="MissingConstraints" />
 
@@ -111,10 +110,62 @@
         style="@style/GrayLineButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
         android:text="성별을 선택해주세요"
         app:layout_constraintTop_toBottomOf="@+id/pwCheckTextView"
         tools:ignore="HardcodedText,MissingConstraints" />
+
+    <!--  체중  -->
+    <TextView
+        android:id="@+id/weightTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:fontFamily="@font/pretendard_medium"
+        android:text="체중"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@+id/genderButton"
+        tools:ignore="MissingConstraints" />
+
+    <EditText
+        android:id="@+id/weightText"
+        style="@style/GrayEditTextStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:hint="65.0"
+        android:maxLines="1"
+        android:inputType="numberDecimal"
+        app:layout_constraintTop_toBottomOf="@+id/weightTextView"
+        tools:ignore="HardcodedText,MissingConstraints" />
+
+    <TextView
+        android:id="@+id/heightTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:fontFamily="@font/pretendard_medium"
+        android:text="키"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@+id/weightText"
+        tools:ignore="MissingConstraints" />
+
+    <EditText
+        android:id="@+id/heightText"
+        style="@style/GrayEditTextStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:hint="160.0"
+        android:maxLines="1"
+        android:inputType="numberDecimal"
+        app:layout_constraintTop_toBottomOf="@+id/heightTextView"
+        tools:ignore="HardcodedText,MissingConstraints"
+        tools:layout_editor_absoluteX="26dp" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/signupButton"

@@ -68,6 +68,12 @@ class JoinViewModel @Inject constructor(
     private val _profileImageUri = MutableLiveData<Uri?>()
     val profileImageUri: LiveData<Uri?> = _profileImageUri
 
+    private val _weight = MutableLiveData<Double>()
+    val weight: LiveData<Double> = _weight
+
+    private val _height = MutableLiveData<Double>()
+    val height: LiveData<Double> = _height
+
     fun setEmail(email: String) {
         _email.value = email
         validateEmail(email)
@@ -91,6 +97,14 @@ class JoinViewModel @Inject constructor(
             "여성" -> "FEMALE"
             else -> "MALE"
         }
+    }
+
+    fun setWeight(weight: Double) {
+        _weight.value = weight
+    }
+
+    fun setHeight(height: Double) {
+        _height.value = height
     }
 
     fun setProfileImage(uri: Uri?) {
@@ -133,13 +147,13 @@ class JoinViewModel @Inject constructor(
         val birthday = _birthday.value ?: return
         val gender = _gender.value ?: return
         val profileUri = _profileImageUri.value
+        val weight = _weight.value ?: return
+        val height = _height.value ?: return
 
         // Uri를 ProfileImageSource로 변환
         val profileImageSource = profileUri?.let {
             ProfileImageSource(it.toString())
         }
-
-        Log.d("JoinViewModel", "Signup attempt: email=$email, password=${password?.take(3)}..., nickname=$nickname, birthday=$birthday, gender=$gender")
 
         val signupData = SignupData(
             email = email,
@@ -147,7 +161,9 @@ class JoinViewModel @Inject constructor(
             nickname = nickname,
             birthday = birthday,
             gender = gender,
-            profileImageSource = profileImageSource
+            profileImageSource = profileImageSource,
+            weight = weight,
+            height = height
         )
 
         viewModelScope.launch {
@@ -191,6 +207,8 @@ class JoinViewModel @Inject constructor(
         _birthday.value = ""
         _gender.value = ""
         _profileImageUri.value = null
+        _weight.value = 0.0
+        _weight.value = 0.0
     }
 
     fun goToNextStep() {
