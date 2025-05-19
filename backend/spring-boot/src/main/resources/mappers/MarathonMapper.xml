@@ -16,8 +16,11 @@
         created_at    AS createdAt
         FROM marathons
         WHERE date >= #{now}
+        AND date &lt;= #{now} + INTERVAL '3 month'
         ORDER BY date
     </select>
+
+
 
     <select id="findById"
             parameterType="java.util.UUID"
