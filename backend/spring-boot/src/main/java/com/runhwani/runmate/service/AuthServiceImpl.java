@@ -129,4 +129,9 @@ public class AuthServiceImpl implements AuthService {
             throw new CustomException(ErrorCode.LOGOUT_SERVER_ERROR);
         }
     }
+
+    @Override
+    public boolean checkEmailDuplicate(String email) {
+        return userDao.existsByEmail(email);
+    }
 } 

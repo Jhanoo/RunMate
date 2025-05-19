@@ -24,4 +24,11 @@ public interface AuthService {
      * 로그아웃
      */
     void logout(String token);
+    
+    /**
+     * 이메일 중복 확인
+     * @param email 확인할 이메일
+     * @return 중복 여부 (true: 중복, false: 사용 가능)
+     */
+    boolean checkEmailDuplicate(String email);
 } 
