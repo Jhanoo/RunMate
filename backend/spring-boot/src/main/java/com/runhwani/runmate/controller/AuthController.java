@@ -80,4 +80,26 @@ public class AuthController implements AuthControllerDocs {
                     .body(new CommonResponse<>(e.getErrorCode().getMessage(), null));
         }
     }
+
+    @Override
+    @GetMapping("/api/auth/check-email")
+    public ResponseEntity<CommonResponse<Boolean>> checkEmailDuplicate(@RequestParam String email) {
+        try {
+            // 이메일 형식 검증 (간단한 정규식 사용)
+            if (!email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+                return ResponseEntity
+                        .badRequest()
+                        .body(new CommonResponse<>("유효하지 않은 이메일 형식입니다.", null));
+            }
+            
+            boolean isDuplicate = authService.checkEmailDuplicate(email);
+            String message = isDuplicate ? "이미 사용 중인 이메일입니다." : "사용 가능한 이메일입니다.";
+            
+            return ResponseEntity.ok(new CommonResponse<>(message, isDuplicate));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new CommonResponse<>("서버 오류가 발생했습니다.", null));
+        }
+    }
 }

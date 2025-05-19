@@ -17,10 +17,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -194,4 +196,60 @@ public interface AuthControllerDocs {
     )
     @PostMapping("/api/auth/logout")
     ResponseEntity<CommonResponse<Void>> logout(@RequestHeader("Authorization") String token);
+
+    @Operation(
+            summary = "이메일 중복 확인",
+            description = "회원가입 전 이메일 중복 여부를 확인합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "이메일 중복 확인 성공",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = CommonResponse.class),
+                                    examples = {
+                                        @ExampleObject(
+                                            name = "사용 가능한 이메일",
+                                            value = """
+                                            {
+                                                "message": "사용 가능한 이메일입니다.",
+                                                "data": false
+                                            }
+                                            """
+                                        ),
+                                        @ExampleObject(
+                                            name = "중복된 이메일",
+                                            value = """
+                                            {
+                                                "message": "이미 사용 중인 이메일입니다.",
+                                                "data": true
+                                            }
+                                            """
+                                        )
+                                    }
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "잘못된 요청",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    examples = @ExampleObject(
+                                            name = "잘못된 이메일 형식",
+                                            value = """
+                                            {
+                                                "message": "유효하지 않은 이메일 형식입니다.",
+                                                "data": null
+                                            }
+                                            """
+                                    )
+                            )
+                    )
+            }
+    )
+    @GetMapping("/api/auth/check-email")
+    ResponseEntity<CommonResponse<Boolean>> checkEmailDuplicate(
+            @Parameter(description = "확인할 이메일", required = true, example = "user@example.com")
+            @RequestParam String email
+    );
 } 
