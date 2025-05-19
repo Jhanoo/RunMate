@@ -112,7 +112,13 @@ class GroupCreateFragment : BaseFragment<FragmentGroupCreateBinding>(
                 }
                 launch{
                     viewModel.selectedCourse.collect{courseDetail->
-                        binding.etCourse.setText(courseDetail?.name?:"")
+                        if(courseDetail!=null) {
+                            binding.etCourse.setText(courseDetail?.name?:"")
+                            binding.ivClearCourse.visibility = View.VISIBLE
+                        }else{
+                            binding.etCourse.setText("")
+                            binding.ivClearCourse.visibility = View.GONE
+                        }
                     }
                 }
 
@@ -147,6 +153,9 @@ class GroupCreateFragment : BaseFragment<FragmentGroupCreateBinding>(
 
             override fun afterTextChanged(s: Editable?) {}
         })
+        binding.ivClearCourse.setOnClickListener{
+            viewModel.clearCourse()
+        }
 
     }
 
@@ -191,7 +200,8 @@ class GroupCreateFragment : BaseFragment<FragmentGroupCreateBinding>(
         val hour = calendar.get(Calendar.HOUR_OF_DAY)
         val minute = calendar.get(Calendar.MINUTE)
         val picker = MaterialTimePicker.Builder()
-            .setTimeFormat(TimeFormat.CLOCK_12H) // 또는 CLOCK_24H
+            .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
+            .setTimeFormat(TimeFormat.CLOCK_12H)
             .setHour(hour)
             .setMinute(minute)
             .setTitleText("시간 선택")
@@ -212,32 +222,6 @@ class GroupCreateFragment : BaseFragment<FragmentGroupCreateBinding>(
         }
 
         picker.show(parentFragmentManager, "MaterialTimePicker")
-//        val currentDateTime = viewModel.selectedDate.value
-//        val calendar = Calendar.getInstance()
-//
-//        currentDateTime?.let {
-//            calendar.set(Calendar.HOUR_OF_DAY, it.hour)
-//            calendar.set(Calendar.MINUTE, it.minute)
-//        }
-//
-//        val hour = calendar.get(Calendar.HOUR_OF_DAY)
-//        val minute = calendar.get(Calendar.MINUTE)
-//
-//        val timePickerDialog = TimePickerDialog(
-//            requireContext(),
-//            { _, selectedHour, selectedMinute ->
-//                val selectedDate = LocalDate.of(year, month + 1, dayOfMonth)
-//                val selectedTime = LocalTime.of(selectedHour, selectedMinute)
-//                val selectedLocalDateTime = LocalDateTime.of(selectedDate, selectedTime)
-//                val selectedOffsetDateTime = selectedLocalDateTime.atZone(ZoneId.systemDefault()).toOffsetDateTime()
-//
-//                viewModel.selectDate(selectedOffsetDateTime)
-//            },
-//            hour,
-//            minute,
-//            true
-//        )
-//        timePickerDialog.show()
     }
 
     override fun onDestroy() {
