@@ -26,7 +26,7 @@ class CurriculumRepositoryImpl @Inject constructor(
 
             when (val response = curriculumDataSource.createCurriculum(request)) {
                 is ApiResponse.Success -> {
-                    emit(Result.success(response.data.curriculumId))
+                    emit(Result.success(response.data!!.curriculumId))
                 }
 
                 is ApiResponse.Error -> {
@@ -38,7 +38,7 @@ class CurriculumRepositoryImpl @Inject constructor(
     override suspend fun getMyCurriculum(): Flow<Result<CurriculumInfo>> = flow {
         when (val response = curriculumDataSource.getMyCurriculum()) {
             is ApiResponse.Success -> {
-                emit(Result.success(response.data.toDomainModel()))
+                emit(Result.success(response.data!!.toDomainModel()))
             }
             is ApiResponse.Error -> {
                 emit(Result.failure(Exception(response.error.message)))

@@ -1,11 +1,13 @@
 package com.D107.runmate.data.remote.api
 
 import com.D107.runmate.data.remote.common.ApiResponse
+import com.D107.runmate.data.remote.common.ServerResponse
 import com.D107.runmate.data.remote.request.course.CreateCourseRequest
 import com.D107.runmate.data.remote.response.course.CourseDetailResponse
 import com.D107.runmate.data.remote.response.course.CourseIdResponse
 import com.D107.runmate.data.remote.response.course.CourseItemResponse
 import com.D107.runmate.data.remote.response.course.CourseLikeResponse
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -17,28 +19,28 @@ import retrofit2.http.Query
 
 interface CourseService {
     @POST("courses/create")
-    suspend fun createCourse(@Body createCourseRequest: CreateCourseRequest): ApiResponse<CourseIdResponse>
+    suspend fun createCourse(@Body createCourseRequest: CreateCourseRequest): Response<ServerResponse<CourseIdResponse>>
 
     @PATCH("courses/{courseId}/like")
-    suspend fun updateCourseLike(@Path("courseId") courseId: String): ApiResponse<CourseLikeResponse>
+    suspend fun updateCourseLike(@Path("courseId") courseId: String): Response<ServerResponse<CourseLikeResponse>>
 
     @GET("courses/{courseId}")
-    suspend fun getCourseDetail(@Path("courseId") courseId: String): ApiResponse<CourseDetailResponse>
+    suspend fun getCourseDetail(@Path("courseId") courseId: String): Response<ServerResponse<CourseDetailResponse>>
 
     @DELETE("courses/{courseId}")
-    suspend fun deleteCourse(@Path("courseId") courseId: String): ApiResponse<Any?>
+    suspend fun deleteCourse(@Path("courseId") courseId: String): Response<ServerResponse<Any?>>
 
     @GET("courses/search")
-    suspend fun searchCourse(@Query("keyword") keyword: String): ApiResponse<List<CourseItemResponse>>
+    suspend fun searchCourse(@Query("keyword") keyword: String): Response<ServerResponse<List<CourseItemResponse>>>
 
     @GET("courses/all")
-    suspend fun getAllCourseList(): ApiResponse<List<CourseItemResponse>>
+    suspend fun getAllCourseList(): Response<ServerResponse<List<CourseItemResponse>>>
 
     @GET("courses/recent")
-    suspend fun getRecentCourseList(): ApiResponse<List<CourseItemResponse>>
+    suspend fun getRecentCourseList(): Response<ServerResponse<List<CourseItemResponse>>>
 
     @GET("courses/my")
-    suspend fun getMyCourseList(): ApiResponse<List<CourseItemResponse>>
+    suspend fun getMyCourseList(): Response<ServerResponse<List<CourseItemResponse>>>
 
 
 }

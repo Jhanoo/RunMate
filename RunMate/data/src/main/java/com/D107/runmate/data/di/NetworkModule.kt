@@ -2,7 +2,6 @@ package com.D107.runmate.data.di
 
 import com.D107.runmate.data.local.UserDataStoreSource
 import com.D107.runmate.data.remote.api.KakaoLocalService
-import com.D107.runmate.data.remote.common.ApiResponseAdapterFactory
 import com.D107.runmate.data.remote.common.ApiResponseHandler
 import com.D107.runmate.data.remote.interceptor.KakaoRequestInterceptor
 import com.D107.runmate.data.remote.interceptor.RequestInterceptor
@@ -31,7 +30,7 @@ object NetworkModule {
     @Singleton
     fun provideMoshi(): Moshi {
         return Moshi.Builder()
-            .add(ApiResponseAdapterFactory())
+//            .add(ApiResponseAdapterFactory())
             .add(KotlinJsonAdapterFactory())
             .build()
     }

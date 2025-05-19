@@ -3,19 +3,15 @@ package com.D107.runmate.presentation.history
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.D107.runmate.domain.model.base.ResponseStatus
-import com.D107.runmate.domain.model.course.CourseDetail
-import com.D107.runmate.domain.model.course.CourseInfo
-import com.D107.runmate.domain.model.history.History
 import com.D107.runmate.domain.model.history.HistoryDetail
 import com.D107.runmate.domain.model.history.HistoryInfo
+import com.D107.runmate.domain.model.history.UserHistoryDetail
 import com.D107.runmate.domain.usecase.history.GetHistoryDetailUseCase
 import com.D107.runmate.domain.usecase.history.GetHistoryListUseCase
+import com.D107.runmate.domain.usecase.history.GetUserHistoryDetailUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -24,13 +20,17 @@ import javax.inject.Inject
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
     private val getHistoryListUseCase: GetHistoryListUseCase,
-    private val getHistoryDetailUseCase: GetHistoryDetailUseCase
+    private val getHistoryDetailUseCase: GetHistoryDetailUseCase,
+    private val getUserHistoryDetailUseCase: GetUserHistoryDetailUseCase
 ) : ViewModel() {
     private val _historyList = MutableStateFlow<HistoryListState>(HistoryListState.Initial)
     val historyList = _historyList.asStateFlow()
 
     private val _historyDetail = MutableStateFlow<HistoryDetailState>(HistoryDetailState.Initial)
     val historyDetail = _historyDetail.asStateFlow()
+
+    private val _historyUserDetail = MutableStateFlow<UserHistoryDetailState>(UserHistoryDetailState.Initial)
+    val historyUserDetail = _historyUserDetail.asStateFlow()
 
     fun getHistoryList() {
         viewModelScope.launch {
@@ -66,6 +66,23 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
+    fun getUserHistoryDetail(historyId: String, userId: String) {
+        viewModelScope.launch {
+            getUserHistoryDetailUseCase(historyId, userId).collectLatest { status ->
+                when (status) {
+                    is ResponseStatus.Success -> {
+                        Timber.d("getHistoryDetail Success {${status.data}}")
+                        _historyUserDetail.value = UserHistoryDetailState.Success(status.data)
+                    }
+                    is ResponseStatus.Error -> {
+                        Timber.d("getHistoryDetail Error {${status.error}}")
+                        _historyDetail.value = HistoryDetailState.Error(status.error.message)
+                    }
+                }
+            }
+        }
+    }
+
     fun resetHistoryDetail() {
         _historyDetail.value = HistoryDetailState.Initial
     }
@@ -81,4 +98,10 @@ sealed class HistoryDetailState {
     object Initial : HistoryDetailState()
     data class Success(val historyDetail: HistoryDetail) : HistoryDetailState()
     data class Error(val message: String?) : HistoryDetailState()
+}
+
+sealed class UserHistoryDetailState {
+    object Initial : UserHistoryDetailState()
+    data class Success(val userHistoryDetail: UserHistoryDetail) : UserHistoryDetailState()
+    data class Error(val message: String?) : UserHistoryDetailState()
 }

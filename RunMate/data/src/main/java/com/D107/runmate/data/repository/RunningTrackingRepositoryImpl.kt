@@ -55,7 +55,6 @@ class RunningTrackingRepositoryImpl @Inject constructor(
             _runningRecord.value = RunningRecordState.Initial
             _userLocation.value = UserLocationState.Initial
             _recordSize.value = 0
-        } else if(status == TrackingStatus.INITIAL) {
             gpxWriter.deleteFile()
         }
         _trackingStatus.value = status

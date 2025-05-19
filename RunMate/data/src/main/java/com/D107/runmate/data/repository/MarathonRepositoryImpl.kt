@@ -15,7 +15,7 @@ class MarathonRepositoryImpl @Inject constructor(
     override suspend fun getMarathons(): Flow<Result<List<MarathonInfo>>> = flow {
         when (val response = marathonDataSource.getMarathons()) {
             is ApiResponse.Success -> {
-                val marathons = response.data.map { it.toDomainModel() }
+                val marathons = response.data!!.map { it.toDomainModel() }
                 emit(Result.success(marathons))
             }
             is ApiResponse.Error -> {

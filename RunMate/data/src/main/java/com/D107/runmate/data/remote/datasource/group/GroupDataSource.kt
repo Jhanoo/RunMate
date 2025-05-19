@@ -9,9 +9,9 @@ import retrofit2.Response
 interface GroupDataSource  {
     suspend fun createGroup(createGroupRequest: GroupCreateRequest): ApiResponse<GroupResponse>
     suspend fun getCurrentGroup(): ApiResponse<GroupResponse>
-    suspend fun leaveGroup(): ApiResponse<Any?>
+    suspend fun leaveGroup(): ApiResponse<Any>
     suspend fun joinGroup(inviteCode: String): ApiResponse<GroupJoinResponse?>
-    suspend fun startGroup(): ApiResponse<Any?>
-    suspend fun finishGroup(): ApiResponse<Any?>
-    suspend fun hasGroupHistoriy(): ApiResponse<Boolean>
+    suspend fun startGroup(): ApiResponse<Any>
+    suspend fun finishGroup(): ApiResponse<Any>
+    suspend fun hasGroupHistory(): ApiResponse<Boolean>
 }

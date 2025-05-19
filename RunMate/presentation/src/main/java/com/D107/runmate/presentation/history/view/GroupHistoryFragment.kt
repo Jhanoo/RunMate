@@ -57,9 +57,9 @@ class GroupHistoryFragment : BaseFragment<FragmentGroupHistoryBinding>(
                         binding.tvMyPace.text = getString(R.string.running_pace, state.historyDetail.myRunItem.avgPace/60, state.historyDetail.myRunItem.avgPace%60)
                         binding.tvMyDistance.text = getString(R.string.running_distance_int, state.historyDetail.myRunItem.distance)
                         binding.tvMyDuration.text = if(state.historyDetail.myRunItem.time >= 3600) {
-                            formatSecondsToHMS(state.historyDetail.myRunItem.time)
+                            formatSecondsToHMS(state.historyDetail.myRunItem.time.toInt())
                         } else {
-                            formatSecondsToMS(state.historyDetail.myRunItem.time)
+                            formatSecondsToMS(state.historyDetail.myRunItem.time.toInt())
                         }
                         groupHistoryRVAdapter.submitList(state.historyDetail.groupRunItem)
                     }

@@ -46,9 +46,24 @@ object KakaoMapUtil {
 
         val options = RouteLineOptions.from(segment)
             .setStylesSet(stylesSet)
-//        lastLatLng = point
         val routeLine = layer.addRouteLine(options)
     }
 
+    fun addMoveLine(context: Context, kakaoMap: KakaoMap, latLngList: List<LatLng>) {
 
+        val layer = kakaoMap.routeLineManager!!.layer
+
+        val stylesSet = RouteLineStylesSet.from(
+            "runMateMoveStyles",
+            RouteLineStyles.from(RouteLineStyle.from(12f, context.getColor(R.color.secondary)))
+        )
+
+        val segment = RouteLineSegment.from(latLngList)
+            .setStyles(stylesSet.getStyles(0))
+
+        val options = RouteLineOptions.from(segment)
+            .setStylesSet(stylesSet)
+
+        val routeLine = layer.addRouteLine(options)
+    }
 }

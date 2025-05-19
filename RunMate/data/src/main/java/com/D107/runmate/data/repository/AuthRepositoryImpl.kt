@@ -26,7 +26,7 @@ class AuthRepositoryImpl @Inject constructor(
         when (val response = authDataSource.login(request)) {
             is ApiResponse.Success -> {
                 Timber.d("login ${response}")
-                emit(ResponseStatus.Success(response.data.toDomainModel()))
+                emit(ResponseStatus.Success(response.data!!.toDomainModel()))
             }
             is ApiResponse.Error -> {
                 emit(ResponseStatus.Error(
@@ -53,7 +53,7 @@ class AuthRepositoryImpl @Inject constructor(
         try {
             when (val response = authDataSource.signup(request, signupData.profileImageSource)) {
                 is ApiResponse.Success -> {
-                    val userInfo = response.data.toDomainModel()
+                    val userInfo = response.data!!.toDomainModel()
                     emit(ResponseStatus.Success(userInfo))
                 }
                 is ApiResponse.Error -> {

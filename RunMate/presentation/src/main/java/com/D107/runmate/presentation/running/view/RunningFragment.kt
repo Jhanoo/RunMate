@@ -35,6 +35,7 @@ import com.D107.runmate.presentation.utils.GpxParser
 import com.D107.runmate.presentation.utils.GpxParser.parseGpx
 import com.D107.runmate.presentation.utils.KakaoMapUtil.addCourseLine
 import com.D107.runmate.presentation.utils.KakaoMapUtil.addCoursePoint
+import com.D107.runmate.presentation.utils.KakaoMapUtil.addMoveLine
 import com.D107.runmate.presentation.utils.LocationUtils
 import com.kakao.vectormap.KakaoMap
 import com.kakao.vectormap.KakaoMapReadyCallback
@@ -121,6 +122,11 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
         }, object : KakaoMapReadyCallback() {
             override fun onMapReady(p0: KakaoMap) {
                 kakaoMap = p0
+                userLabel = null
+                val state = mainViewModel.userLocation.value
+                if(state is UserLocationState.Exist){
+                    setCameraUpdateAndAddMarker(state)
+                }
                 loadLocationAndMove()
                 viewLifecycleOwner.lifecycleScope.launch {
                     if(mainViewModel.course.value.second != null && mainViewModel.courseId.value != null){
@@ -128,11 +134,20 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                             drawGpxFile(GpxParser.getGpxInputStream(mainViewModel.course.value.second!!))
                         }
                     }
+                    val locations = mainViewModel.userLocation.value
+                    if(locations is UserLocationState.Exist){
+                        val latLngList: List<LatLng> = locations.locations.map { location ->
+                            LatLng.from(location.latitude, location.longitude)
+                        }
+                        mContext?.let {
+                            addMoveLine(it, p0, latLngList)
+                        }
+                    }
                 }
             }
 
             override fun getPosition(): LatLng {
-                mainViewModel.userLocation.value?.let {
+                mainViewModel.userLocation.value.let {
                     if (it is UserLocationState.Exist) {
                         return LatLng.from(
                             it.locations.last().latitude,
@@ -167,6 +182,8 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                             binding.groupRecord.visibility = View.VISIBLE
                             binding.groupBtnPause.visibility = View.GONE
                             binding.groupBtnRunning.visibility = View.VISIBLE
+                            binding.tvNoCurriculum.visibility = View.GONE
+                            binding.cbDailyTodo.visibility = View.GONE
                             mContext?.let {
                                 (getActivityContext(it) as MainActivity).hideHamburgerBtn()
                             }
@@ -190,6 +207,8 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                             binding.groupRecord.visibility = View.VISIBLE
                             binding.groupBtnPause.visibility = View.VISIBLE
                             binding.groupBtnRunning.visibility = View.GONE
+                            binding.tvNoCurriculum.visibility = View.GONE
+                            binding.cbDailyTodo.visibility = View.GONE
                             mContext?.let {
                                 (getActivityContext(it) as MainActivity).hideHamburgerBtn()
                             }
@@ -202,9 +221,9 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
         viewLifecycleOwner.lifecycleScope.launch {
             mainViewModel.runningRecord.collectLatest { state ->
                 if (state is RunningRecordState.Exist) {
+                    val locationValue = mainViewModel.userLocation.value
                     if (state.runningRecords.size > 1) {
-                        val locationValue = mainViewModel.userLocation.value
-                        if (locationValue is UserLocationState.Exist) {
+                        if (locationValue is UserLocationState.Exist && locationValue.locations.size > 1) {
                             val currentLocation = LatLng.from(
                                 locationValue.locations.last().latitude,
                                 locationValue.locations.last().longitude
@@ -223,7 +242,6 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                                     )
                                 }
                             }
-
                         }
                     }
                     binding.tvDistance.text =
@@ -235,14 +253,19 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                 }
             }
         }
+
         viewLifecycleOwner.lifecycleScope.launch {
             dailyTodoViewModel.dailyTodo.collectLatest { state ->
                 when(state) {
                     is DailyTodoState.Success -> {
                         binding.cbDailyTodo.text = state.todo.content
+                        binding.tvNoCurriculum.visibility = View.GONE
+                        binding.cbDailyTodo.visibility = View.VISIBLE
                     }
                     is DailyTodoState.Error -> {
                         Timber.d("getDailyTodo Error {${state.message}}")
+                        binding.tvNoCurriculum.visibility = View.VISIBLE
+                        binding.cbDailyTodo.visibility = View.GONE
                     }
                     is DailyTodoState.Initial -> {
 
@@ -254,7 +277,6 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
         viewLifecycleOwner.lifecycleScope.launch {
             mainViewModel.course.collectLatest {
                 if(it.second != null && mainViewModel.courseId.value != null) {
-                    Timber.d("course set ${it.second}")
                     withContext(Dispatchers.IO) {
                         drawGpxFile(GpxParser.getGpxInputStream(it.second!!))
                     }
@@ -336,13 +358,25 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
             }
             dialog.show(requireActivity().supportFragmentManager, "pace")
         }
+
+        binding.bgTodo.setOnClickListener {
+            Timber.d("groupTodo click")
+            mContext?.let {
+                (getActivityContext(it) as MainActivity).setNavigation(R.id.drawer_manager)
+//                findNavController().navigate(R.id.action_runningFragment_to_AIManagerIntroFragment)
+            }
+        }
     }
 
     private fun addMarker(latitude: Double, longitude: Double) {
         mContext?.let {
             CoroutineScope(Dispatchers.IO).launch {
-                val profileUrl = mainViewModel.profileImage.value ?: "https://picsum.photos/200/300" // 테스트 이미지, 추후 사용자 프로필 이미지로 변경 예정
-                val profileBitmap = getBitmapFromURL(profileUrl)
+                val profileUrl = mainViewModel.profileImage.value
+                val profileBitmap = if(profileUrl == null) {
+                    BitmapFactory.decodeResource(resources, R.drawable.tonie)
+                } else {
+                    getBitmapFromURL(profileUrl)
+                }
                 profileBitmap?.let { bitmap ->
                     val markerBg =
                         BitmapFactory.decodeResource(
@@ -392,6 +426,8 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                 binding.groupRecord.visibility = View.VISIBLE
                 binding.groupBtnPause.visibility = View.GONE
                 binding.groupBtnRunning.visibility = View.VISIBLE
+                binding.tvNoCurriculum.visibility = View.GONE
+                binding.cbDailyTodo.visibility = View.GONE
                 mContext?.let {
                     (getActivityContext(it) as MainActivity).hideHamburgerBtn()
                 }
@@ -415,6 +451,8 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                 binding.groupRecord.visibility = View.VISIBLE
                 binding.groupBtnPause.visibility = View.VISIBLE
                 binding.groupBtnRunning.visibility = View.GONE
+                binding.tvNoCurriculum.visibility = View.GONE
+                binding.cbDailyTodo.visibility = View.GONE
                 mContext?.let {
                     (getActivityContext(it) as MainActivity).hideHamburgerBtn()
                 }
@@ -435,17 +473,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                                     state.locations.last().longitude
                                 ), 800)
                         } else {
-                            val cameraUpdate = CameraUpdateFactory.newCenterPosition(
-                                LatLng.from(
-                                    state.locations.last().latitude,
-                                    state.locations.last().longitude
-                                )
-                            )
-                            kakaoMap?.moveCamera(cameraUpdate)
-                            addMarker(
-                                state.locations.last().latitude,
-                                state.locations.last().longitude
-                            )
+                            setCameraUpdateAndAddMarker(state)
                         }
                     }
 
@@ -464,7 +492,6 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
     override fun onPause() {
         super.onPause()
         binding.mapView.pause()
-        userLabel = null
     }
 
     private fun createProfileMarker(markerBackground: Bitmap, profileBitmap: Bitmap): Bitmap {
@@ -538,5 +565,19 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
                 }
             }
         }
+    }
+
+    private fun setCameraUpdateAndAddMarker(state: UserLocationState.Exist) {
+        val cameraUpdate = CameraUpdateFactory.newCenterPosition(
+            LatLng.from(
+                state.locations.last().latitude,
+                state.locations.last().longitude
+            )
+        )
+        kakaoMap?.moveCamera(cameraUpdate)
+        addMarker(
+            state.locations.last().latitude,
+            state.locations.last().longitude
+        )
     }
 }

@@ -390,18 +390,20 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
             try {
                 mContext?.let {
                     val location = getLocation(it, this@MainActivity)
-                    viewModel.setUserLocation(
-                        UserLocationState.Exist(
-                            listOf(
-                                LocationModel(
-                                    location.latitude,
-                                    location.longitude,
-                                    location.altitude,
-                                    location.speed
+                    if(viewModel.userLocation.value is UserLocationState.Initial) {
+                        viewModel.setUserLocation(
+                            UserLocationState.Exist(
+                                listOf(
+                                    LocationModel(
+                                        location.latitude,
+                                        location.longitude,
+                                        location.altitude,
+                                        location.speed
+                                    )
                                 )
                             )
                         )
-                    )
+                    }
                     Log.d(TAG, "onAllPermissionsGranted: location ${location}")
                 }
             } catch (e: Exception) {
@@ -412,12 +414,16 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
 
     private fun initDrawerHeader() {
         binding.navView.setNavigationItemSelectedListener(this)
-        binding.navView.menu.findItem(R.id.drawer_running).isChecked = true
+        binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
 
         // 초기 메뉴 아이템(달리기) 선택 상태로 설정
-        binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+        binding.navView.menu.findItem(R.id.drawer_running).isChecked = true
     }
 
+    fun setNavigation(id:Int) {
+//        binding.navView.menu.findItem(id).isChecked = true
+        onNavigationItemSelected(binding.navView.menu.findItem(id))
+    }
     private fun setDrawerWidth() {
         val displayMetrics = resources.displayMetrics
         val screenWidth = displayMetrics.widthPixels

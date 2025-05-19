@@ -2,12 +2,14 @@ package com.D107.runmate.presentation.history.view
 
 import android.os.Bundle
 import android.view.View
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.D107.runmate.domain.model.course.CourseInfo
 import com.D107.runmate.domain.model.history.History
+import com.D107.runmate.presentation.MainViewModel
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.course.adapter.CourseRVAdapter
 import com.D107.runmate.presentation.course.view.CourseSearchFragmentDirections
@@ -30,7 +32,7 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>(
 ) {
     private lateinit var historyRVAdapter: HistoryRVAdapter
     private val historyViewModel: HistoryViewModel by viewModels()
-
+    private val mainViewModel: MainViewModel by activityViewModels()
     private lateinit var dialog: FilterDialog
     private var setting: List<Int?> =
         listOf(null, null) // 첫 번째 거는 선택된 아이템(거리)의 index(선택 x는 -1), 두 번째 거는 0, 1로 bool대신 int
@@ -63,9 +65,11 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>(
             historyViewModel.historyDetail.collectLatest { state ->
                 when (state) {
                     is HistoryDetailState.Success -> {
-                        val action = HistoryFragmentDirections.actionHistoryFragmentToChartFragment(state.historyDetail.gpxFile)
-                        findNavController().navigate(action)
-                        historyViewModel.resetHistoryDetail()
+                        mainViewModel.userId.value?.let {
+                            val action = HistoryFragmentDirections.actionHistoryFragmentToPersonalHistoryFragment(it, state.historyDetail.historyId)
+                            findNavController().navigate(action)
+                            historyViewModel.resetHistoryDetail()
+                        }
                     }
                     is HistoryDetailState.Error -> {
                         Timber.d("getHistoryDetail Error {${state.message}}")
@@ -86,51 +90,69 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>(
                             if (value[0] == null) null else if (value[0] == distanceFilterList.size - 1) null else distanceFilterList[value[0]!! + 1]
                         if (value[1] == 0) { // 전체
                             if (minDistance == null && maxDistance == null) {
-                                historyRVAdapter.submitList(historyList.historyInfo.histories)
+                                historyRVAdapter.submitList(historyList.historyInfo.histories){
+                                    binding.rvHistory.scrollToPosition(0)
+                                }
                             } else if (minDistance != null && maxDistance == null) {
                                 historyRVAdapter.submitList(
                                     historyList.historyInfo.histories.filter {
                                         it.myDistance > minDistance
                                     }
-                                )
+                                ){
+                                    binding.rvHistory.scrollToPosition(0)
+                                }
                             } else {
                                 historyRVAdapter.submitList(
                                     historyList.historyInfo.histories.filter {
                                         it.myDistance >= minDistance!! && it.myDistance < maxDistance!!
                                     }
-                                )
+                                ){
+                                    binding.rvHistory.scrollToPosition(0)
+                                }
                             }
                         } else if (value[1] == 1) { // 그룹
                             if (minDistance == null && maxDistance == null) {
-                                historyRVAdapter.submitList(historyList.historyInfo.histories.filter { it.groupName != null })
+                                historyRVAdapter.submitList(historyList.historyInfo.histories.filter { it.groupName != null }){
+                                    binding.rvHistory.scrollToPosition(0)
+                                }
                             } else if (minDistance != null && maxDistance == null) {
                                 historyRVAdapter.submitList(
                                     historyList.historyInfo.histories.filter {
                                         it.myDistance > minDistance && it.groupName != null
                                     }
-                                )
+                                ){
+                                    binding.rvHistory.scrollToPosition(0)
+                                }
                             } else {
                                 historyRVAdapter.submitList(
                                     historyList.historyInfo.histories.filter {
                                         it.myDistance >= minDistance!! && it.myDistance < maxDistance!! && it.groupName != null
                                     }
-                                )
+                                ){
+                                    binding.rvHistory.scrollToPosition(0)
+                                }
                             }
-                        } else {
+                        } else { // 개인
                             if (minDistance == null && maxDistance == null) {
-                                historyRVAdapter.submitList(historyList.historyInfo.histories.filter { it.groupName == null })
+                                historyRVAdapter.submitList(historyList.historyInfo.histories.filter { it.groupName == null }){
+                                    binding.rvHistory.scrollToPosition(0)
+                                }
                             } else if (minDistance != null && maxDistance == null) {
                                 historyRVAdapter.submitList(
                                     historyList.historyInfo.histories.filter {
                                         it.myDistance > minDistance && it.groupName == null
                                     }
-                                )
+                                ){
+                                    binding.rvHistory.scrollToPosition(0)
+                                }
                             } else {
                                 historyRVAdapter.submitList(
                                     historyList.historyInfo.histories.filter {
                                         it.myDistance >= minDistance!! && it.myDistance < maxDistance!! && it.groupName == null
                                     }
-                                )
+                                ){
+                                    binding.rvHistory.scrollToPosition(0)
+                                }
                             }
                         }
                     }
@@ -151,6 +173,8 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>(
             layoutManager = LinearLayoutManager(requireContext())
             historyRVAdapter.submitList(listOf())
         }
+
+        binding.rvHistory.itemAnimator = null
 
         historyRVAdapter.itemClickListener = object : HistoryRVAdapter.ItemClickListener {
             override fun onClick(view: View, data: History, position: Int) {

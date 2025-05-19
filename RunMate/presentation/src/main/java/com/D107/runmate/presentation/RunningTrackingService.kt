@@ -343,7 +343,7 @@ class RunningTrackingService : Service() {
     private fun createNotification(): Notification {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("러닝 준비 중")
-            .setSmallIcon(R.drawable.ic_drawer_menu)
+            .setSmallIcon(R.drawable.image_tonie_small)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
