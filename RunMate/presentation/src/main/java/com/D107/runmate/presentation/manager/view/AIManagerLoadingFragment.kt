@@ -36,7 +36,7 @@ class AIManagerLoadingFragment : BaseFragment<FragmentAIManagerLoadingBinding>(
 
         // 30초 후에도 응답이 오지 않으면 강제 이동을 위한 타이머 설정
         viewLifecycleOwner.lifecycleScope.launch {
-            delay(30000) // 30초 후
+            delay(10000) // 30초 후
             if (view.isAttachedToWindow && findNavController().currentDestination?.id == R.id.AIManagerLoadingFragment) {
                 // 커리큘럼 체크 시도
                 curriculumViewModel.getMyCurriculum()

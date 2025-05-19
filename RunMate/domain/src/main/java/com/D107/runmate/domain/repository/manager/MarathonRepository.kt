@@ -7,4 +7,5 @@ import javax.inject.Inject
 
 interface MarathonRepository {
     suspend fun getMarathons(): Flow<Result<List<MarathonInfo>>>
+    suspend fun getMarathonById(marathonId: String): Flow<Result<MarathonInfo>>
 }
