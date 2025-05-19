@@ -6,12 +6,10 @@
     android:layout_height="wrap_content"
     android:padding="8dp">
 
-    <com.google.android.material.imageview.ShapeableImageView
+    <ImageView
         android:id="@+id/iv_member_profile"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        app:cornerFamily="rounded"
-        app:cornerSize="50%"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -34,8 +32,8 @@
 
     <ImageView
         android:id="@+id/iv_group_leader"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:layout_marginStart="4dp"
         android:src="@drawable/ic_crown"
         android:visibility="gone"

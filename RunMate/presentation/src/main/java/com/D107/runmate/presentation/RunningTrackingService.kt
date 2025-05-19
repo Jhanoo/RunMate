@@ -14,12 +14,14 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Build
+import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavDeepLinkBuilder
 import com.D107.runmate.domain.model.base.ResponseStatus
 import com.D107.runmate.domain.model.running.LocationModel
 import com.D107.runmate.domain.model.running.RunningRecordState
@@ -630,21 +632,24 @@ class RunningTrackingService : Service() {
                     val channelId = "GROUP_RUN_TERMINATION_CHANNEL"
                     val notificationId = System.currentTimeMillis().toInt()
 
-                    val intent = Intent(this@RunningTrackingService, MainActivity::class.java) // 결과 화면으로 이동
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    val pendingIntent = PendingIntent.getActivity(this@RunningTrackingService, 0, intent,
-                        PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE)
+                    val pendingIntent = NavDeepLinkBuilder(this@RunningTrackingService)
+                        .setComponentName(MainActivity::class.java)
+                        .setGraph(R.navigation.nav_graph)
+                        .setDestination(R.id.runningEndFragment)
+                        .setArguments(Bundle().apply {
+                            putString("sourceScreen", "GROUP_RUNNING_FRAGMENT")
+                        })
+                        .createPendingIntent()
 
                     val builder = NotificationCompat.Builder(this@RunningTrackingService, channelId)
-                        .setSmallIcon(R.drawable.tonie) // 적절한 아이콘
+                        .setSmallIcon(R.drawable.ic_logo)
                         .setContentTitle("그룹 달리기 종료")
                         .setContentText("그룹장에 의해 그룹 달리기가 종료되었습니다. 기록이 저장됩니다.")
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                         .setCategory(NotificationCompat.CATEGORY_EVENT)
-                        .setAutoCancel(true) // 클릭 시 자동 삭제
+                        .setAutoCancel(true)
                         .setContentIntent(pendingIntent)
-                        .setFullScreenIntent(pendingIntent, true)
-
+                        .setFullScreenIntent(pendingIntent, true) // Heads-up 알림으로 표시
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         if (ContextCompat.checkSelfPermission(this@RunningTrackingService, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
