@@ -339,7 +339,7 @@
         android:id="@+id/group_record"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
+        android:visibility="gone"
         android:background="@color/primary"
         app:constraint_referenced_ids="bg_running_record, tv_distance, tv_distance_title, tv_pace, tv_pace_title, tv_time, tv_time_title" />
 

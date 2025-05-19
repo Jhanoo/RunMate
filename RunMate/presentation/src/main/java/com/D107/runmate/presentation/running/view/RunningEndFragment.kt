@@ -103,7 +103,7 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
                         R.string.running_avg_altitude,
                         lastRecord.altitudeSum / it.runningRecords.size
                     )
-                    binding.tvCalorie.text = "0" // TODO 삼성헬스 연결하여 데이터 수정
+                    binding.tvCalorie.text = "0"
 
                     if(startLocation is UserLocationState.Exist) {
                         courseViewModel.getAddressFromLatLng(startLocation.locations.last().longitude, startLocation.locations.last().latitude)
@@ -118,7 +118,6 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
                     is HistoryDetailState.Success -> {
                         isLike = state.historyDetail.myRunItem.courseLiked
                         initIsLike = state.historyDetail.myRunItem.courseLiked
-                        Timber.d("isLike ${isLike} ${state.historyDetail.myRunItem.courseLiked}")
                         if(state.historyDetail.myRunItem.courseLiked) {
                             binding.ivLike.setImageResource(R.drawable.ic_course_like)
                         } else {

@@ -10,6 +10,8 @@ data class MyRunItem(
     val addedToCourse: Boolean,
     val avgBpm: Double,
     val avgPace: Double,
+    val avgCadence: Double,
+    val avgElevation: Double,
     val calories: Double,
     val courseLiked: Boolean,
     val courseLikes: Int,
@@ -18,7 +20,7 @@ data class MyRunItem(
 ): BaseResponse {
     companion object: DataMapper<MyRunItem, MyRun> {
         override fun MyRunItem.toDomainModel(): MyRun {
-            return MyRun(addedToCourse, avgBpm, avgPace, calories, courseLiked, courseLikes, distance, time)
+            return MyRun(addedToCourse, avgBpm, avgPace, calories, avgCadence, avgElevation, courseLiked, courseLikes, distance, time)
         }
     }
 }

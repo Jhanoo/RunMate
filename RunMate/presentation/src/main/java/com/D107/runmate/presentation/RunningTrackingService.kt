@@ -29,6 +29,7 @@ import com.D107.runmate.domain.model.running.TrackingStatus
 import com.D107.runmate.domain.model.running.UserLocationState
 import com.D107.runmate.domain.model.socket.ConnectionStatus
 import com.D107.runmate.domain.model.socket.SocketAuth
+import com.D107.runmate.domain.repository.DataStoreRepository
 import com.D107.runmate.domain.repository.running.RunningRepository
 import com.D107.runmate.domain.repository.running.RunningTrackingRepository
 import com.D107.runmate.domain.usecase.group.GetCoord2AddressUseCase
@@ -67,6 +68,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.time.times
 
 @AndroidEntryPoint
 class RunningTrackingService : Service() {
@@ -76,6 +78,9 @@ class RunningTrackingService : Service() {
 
     @Inject
     lateinit var repository: RunningTrackingRepository
+
+    @Inject
+    lateinit var dataStoreRepository: DataStoreRepository
 
     @Inject
     lateinit var getCoord2AddressUseCase: GetCoord2AddressUseCase
@@ -218,12 +223,20 @@ class RunningTrackingService : Service() {
                             )
                             address?.let {
                                 val lastRecord = record.runningRecords.last()
+                                val avgPace = 16.6667 / lastRecord.avgSpeed
+                                val met = if(avgPace > 20*60) 1.0
+                                else if(avgPace > 10*60) 2.5
+                                else if(avgPace > 7.5*60) 5.0
+                                else if(avgPace > 5*60) 7.0
+                                else 10.0
+                                val weight = dataStoreRepository.weight.first() ?: 0.0
+                                val calories = (repository.time.value/60) * met * 3.5 * weight / 200
                                 endRunning(
                                     0.0,
                                     lastRecord.cadenceSum / recordSize,
                                     lastRecord.altitudeSum / recordSize,
-                                    16.6667 / lastRecord.avgSpeed,
-                                    0.0,
+                                    avgPace,
+                                    calories,
                                     repository.courseId.value,
                                     (lastRecord.distance).toDouble(),
                                     convertDateTime(lastRecord.currentTime),
@@ -241,7 +254,6 @@ class RunningTrackingService : Service() {
                 }
             }
         } else {
-            Timber.d("recordSize 0")
             // 종료시키기
             stopForeground(true)
             stopSelf()
