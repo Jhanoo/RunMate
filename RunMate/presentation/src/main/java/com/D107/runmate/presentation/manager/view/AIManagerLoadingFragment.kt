@@ -11,6 +11,7 @@ import android.widget.ImageView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentAIManagerLoadingBinding
@@ -47,11 +48,20 @@ class AIManagerLoadingFragment : BaseFragment<FragmentAIManagerLoadingBinding>(
                     Timber.d("타임아웃 후 커리큘럼 발견: ${curriculum.curriculumId}")
                     findNavController().navigate(
                         R.id.AIManagerFragment,
-                        bundleOf("curriculumId" to curriculum.curriculumId)
+                        bundleOf("curriculumId" to curriculum.curriculumId),
+                        NavOptions.Builder()
+                            .setPopUpTo(R.id.nav_graph, false) // 네비게이션 그래프의 루트까지 스택 제거 (최상위 화면 제외)
+                            .build()
                     )
                 } ?: run {
                     // 커리큘럼이 없으면 러닝 화면으로 이동
-                    findNavController().navigate(R.id.runningFragment)
+                    findNavController().navigate(
+                        R.id.runningFragment,
+                        null,
+                        NavOptions.Builder()
+                            .setPopUpTo(R.id.nav_graph, false) // 네비게이션 그래프의 루트까지 스택 제거 (최상위 화면 제외)
+                            .build()
+                    )
                 }
             }
         }

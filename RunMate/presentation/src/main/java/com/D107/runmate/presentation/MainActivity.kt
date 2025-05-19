@@ -19,6 +19,7 @@ import android.view.ViewGroup
 import android.view.Window
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.core.os.bundleOf
@@ -55,8 +56,46 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     private var mContext: Context? = null
     private val viewModel: MainViewModel by viewModels()
 
+    private var backPressedTime: Long = 0
+    private val BACK_PRESS_INTERVAL = 2000
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 뒤로가기
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    // 드로어가 열려 있으면 닫기
+                    binding.drawerLayout.closeDrawer(GravityCompat.START)
+                } else {
+                    val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+                    val navController = navHostFragment.navController
+
+                    // 현재 목적지가 시작 목적지(홈 화면)이거나 주요 메뉴 화면인 경우
+                    if (navController.currentDestination?.id == navController.graph.startDestinationId
+                        || navController.currentDestination?.id == R.id.runningFragment
+                        || navController.currentDestination?.id == R.id.AIManagerFragment
+                        || navController.currentDestination?.id == R.id.wearableFragment
+                        || navController.currentDestination?.id == R.id.groupFragment
+                        || navController.currentDestination?.id == R.id.historyFragment) {
+
+                        // 백 버튼 두 번 클릭 처리
+                        if (backPressedTime + BACK_PRESS_INTERVAL > System.currentTimeMillis()) {
+                            // 두 번째 클릭이 간격 내에 발생하면 앱 종료
+                            finish()
+                        } else {
+                            // 첫 번째 클릭 시 토스트 메시지 표시
+                            Toast.makeText(this@MainActivity, "한 번 더 누르면 종료됩니다.", Toast.LENGTH_SHORT).show()
+                            backPressedTime = System.currentTimeMillis()
+                        }
+                    } else {
+                        // 그 외 화면에서는 이전 화면으로 이동
+                        navController.navigateUp()
+                    }
+                }
+            }
+        })
 
         mContext = this
 
