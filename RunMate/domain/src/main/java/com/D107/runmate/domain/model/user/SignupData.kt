@@ -8,5 +8,7 @@ data class SignupData(
     val nickname: String,
     val birthday: String,
     val gender: String,
-    val profileImageSource: ProfileImageSource? = null
+    val profileImageSource: ProfileImageSource? = null,
+    val weight: Double,
+    val height: Double
 ) : BaseModel

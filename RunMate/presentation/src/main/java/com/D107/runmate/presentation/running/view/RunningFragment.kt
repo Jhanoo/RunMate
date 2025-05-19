@@ -36,6 +36,7 @@ import com.D107.runmate.presentation.utils.KakaoMapUtil.addCourseLine
 import com.D107.runmate.presentation.utils.KakaoMapUtil.addCoursePoint
 import com.D107.runmate.presentation.utils.KakaoMapUtil.addMoveLine
 import com.D107.runmate.presentation.utils.LocationUtils
+import com.D107.runmate.presentation.utils.SourceScreen
 import com.kakao.vectormap.KakaoMap
 import com.kakao.vectormap.KakaoMapReadyCallback
 import com.kakao.vectormap.LatLng
@@ -299,6 +300,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
         }
 
         binding.btnSetCourse.setOnClickListener {
+            mainViewModel.setSourceScreen(SourceScreen.RUNNING_FRAGMENT)
             findNavController().navigate(R.id.action_runningFragment_to_courseSettingFragment)
         }
 

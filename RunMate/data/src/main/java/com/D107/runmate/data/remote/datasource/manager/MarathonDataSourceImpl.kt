@@ -15,17 +15,11 @@ class MarathonDataSourceImpl @Inject constructor(
         return handler.handle {
             marathonService.getMarathons()
         }
-//        return try {
-//            marathonService.getMarathons()
-//        } catch (e: Exception) {
-//            ApiResponse.Error(
-//                ErrorResponse(
-//                    status = "NETWORK_ERROR",
-//                    error = "CONNECTION_FAILED",
-//                    code = "NETWORK_ERROR",
-//                    message = "서버에 연결할 수 없습니다: ${e.message}"
-//                )
-//            )
-//        }
+    }
+
+    override suspend fun getMarathonById(marathonId: String): ApiResponse<MarathonResponse> {
+        return handler.handle {
+            marathonService.getMarathonById(marathonId)
+        }
     }
 }

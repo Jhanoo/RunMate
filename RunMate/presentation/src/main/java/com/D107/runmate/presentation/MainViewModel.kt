@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import androidx.lifecycle.viewModelScope
+import com.D107.runmate.presentation.utils.SourceScreen
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -40,6 +41,9 @@ class MainViewModel @Inject constructor(
 
     private val _profileImage = MutableStateFlow<String?>(null)
     val profileImage: StateFlow<String?> = _profileImage
+
+    private val _sourceScreen = MutableStateFlow(SourceScreen.RUNNING_FRAGMENT)
+    val sourceScreen: StateFlow<String> = _sourceScreen.asStateFlow()
 
     init {
         // DataStore에서 사용자 정보 로드
@@ -98,5 +102,10 @@ class MainViewModel @Inject constructor(
 
     fun setGoalPace(pace: Int?) {
         _goalPace.value = pace
+    }
+
+    fun setSourceScreen(sourceScreen: String) {
+        _sourceScreen.value = sourceScreen
+
     }
 }

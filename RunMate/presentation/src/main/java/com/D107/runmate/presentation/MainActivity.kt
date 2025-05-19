@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.content.pm.PackageManager
@@ -18,6 +19,7 @@ import android.view.ViewGroup
 import android.view.Window
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.core.os.bundleOf
@@ -54,14 +56,51 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     private var mContext: Context? = null
     private val viewModel: MainViewModel by viewModels()
 
+    private var backPressedTime: Long = 0
+    private val BACK_PRESS_INTERVAL = 2000
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // 뒤로가기
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    // 드로어가 열려 있으면 닫기
+                    binding.drawerLayout.closeDrawer(GravityCompat.START)
+                } else {
+                    val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+                    val navController = navHostFragment.navController
+
+                    // 현재 목적지가 시작 목적지(홈 화면)이거나 주요 메뉴 화면인 경우
+                    if (navController.currentDestination?.id == navController.graph.startDestinationId
+                        || navController.currentDestination?.id == R.id.runningFragment
+                        || navController.currentDestination?.id == R.id.AIManagerFragment
+                        || navController.currentDestination?.id == R.id.wearableFragment
+                        || navController.currentDestination?.id == R.id.groupFragment
+                        || navController.currentDestination?.id == R.id.historyFragment) {
+
+                        // 백 버튼 두 번 클릭 처리
+                        if (backPressedTime + BACK_PRESS_INTERVAL > System.currentTimeMillis()) {
+                            // 두 번째 클릭이 간격 내에 발생하면 앱 종료
+                            finish()
+                        } else {
+                            // 첫 번째 클릭 시 토스트 메시지 표시
+                            Toast.makeText(this@MainActivity, "한 번 더 누르면 종료됩니다.", Toast.LENGTH_SHORT).show()
+                            backPressedTime = System.currentTimeMillis()
+                        }
+                    } else {
+                        // 그 외 화면에서는 이전 화면으로 이동
+                        navController.navigateUp()
+                    }
+                }
+            }
+        })
+
         mContext = this
 
-        initDrawerHeader()
-        // 사용자 정보 관찰
         observeUserInfo()
+        initDrawerHeader()
 
         getKeyHash()
 
@@ -99,38 +138,16 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     private fun observeUserInfo() {
         lifecycleScope.launch {
             viewModel.nickname.collect { nickname ->
-                val navController = (supportFragmentManager
-                    .findFragmentById(R.id.nav_host_fragment) as NavHostFragment)
-                    .navController
-                val current = navController.currentDestination?.id ?: return@collect
-
-                Timber.d("current : $current  Splash ${R.id.splashFragment}  running ${R.id.runningFragment}")
-                if (current == R.id.splashFragment) {
-                    // 스플래시 화면일 때는 SplashFragment 에서 로직 처리
-                    return@collect
-                }
-
+                Timber.d("nickname 변경 감지: $nickname")
                 if (!nickname.isNullOrEmpty()) {
                     // 드로어 헤더의 이름 업데이트
-                    Timber.d("nickname : $nickname")
                     val headerView = binding.navView.getHeaderView(0)
                     val headerBinding = DrawerHeaderBinding.bind(headerView)
                     headerBinding.tvName.text = nickname
-                } else {
-                    Timber.d("delete nickname")
-                    navController.navigate(
-                        R.id.loginFragment,
-                        null,
-                        NavOptions.Builder()
-                            .setLaunchSingleTop(true)
-                            .setPopUpTo(current, true)
-                            .build()
-                    )
                 }
             }
         }
 
-        // 프로필 이미지 변경 관찰
         lifecycleScope.launch {
             viewModel.profileImage.collect { profileImageUrl ->
                 val headerView = binding.navView.getHeaderView(0)
@@ -147,6 +164,34 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                 } else {
                     // 기본 이미지 설정
                     headerBinding.ivProfile.setImageResource(R.drawable.ic_drawer_profile)
+                }
+            }
+        }
+
+        // 별도의 코루틴으로 로그인 상태 확인
+        lifecycleScope.launch {
+            viewModel.userId.collect { userId ->
+                Timber.d("userId 변경 감지: $userId")
+                val navController = (supportFragmentManager
+                    .findFragmentById(R.id.nav_host_fragment) as NavHostFragment)
+                    .navController
+                val current = navController.currentDestination?.id ?: return@collect
+
+                if (current == R.id.splashFragment) {
+                    // 스플래시 화면일 때는 SplashFragment 에서 로직 처리
+                    return@collect
+                }
+
+                if (userId.isNullOrEmpty()) {
+                    Timber.d("userId가 없음 - 로그인 화면으로 이동")
+                    navController.navigate(
+                        R.id.loginFragment,
+                        null,
+                        NavOptions.Builder()
+                            .setLaunchSingleTop(true)
+                            .setPopUpTo(current, true)
+                            .build()
+                    )
                 }
             }
         }
@@ -267,6 +312,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                             // 커리큘럼이 없거나 API 호출 타임아웃인 경우
                             if (!hasCurriculum) {
                                 Timber.d("커리큘럼 없음: AIManagerIntroFragment로 이동")
+//                                showHamburgerBtn(navController)
                                 navController.navigate(
                                     R.id.AIManagerIntroFragment,
                                     null,
@@ -276,6 +322,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                         } catch (e: Exception) {
                             // 예외 발생 시 로그 출력 및 IntroFragment로 이동
                             Timber.e("AI 매니저 접근 오류: ${e.message}")
+//                            showHamburgerBtn(navController)
                             navController.navigate(
                                 R.id.AIManagerIntroFragment,
                                 null,
@@ -310,7 +357,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
         dialog.window?.setLayout(
-            ViewGroup.LayoutParams.MATCH_PARENT,
+            (resources.displayMetrics.widthPixels * 0.9).toInt(),
             ViewGroup.LayoutParams.WRAP_CONTENT
         )
 
@@ -438,7 +485,26 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     }
 
     private fun showHamburgerBtn(navController: NavController) {
-        navController.addOnDestinationChangedListener { _, destination, _ ->
+        navController.addOnDestinationChangedListener { controller, destination, arguments ->
+            Timber.d("Destination changed to: ${destination.label}, ID: ${destination.id}")
+
+            val nickname = viewModel.nickname.value // 현재 닉네임 값 가져오기 (StateFlow 사용 가정)
+            val isLoginRequiredDestination = destination.id !in listOf(R.id.splashFragment, R.id.loginFragment, R.id.JoinFragment, R.id.Join2Fragment)
+
+            if (nickname.isNullOrEmpty() && isLoginRequiredDestination) {
+                Timber.d("Nickname is null/empty and current destination requires login. Navigating to loginFragment.")
+                if (controller.currentDestination?.id != R.id.loginFragment) {
+                    controller.navigate(
+                        R.id.loginFragment,
+                        null,
+                        NavOptions.Builder()
+                            .setLaunchSingleTop(true)
+                            .setPopUpTo(controller.graph.startDestinationId, false) // 시작점까지 팝 (inclusive=false)
+                            .setPopUpTo(destination.id, true) // 현재 목적지 팝 (inclusive=true)
+                            .build()
+                    )
+                }
+            }
             binding.btnMenu.visibility = when (destination.id) {
                 R.id.goalSettingFragment -> View.VISIBLE
                 R.id.runningFragment -> View.VISIBLE
@@ -448,6 +514,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                 R.id.AIManagerFragment -> View.VISIBLE
                 R.id.groupInfoFragment -> View.VISIBLE
                 R.id.groupRunningFragment -> View.VISIBLE
+                R.id.AIManagerIntroFragment -> View.VISIBLE
                 R.id.splashFragment -> View.GONE
                 R.id.loginFragment -> View.GONE
                 R.id.JoinFragment -> View.GONE
@@ -464,6 +531,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
     fun showHamburgerBtn() {
         binding.btnMenu.visibility = View.VISIBLE
     }
+
 
     fun getKeyHash() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -485,6 +553,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
             }
         }
     }
+
+
+
     fun setNotificationChannel(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channelId = "GROUP_RUN_TERMINATION_CHANNEL"
@@ -499,5 +570,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent) // 새 인텐트로 교체
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navHostFragment.navController.handleDeepLink(intent) // NavController에게 딥링크 처리 명시적 요청
     }
 }

@@ -25,6 +25,7 @@
     <color name="login_background">#1D4F38</color>
     <color name="login_btn">#298E60</color>
     <color name="primary_dark">#1F6A48</color>
+    <color name="color_clock_background">#C7D7C4</color>
 
 
 </resources>

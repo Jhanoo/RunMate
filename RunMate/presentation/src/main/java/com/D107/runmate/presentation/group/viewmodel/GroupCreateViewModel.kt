@@ -3,19 +3,24 @@ package com.D107.runmate.presentation.group.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.D107.runmate.domain.model.base.ResponseStatus
+import com.D107.runmate.domain.model.course.CourseDetail
 import com.D107.runmate.domain.model.group.Address
 import com.D107.runmate.domain.model.group.GroupCreateInfo
 import com.D107.runmate.domain.model.group.Place
 import com.D107.runmate.domain.model.group.RoadAddress
+import com.D107.runmate.domain.model.running.TrackPoint
 import com.D107.runmate.domain.usecase.group.CreateGroupUseCase
 import com.D107.runmate.domain.usecase.group.GetCoord2AddressUseCase
 import com.D107.runmate.domain.usecase.group.SearchPlaceUseCase
+import com.D107.runmate.presentation.utils.GpxParser
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.time.OffsetDateTime
 import javax.inject.Inject
@@ -31,6 +36,9 @@ class GroupCreateViewModel @Inject constructor(
 
     private val _groupName = MutableStateFlow<String>("")
     val groupName = _groupName.asStateFlow()
+
+    private val _selectedCourse = MutableStateFlow<CourseDetail?>(null)
+    val selectedCourse = _selectedCourse.asStateFlow()
 
     private val _selectedPlace = MutableStateFlow<Place?>(null)
     val selectedPlace = _selectedPlace.asStateFlow()
@@ -79,7 +87,7 @@ class GroupCreateViewModel @Inject constructor(
             createGroupUseCase(
                 GroupCreateInfo(
                     groupName = groupName.value,
-                    courseId = null,
+                    courseId = selectedCourse.value?.id,
                     startTime = selectedDate!!,
                     startLocation = selectedPlace!!.address,
                     latitude = selectedPlace!!.x,
@@ -157,6 +165,55 @@ class GroupCreateViewModel @Inject constructor(
         _selectedDate.value = date
     }
 
+    fun setCourse(course:CourseDetail){
+        _selectedCourse.value = course
+
+        _selectedPlace.value = Place(
+            id = "",
+            name = course.name,
+            x = 126.896495,
+            y = 37.533422,
+            address = course.startLocation
+        )
+        if (course.gpxFile.isNotEmpty()) {
+            viewModelScope.launch {
+                var firstTrackPoint: TrackPoint? = null
+
+                try {
+                    val inputStream = withContext(Dispatchers.IO) {
+                        GpxParser.getGpxInputStream(course.gpxFile) // 기존 함수 사용
+                    }
+
+                    if (inputStream != null) {
+                        val trackPoints = withContext(Dispatchers.Default) { // CPU 바운드 작업이면 Default
+                            GpxParser.parseGpx(inputStream)
+                        }
+                        inputStream.close() // 스트림 닫기 중요
+                        firstTrackPoint = trackPoints.firstOrNull()
+                    }
+                } catch (e: Exception) {
+                    Timber.e(e, "Error processing GPX file in ViewModel for course: ${course.name}")
+                    // 에러 처리 (예: 사용자에게 알림, 로그 기록 등)
+                }
+
+                firstTrackPoint?.let { point ->
+                    _selectedPlace.value = _selectedPlace.value?.copy(
+                        x = point.lon,
+                        y = point.lat
+                    ) ?: Place(
+                        id = "",
+                        name = course.name,
+                        x = point.lon,
+                        y = point.lat,
+                        address = course.startLocation // 또는 ""
+                    )
+                } ?: run {
+                    Timber.w("Could not get first track point from GPX: ${course.gpxFile}")
+                }
+            }
+        }
+    }
+
 
 
     fun clearQuery() {
@@ -168,6 +225,10 @@ class GroupCreateViewModel @Inject constructor(
         _queryResult.value = emptyList()
     }
 
+    fun clearCourse(){
+        _selectedCourse.value = null
+
+    }
 
     fun clearSelectedData(){
         clearQuery()
@@ -178,6 +239,7 @@ class GroupCreateViewModel @Inject constructor(
         _selectedDate.value = null
         _selectedPlace.value = null
         _addressResult.value = null
+        _selectedCourse.value = null
 
 
     }

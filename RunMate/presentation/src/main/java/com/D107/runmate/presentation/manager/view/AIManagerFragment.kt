@@ -1,5 +1,6 @@
 package com.D107.runmate.presentation.manager.view
 
+import android.app.Dialog
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -21,6 +22,28 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import javax.inject.Inject
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.GradientDrawable
+import android.view.ViewGroup
+import android.view.Window
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.RadioButton
+import android.widget.RadioGroup
+import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
+import com.D107.runmate.data.remote.api.MarathonService
+import com.D107.runmate.data.remote.common.ApiResponse
+import com.D107.runmate.presentation.manager.util.CurriculumPrefs
+import com.D107.runmate.presentation.manager.viewmodel.CurriculumViewModel
+import com.prolificinteractive.materialcalendarview.DayViewDecorator
+import com.prolificinteractive.materialcalendarview.DayViewFacade
+import com.prolificinteractive.materialcalendarview.spans.DotSpan
+import timber.log.Timber
 
 @RequiresApi(Build.VERSION_CODES.O)
 @AndroidEntryPoint
@@ -31,7 +54,12 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
     @Inject
     lateinit var todoRepository: TodoRepository
 
+    @Inject
+    lateinit var marathonService: MarathonService
+
     private lateinit var scheduleAdapter: ScheduleRVAdapter
+
+//    private var canRefresh = false
 
     // 서버에서 가져온 모든 일정을 저장할 리스트
     private val allScheduleItems = mutableListOf<ScheduleItem>()
@@ -45,8 +73,263 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
         // 리사이클러뷰 초기화
         initRecyclerView()
 
+        updateRefreshButton()
+
+        updateGoalDist()
+
+        CurriculumPrefs.logAllPreferences(requireContext())
+
         // 오늘 날짜에 해당하는 데이터 로드
         loadSchedulesForSelectedDate(Calendar.getInstance())
+    }
+
+    private fun updateGoalDist() {
+        val curriculumViewModel = ViewModelProvider(requireActivity()).get(CurriculumViewModel::class.java)
+
+        // 현재 커리큘럼 정보 가져오기
+        lifecycleScope.launch {
+            curriculumViewModel.myCurriculum.collect { result ->
+                result?.getOrNull()?.let { curriculum ->
+                    // goalDist 값 가져오기
+                    val goalDist = curriculum.goalDist
+
+                    // TextView에 설정
+                    binding.tvGoalValue.text = goalDist
+                }
+            }
+        }
+    }
+
+    private fun updateRefreshButton() {
+        CurriculumPrefs.logAllPreferences(requireContext())
+
+        val canRefresh = CurriculumPrefs.canRefresh(requireContext())
+
+        binding.ivRefresh.apply {
+            setImageResource(if (canRefresh) R.drawable.refresh else R.drawable.refresh_no)
+            isClickable = canRefresh
+            setOnClickListener(if (canRefresh) { _ -> showCurriculumModifyDialog() } else null)
+        }
+    }
+
+    private fun showCurriculumModifyDialog() {
+        CurriculumPrefs.saveRefreshTime(requireContext())
+        val dialog = Dialog(requireContext())
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog.setContentView(R.layout.dialog_curriculum_modify)
+
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window?.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+
+        val curriculumViewModel = ViewModelProvider(requireActivity()).get(CurriculumViewModel::class.java)
+        val currentCurriculum = curriculumViewModel.myCurriculum.value?.getOrNull()
+
+        if (currentCurriculum == null) {
+            Toast.makeText(requireContext(), "커리큘럼 정보를 가져올 수 없습니다", Toast.LENGTH_SHORT).show()
+            dialog.dismiss()
+            return
+        }
+
+        val btnClose = dialog.findViewById<ImageView>(R.id.btn_close)
+        val btnConfirm = dialog.findViewById<Button>(R.id.btn_confirm)
+
+        val etMarathonName = dialog.findViewById<EditText>(R.id.et_marathon_name)
+        val distanceGroup = dialog.findViewById<RadioGroup>(R.id.distance_options)
+        val prepGroup = dialog.findViewById<RadioGroup>(R.id.preparation_options)
+
+        // 모든 거리 라디오 버튼의 텍스트 색상 초기화
+        for (i in 0 until distanceGroup.childCount) {
+            val radioButton = distanceGroup.getChildAt(i) as RadioButton
+            radioButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+        }
+
+        // 모든 준비기간 라디오 버튼의 텍스트 색상 초기화
+        for (i in 0 until prepGroup.childCount) {
+            val radioButton = prepGroup.getChildAt(i) as RadioButton
+            radioButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+        }
+
+        // 선택된 버튼의 텍스트 색상 설정
+        distanceGroup.findViewById<RadioButton>(distanceGroup.checkedRadioButtonId)?.setTextColor(
+            ContextCompat.getColor(requireContext(), R.color.white)
+        )
+
+        prepGroup.findViewById<RadioButton>(prepGroup.checkedRadioButtonId)?.setTextColor(
+            ContextCompat.getColor(requireContext(), R.color.white)
+        )
+
+        // 거리 라디오 그룹 선택 리스너 설정
+        distanceGroup.setOnCheckedChangeListener { group, checkedId ->
+            // 모든 버튼 텍스트 색상 초기화
+            for (i in 0 until group.childCount) {
+                val radioButton = group.getChildAt(i) as RadioButton
+                radioButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+            }
+
+            // 선택된 버튼 텍스트 색상 변경
+            group.findViewById<RadioButton>(checkedId)?.setTextColor(
+                ContextCompat.getColor(requireContext(), R.color.white)
+            )
+        }
+
+        // 준비기간 라디오 그룹 선택 리스너 설정
+        prepGroup.setOnCheckedChangeListener { group, checkedId ->
+            // 모든 버튼 텍스트 색상 초기화
+            for (i in 0 until group.childCount) {
+                val radioButton = group.getChildAt(i) as RadioButton
+                radioButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+            }
+
+            // 선택된 버튼 텍스트 색상 변경
+            group.findViewById<RadioButton>(checkedId)?.setTextColor(
+                ContextCompat.getColor(requireContext(), R.color.white)
+            )
+        }
+
+        btnClose.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        Timber.d("마라톤 정보 가져오기 시작:  ${currentCurriculum.marathonId}")
+
+        // 마라톤 ID로 마라톤 정보 요청
+        curriculumViewModel.getMarathonById(currentCurriculum.marathonId)
+
+        // 마라톤 정보 가져오기
+        lifecycleScope.launch {
+            // 마라톤 정보 관찰
+            curriculumViewModel.marathonInfo.collect { marathonResult ->
+                marathonResult?.fold(
+                    onSuccess = { marathon ->
+                        Timber.d("마라톤 정보 가져오기 성공: ${marathon.title}")
+
+                        // marathon은 이제 MarathonInfo 타입입니다
+                        etMarathonName.setText(marathon.title)
+
+                        // 현재 거리 선택
+                        when (currentCurriculum.goalDist) {
+                            "5km" -> {
+                                distanceGroup.check(R.id.rb_run_0)
+                                distanceGroup.findViewById<RadioButton>(R.id.rb_run_0)?.setTextColor(
+                                    ContextCompat.getColor(requireContext(), R.color.white)
+                                )
+                            }
+                            "10km" -> {
+                                distanceGroup.check(R.id.rb_run_1_2)
+                                distanceGroup.findViewById<RadioButton>(R.id.rb_run_1_2)?.setTextColor(
+                                    ContextCompat.getColor(requireContext(), R.color.white)
+                                )
+                            }
+                            "21.0975km", "21km" -> {
+                                distanceGroup.check(R.id.rb_run_3_4)
+                                distanceGroup.findViewById<RadioButton>(R.id.rb_run_3_4)?.setTextColor(
+                                    ContextCompat.getColor(requireContext(), R.color.white)
+                                )
+                            }
+                            "42.195km", "42km" -> {
+                                distanceGroup.check(R.id.rb_run_5_more)
+                                distanceGroup.findViewById<RadioButton>(R.id.rb_run_5_more)?.setTextColor(
+                                    ContextCompat.getColor(requireContext(), R.color.white)
+                                )
+                            }
+                        }
+                    },
+                    onFailure = { error ->
+                        Timber.e("마라톤 정보 가져오기 실패: ${error.message}")
+                    }
+                )
+            }
+        }
+
+        btnConfirm.setOnClickListener {
+            CurriculumPrefs.saveRefreshTime(requireContext())
+
+            // 선택된 거리 값 가져오기
+            val goalDist = when (distanceGroup.checkedRadioButtonId) {
+                R.id.rb_run_0 -> "5km"
+                R.id.rb_run_1_2 -> "10km"
+                R.id.rb_run_3_4 -> "21.0975km"
+                R.id.rb_run_5_more -> "42.195km"
+                else -> "10km"
+            }
+
+            // 준비 기간에 따라 목표 날짜 계산
+            val calendar = Calendar.getInstance()
+            val weeksToAdd = when (prepGroup.checkedRadioButtonId) {
+                R.id.rb_prev_0 -> 4
+                R.id.rb_prev_1 -> 6
+                R.id.rb_prev_3 -> 8
+                R.id.rb_prev_4 -> 12
+                R.id.rb_prev_5 -> 20
+                else -> 6
+            }
+            calendar.add(Calendar.WEEK_OF_YEAR, weeksToAdd)
+
+            // ISO 8601 형식으로 변환
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.getDefault())
+            val goalDate = dateFormat.format(calendar.time)
+
+            // 커리큘럼 업데이트
+            val updatedCurriculum = currentCurriculum.copy(
+                goalDist = goalDist,
+                goalDate = goalDate
+            )
+            CurriculumPrefs.saveRefreshTime(requireContext())
+
+            dialog.dismiss()
+
+            findNavController().navigate(
+                R.id.AIManagerLoadingFragment,
+                null,
+                androidx.navigation.NavOptions.Builder()
+                    .setPopUpTo(R.id.AIManagerFragment, true)  // AIManagerFragment에서 시작
+                    .build()
+            )
+
+            curriculumViewModel.updateCurriculum(updatedCurriculum)
+
+            // 결과 관찰
+            lifecycleScope.launch {
+                curriculumViewModel.curriculumCreationResult.collect { result ->
+                    result?.fold(
+                        onSuccess = { curriculumId ->
+                            Timber.d("커리큘럼 업데이트 성공: ${curriculumId}")
+
+                            // AIManagerFragment로 이동
+                            findNavController().navigate(
+                                R.id.AIManagerFragment,
+                                bundleOf("curriculumId" to curriculumId),
+                                androidx.navigation.NavOptions.Builder()
+                                    .setPopUpTo(R.id.AIManagerLoadingFragment, true)
+                                    .build()
+                            )
+
+                            updateRefreshButton()
+                        },
+                        onFailure = { error ->
+                            Timber.e("커리큘럼 업데이트 실패: ${error.message}")
+                            Toast.makeText(requireContext(), "커리큘럼 업데이트 실패: ${error.message}", Toast.LENGTH_SHORT).show()
+
+                            // 오류 발생 시 AIManagerFragment로 돌아가기
+                            findNavController().popBackStack()
+                        }
+                    )
+                }
+            }
+
+
+            Toast.makeText(context, "목표가 수정되었습니다", Toast.LENGTH_SHORT).show()
+        }
+
+        dialog.show()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateRefreshButton()
     }
 
     private fun setupCalendar() {
@@ -60,6 +343,9 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
         // 현재 날짜 가져오기
         val today = CalendarDay.today()
 
+        // Make selection color transparent to disable default rectangle selection
+        binding.calendar.setSelectionColor(Color.TRANSPARENT)
+
         // 현재 날짜 이후의 날짜는 선택 불가능하게 설정
         binding.calendar.setDateSelected(today, true)
 
@@ -68,6 +354,7 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
             val selectedCalendar = Calendar.getInstance().apply {
                 set(date.year, date.month, date.day)
             }
+            binding.calendar.removeDecorators()
             loadSchedulesForSelectedDate(selectedCalendar)
         }
     }
@@ -93,18 +380,16 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
     private fun loadSchedulesForSelectedDate(selectedDate: Calendar) {
         // allScheduleItems 초기화 - 중요!
         allScheduleItems.clear()
+        scheduleAdapter.submitList(emptyList())
 
-        lifecycleScope.launch(Dispatchers.Main) {
-            // UI 즉시 비우기
-            scheduleAdapter.submitList(emptyList())
-        }
+//        lifecycleScope.launch(Dispatchers.Main) {
+//            // UI 즉시 비우기
+//            scheduleAdapter.submitList(emptyList())
+//        }
 
         // 선택한 날짜가 속한 주의 월요일과 일요일 구하기
         val monday = getWeekMonday(selectedDate)
         val sunday = getWeekSunday(selectedDate)
-
-        // 로그 추가 - 선택된 주 확인
-//        timber.log.Timber.d("선택된 주: ${formatCalendarDate(monday)} ~ ${formatCalendarDate(sunday)}")
 
         // 주 단위로 필요한 모든 월을 확인
         val mondayMonth = monday.get(Calendar.MONTH) + 1  // 0-based 인덱스라 +1
@@ -177,22 +462,6 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
             try {
                 timber.log.Timber.d("일정 변환 시도: ${todo.todoId}, date=${todo.date}")
 
-                // ISO 날짜 문자열에서 날짜 추출 (예: 2025-05-16T00:00:00+09:00)
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.getDefault())
-//                val date = dateFormat.parse(todo.date) ?: return@mapNotNull null
-
-//                if (date == null) {
-//                    timber.log.Timber.w("날짜 파싱 실패: ${todo.date}")
-//                    return@mapNotNull null
-//                }
-
-                // 표시용 날짜 및 요일 포맷
-//                val dayFormat = SimpleDateFormat("M/d", Locale.getDefault())
-//                val weekDayFormat = SimpleDateFormat("E", Locale.KOREAN)
-
-//                val formattedDate = dayFormat.format(date)
-//                val formattedDay = weekDayFormat.format(date)4
-
                 val date = java.time.OffsetDateTime.parse(todo.date)
                 val formattedDate = "${date.monthValue}/${date.dayOfMonth}"
                 val formattedDay = when(date.dayOfWeek) {
@@ -211,8 +480,9 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
                     date = formattedDate,
                     day = formattedDay,
                     scheduleText = todo.content,
+//                    isCompleted = true,
                     isCompleted = todo.isDone ?: false,
-                    todoId = todo.todoId
+//                    todoId = todo.todoId
                 )
             } catch (e: Exception) {
                 android.util.Log.e("AIManagerFragment", "날짜 변환 오류: ${e.message}, 날짜: ${todo.date}")
@@ -287,6 +557,8 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
                 }
             }
 
+            updateCalendarWithCompletedTasks()
+
         } catch (e: Exception) {
             timber.log.Timber.e("일정 필터링 중 오류: ${e.message}")
             timber.log.Timber.e(e)
@@ -324,5 +596,87 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
 
         result.add(Calendar.DAY_OF_MONTH, -daysToSubtract)
         return result
+    }
+
+    private class CompletedDayDecorator(
+        private val dates: Collection<CalendarDay>,
+        private val selectedDate: CalendarDay?
+    ) : DayViewDecorator {
+        private val lightGreenColor = Color.parseColor(("#FFEBF8F2"))
+
+        override fun shouldDecorate(day: CalendarDay): Boolean {
+            // Only decorate completed days that are NOT the selected date
+            return dates.contains(day) && day != selectedDate
+        }
+
+        override fun decorate(view: DayViewFacade) {
+            val roundedBackground = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+//                setSize(32,32)
+                cornerRadius = 4f  // Rounded corners
+                setColor(lightGreenColor)
+
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+//                    setPadding(2,2,2,2)
+//                }
+            }
+            val insetDrawable = android.graphics.drawable.InsetDrawable(
+                roundedBackground,
+                1,  // 왼쪽 여백
+                1,  // 위쪽 여백
+                1,  // 오른쪽 여백
+                1   // 아래쪽 여백
+            )
+            view.setBackgroundDrawable(insetDrawable)
+        }
+    }
+
+    private fun updateCalendarWithCompletedTasks() {
+        val completedDays = mutableSetOf<CalendarDay>()
+        val selectedDate = binding.calendar.selectedDate
+
+        allScheduleItems.forEach { item ->
+            if (item.isCompleted == true) {
+                try {
+                    val parts = item.date.split("/")
+                    val month = parts[0].toInt() - 1 // Calendar month is 0-based
+                    val day = parts[1].toInt()
+
+                    val calendar = Calendar.getInstance()
+                    val year = calendar.get(Calendar.YEAR)
+
+                    completedDays.add(CalendarDay.from(year, month, day))
+                } catch (e: Exception) {
+                    timber.log.Timber.e("Error parsing date: ${item.date}")
+                }
+            }
+        }
+
+//        binding.calendar.removeDecorators()
+
+        if (completedDays.isNotEmpty()) {
+            binding.calendar.addDecorator(CompletedDayDecorator(completedDays, binding.calendar.selectedDate))
+        }
+
+        if (selectedDate != null) {
+            binding.calendar.addDecorator(object : DayViewDecorator {
+                override fun shouldDecorate(day: CalendarDay): Boolean {
+                    return day == selectedDate
+                }
+
+                override fun decorate(view: DayViewFacade) {
+                    val selectionColor = ContextCompat.getColor(requireContext(), R.color.login_btn)
+
+                    val selectionBackground = GradientDrawable().apply {
+                        shape = GradientDrawable.RECTANGLE
+                        cornerRadius = 30f
+                        setColor(selectionColor)
+                    }
+                    view.setSelectionDrawable(selectionBackground)
+                }
+            })
+        }
+
+        binding.calendar.setDateSelected(selectedDate, true)
     }
 }

@@ -12,12 +12,12 @@ object CurriculumMapper {
     fun CurriculumDetailResponse.toDomainModel(): CurriculumInfo {
         return CurriculumInfo(
             curriculumId = curriculumId ?: "",
-            marathonId = marathonId ?: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-            goalDist = goalDist ?: "10km",
-            goalDate = goalDate ?: "2025-06-10T09:00:00+09:00",
+            marathonId = marathonId ?: "",
+            goalDist = goalDist ?: "",
+            goalDate = goalDate ?: "",
             runExp = runExp ?: false,
-            distExp = distExp ?: "~10km",
-            freqExp = freqExp ?: "1~2회"
+            distExp = distExp ?: "",
+            freqExp = freqExp ?: ""
         )
     }
 }

@@ -13,7 +13,9 @@ data class SignupResponse(
     @Json(name = "nickname") val nickname: String,
     @Json(name = "profileImage") val profileImage: String?,
     @Json(name = "birthday") val birthday: String,
-    @Json(name = "gender") val gender: String
+    @Json(name = "gender") val gender: String,
+    @Json(name = "weight") val weight: Double,
+    @Json(name = "height") val height: Double
 ) : BaseResponse {
     companion object : DataMapper<SignupResponse, UserInfo> {
         override fun SignupResponse.toDomainModel(): UserInfo {
@@ -23,7 +25,9 @@ data class SignupResponse(
                 nickname = nickname,
                 profileImage = profileImage,
                 birthday = birthday,
-                gender = gender
+                gender = gender,
+                weight = weight,
+                height = height
             )
         }
     }

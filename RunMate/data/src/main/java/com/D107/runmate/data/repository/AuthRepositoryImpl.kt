@@ -5,6 +5,7 @@ import com.D107.runmate.data.remote.datasource.user.AuthDataSource
 import com.D107.runmate.data.remote.request.user.LoginRequest
 import com.D107.runmate.data.remote.request.user.SignupRequest
 import com.D107.runmate.data.remote.response.user.LoginResponse.Companion.toDomainModel
+import com.D107.runmate.data.remote.response.user.SignupResponse
 import com.D107.runmate.data.remote.response.user.SignupResponse.Companion.toDomainModel
 import com.D107.runmate.domain.model.base.NetworkError
 import com.D107.runmate.domain.model.base.ResponseStatus
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.math.sign
 
 class AuthRepositoryImpl @Inject constructor(
     private val authDataSource: AuthDataSource
@@ -47,7 +49,9 @@ class AuthRepositoryImpl @Inject constructor(
             password = signupData.password,
             nickname = signupData.nickname,
             birthday = signupData.birthday,
-            gender = signupData.gender
+            gender = signupData.gender,
+            weight = signupData.weight,
+            height = signupData.height
         )
 
         try {
@@ -68,6 +72,41 @@ class AuthRepositoryImpl @Inject constructor(
                 }
             }
         } catch (e: Exception) {
+            emit(ResponseStatus.Error(
+                NetworkError(
+                    error = "NETWORK_ERROR",
+                    code = "CONNECTION_FAILED",
+                    status = "FAILED",
+                    message = "네트워크 오류가 발생했습니다: ${e.message}"
+                )
+            ))
+        }
+    }
+
+    override suspend fun checkEmail(email: String): Flow<ResponseStatus<Boolean>> = flow {
+        try {
+            Timber.d("Checking email: $email")
+            when (val response = authDataSource.checkEmail(email)) {
+                is ApiResponse.Success -> {
+                    // API 응답의 data 필드가 true면 중복된 이메일, false면 사용 가능한 이메일
+                    val isEmailAvailable = !response.data!! // true면 사용 가능, false면 중복
+                    emit(ResponseStatus.Success(isEmailAvailable))
+                }
+                is ApiResponse.Error -> {
+                    Timber.e("Email check API error: ${response.error.message}")
+                    emit(ResponseStatus.Error(
+                        NetworkError(
+                            error = response.error.error ?: "CHECK_EMAIL_ERROR",
+                            code = response.error.code ?: "UNKNOWN_CODE",
+                            status = response.error.status ?: "ERROR",
+                            message = response.error.message ?: "이메일 중복 확인에 실패했습니다."
+                        )
+                    ))
+                }
+            }
+        } catch (e: Exception) {
+            Timber.e("Email check exception: ${e.message}")
+            e.printStackTrace()
             emit(ResponseStatus.Error(
                 NetworkError(
                     error = "NETWORK_ERROR",

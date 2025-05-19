@@ -5,11 +5,13 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -24,6 +26,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
+@RequiresApi(Build.VERSION_CODES.O)
 class Join2Fragment : BaseFragment<FragmentPersonalJoinBinding>(
     FragmentPersonalJoinBinding::bind,
     R.layout.fragment_personal_join
@@ -112,6 +115,9 @@ class Join2Fragment : BaseFragment<FragmentPersonalJoinBinding>(
 
         binding.signupButton.setOnClickListener {
             val nickname = binding.idEditText.text.toString()
+            val weightText = binding.weightText.text.toString()
+            val heightText = binding.heightText.text.toString()
+
             if (nickname.isBlank()) {
                 showToast("닉네임을 입력해주세요.")
                 return@setOnClickListener
@@ -127,9 +133,43 @@ class Join2Fragment : BaseFragment<FragmentPersonalJoinBinding>(
                 return@setOnClickListener
             }
 
+            if (weightText.isBlank()) {
+                showToast("체중을 입력해주세요.")
+                return@setOnClickListener
+            }
+
+            if (heightText.isBlank()) {
+                showToast("키를 입력해주세요.")
+                return@setOnClickListener
+            }
+
+            val weight = weightText.toDoubleOrNull()
+            if (weight == null) {
+                showToast("올바른 체중을 입력해주세요.")
+                return@setOnClickListener
+            }
+
+            val height = heightText.toDoubleOrNull()
+            if (height == null) {
+                showToast("올바른 키를 입력해주세요.")
+                return@setOnClickListener
+            }
+
+            if (weight <= 20 || weight > 300) {
+                showToast("체중을 다시 확인해주세요.")
+                return@setOnClickListener
+            }
+
+            if (height <= 100 || height > 350) {
+                showToast("키를 다시 확인해주세요")
+                return@setOnClickListener
+            }
+
             viewModel.setNickname(nickname)
             viewModel.setBirthday(selectedYear, selectedMonth, selectedDay)
             viewModel.setGender(selectedGender)
+            viewModel.setWeight(weight)
+            viewModel.setHeight(height)
 
             viewModel.signup()
         }

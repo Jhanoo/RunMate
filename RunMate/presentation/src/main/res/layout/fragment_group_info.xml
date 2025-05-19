@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:background="#FFFFFF">
 
+    <!-- 1. MaterialToolbar: 화면 최상단에 고정 -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar_group_info"
         android:layout_width="match_parent"
@@ -15,240 +16,265 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:title="그룹"
-        app:titleTextAppearance="@style/ToolbarTitleFont"
         app:titleCentered="true"
+        app:titleTextAppearance="@style/ToolbarTitleFont"
         app:titleTextColor="@android:color/black" />
 
-    <TextView
-        android:id="@+id/tv_group_name_group_info"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="달려라 화니"
-        android:textSize="20sp"
-        android:fontFamily="@font/pretendard_bold"
-        android:textColor="@color/text"
-        android:layout_marginTop="16dp"
-        android:layout_marginStart="16dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar_group_info"
-        />
-
-    <ImageView
-        android:id="@+id/iv_group_icon_group_info"
-        android:layout_width="28dp"
-        android:layout_height="28dp"
-        android:src="@drawable/ic_group"
-        android:layout_marginStart="8dp"
-        app:layout_constraintStart_toEndOf="@id/tv_group_name_group_info"
-        app:layout_constraintTop_toTopOf="@id/tv_group_name_group_info"
-        app:layout_constraintBottom_toBottomOf="@id/tv_group_name_group_info"
-        />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_invinte_group_info"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:backgroundTint="@color/primary"
-        android:paddingHorizontal="40dp"
-        android:text="초대하기"
-        android:textStyle="bold"
-        android:textColor="#FFFFFF"
-        app:cornerRadius="8dp"
-        app:layout_constraintTop_toTopOf="@id/tv_group_name_group_info"
-        app:layout_constraintBottom_toBottomOf="@id/tv_group_name_group_info"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout_group_info"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        />
-
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cv_group_info"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="16dp"
-        app:cardCornerRadius="8dp"
-        app:cardElevation="2dp"
-        app:layout_constraintTop_toBottomOf="@id/tv_group_name_group_info"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/toolbar_group_info">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="16dp">
+            android:layout_height="match_parent"
+            android:fillViewport="true">
 
-            <TextView
-                android:id="@+id/tv_group_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/pretendard_semi_bold"
-                android:text="그룹 코스"
-                android:textColor="@color/text"
-                android:textSize="16sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageView
-                android:id="@+id/btn_course_detail_group_info"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginStart="8dp"
-                android:src="@drawable/ic_arrow_right"
-                android:visibility="gone"
-                app:layout_constraintStart_toEndOf="@id/tv_group_label"
-                app:layout_constraintTop_toTopOf="parent"
-                android:contentDescription="더보기" />
-
-            <TextView
-                android:id="@+id/tv_course_name_label_group_info"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="코스명"
-                android:textColor="@color/text"
-                android:textSize="14sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_group_label" />
-
-            <TextView
-                android:id="@+id/tv_course_name_group_info"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:text="프리 러닝"
-                android:textColor="@color/text"
-                android:textSize="14sp"
-                app:layout_constraintBottom_toBottomOf="@id/tv_course_name_label_group_info"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/tv_course_name_label_group_info"
-                app:layout_constraintTop_toTopOf="@id/tv_course_name_label_group_info" />
-
-            <TextView
-                android:id="@+id/tv_date_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="시작일시"
-                android:textColor="@color/text"
-                android:textSize="14sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_course_name_label_group_info" />
-
-            <TextView
-                android:id="@+id/tv_date_group_info"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="2025.05.01 09:00"
-                android:textColor="@color/text"
-                android:textSize="14sp"
-                app:layout_constraintBottom_toBottomOf="@id/tv_date_label"
-                app:layout_constraintStart_toStartOf="@id/tv_course_name_group_info"
-                app:layout_constraintTop_toTopOf="@id/tv_date_label" />
-
-            <TextView
-                android:id="@+id/tv_location_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="시작장소"
-                android:textColor="@color/text"
-                android:textSize="14sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_date_label" />
-
-            <TextView
-                android:id="@+id/tv_location_group_info"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="경상북도 구미시 인동길 13-2"
-                android:textColor="@color/text"
-                android:textSize="14sp"
-                app:layout_constraintBottom_toBottomOf="@id/tv_location_label"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@id/tv_date_group_info"
-                app:layout_constraintTop_toTopOf="@id/tv_location_label" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
-
-    <!-- 그룹원 섹션 CardView -->
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cv_group_members"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="16dp"
-        app:cardCornerRadius="8dp"
-        app:cardElevation="2dp"
-        app:layout_constraintTop_toBottomOf="@id/cv_group_info"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="16dp">
-
-            <TextView
-                android:id="@+id/tv_group_members_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="그룹원"
-                android:textColor="#000000"
-                android:textSize="16sp"
-                android:fontFamily="@font/pretendard_semi_bold"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_group_members"
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:layout_marginTop="8dp"
-                app:layout_constraintTop_toBottomOf="@id/tv_group_members_label"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
+                android:layout_height="wrap_content"
+                android:paddingBottom="16dp">
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
 
-    <!-- 하단 버튼들 -->
-    <ImageView
-        android:id="@+id/btn_start_group_info"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:src="@drawable/btn_group_start"
-        android:visibility="visible"
-        app:layout_constraintTop_toBottomOf="@id/cv_group_members"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+                <TextView
+                    android:id="@+id/tv_group_name_group_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:fontFamily="@font/pretendard_bold"
+                    android:text="달려라 화니"
+                    android:textColor="@color/text"
+                    android:textSize="20sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/btn_exit_group_info"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:src="@drawable/btn_group_exit"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/cv_group_members"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+                <ImageView
+                    android:id="@+id/iv_group_icon_group_info"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_marginStart="8dp"
+                    android:src="@drawable/ic_group"
+                    app:layout_constraintBottom_toBottomOf="@id/tv_group_name_group_info"
+                    app:layout_constraintStart_toEndOf="@id/tv_group_name_group_info"
+                    app:layout_constraintTop_toTopOf="@id/tv_group_name_group_info" />
 
-    <ImageView
-        android:id="@+id/btn_group_disperse"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:src="@drawable/btn_group_disperse"
-        android:elevation="8dp"
-        android:visibility="visible"
-        app:layout_constraintTop_toBottomOf="@id/btn_start_group_info"
-        app:layout_constraintStart_toStartOf="@id/btn_start_group_info"
-        app:layout_constraintEnd_toEndOf="@id/btn_start_group_info"
-        />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_invinte_group_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:backgroundTint="@color/primary"
+                    android:paddingHorizontal="40dp"
+                    android:text="초대하기"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    app:cornerRadius="8dp"
+                    app:layout_constraintBottom_toBottomOf="@id/tv_group_name_group_info"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/tv_group_name_group_info" />
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cv_group_info"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="16dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="2dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_group_name_group_info">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="16dp">
+
+                        <!-- CardView 내부 콘텐츠 (내용 동일) -->
+                        <TextView
+                            android:id="@+id/tv_group_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/pretendard_semi_bold"
+                            android:text="그룹 코스"
+                            android:textColor="@color/text"
+                            android:textSize="16sp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <ImageView
+                            android:id="@+id/btn_course_detail_group_info"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_marginStart="8dp"
+                            android:contentDescription="더보기"
+                            android:src="@drawable/ic_arrow_right"
+                            android:visibility="gone"
+                            app:layout_constraintStart_toEndOf="@id/tv_group_label"
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:visibility="visible" />
+
+                        <TextView
+                            android:id="@+id/tv_course_name_label_group_info"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="코스명"
+                            android:textColor="@color/text"
+                            android:textSize="14sp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/tv_group_label" />
+
+                        <TextView
+                            android:id="@+id/tv_course_name_group_info"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="24dp"
+                            android:text="프리 러닝"
+                            android:textColor="@color/text"
+                            android:textSize="14sp"
+                            app:layout_constraintBottom_toBottomOf="@id/tv_course_name_label_group_info"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@id/tv_course_name_label_group_info"
+                            app:layout_constraintTop_toTopOf="@id/tv_course_name_label_group_info" />
+
+                        <TextView
+                            android:id="@+id/tv_date_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="시작일시"
+                            android:textColor="@color/text"
+                            android:textSize="14sp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/tv_course_name_label_group_info" />
+
+                        <TextView
+                            android:id="@+id/tv_date_group_info"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="2025.05.01 09:00"
+                            android:textColor="@color/text"
+                            android:textSize="14sp"
+                            app:layout_constraintBottom_toBottomOf="@id/tv_date_label"
+                            app:layout_constraintStart_toStartOf="@id/tv_course_name_group_info"
+                            app:layout_constraintTop_toTopOf="@id/tv_date_label" />
+
+                        <TextView
+                            android:id="@+id/tv_location_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="시작장소"
+                            android:textColor="@color/text"
+                            android:textSize="14sp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/tv_date_label" />
+
+                        <TextView
+                            android:id="@+id/tv_location_group_info"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="경상북도 구미시 인동길 13-2"
+                            android:textColor="@color/text"
+                            android:textSize="14sp"
+                            app:layout_constraintBottom_toBottomOf="@id/tv_location_label"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="@id/tv_date_group_info"
+                            app:layout_constraintTop_toTopOf="@id/tv_location_label" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cv_group_members"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="16dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="2dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/cv_group_info">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:id="@+id/tv_group_members_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/pretendard_semi_bold"
+                            android:text="그룹원"
+                            android:textColor="#000000"
+                            android:textSize="16sp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rv_group_members"
+                            android:layout_width="match_parent"
+                            android:layout_height="200dp"
+                            android:layout_marginTop="8dp"
+                            android:nestedScrollingEnabled="false"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/tv_group_members_label" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- 하단 버튼들: 스크롤되는 콘텐츠의 일부로 -->
+                <ImageView
+                    android:id="@+id/btn_start_group_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:src="@drawable/btn_group_start"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/cv_group_members"
+                    tools:visibility="visible" />
+
+                <ImageView
+                    android:id="@+id/btn_exit_group_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/btn_group_exit"
+                    android:visibility="gone"
+                    android:layout_marginTop="24dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/cv_group_members"
+                    tools:visibility="visible" />
+
+                <ImageView
+                    android:id="@+id/btn_group_disperse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:elevation="8dp"
+                    android:src="@drawable/btn_group_disperse"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="@id/btn_start_group_info"
+                    app:layout_constraintStart_toStartOf="@id/btn_start_group_info"
+                    app:layout_constraintTop_toBottomOf="@id/btn_start_group_info"
+                    tools:visibility="visible" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

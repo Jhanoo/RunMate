@@ -47,6 +47,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
+        android:maxLines="1"
         android:hint="example@gamil.com"
         app:layout_constraintTop_toBottomOf="@+id/idTextView"
         tools:ignore="HardcodedText,MissingConstraints" />
@@ -68,6 +69,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
+        android:maxLines="1"
         android:hint="비밀번호를 입력해주세요"
         android:inputType="textPassword"
         app:layout_constraintTop_toBottomOf="@+id/pwTextView"
@@ -90,6 +92,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
+        android:maxLines="1"
         android:hint="확인을 위해 비밀번호를 입력해주세요"
         android:inputType="textPassword"
         app:layout_constraintTop_toBottomOf="@+id/pwCheckTextView"

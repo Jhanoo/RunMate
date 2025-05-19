@@ -17,6 +17,8 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
 import android.content.Context
 import com.D107.runmate.data.remote.common.ApiResponseHandler
+import com.D107.runmate.data.remote.response.user.CheckEmailResponse
+import timber.log.Timber
 
 class AuthDataSourceImpl @Inject constructor(
     private val userService: UserService,
@@ -53,32 +55,11 @@ class AuthDataSourceImpl @Inject constructor(
             // API 호출 (imagePart가 null일 경우 이미지 없이 요청)
             userService.signup(userJsonRequestBody, imagePart)
         }
-//        try {
-//            // 'data' part에 JSON으로 사용자 정보 추가
-//            val jsonAdapter = moshi.adapter(SignupRequest::class.java)
-//            val userJsonRequestBody = jsonAdapter.toJson(request)
-//                .toRequestBody("application/json".toMediaTypeOrNull())
-//
-//            // 프로필 이미지가 있으면 처리
-//            val imagePart = profileImageSource?.let { source ->
-//                // Data 레이어에서 Uri 변환
-//                val uri = Uri.parse(source.imageId)
-//                context.contentResolver.openInputStream(uri)?.use { inputStream ->
-//                    val bytes = inputStream.readBytes()
-//                    val requestFile = bytes.toRequestBody("image/*".toMediaTypeOrNull())
-//                    MultipartBody.Part.createFormData("profileImage", "profile.jpg", requestFile)
-//                }
-//            }
-//
-//            // API 호출 (imagePart가 null일 경우 이미지 없이 요청)
-//            return userService.signup(userJsonRequestBody, imagePart)
-//        } catch (e: Exception) {
-//            return ApiResponse.Error(
-//                ErrorResponse(
-//                    message = e.message ?: "회원가입에 실패했습니다.",
-//                    status = "ERROR"
-//                )
-//            )
-//        }
+    }
+
+    override suspend fun checkEmail(email: String): ApiResponse<Boolean> {
+        return handler.handle {
+            userService.checkEmail(email)
+        }
     }
 }

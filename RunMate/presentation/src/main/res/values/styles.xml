@@ -164,4 +164,56 @@
         <item name="android:fontFamily">@font/pretendard_bold</item>
     </style>
 
+    <!--  TimePicker  -->
+    <style name="BaseTheme.TimePicker" parent="ThemeOverlay.MaterialComponents.TimePicker">
+        <item name="materialClockStyle">@style/AppTheme.Widget.TimePicker.Clock</item>
+        <item name="chipStyle">@style/BaseTheme.Widget.Chip</item>
+        <item name="materialButtonOutlinedStyle">@style/AppTheme.Widget.TimePicker.Clock.AmPmButton
+        </item>
+<!--        <item name="textInputStyle">@style/BaseTheme.Widget.TimePicker.TextInputLayout</item>-->
+        <item name="materialTimePickerTitleStyle">@style/ToolbarTitleFont</item>
+        <item name="colorSurface">@color/white</item>
+
+    </style>
+    <style name="BaseTheme.Widget.TimePicker.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/selector_timepicker_stroke</item>
+        <item name="boxBackgroundColor">@color/selector_timepicker_edit_box</item>
+        <item name="hintTextColor">@color/primary</item>
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="editTextStyle">@style/BaseTheme.Widget.TimePicker.TextInputEditText</item>
+    </style>
+    <style name="BaseTheme.Widget.TimePicker.TextInputEditText" parent="Widget.MaterialComponents.TextInputEditText.OutlinedBox">
+        <item name="android:textAppearance">@style/TextAppearance.TimePicker.EditText</item>
+        <item name="android:textSize">36sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:maxLength">2</item>
+    </style>
+
+    <style name="TextAppearance.TimePicker.EditText" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">36sp</item>
+    </style>
+
+    <style name="BaseTheme.Widget.Chip" parent="Widget.MaterialComponents.TimePicker.Display">
+        <item name="android:textColor">@color/selector_timepicker_text</item>
+        <item name="chipBackgroundColor">@color/selector_timepicker_background</item>
+        <item name="strokeColor">@color/selector_timepicker_stroke</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+
+    <style name="AppTheme.Widget.TimePicker.Clock" parent="Widget.MaterialComponents.TimePicker.Clock">
+        <item name="clockFaceBackgroundColor">@color/color_clock_background</item>
+        <item name="clockHandColor">@color/primary_dark</item>
+        <item name="clockNumberTextColor">@color/selector_timepicker_clock_text</item>
+    </style>
+
+    <style name="AppTheme.Widget.TimePicker.Clock.AmPmButton" parent="Widget.MaterialComponents.TimePicker.Button">
+        <item name="backgroundTint">@color/selector_timepicker_background</item>
+        <item name="strokeColor">@color/primary_dark</item>
+        <item name="android:textColor">@color/selector_timepicker_text</item>
+
+    </style>
+
+
 </resources>

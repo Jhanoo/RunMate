@@ -95,7 +95,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:mcv_headerTextAppearance="@style/CalendarHeaderTextStyle"
         app:mcv_selectionColor="@color/login_btn"
-        app:mcv_showOtherDates="all" />
+        app:mcv_showOtherDates="all"
+        />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_schedule_list"
