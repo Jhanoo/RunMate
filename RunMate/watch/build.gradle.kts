@@ -123,6 +123,7 @@ dependencies {
     // 폰과 연동
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation ("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
+    implementation("com.google.android.gms:play-services-wearable:18.1.0")
 
 
     // Android 테스트 의존성

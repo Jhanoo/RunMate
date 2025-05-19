@@ -111,6 +111,44 @@ fun MenuScreen(
                 }
             }
 
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = if (bluetoothConnected)
+                        "휴대폰과 연결됨"
+                    else
+                        "휴대폰과 연결되지 않음",
+                    color = if (bluetoothConnected)
+                        colorResource(id = R.color.primary)
+                    else
+                        Color.Gray,
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                // 블루투스 연결 버튼 (연결되지 않았을 때만 표시)
+                if (!bluetoothConnected) {
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Button(
+                        onClick = { viewModel.connectToPhone() },
+                        modifier = Modifier.fillMaxWidth(0.8f),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = colorResource(id = R.color.primary)
+                        )
+                    ) {
+                        Text(
+                            text = "휴대폰 연결",
+                            color = Color.Black,
+                            fontSize = 14.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+
             // 안내 메시지 추가
             item {
                 if (bluetoothConnected) {
