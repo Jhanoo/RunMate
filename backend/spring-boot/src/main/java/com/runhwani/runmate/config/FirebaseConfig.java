@@ -17,9 +17,9 @@ public class FirebaseConfig {
         try {
             // 이미 초기화된 앱이 있는지 확인
             if (FirebaseApp.getApps().isEmpty()) {
-                // Firebase Admin SDK 인증 파일 로드
+                // Firebase Admin SDK 인증 파일 로드 - 새 파일 경로로 업데이트
                 GoogleCredentials credentials = GoogleCredentials.fromStream(
-                        new ClassPathResource("runmate-e11b0-firebase-adminsdk-fbsvc-358767a133.json").getInputStream());
+                        new ClassPathResource("runmate-1054e-firebase-adminsdk-fbsvc-011ff00000.json").getInputStream());
                 
                 // Firebase 옵션 설정
                 FirebaseOptions options = FirebaseOptions.builder()

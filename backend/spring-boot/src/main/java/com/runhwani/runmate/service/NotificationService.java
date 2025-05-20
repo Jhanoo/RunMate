@@ -5,6 +5,7 @@ import com.runhwani.runmate.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +28,7 @@ public class NotificationService {
      * @param data 추가 데이터 (선택 사항)
      * @return 성공 여부
      */
+    @Transactional
     public boolean sendNotificationToUser(UUID userId, String title, String body, Map<String, String> data) {
         try {
             // 사용자 정보 조회
@@ -41,11 +43,39 @@ public class NotificationService {
                 return false;
             }
             
-            // FCM 알림 전송
-            fcmService.sendNotification(user.getFcmToken(), title, body, data);
-            return true;
+            try {
+                // FCM 알림 전송
+                String result = fcmService.sendNotification(user.getFcmToken(), title, body, data);
+                
+                // 토큰 오류로 null이 반환된 경우
+                if (result == null) {
+                    log.warn("FCM 토큰 오류로 사용자({})의 토큰을 초기화합니다.", userId);
+                    user.setFcmToken(null);
+                    userDao.updateFcmToken(userId, null);
+                    return false;
+                }
+                
+                // 전송 성공
+                log.info("FCM 알림 전송 성공 - 사용자: {}", userId);
+                return true;
+            } catch (Exception e) {
+                // 오류 메시지에서 토큰 관련 오류 확인
+                String errorMsg = e.getMessage();
+                if (errorMsg != null && (
+                    errorMsg.contains("not a valid FCM registration token") ||
+                    errorMsg.contains("UNREGISTERED") ||
+                    errorMsg.contains("SENDER_ID_MISMATCH"))) {
+                    
+                    log.warn("FCM 토큰 오류로 사용자({})의 토큰을 초기화합니다.", userId);
+                    user.setFcmToken(null);
+                    userDao.updateFcmToken(userId, null);
+                }
+                
+                log.error("FCM 알림 전송 실패 - 사용자: {}", userId);
+                return false;
+            }
         } catch (Exception e) {
-            log.error("사용자 알림 전송 실패: {}", userId, e);
+            log.error("알림 전송 처리 중 오류 발생: {}", e.getMessage());
             return false;
         }
     }
