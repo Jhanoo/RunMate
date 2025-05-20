@@ -99,12 +99,17 @@ public class NotificationTodoService {
     
     /**
      * 사용자의 오늘 할 일 알림 즉시 전송
-     * @return 성공 여부
      */
     public boolean sendUserTodayTodoNotifications(UUID userId) {
         // 사용자 정보 조회 및 FCM 토큰 확인
         User user = userDao.findByUserId(userId);
-        if (user == null || user.getFcmToken() == null || user.getFcmToken().isEmpty()) {
+        if (user == null) {
+            log.warn("사용자를 찾을 수 없음: {}", userId);
+            return false;
+        }
+        
+        // FCM 토큰이 없는 경우 알림 전송 불가
+        if (user.getFcmToken() == null || user.getFcmToken().isEmpty()) {
             log.warn("FCM 토큰이 없는 사용자: {}", userId);
             return false;
         }
@@ -112,37 +117,42 @@ public class NotificationTodoService {
         List<Todo> todayTodos = getTodayTodosByUserId(userId);
         boolean anyNotificationSent = false;
         
-        if (todayTodos.isEmpty()) {
-            // 오늘 할 일이 없는 경우
-            String title = "오늘의 할 일";
-            String body = "나만의 러닝 커리큘럼을 생성해 보세요!";
-            
-            Map<String, String> data = new HashMap<>();
-            data.put("type", "TODO_EMPTY");
-            
-            anyNotificationSent = notificationService.sendNotificationToUser(userId, title, body, data);
-        } else {
-            // 오늘 할 일이 있는 경우
-            for (Todo todo : todayTodos) {
-                // isDone이 null인 경우 false로 처리
-                boolean isDone = todo.getIsDone() != null && todo.getIsDone();
+        try {
+            if (todayTodos.isEmpty()) {
+                // 오늘 할 일이 없는 경우
+                String title = "오늘의 할 일";
+                String body = "나만의 러닝 커리큘럼을 생성해 보세요!";
                 
-                if (!isDone) { // 완료되지 않은 할 일만 알림 전송
-                    boolean sent = sendTodoNotification(todo);
-                    if (sent) {
-                        anyNotificationSent = true;
+                Map<String, String> data = new HashMap<>();
+                data.put("type", "TODO_EMPTY");
+                
+                anyNotificationSent = notificationService.sendNotificationToUser(userId, title, body, data);
+            } else {
+                // 오늘 할 일이 있는 경우
+                for (Todo todo : todayTodos) {
+                    // isDone이 null인 경우 false로 처리
+                    boolean isDone = todo.getIsDone() != null && todo.getIsDone();
+                    
+                    if (!isDone) { // 완료되지 않은 할 일만 알림 전송
+                        boolean sent = sendTodoNotification(todo);
+                        if (sent) {
+                            anyNotificationSent = true;
+                        }
                     }
                 }
             }
+            
+            return anyNotificationSent;
+        } catch (Exception e) {
+            log.error("할 일 알림 전송 중 오류 발생: {}", e.getMessage());
+            return false;
         }
-        
-        return anyNotificationSent;
     }
     
     /**
-     * 매일 오전 9시에 모든 사용자에게 오늘의 할 일 알림 전송
+     * 매일 오후 2시 5분에 모든 사용자에게 오늘의 할 일 알림 전송
      */
-    @Scheduled(cron = "0 0 9 * * ?", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 5 14 * * ?", zone = "Asia/Seoul")
     public void sendDailyTodoNotifications() {
         log.info("일일 할 일 알림 전송 시작");
         LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
@@ -163,6 +173,17 @@ public class NotificationTodoService {
             processedUsers.put(userId, success);
         }
         
-        log.info("일일 할 일 알림 전송 완료: {} 명의 사용자에게 전송됨", processedUsers.size());
+        // 성공한 사용자 수만 계산
+        long successCount = processedUsers.values().stream()
+            .filter(success -> success)
+            .count();
+
+        log.info("일일 할 일 알림 전송 완료: 총 {} 명 중 {} 명에게 성공적으로 전송됨", 
+            processedUsers.size(), successCount);
+
+        // 각 사용자별 전송 결과 상세 로깅
+        processedUsers.forEach((userId, success) -> {
+            log.info("사용자 {}: 알림 전송 {}", userId, success ? "성공" : "실패");
+        });
     }
 } 
