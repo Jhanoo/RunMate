@@ -11,16 +11,16 @@ class WatchApplication : Application() {
     @Inject
     lateinit var bluetoothService: BluetoothService
 
-    companion object {
-        private lateinit var instance: WatchApplication
-
-        fun getBluetoothService(): BluetoothService {
-            return instance.bluetoothService
-        }
-    }
+//    companion object {
+//        private lateinit var instance: WatchApplication
+//
+//        fun getBluetoothService(): BluetoothService {
+//            return instance.bluetoothService
+//        }
+//    }
     override fun onCreate() {
         super.onCreate()
         GpxUploadWorker.schedulePeriodic(this)
-        instance = this
+//        instance = this
     }
 }
