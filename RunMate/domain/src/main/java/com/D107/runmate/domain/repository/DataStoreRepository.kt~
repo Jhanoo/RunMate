@@ -31,7 +31,4 @@ interface DataStoreRepository {
     val height: Flow<Double?>
     suspend fun saveHeight(height: Double)
 
-    val fcmToken: Flow<String?>
-    suspend fun saveFcmToken(fcmToken: String)
-
 }

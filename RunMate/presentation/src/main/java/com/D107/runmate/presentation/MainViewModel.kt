@@ -21,17 +21,8 @@ class MainViewModel @Inject constructor(
     private val repository: RunningTrackingRepository,
     private val dataStoreRepository: DataStoreRepository
 ): ViewModel() {
-//    private val _isVibrationEnabled = MutableStateFlow(true)
-//    val isVibrationEnabled = _isVibrationEnabled.asStateFlow()
-//
-//    private val _isSoundEnabled = MutableStateFlow(true)
-//    val isSoundEnabled = _isSoundEnabled.asStateFlow()
-
     private val _course = MutableStateFlow(Pair<String?, String?>(null, null)) // course 설정 안 한 경우 null, first: courseId, second: gpxFile
     val course = _course.asStateFlow()
-
-//    private val _goalPace = MutableStateFlow<Int?>(null) // 페이스 설정 안 한 경우 null
-//    val goalPace = _goalPace.asStateFlow()
 
     private val _userId = MutableStateFlow<String?>(null)
     val userId: StateFlow<String?> = _userId
@@ -44,6 +35,9 @@ class MainViewModel @Inject constructor(
 
     private val _sourceScreen = MutableStateFlow(SourceScreen.RUNNING_FRAGMENT)
     val sourceScreen: StateFlow<String> = _sourceScreen.asStateFlow()
+
+    private val _fcmToken = MutableStateFlow<String?>(null)
+    val fcmToken: StateFlow<String?> = _fcmToken.asStateFlow()
 
     init {
         // DataStore에서 사용자 정보 로드
@@ -70,6 +64,13 @@ class MainViewModel @Inject constructor(
     fun logout() {
         viewModelScope.launch {
             dataStoreRepository.clearAll()
+        }
+    }
+
+    fun saveFcmToken(token: String) {
+        _fcmToken.value = token
+        viewModelScope.launch {
+            dataStoreRepository.saveFcmToken(token)
         }
     }
 

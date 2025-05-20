@@ -25,11 +25,11 @@ class HistoryDataSourceImpl @Inject constructor(
     }
 
     override suspend fun getHistoryDetailByUserId(
-        historyId: String,
+        groupId: String,
         userId: String
     ): ApiResponse<UserHistoryDetailResponse> {
         return handler.handle {
-            historyService.getHistoryDetailByUserId(historyId, userId)
+            historyService.getHistoryDetailByUserId(groupId, userId)
         }
     }
 }

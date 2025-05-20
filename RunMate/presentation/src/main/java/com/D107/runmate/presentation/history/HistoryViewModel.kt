@@ -10,7 +10,9 @@ import com.D107.runmate.domain.usecase.history.GetHistoryDetailUseCase
 import com.D107.runmate.domain.usecase.history.GetHistoryListUseCase
 import com.D107.runmate.domain.usecase.history.GetUserHistoryDetailUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -31,6 +33,9 @@ class HistoryViewModel @Inject constructor(
 
     private val _historyUserDetail = MutableStateFlow<UserHistoryDetailState>(UserHistoryDetailState.Initial)
     val historyUserDetail = _historyUserDetail.asStateFlow()
+
+    private val _historyDetailEvent = MutableSharedFlow<Boolean>()
+    val historyDetailEvent = _historyDetailEvent.asSharedFlow()
 
     fun getHistoryList() {
         viewModelScope.launch {
@@ -56,19 +61,21 @@ class HistoryViewModel @Inject constructor(
                     is ResponseStatus.Success -> {
                         Timber.d("getHistoryDetail Success {${status.data}}")
                         _historyDetail.value = HistoryDetailState.Success(status.data)
+                        _historyDetailEvent.emit(true)
                     }
                     is ResponseStatus.Error -> {
                         Timber.d("getHistoryDetail Error {${status.error}}")
                         _historyDetail.value = HistoryDetailState.Error(status.error.message)
+                        _historyDetailEvent.emit(false)
                     }
                 }
             }
         }
     }
 
-    fun getUserHistoryDetail(historyId: String, userId: String) {
+    fun getGroupUserHistoryDetail(groupId: String, userId: String) {
         viewModelScope.launch {
-            getUserHistoryDetailUseCase(historyId, userId).collectLatest { status ->
+            getUserHistoryDetailUseCase(groupId, userId).collectLatest { status ->
                 when (status) {
                     is ResponseStatus.Success -> {
                         Timber.d("getHistoryDetail Success {${status.data}}")

@@ -742,7 +742,5 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
             }
         }
     }
-
-
 }
 

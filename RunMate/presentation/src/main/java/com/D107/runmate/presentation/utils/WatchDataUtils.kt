@@ -16,7 +16,7 @@ object WatchDataUtils {
             val request = dataMapRequest.asPutDataRequest().setUrgent()
             dataClient.putDataItem(request).addOnSuccessListener {
                 // 성공 로그 등
-                Timber.d("sendTokenToWatch success")
+                Timber.d("sendTokenToWatch success ${token}")
             }
                 .addOnFailureListener {
                     Timber.e("sendTokenToWatch Fail ${it.message}")

@@ -246,12 +246,6 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
             // 코스 모드인 경우
             binding.btnAddCourse.visibility = View.GONE
             binding.ivLike.visibility = View.VISIBLE
-
-            // TODO 사용자 좋아요 여부 좋아요 x
-            binding.ivLike.setImageResource(R.drawable.ic_course_like_inactive)
-
-            // TODO 사용자 좋아요 여부 좋아요 o
-            binding.ivLike.setImageResource(R.drawable.ic_course_like)
         }
     }
 

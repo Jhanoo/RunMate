@@ -345,10 +345,12 @@
             app:destination="@id/chartFragment" />
         <argument
             android:name="userId"
-            app:argType="string" />
+            app:argType="string"
+            app:nullable="true" />
         <argument
-            android:name="historyId"
-            app:argType="string" />
+            android:name="groupId"
+            app:argType="string"
+            app:nullable="true" />
     </fragment>
 
 

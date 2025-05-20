@@ -7,11 +7,11 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class GroupRunItem(
-    val avgPace: Int,
+    val avgPace: Double,
     val courseLiked: Boolean,
-    val distance: Int,
+    val distance: Double,
     val nickname: String,
-    val time: Int,
+    val time: Double,
     val userId: String
 ): BaseResponse {
     companion object: DataMapper<GroupRunItem, GroupRun> {

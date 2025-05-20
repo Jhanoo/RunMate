@@ -139,7 +139,7 @@
                 app:layout_constraintBaseline_toBottomOf="@+id/tv_my_distance_unit"
                 app:layout_constraintBottom_toBottomOf="@+id/imageView"
                 app:layout_constraintEnd_toStartOf="@+id/tv_my_distance_unit"
-                app:layout_constraintHorizontal_weight="6"
+                app:layout_constraintHorizontal_weight="5"
                 app:layout_constraintStart_toStartOf="@+id/imageView"
                 tools:text="10" />
 
@@ -157,7 +157,7 @@
                 android:layout_marginBottom="8dp"
                 app:layout_constraintBottom_toBottomOf="@+id/imageView"
                 app:layout_constraintEnd_toEndOf="@+id/imageView"
-                app:layout_constraintHorizontal_weight="4"
+                app:layout_constraintHorizontal_weight="5"
                 app:layout_constraintStart_toEndOf="@+id/tv_my_distance" />
 
             <TextView
