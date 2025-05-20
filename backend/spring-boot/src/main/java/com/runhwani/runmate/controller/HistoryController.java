@@ -46,12 +46,12 @@ public class HistoryController implements HistoryControllerDocs {
     }
 
     @Override
-    @RequestMapping(value = "/{historyId}/users/{userId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{groupId}/users/{userId}", method = RequestMethod.GET)
     public ResponseEntity<CommonResponse<RunnerDetailResponse>> getRunnerDetail(
-            @PathVariable UUID historyId,
+            @PathVariable UUID groupId,
             @PathVariable UUID userId) {
         try {
-            RunnerDetailResponse response = historyService.getRunnerDetail(historyId, userId);
+            RunnerDetailResponse response = historyService.getRunnerDetail(groupId, userId);
             return ResponseEntity.ok(new CommonResponse<>("히스토리 참여자 기록 상세 조회 성공", response));
         } catch (CustomException e) {
             return ResponseEntity

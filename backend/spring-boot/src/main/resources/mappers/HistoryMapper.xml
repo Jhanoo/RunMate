@@ -198,26 +198,26 @@
         ORDER BY created_at
     </select>
 
-    <select id="findRunnerDetailByHistoryIdAndUserId" resultType="map">
+    <select id="findRunnerDetailByHistoryIdAndUserId" resultType="com.runhwani.runmate.dto.response.history.RunnerDetailResponse">
         SELECT 
-            u.user_id,
+            u.user_id       as userId,
             u.nickname,
             u.profile_image as profileImage,
-            h.start_time,
-            h.end_time,
+            h.start_time    as startTime,
+            h.end_time      as endTime,
             h.distance,
-            h.gpx_file as gpxFile,
+            h.gpx_file      as gpxFile,
             h.calories,
-            h.avg_cadence as avgCadence,
-            h.avg_pace as avgPace,
-            h.avg_bpm as avgBpm,
+            h.avg_cadence   as avgCadence,
+            h.avg_pace      as avgPace,
+            h.avg_bpm       as avgBpm,
             h.avg_elevation as avgElevation
         FROM 
             histories h
         JOIN 
             users u ON h.user_id = u.user_id
         WHERE 
-            h.history_id = #{historyId}
+            h.group_id = #{groupId}
             AND h.user_id = #{userId}
     </select>
 

@@ -144,6 +144,7 @@ public class HistoryServiceImpl implements HistoryService {
         return HistoryDetailResponse.builder()
                 .historyId(historyId)
                 .gpxFile(gpxFile)
+                .groupId(groupId)
                 .groupRun(groupRunResponses)
                 .myRun(myRunResponse)
                 .build();
@@ -151,7 +152,7 @@ public class HistoryServiceImpl implements HistoryService {
     
     @Override
     @Transactional(readOnly = true)
-    public RunnerDetailResponse getRunnerDetail(UUID historyId, UUID userId) {
+    public RunnerDetailResponse getRunnerDetail(UUID groupId, UUID userId) {
         // 현재 인증된 사용자의 ID 가져오기
         String currentUserIdStr = SecurityUtil.getCurrentUserEmail()
                 .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED_USER));
@@ -165,26 +166,14 @@ public class HistoryServiceImpl implements HistoryService {
         }
         
         // 히스토리 참여자 상세 정보 조회
-        Map<String, Object> runnerDetail = historyDao.findRunnerDetailByHistoryIdAndUserId(historyId, userId);
+        RunnerDetailResponse runnerDetail = historyDao.findRunnerDetailByHistoryIdAndUserId(groupId, userId);
         if (runnerDetail == null) {
             throw new CustomException(ErrorCode.ENTITY_NOT_FOUND, "해당 사용자의 기록을 찾을 수 없습니다.");
         }
-        
-        // 응답 객체 생성
-        return RunnerDetailResponse.builder()
-                .userId(convertToUUID(runnerDetail.get("user_id")))
-                .nickname((String) runnerDetail.get("nickname"))
-                .profileImage((String) runnerDetail.get("profileImage"))
-                .startTime(convertToOffsetDateTime(runnerDetail.get("start_time")))
-                .endTime(convertToOffsetDateTime(runnerDetail.get("end_time")))
-                .distance(convertToDouble(runnerDetail.get("distance")))
-                .gpxFile((String) runnerDetail.get("gpxFile"))
-                .calories(convertToDouble(runnerDetail.get("calories")))
-                .avgCadence(convertToDouble(runnerDetail.get("avgCadence")))
-                .avgPace(convertToDouble(runnerDetail.get("avgPace")))
-                .avgBpm(convertToDouble(runnerDetail.get("avgBpm")))
-                .avgElevation(convertToDouble(runnerDetail.get("avgElevation")))
-                .build();
+
+        log.debug("runnerDetail: {}", runnerDetail);
+
+        return runnerDetail;
     }
 
     @Override

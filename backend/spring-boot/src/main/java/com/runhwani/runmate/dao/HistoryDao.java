@@ -1,5 +1,6 @@
 package com.runhwani.runmate.dao;
 
+import com.runhwani.runmate.dto.response.history.RunnerDetailResponse;
 import com.runhwani.runmate.model.History;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -96,7 +97,7 @@ public interface HistoryDao {
     /**
      * 히스토리 ID와 사용자 ID로 참여자 상세 기록 조회
      */
-    Map<String, Object> findRunnerDetailByHistoryIdAndUserId(UUID historyId, UUID userId);
+    RunnerDetailResponse findRunnerDetailByHistoryIdAndUserId(UUID groupId, UUID userId);
 
     boolean existsByUserIdAndGroupId(UUID userId, UUID groupId);
 }
