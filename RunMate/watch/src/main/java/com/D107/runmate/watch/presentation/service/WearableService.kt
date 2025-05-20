@@ -8,6 +8,7 @@ import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.Node
 import com.google.android.gms.wearable.Wearable
+import com.google.android.gms.wearable.WearableListenerService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +26,7 @@ import javax.inject.Singleton
 @Singleton
 class WearableService @Inject constructor(
     @ApplicationContext private val context: Context
-) {
+): WearableListenerService() {
     private val TAG = "WearableService"
 
     private val messageClient = Wearable.getMessageClient(context)
@@ -44,6 +45,9 @@ class WearableService @Inject constructor(
     // JWT 토큰 상태
     private val _jwtToken = MutableStateFlow<String?>(null)
     val jwtToken: StateFlow<String?> = _jwtToken.asStateFlow()
+
+    // 클래스 멤버 변수로 리스너 참조 유지
+    private var dataListener: DataClient.OnDataChangedListener? = null
 
     // 초기화
     init {
@@ -95,9 +99,6 @@ class WearableService @Inject constructor(
         // 이후에 리스너를 제거할 때 사용하기 위해 변수에 저장
         this.dataListener = dataListener
     }
-
-    // 클래스 멤버 변수로 리스너 참조 유지
-    private var dataListener: DataClient.OnDataChangedListener? = null
 
     private suspend fun saveJwtToken(token: String) {
         try {

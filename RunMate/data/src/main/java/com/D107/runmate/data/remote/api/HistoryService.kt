@@ -17,6 +17,6 @@ interface HistoryService {
     @GET("histories/{historyId}")
     suspend fun getHistoryDetail(@Path("historyId") historyId: String): Response<ServerResponse<HistoryDetailResponse>>
 
-    @GET("histories/{historyId}/users/{userId}")
-    suspend fun getHistoryDetailByUserId(@Path("historyId") historyId: String, @Path("userId") userId: String): Response<ServerResponse<UserHistoryDetailResponse>>
+    @GET("histories/{groupId}/users/{userId}")
+    suspend fun getHistoryDetailByUserId(@Path("groupId") groupId: String, @Path("userId") userId: String): Response<ServerResponse<UserHistoryDetailResponse>>
 }

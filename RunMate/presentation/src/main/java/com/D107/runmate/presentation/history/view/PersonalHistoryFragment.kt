@@ -19,12 +19,15 @@ import com.D107.runmate.presentation.course.view.CourseAddDialog
 import com.D107.runmate.presentation.databinding.FragmentPersonalHistoryBinding
 import com.D107.runmate.presentation.history.HistoryViewModel
 import com.D107.runmate.presentation.history.UserHistoryDetailState
+import com.D107.runmate.presentation.running.CourseDetailState
 import com.D107.runmate.presentation.running.CourseViewModel
 import com.D107.runmate.presentation.running.HistoryDetailState
 import com.D107.runmate.presentation.running.RunningEndViewModel
 import com.D107.runmate.presentation.running.view.RunningEndFragmentDirections
 import com.D107.runmate.presentation.utils.CommonUtils.dateformatMMdd
 import com.D107.runmate.presentation.utils.CommonUtils.getGpxInputStream
+import com.D107.runmate.presentation.utils.CommonUtils.getSecondsBetween
+import com.D107.runmate.presentation.utils.GpxParser
 import com.D107.runmate.presentation.utils.GpxParser.parseGpx
 import com.D107.runmate.presentation.utils.KakaoMapUtil.addCourseLine
 import com.D107.runmate.presentation.utils.LocationUtils.getPaceFromSpeed
@@ -34,13 +37,16 @@ import com.kakao.vectormap.LatLng
 import com.kakao.vectormap.MapLifeCycleCallback
 import com.kakao.vectormap.camera.CameraUpdateFactory
 import com.ssafy.locket.presentation.base.BaseFragment
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.io.InputStream
 
+@AndroidEntryPoint
 class PersonalHistoryFragment : BaseFragment<FragmentPersonalHistoryBinding>(
     FragmentPersonalHistoryBinding::bind,
     R.layout.fragment_personal_history
@@ -67,24 +73,22 @@ class PersonalHistoryFragment : BaseFragment<FragmentPersonalHistoryBinding>(
         initEvent()
         initMap()
 
-        historyViewModel.getHistoryDetail(args.historyId)
+//        historyViewModel.getGroupUserHistoryDetail(args.groupId, args.userId)
 
         viewLifecycleOwner.lifecycleScope.launch {
             historyViewModel.historyUserDetail.collectLatest { state ->
                 when (state) {
                     is UserHistoryDetailState.Success -> {
-//                        val time = mainViewModel.time.value
-//                        val lastRecord = it.runningRecords.last()
-//                        val firstRecord = it.runningRecords.first()
-//                        val startLocation = mainViewModel.userLocation.value
-//                        binding.tvDistance.text = getString(R.string.course_distance, lastRecord.distance)
-//                        binding.tvDateGroupInfo.text = getString(R.string.running_date, firstRecord.currentTime, lastRecord.currentTime)
-//                        binding.tvTime.text = getString(R.string.running_time, time / 60, time % 60)
-//                        binding.tvBpm.text = "-" // TODO 추후 HR 연결하여 데이터 수정
-//                        binding.tvAvgPace.text = getPaceFromSpeed(lastRecord.avgSpeed)
-//                        binding.tvCadence.text = getString(R.string.running_avg_cadence, lastRecord.cadenceSum / it.runningRecords.size)
-//                        binding.tvAltitude.text = getString(R.string.running_avg_altitude, lastRecord.altitudeSum / it.runningRecords.size)
-//                        binding.tvCalorie.text = "0" // TODO 삼성헬스 연결하여 데이터 수정
+                        Timber.d("state Success {${state.userHistoryDetail}}")
+                        val time = getSecondsBetween(state.userHistoryDetail.startTime, state.userHistoryDetail.endTime)
+                        binding.tvDistance.text = getString(R.string.course_distance, state.userHistoryDetail.distance)
+                        binding.tvDateGroupInfo.text = getString(R.string.running_date, state.userHistoryDetail.startTime, state.userHistoryDetail.endTime)
+                        binding.tvTime.text = getString(R.string.running_time, time / 60, time % 60)
+                        binding.tvBpm.text = "-" // TODO 추후 HR 연결하여 데이터 수정
+                        binding.tvAvgPace.text = getString(R.string.running_pace, (state.userHistoryDetail.avgPace.toInt())/60, (state.userHistoryDetail.avgPace.toInt())%60)
+                        binding.tvCadence.text = getString(R.string.running_avg_cadence, state.userHistoryDetail.avgCadence)
+                        binding.tvAltitude.text = getString(R.string.running_avg_altitude, state.userHistoryDetail.avgElevation)
+                        binding.tvCalorie.text = state.userHistoryDetail.calories.toString()
                     }
 
                     is UserHistoryDetailState.Error -> {
@@ -108,12 +112,6 @@ class PersonalHistoryFragment : BaseFragment<FragmentPersonalHistoryBinding>(
             // 코스 모드인 경우
             binding.btnAddCourse.visibility = View.GONE
             binding.ivLike.visibility = View.VISIBLE
-
-            // TODO 사용자 좋아요 여부 좋아요 x
-            binding.ivLike.setImageResource(R.drawable.ic_course_like_inactive)
-
-            // TODO 사용자 좋아요 여부 좋아요 o
-            binding.ivLike.setImageResource(R.drawable.ic_course_like)
         }
     }
 
@@ -124,8 +122,7 @@ class PersonalHistoryFragment : BaseFragment<FragmentPersonalHistoryBinding>(
                     courseViewModel.updateCourseLike(it)
                 }
             }
-
-            findNavController().navigate(R.id.action_runningEndFragment_to_runningFragment)
+            findNavController().popBackStack()
         }
 
         binding.btnChart.setOnClickListener {
@@ -177,33 +174,19 @@ class PersonalHistoryFragment : BaseFragment<FragmentPersonalHistoryBinding>(
         }, object : KakaoMapReadyCallback() {
             override fun onMapReady(p0: KakaoMap) {
                 kakaoMap = p0
-                loadAndDrawGpxFile()
-            }
-        })
-    }
-
-    private fun loadAndDrawGpxFile() {
-        CoroutineScope(Dispatchers.IO).launch {
-            mContext?.let {
-                getGpxInputStream(it)?.let { inputStream ->
-                    val trackPoints = parseGpx(inputStream)
-                    withContext(Dispatchers.Main) {
-                        Timber.d("trackPoints size ${trackPoints.size}")
-                        val startPoint = trackPoints[0]
-                        val cameraUpdate = CameraUpdateFactory.newCenterPosition(
-                            LatLng.from(
-                                startPoint.lat,
-                                startPoint.lon
-                            )
-                        )
-                        kakaoMap?.let { map ->
-                            map.moveCamera(cameraUpdate)
-                            addCourseLine(it, map, trackPoints)
+                viewLifecycleOwner.lifecycleScope.launch {
+                    withContext(Dispatchers.IO) {
+                        if(historyViewModel.historyUserDetail.value is UserHistoryDetailState.Success){
+                            (historyViewModel.historyUserDetail.value as UserHistoryDetailState.Success).userHistoryDetail.gpxFile?.let{
+                                withContext(Dispatchers.IO) {
+                                    drawGpxFile(GpxParser.getGpxInputStream(it))
+                                }
+                            }
                         }
                     }
                 }
             }
-        }
+        })
     }
 
     override fun onResume() {
@@ -214,5 +197,28 @@ class PersonalHistoryFragment : BaseFragment<FragmentPersonalHistoryBinding>(
     override fun onPause() {
         super.onPause()
         binding.mapView.pause()
+//        historyViewModel.resetHistoryDetail()
+    }
+
+    private fun drawGpxFile(inputStream: InputStream) {
+        CoroutineScope(Dispatchers.IO).launch {
+            mContext?.let {
+                val trackPoints = parseGpx(inputStream)
+                withContext(Dispatchers.Main) {
+                    val startPoint = trackPoints[0]
+                    val cameraUpdate = CameraUpdateFactory.newCenterPosition(
+                        LatLng.from(
+                            startPoint.lat,
+                            startPoint.lon
+                        )
+                    )
+                    kakaoMap?.let { map ->
+                        Timber.d("addCourseLine")
+                        map.moveCamera(cameraUpdate)
+                        addCourseLine(it, map, trackPoints)
+                    }
+                }
+            }
+        }
     }
 }

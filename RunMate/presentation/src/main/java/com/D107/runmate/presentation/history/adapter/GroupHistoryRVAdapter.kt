@@ -36,12 +36,12 @@ class GroupHistoryRVAdapter: ListAdapter<GroupRun, GroupHistoryRVAdapter.CustomV
 
         fun bind(item: GroupRun) {
             binding.tvMyName.text = item.nickname
-            binding.tvMyPace.text = context.resources.getString(R.string.running_pace, item.avgPace/60, item.avgPace%60)
-            binding.tvMyDistance.text = context.resources.getString(R.string.running_distance_int, item.distance)
+            binding.tvMyPace.text = context.resources.getString(R.string.running_pace, item.avgPace.toInt()/60, item.avgPace.toInt()%60)
+            binding.tvMyDistance.text = context.resources.getString(R.string.running_distance_int, item.distance.toInt())
             binding.tvMyDuration.text = if(item.time >= 3600) {
-                formatSecondsToHMS(item.time)
+                formatSecondsToHMS(item.time.toInt())
             } else {
-                formatSecondsToMS(item.time)
+                formatSecondsToMS(item.time.toInt())
             }
 
             binding.root.setOnClickListener {

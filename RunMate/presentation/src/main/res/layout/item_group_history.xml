@@ -2,7 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="24dp"
+    android:layout_marginBottom="12dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
@@ -28,28 +28,27 @@
         app:layout_constraintDimensionRatio="1"
         app:layout_constraintStart_toStartOf="@+id/iv_group_background"
         app:layout_constraintTop_toTopOf="@+id/iv_group_background" />
-
     <TextView
         android:id="@+id/tv_my_distance"
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:letterSpacing="-0.02"
+        android:layout_height="wrap_content"
         android:fontFamily="@font/postnonillsjaffna_extrabold"
+        android:letterSpacing="-0.02"
         android:textColor="@color/primary_dark"
         android:textSize="40sp"
         android:gravity="end|bottom"
         android:includeFontPadding="false"
-        app:layout_constraintTop_toTopOf="@+id/imageView"
+        app:layout_constraintBaseline_toBottomOf="@+id/tv_my_distance_unit"
         app:layout_constraintBottom_toBottomOf="@+id/imageView"
         app:layout_constraintEnd_toStartOf="@+id/tv_my_distance_unit"
-        app:layout_constraintHorizontal_weight="6"
+        app:layout_constraintHorizontal_weight="5"
         app:layout_constraintStart_toStartOf="@+id/imageView"
         tools:text="10" />
 
     <TextView
         android:id="@+id/tv_my_distance_unit"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:fontFamily="@font/postnonillsjaffna_extrabold"
         android:letterSpacing="-0.02"
         android:text="km"
@@ -57,11 +56,44 @@
         android:textSize="14sp"
         android:gravity="bottom|start"
         android:includeFontPadding="false"
+        android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="@+id/imageView"
         app:layout_constraintEnd_toEndOf="@+id/imageView"
-        app:layout_constraintHorizontal_weight="4"
-        app:layout_constraintStart_toEndOf="@+id/tv_my_distance"
-        app:layout_constraintTop_toTopOf="@+id/imageView" />
+        app:layout_constraintHorizontal_weight="5"
+        app:layout_constraintStart_toEndOf="@+id/tv_my_distance" />
+<!--    <TextView-->
+<!--        android:id="@+id/tv_my_distance"-->
+<!--        android:layout_width="0dp"-->
+<!--        android:layout_height="0dp"-->
+<!--        android:letterSpacing="-0.02"-->
+<!--        android:fontFamily="@font/postnonillsjaffna_extrabold"-->
+<!--        android:textColor="@color/primary_dark"-->
+<!--        android:textSize="40sp"-->
+<!--        android:gravity="end|bottom"-->
+<!--        android:includeFontPadding="false"-->
+<!--        app:layout_constraintTop_toTopOf="@+id/imageView"-->
+<!--        app:layout_constraintBottom_toBottomOf="@+id/imageView"-->
+<!--        app:layout_constraintEnd_toStartOf="@+id/tv_my_distance_unit"-->
+<!--        app:layout_constraintHorizontal_weight="6"-->
+<!--        app:layout_constraintStart_toStartOf="@+id/imageView"-->
+<!--        tools:text="10" />-->
+
+<!--    <TextView-->
+<!--        android:id="@+id/tv_my_distance_unit"-->
+<!--        android:layout_width="0dp"-->
+<!--        android:layout_height="0dp"-->
+<!--        android:fontFamily="@font/postnonillsjaffna_extrabold"-->
+<!--        android:letterSpacing="-0.02"-->
+<!--        android:text="km"-->
+<!--        android:textColor="@color/primary_dark"-->
+<!--        android:textSize="14sp"-->
+<!--        android:gravity="bottom|start"-->
+<!--        android:includeFontPadding="false"-->
+<!--        app:layout_constraintBottom_toBottomOf="@+id/imageView"-->
+<!--        app:layout_constraintEnd_toEndOf="@+id/imageView"-->
+<!--        app:layout_constraintHorizontal_weight="4"-->
+<!--        app:layout_constraintStart_toEndOf="@+id/tv_my_distance"-->
+<!--        app:layout_constraintTop_toTopOf="@+id/imageView" />-->
 
     <TextView
         android:id="@+id/tv_my_name"

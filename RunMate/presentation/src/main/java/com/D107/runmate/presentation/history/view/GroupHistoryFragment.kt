@@ -36,7 +36,7 @@ class GroupHistoryFragment : BaseFragment<FragmentGroupHistoryBinding>(
 ) {
     private val mainViewModel: MainViewModel by activityViewModels()
     private val historyViewModel: HistoryViewModel by viewModels()
-    private val args: GroupHistoryFragmentArgs by navArgs()
+//    private val args: GroupHistoryFragmentArgs by navArgs()
     private lateinit var groupHistoryRVAdapter: GroupHistoryRVAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -45,7 +45,7 @@ class GroupHistoryFragment : BaseFragment<FragmentGroupHistoryBinding>(
         initAdapter()
         initUI()
 
-        historyViewModel.getHistoryDetail(args.historyId)
+//        historyViewModel.getHistoryDetail(args.historyId)
     }
 
     private fun initUI() {
@@ -54,8 +54,8 @@ class GroupHistoryFragment : BaseFragment<FragmentGroupHistoryBinding>(
                 when (state) {
                     is HistoryDetailState.Success -> {
                         binding.tvMyName.text = mainViewModel.nickname.value
-                        binding.tvMyPace.text = getString(R.string.running_pace, state.historyDetail.myRunItem.avgPace/60, state.historyDetail.myRunItem.avgPace%60)
-                        binding.tvMyDistance.text = getString(R.string.running_distance_int, state.historyDetail.myRunItem.distance)
+                        binding.tvMyPace.text = getString(R.string.running_pace, (state.historyDetail.myRunItem.avgPace).toInt()/60, (state.historyDetail.myRunItem.avgPace).toInt()%60)
+                        binding.tvMyDistance.text = getString(R.string.running_distance_int, state.historyDetail.myRunItem.distance.toInt())
                         binding.tvMyDuration.text = if(state.historyDetail.myRunItem.time >= 3600) {
                             formatSecondsToHMS(state.historyDetail.myRunItem.time.toInt())
                         } else {
@@ -88,8 +88,17 @@ class GroupHistoryFragment : BaseFragment<FragmentGroupHistoryBinding>(
         groupHistoryRVAdapter.itemClickListener = object : GroupHistoryRVAdapter.ItemClickListener {
             override fun onClick(view: View, data: GroupRun, position: Int) {
                 Timber.d("groupRun ${data}")
-
+                // TODO 상세 화면 이동
+                val historyDetail = historyViewModel.historyDetail.value
+                if(historyDetail is HistoryDetailState.Success) {
+                    historyViewModel.getGroupUserHistoryDetail(historyDetail.historyDetail.groupId!!, data.userId)
+                }
             }
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+//        historyViewModel.resetHistoryDetail()
     }
 }

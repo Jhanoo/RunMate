@@ -21,6 +21,7 @@ import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
+import java.time.Duration
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.time.LocalDateTime
@@ -130,8 +131,6 @@ object CommonUtils {
 
     fun getGpxInputStream(context: Context): InputStream? {
         return try {
-//            val file = context.assets.open("test_3.gpx") // test용
-            //            file
             val file = File(context.filesDir, "running_tracking.gpx") // 실제로 작성한 파일
             FileInputStream(file)
         } catch (e: Exception) {
@@ -160,6 +159,13 @@ object CommonUtils {
         val minutes = (seconds % 3600) / 60
         val secs = seconds % 60
         return String.format("%02d:%02d", minutes, secs)
+    }
+
+    fun getSecondsBetween(time1: String, time2: String): Long {
+        val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+        val dateTime1 = LocalDateTime.parse(time1, formatter)
+        val dateTime2 = LocalDateTime.parse(time2, formatter)
+        return Duration.between(dateTime1, dateTime2).seconds
     }
 }
 

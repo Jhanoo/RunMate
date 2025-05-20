@@ -23,8 +23,8 @@ class AuthRepositoryImpl @Inject constructor(
     private val authDataSource: AuthDataSource
 ) : AuthRepository {
 
-    override suspend fun login(email: String, password: String): Flow<ResponseStatus<LoginData>> = flow {
-        val request = LoginRequest(email, password)
+    override suspend fun login(email: String, password: String, fcmToken: String?): Flow<ResponseStatus<LoginData>> = flow {
+        val request = LoginRequest(email, password, fcmToken)
         when (val response = authDataSource.login(request)) {
             is ApiResponse.Success -> {
                 Timber.d("login ${response}")

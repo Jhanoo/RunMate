@@ -53,6 +53,11 @@ import com.D107.runmate.presentation.running.RunningEndState
 import com.D107.runmate.presentation.utils.CommonUtils
 import com.D107.runmate.presentation.utils.CommonUtils.convertDateTime
 import com.D107.runmate.presentation.utils.LocationUtils.trackingLocation
+import com.google.android.gms.wearable.DataClient
+import com.google.android.gms.wearable.DataEvent
+import com.google.android.gms.wearable.DataEventBuffer
+import com.google.android.gms.wearable.DataMapItem
+import com.google.android.gms.wearable.Wearable
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -76,7 +81,7 @@ import javax.inject.Inject
 import kotlin.time.times
 
 @AndroidEntryPoint
-class RunningTrackingService : Service(), TextToSpeech.OnInitListener {
+class RunningTrackingService : Service(), TextToSpeech.OnInitListener, DataClient.OnDataChangedListener {
     private val TAG = "RunningService"
     private val NOTIFICATION_ID = 1001
     private val CHANNEL_ID = "running_tracker_channel"
@@ -140,12 +145,16 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener {
     private var vibrateJob: Job? = null
     private lateinit var vibrator: Vibrator
 
+    private lateinit var dataClient: DataClient
+
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
         observeSocketConnection()
         tts = TextToSpeech(this, this)
         initVibrator()
+        dataClient = Wearable.getDataClient(this)
+        dataClient.addListener(this)
     }
 
     private fun observeSocketConnection() {
@@ -527,6 +536,9 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener {
         runningJob = RunningJobState.None
         tts?.stop()
         tts?.shutdown()
+        ttsJob?.cancel()
+        vibrateJob?.cancel()
+        dataClient.removeListener(this)
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -824,6 +836,39 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener {
         if (status == TextToSpeech.SUCCESS) {
             tts?.language = Locale.KOREAN
         }
+    }
+
+    override fun onDataChanged(dataEventBuffer: DataEventBuffer) {
+        try {
+            Log.d("onDataChanged","onDatachanged")
+            if (!dataEventBuffer.isClosed) {
+                Log.d("dataeventbuffer","dataeventbuffer")
+                if(dataEventBuffer.count > 0){
+                    Log.d("dataeventbuffer","count>0")
+
+                    dataEventBuffer.forEach { event ->
+                        if (event.type == DataEvent.TYPE_CHANGED) {
+                            val item = event.dataItem
+                            Log.d("datachanged", item.toString())
+                            if (item.uri.path?.compareTo("/heart_rate") == 0) {
+                                val dataMap = DataMapItem.fromDataItem(item).dataMap
+                                val myData = dataMap.getInt("heart_rate_key")
+                                Log.d("MyForegroundService", "Received data: $myData")
+
+                            }
+                        }
+                    }
+                }
+            }
+            else{
+                Log.d("dataeventbuffer","isClosed")
+            }
+        } catch (e: Exception) {
+            Log.e("MyForegroundService", "Error: ${e.message}")
+        } finally {
+            dataEventBuffer.release()
+        }
+
     }
 
 }

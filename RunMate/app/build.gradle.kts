@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
+    id("com.google.gms.google-services")
+    id("kotlin-parcelize")
 }
 val properties = Properties().apply {
     load(rootProject.file("apikey.properties").inputStream())
@@ -83,6 +85,10 @@ dependencies {
 
     //Timber
     implementation("com.jakewharton.timber:timber:5.0.1")
+
+    //파이어베이스
+    implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
+    implementation(libs.firebase.messaging.ktx)
 }
 
 kapt {
