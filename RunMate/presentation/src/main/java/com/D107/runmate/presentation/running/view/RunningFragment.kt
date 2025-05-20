@@ -338,21 +338,25 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
         }
 
         binding.btnVibrate.setOnClickListener {
-            if (mainViewModel.isVibrationEnabled.value) {
+            if (mainViewModel.isVibration.value) {
                 binding.btnVibrate.setImageResource(R.drawable.ic_running_btn_vibrate_off)
             } else {
                 binding.btnVibrate.setImageResource(R.drawable.ic_running_btn_vibrate_on)
             }
-//            mainViewModel.toggleVibrationEnabled()
+            mContext?.let {
+                RunningTrackingService.toggleVibrateService(it)
+            }
         }
 
         binding.btnSound.setOnClickListener {
-            if (mainViewModel.isSoundEnabled.value) {
+            if (mainViewModel.isSound.value) {
                 binding.btnSound.setImageResource(R.drawable.ic_running_btn_sound_off)
             } else {
                 binding.btnSound.setImageResource(R.drawable.ic_running_btn_sound_on)
             }
-//            mainViewModel.toggleSoundEnabled()
+            mContext?.let {
+                RunningTrackingService.toggleSoundService(it)
+            }
         }
 
         binding.btnSetPace.setOnClickListener {
@@ -368,10 +372,8 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
         }
 
         binding.bgTodo.setOnClickListener {
-            Timber.d("groupTodo click")
             mContext?.let {
                 (getActivityContext(it) as MainActivity).setNavigation(R.id.drawer_manager)
-//                findNavController().navigate(R.id.action_runningFragment_to_AIManagerIntroFragment)
             }
         }
     }

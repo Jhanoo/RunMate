@@ -9,7 +9,7 @@ import com.squareup.moshi.JsonClass
 data class DailyTodoResponse(
     val content: String,
     val date: String,
-    val isDone: Boolean,
+    val isDone: Boolean?,
     val todoId: String
 ): BaseResponse {
     companion object: DataMapper<DailyTodoResponse, TodoItem> {

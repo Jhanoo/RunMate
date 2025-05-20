@@ -122,7 +122,7 @@ class RunningRecordFragment : BaseFragment<FragmentRunningRecordBinding>(
         }
 
         binding.btnVibrate.setOnClickListener {
-            if(mainViewModel.isVibrationEnabled.value) {
+            if(mainViewModel.isVibration.value) {
                 binding.btnVibrate.setImageResource(R.drawable.ic_running_btn_vibrate_off)
             } else {
                 binding.btnVibrate.setImageResource(R.drawable.ic_running_btn_vibrate_on)
@@ -131,7 +131,7 @@ class RunningRecordFragment : BaseFragment<FragmentRunningRecordBinding>(
         }
 
         binding.btnSound.setOnClickListener {
-            if(mainViewModel.isSoundEnabled.value) {
+            if(mainViewModel.isSound.value) {
                 binding.btnSound.setImageResource(R.drawable.ic_running_btn_sound_off)
             } else {
                 binding.btnSound.setImageResource(R.drawable.ic_running_btn_sound_on)

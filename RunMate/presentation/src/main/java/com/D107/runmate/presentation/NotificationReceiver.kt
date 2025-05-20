@@ -18,11 +18,15 @@ class NotificationReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         when (intent?.action) {
             ACTION_VIBRATE -> {
-                Timber.d("onReceive: ACTION_VIBRATE")
+                context?.let {
+                    RunningTrackingService.toggleVibrateService(it)
+                }
             }
 
             ACTION_SOUND -> {
-                Timber.d("onReceive: ACTION_SOUND")
+                context?.let {
+                    RunningTrackingService.toggleSoundService(it)
+                }
             }
 
             ACTION_PAUSE -> {
