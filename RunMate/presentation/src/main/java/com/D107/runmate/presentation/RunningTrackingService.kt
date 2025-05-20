@@ -159,6 +159,7 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener {
 
         when (intent?.action) {
             ACTION_START_SERVICE -> {
+                Timber.d("startService : $intent")
                 currentGroupId = intent.getStringExtra(EXTRA_GROUP_ID)
                 isGroupRunningMode = currentGroupId != null
                 currentGroupLeaderId = intent.getStringExtra(EXTRA_GROUP_LEADER_ID)
@@ -172,6 +173,7 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener {
                         @Suppress("DEPRECATION")
                         intent.getParcelableExtra<SocketAuthParcelable>(EXTRA_SOCKET_AUTH)
                     }
+                    Timber.d("service groupId $currentGroupId socketAuth $currentSocketAuth")
                 }
                 startForegroundService()
 
@@ -235,8 +237,6 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener {
         stopTimeTracking()
         stopLocationTracking()
         stopTracking()
-        currentGroupId = null
-        isGroupRunningMode = false
 
         if(repository.recordSize.value > 0) {
             CoroutineScope(Dispatchers.IO).launch {
@@ -331,6 +331,7 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener {
         startTime: String,
         groupId: String? = null
     ) {
+        Timber.d("History GroupId!!!${groupId}")
         endRunningUseCase(
             avgBpm,
             avgCadence,
@@ -573,6 +574,7 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener {
                     putExtra(EXTRA_SOCKET_AUTH, socketAuth)
 
                 }
+
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -743,7 +745,7 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener {
 
     private fun disconnectFromGroupSocket() {
         if (isGroupRunningMode) {
-//            disconnectSocketUseCase()
+            disconnectSocketUseCase()
             currentGroupId = null
             currentSocketAuth = null
             currentGroupLeaderId = null

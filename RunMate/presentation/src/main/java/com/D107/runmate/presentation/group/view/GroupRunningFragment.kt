@@ -385,22 +385,24 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
                         if (state.runningRecords.size > 1) {
                             val locationValue = mainViewModel.userLocation.value
                             if (locationValue is UserLocationState.Exist) {
-                                val currentLocation = LatLng.from(
-                                    locationValue.locations.last().latitude,
-                                    locationValue.locations.last().longitude
-                                )
-                                val prevLocation = LatLng.from(
-                                    locationValue.locations[locationValue.locations.size - 2].latitude,
-                                    locationValue.locations[locationValue.locations.size - 2].longitude
-                                )
-                                mContext?.let {
-                                    kakaoMap?.let {
-                                        addCoursePoint(
-                                            mContext!!,
-                                            kakaoMap!!,
-                                            prevLocation,
-                                            currentLocation
-                                        )
+                                if(locationValue.locations.size>1) {
+                                    val currentLocation = LatLng.from(
+                                        locationValue.locations.last().latitude,
+                                        locationValue.locations.last().longitude
+                                    )
+                                    val prevLocation = LatLng.from(
+                                        locationValue.locations[locationValue.locations.size - 2].latitude,
+                                        locationValue.locations[locationValue.locations.size - 2].longitude
+                                    )
+                                    mContext?.let {
+                                        kakaoMap?.let {
+                                            addCoursePoint(
+                                                mContext!!,
+                                                kakaoMap!!,
+                                                prevLocation,
+                                                currentLocation
+                                            )
+                                        }
                                     }
                                 }
 

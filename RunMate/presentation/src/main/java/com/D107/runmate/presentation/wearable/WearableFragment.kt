@@ -657,6 +657,7 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
         }
 
         cancelButton.setOnClickListener {
+            viewModel.stopRealTimeAnalysis("사용자 취소", saveResult = false)
             diagnosisProgressDialog?.dismiss()
         }
 
