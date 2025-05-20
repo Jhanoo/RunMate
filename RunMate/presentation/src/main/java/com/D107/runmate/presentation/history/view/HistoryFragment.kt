@@ -67,7 +67,8 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>(
                     historyViewModel.historyDetail.value.let { historyDetail ->
                         if (historyDetail is HistoryDetailState.Success) {
                             if (historyDetail.historyDetail.groupId == null) {
-                                findNavController().navigate(R.id.action_historyFragment_to_personalHistoryFragment)
+                                val action = HistoryFragmentDirections.actionHistoryFragmentToPersonalHistoryFragment("Personal")
+                                findNavController().navigate(action)
                             } else {
                                 findNavController().navigate(R.id.action_historyFragment_to_groupHistoryFragment)
                             }

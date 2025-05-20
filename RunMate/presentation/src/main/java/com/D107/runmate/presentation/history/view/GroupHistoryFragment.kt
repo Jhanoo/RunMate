@@ -17,10 +17,10 @@ import com.D107.runmate.presentation.MainViewModel
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.course.view.CourseDetailFragmentArgs
 import com.D107.runmate.presentation.databinding.FragmentGroupHistoryBinding
-import com.D107.runmate.presentation.history.HistoryDetailState
 import com.D107.runmate.presentation.history.HistoryViewModel
 import com.D107.runmate.presentation.history.adapter.GroupHistoryRVAdapter
 import com.D107.runmate.presentation.history.adapter.HistoryRVAdapter
+import com.D107.runmate.presentation.running.HistoryDetailState
 import com.D107.runmate.presentation.utils.CommonUtils.formatSecondsToHMS
 import com.D107.runmate.presentation.utils.CommonUtils.formatSecondsToMS
 import com.ssafy.locket.presentation.base.BaseFragment
@@ -71,6 +71,15 @@ class GroupHistoryFragment : BaseFragment<FragmentGroupHistoryBinding>(
                     is HistoryDetailState.Initial -> {
                         Timber.d("getHistoryDetail Initial")
                     }
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            historyViewModel.historyUserDetailEvent.collectLatest {
+                if(it) {
+                    val action = GroupHistoryFragmentDirections.actionGroupHistoryFragmentToPersonalHistoryFragment("group")
+                    findNavController().navigate(action)
                 }
             }
         }

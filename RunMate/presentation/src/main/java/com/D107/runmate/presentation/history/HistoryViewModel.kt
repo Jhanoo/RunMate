@@ -9,6 +9,7 @@ import com.D107.runmate.domain.model.history.UserHistoryDetail
 import com.D107.runmate.domain.usecase.history.GetHistoryDetailUseCase
 import com.D107.runmate.domain.usecase.history.GetHistoryListUseCase
 import com.D107.runmate.domain.usecase.history.GetUserHistoryDetailUseCase
+import com.D107.runmate.presentation.running.HistoryDetailState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,6 +37,9 @@ class HistoryViewModel @Inject constructor(
 
     private val _historyDetailEvent = MutableSharedFlow<Boolean>()
     val historyDetailEvent = _historyDetailEvent.asSharedFlow()
+
+    private val _historyUserDetailEvent = MutableSharedFlow<Boolean>()
+    val historyUserDetailEvent = _historyUserDetailEvent.asSharedFlow()
 
     fun getHistoryList() {
         viewModelScope.launch {
@@ -79,10 +83,12 @@ class HistoryViewModel @Inject constructor(
                 when (status) {
                     is ResponseStatus.Success -> {
                         Timber.d("getHistoryDetail Success {${status.data}}")
+                        _historyUserDetailEvent.emit(true)
                         _historyUserDetail.value = UserHistoryDetailState.Success(status.data)
                     }
                     is ResponseStatus.Error -> {
                         Timber.d("getHistoryDetail Error {${status.error}}")
+                        _historyUserDetailEvent.emit(false)
                         _historyDetail.value = HistoryDetailState.Error(status.error.message)
                     }
                 }
@@ -99,12 +105,6 @@ sealed class HistoryListState {
     object Initial : HistoryListState()
     data class Success(val historyInfo: HistoryInfo) : HistoryListState()
     data class Error(val message: String?) : HistoryListState()
-}
-
-sealed class HistoryDetailState {
-    object Initial : HistoryDetailState()
-    data class Success(val historyDetail: HistoryDetail) : HistoryDetailState()
-    data class Error(val message: String?) : HistoryDetailState()
 }
 
 sealed class UserHistoryDetailState {

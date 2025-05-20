@@ -344,13 +344,8 @@
             android:id="@+id/action_personalHistoryFragment_to_chartFragment"
             app:destination="@id/chartFragment" />
         <argument
-            android:name="userId"
-            app:argType="string"
-            app:nullable="true" />
-        <argument
-            android:name="groupId"
-            app:argType="string"
-            app:nullable="true" />
+            android:name="type"
+            app:argType="string" />
     </fragment>
 
 

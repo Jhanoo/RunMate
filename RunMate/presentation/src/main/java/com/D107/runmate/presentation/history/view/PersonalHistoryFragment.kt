@@ -2,10 +2,7 @@ package com.D107.runmate.presentation.history.view
 
 import android.content.Context
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -75,32 +72,65 @@ class PersonalHistoryFragment : BaseFragment<FragmentPersonalHistoryBinding>(
 
 //        historyViewModel.getGroupUserHistoryDetail(args.groupId, args.userId)
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            historyViewModel.historyUserDetail.collectLatest { state ->
-                when (state) {
-                    is UserHistoryDetailState.Success -> {
-                        Timber.d("state Success {${state.userHistoryDetail}}")
-                        val time = getSecondsBetween(state.userHistoryDetail.startTime, state.userHistoryDetail.endTime)
-                        binding.tvDistance.text = getString(R.string.course_distance, state.userHistoryDetail.distance)
-                        binding.tvDateGroupInfo.text = getString(R.string.running_date, state.userHistoryDetail.startTime, state.userHistoryDetail.endTime)
-                        binding.tvTime.text = getString(R.string.running_time, time / 60, time % 60)
-                        binding.tvBpm.text = "-" // TODO 추후 HR 연결하여 데이터 수정
-                        binding.tvAvgPace.text = getString(R.string.running_pace, (state.userHistoryDetail.avgPace.toInt())/60, (state.userHistoryDetail.avgPace.toInt())%60)
-                        binding.tvCadence.text = getString(R.string.running_avg_cadence, state.userHistoryDetail.avgCadence)
-                        binding.tvAltitude.text = getString(R.string.running_avg_altitude, state.userHistoryDetail.avgElevation)
-                        binding.tvCalorie.text = state.userHistoryDetail.calories.toString()
-                    }
+        if(args.type == "group") {
+            viewLifecycleOwner.lifecycleScope.launch {
+                historyViewModel.historyUserDetail.collectLatest { state ->
+                    when (state) {
+                        is UserHistoryDetailState.Success -> {
+                            Timber.d("state Success {${state.userHistoryDetail}}")
+                            val time = getSecondsBetween(state.userHistoryDetail.startTime, state.userHistoryDetail.endTime)
+                            binding.tvDistance.text = getString(R.string.course_distance, state.userHistoryDetail.distance)
+                            binding.tvDateGroupInfo.text = getString(R.string.running_date, state.userHistoryDetail.startTime, state.userHistoryDetail.endTime)
+                            binding.tvTime.text = getString(R.string.running_time, time / 60, time % 60)
+                            binding.tvBpm.text = "-" // TODO 추후 HR 연결하여 데이터 수정
+                            binding.tvAvgPace.text = getString(R.string.running_pace, (state.userHistoryDetail.avgPace.toInt())/60, (state.userHistoryDetail.avgPace.toInt())%60)
+                            binding.tvCadence.text = getString(R.string.running_avg_cadence, state.userHistoryDetail.avgCadence)
+                            binding.tvAltitude.text = getString(R.string.running_avg_altitude, state.userHistoryDetail.avgElevation)
+                            binding.tvCalorie.text = state.userHistoryDetail.calories.toString()
+                        }
 
-                    is UserHistoryDetailState.Error -> {
-                        Timber.d("getHistoryDetail Error {${state.message}}")
-                    }
+                        is UserHistoryDetailState.Error -> {
+                            Timber.d("getHistoryDetail Error {${state.message}}")
+                        }
 
-                    is UserHistoryDetailState.Initial -> {
-                        Timber.d("getHistoryDetail Initial")
+                        is UserHistoryDetailState.Initial -> {
+                            Timber.d("getHistoryDetail Initial")
+                        }
                     }
                 }
             }
+        } else if(args.type == "personal") {
+            // 없는 데이터 존재
+//            viewLifecycleOwner.lifecycleScope.launch {
+//                historyViewModel.historyDetail.collectLatest { state ->
+//                    when (state) {
+//                        is HistoryDetailState.Success -> {
+//                            Timber.d("state Success {${state.historyDetail}}")
+//                            val time = getSecondsBetween(state.historyDetail.myRunItem.startTime, state.userHistoryDetail.endTime)
+//                            binding.tvDistance.text = getString(R.string.course_distance, state.userHistoryDetail.distance)
+//                            binding.tvDateGroupInfo.text = getString(R.string.running_date, state.userHistoryDetail.startTime, state.userHistoryDetail.endTime)
+//                            binding.tvTime.text = getString(R.string.running_time, time / 60, time % 60)
+//                            binding.tvBpm.text = "-" // TODO 추후 HR 연결하여 데이터 수정
+//                            binding.tvAvgPace.text = getString(R.string.running_pace, (state.userHistoryDetail.avgPace.toInt())/60, (state.userHistoryDetail.avgPace.toInt())%60)
+//                            binding.tvCadence.text = getString(R.string.running_avg_cadence, state.userHistoryDetail.avgCadence)
+//                            binding.tvAltitude.text = getString(R.string.running_avg_altitude, state.userHistoryDetail.avgElevation)
+//                            binding.tvCalorie.text = state.userHistoryDetail.calories.toString()
+//                        }
+//
+//                        is HistoryDetailState.Error -> {
+//                            Timber.d("getHistoryDetail Error {${state.message}}")
+//                        }
+//
+//                        is HistoryDetailState.Initial -> {
+//                            Timber.d("getHistoryDetail Initial")
+//                        }
+//                    }
+//                }
+//            }
+        }else {
+            // 예외 상황
         }
+
     }
 
     private fun initUI() {
