@@ -276,7 +276,7 @@ class GroupViewModel @Inject constructor(
 
     fun startObservingLocationUpdates() {
         Timber.d("SocketObserveStart0")
-//        if (locationObserverJob?.isActive == true) return
+        if (locationObserverJob?.isActive == true) return
         Timber.d("SocketObserveStart")
         locationObserverJob = viewModelScope.launch {
             observeLocationUpdatesUseCase()
