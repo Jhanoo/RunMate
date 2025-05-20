@@ -150,9 +150,9 @@ public class NotificationTodoService {
     }
     
     /**
-     * 매일 오후 2시 5분에 모든 사용자에게 오늘의 할 일 알림 전송
+     * 매일 오전 9시에 모든 사용자에게 오늘의 할 일 알림 전송
      */
-    @Scheduled(cron = "0 5 14 * * ?", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 0 9 * * ?", zone = "Asia/Seoul")
     public void sendDailyTodoNotifications() {
         log.info("일일 할 일 알림 전송 시작");
         LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
