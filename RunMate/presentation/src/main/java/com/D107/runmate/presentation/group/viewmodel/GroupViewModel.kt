@@ -149,6 +149,8 @@ class GroupViewModel @Inject constructor(
                     Timber.d("LeaveGroup Success")
                     _currentGroup.value = null
                     _uiEvent.emit(GroupUiEvent.GoToGroup)
+                }else{
+                    finishGroup()
                 }
             }
         }

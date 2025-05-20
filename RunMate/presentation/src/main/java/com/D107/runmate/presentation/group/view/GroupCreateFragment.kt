@@ -40,12 +40,14 @@ import java.util.Locale
 @AndroidEntryPoint
 class GroupCreateFragment : BaseFragment<FragmentGroupCreateBinding>(
     FragmentGroupCreateBinding::bind,
-    R.layout.fragment_group_create) {
+    R.layout.fragment_group_create
+) {
 
 
-    private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm", Locale.getDefault())
+    private val dateTimeFormatter =
+        DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm", Locale.getDefault())
     val viewModel: GroupCreateViewModel by activityViewModels()
-    val mainViewModel : MainViewModel by activityViewModels()
+    val mainViewModel: MainViewModel by activityViewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -56,8 +58,8 @@ class GroupCreateFragment : BaseFragment<FragmentGroupCreateBinding>(
 
     private fun updateUI() {
         binding.etGroupName.setText(viewModel.groupName.value)
-        binding.etLocation.setText(viewModel.selectedPlace.value?.address?:"")
-        if(viewModel.selectedDate.value!=null) {
+        binding.etLocation.setText(viewModel.selectedPlace.value?.address ?: "")
+        if (viewModel.selectedDate.value != null) {
             binding.etDate.setText(dateTimeFormatter.format(viewModel.selectedDate.value))
         }
 
@@ -105,17 +107,18 @@ class GroupCreateFragment : BaseFragment<FragmentGroupCreateBinding>(
                             is GroupUiEvent.ShowToast -> {
                                 showToast(event.message)
                             }
+
                             else -> {}
 
                         }
                     }
                 }
-                launch{
-                    viewModel.selectedCourse.collect{courseDetail->
-                        if(courseDetail!=null) {
-                            binding.etCourse.setText(courseDetail?.name?:"")
+                launch {
+                    viewModel.selectedCourse.collect { courseDetail ->
+                        if (courseDetail != null) {
+                            binding.etCourse.setText(courseDetail?.name ?: "")
                             binding.ivClearCourse.visibility = View.VISIBLE
-                        }else{
+                        } else {
                             binding.etCourse.setText("")
                             binding.ivClearCourse.visibility = View.GONE
                         }
@@ -131,17 +134,17 @@ class GroupCreateFragment : BaseFragment<FragmentGroupCreateBinding>(
         binding.toolbarGroupCreate.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
-        binding.etCourse.setOnClickListener{
+        binding.etCourse.setOnClickListener {
             mainViewModel.setSourceScreen(SourceScreen.GROUP_CREATE_FRAGMENT)
             findNavController().navigate(R.id.action_groupCreateFragment_to_courseSettingFragment)
         }
-        binding.etLocation.setOnClickListener{
+        binding.etLocation.setOnClickListener {
             findNavController().navigate(R.id.action_groupCreateFragment_to_placeSearchFragment)
         }
-        binding.etDate.setOnClickListener{
+        binding.etDate.setOnClickListener {
             showDatePickerDialog()
         }
-        binding.btnCreateGroup.setOnClickListener{
+        binding.btnCreateGroup.setOnClickListener {
             viewModel.createGroup()
         }
         binding.etGroupName.addTextChangedListener(object : TextWatcher {
@@ -153,7 +156,7 @@ class GroupCreateFragment : BaseFragment<FragmentGroupCreateBinding>(
 
             override fun afterTextChanged(s: Editable?) {}
         })
-        binding.ivClearCourse.setOnClickListener{
+        binding.ivClearCourse.setOnClickListener {
             viewModel.clearCourse()
         }
 
@@ -189,36 +192,47 @@ class GroupCreateFragment : BaseFragment<FragmentGroupCreateBinding>(
     }
 
     private fun showTimePickerDialog(year: Int, month: Int, dayOfMonth: Int) {
-        val currentDateTime = viewModel.selectedDate.value
+        val currentSelectedDateTimeInViewModel = viewModel.selectedDate.value
         val calendar = Calendar.getInstance()
 
-        currentDateTime?.let {
-            calendar.set(Calendar.HOUR_OF_DAY, it.hour)
-            calendar.set(Calendar.MINUTE, it.minute)
+        currentSelectedDateTimeInViewModel?.let {
+
+            val pickedDate = LocalDate.of(year, month + 1, dayOfMonth)
+            if (it.toLocalDate().isEqual(pickedDate)) {
+                calendar.set(Calendar.HOUR_OF_DAY, it.hour)
+                calendar.set(Calendar.MINUTE, it.minute)
+            }
         }
 
-        val hour = calendar.get(Calendar.HOUR_OF_DAY)
-        val minute = calendar.get(Calendar.MINUTE)
+        val initialHour = calendar.get(Calendar.HOUR_OF_DAY)
+        val initialMinute = calendar.get(Calendar.MINUTE)
+
         val picker = MaterialTimePicker.Builder()
             .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
             .setTimeFormat(TimeFormat.CLOCK_12H)
-            .setHour(hour)
-            .setMinute(minute)
+            .setHour(initialHour)
+            .setMinute(initialMinute)
             .setTitleText("시간 선택")
             .setTheme(R.style.BaseTheme_TimePicker)
             .build()
 
-
         picker.addOnPositiveButtonClickListener {
             val selectedHour = picker.hour
             val selectedMinute = picker.minute
-            val selectedDate = LocalDate.of(year, month + 1, dayOfMonth)
-            val selectedTime = LocalTime.of(selectedHour, selectedMinute)
-            val selectedLocalDateTime = LocalDateTime.of(selectedDate, selectedTime)
-            val selectedOffsetDateTime =
-                selectedLocalDateTime.atZone(ZoneId.systemDefault()).toOffsetDateTime()
 
-            viewModel.selectDate(selectedOffsetDateTime)
+
+            val selectedUserDateTime = LocalDateTime.of(year, month + 1, dayOfMonth, selectedHour, selectedMinute)
+            val currentSystemDateTime = LocalDateTime.now()
+
+            val selectedDateOnly = LocalDate.of(year, month + 1, dayOfMonth)
+            if (selectedDateOnly.isEqual(currentSystemDateTime.toLocalDate()) && selectedUserDateTime.isBefore(currentSystemDateTime)) {
+                showToast("현재 시간보다 이전 시간은 선택할 수 없습니다.")
+            } else {
+                // 유효한 시간 선택 (오늘의 미래 시간이거나, 미래의 날짜)
+                val selectedOffsetDateTime =
+                    selectedUserDateTime.atZone(ZoneId.systemDefault()).toOffsetDateTime()
+                viewModel.selectDate(selectedOffsetDateTime)
+            }
         }
 
         picker.show(parentFragmentManager, "MaterialTimePicker")
@@ -228,8 +242,6 @@ class GroupCreateFragment : BaseFragment<FragmentGroupCreateBinding>(
         super.onDestroy()
 
     }
-
-
 
 
 }

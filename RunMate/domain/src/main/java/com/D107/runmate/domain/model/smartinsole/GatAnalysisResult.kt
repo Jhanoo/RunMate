@@ -17,6 +17,8 @@ data class GaitAnalysisResult(
     val totalRightSteps: Int = 0,
     val analysisDurationMs: Long? = null,
 
+    val gaitPatternDistribution: Map<GaitPatternType,Int>,
+
     val overallGaitPattern: GaitPatternType = GaitPatternType.UNKNOWN,
     val timestamp:Long = System.currentTimeMillis()
 )

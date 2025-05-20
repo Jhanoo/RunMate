@@ -159,6 +159,7 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener {
 
         when (intent?.action) {
             ACTION_START_SERVICE -> {
+                Timber.d("startService : $intent")
                 currentGroupId = intent.getStringExtra(EXTRA_GROUP_ID)
                 isGroupRunningMode = currentGroupId != null
                 currentGroupLeaderId = intent.getStringExtra(EXTRA_GROUP_LEADER_ID)
@@ -172,6 +173,7 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener {
                         @Suppress("DEPRECATION")
                         intent.getParcelableExtra<SocketAuthParcelable>(EXTRA_SOCKET_AUTH)
                     }
+                    Timber.d("service groupId $currentGroupId socketAuth $currentSocketAuth")
                 }
                 startForegroundService()
 
@@ -329,6 +331,7 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener {
         startTime: String,
         groupId: String? = null
     ) {
+        Timber.d("History GroupId!!!${groupId}")
         endRunningUseCase(
             avgBpm,
             avgCadence,
@@ -571,6 +574,7 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener {
                     putExtra(EXTRA_SOCKET_AUTH, socketAuth)
 
                 }
+
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -640,7 +644,8 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener {
 
         return when (state) {
             is RunningJobState.Active -> {
-                builder.setContentTitle("달리기 진행 중")
+                val setTitle = if(isGroupRunningMode){"그룹 달리기 진행중"}else{"달리기 진행 중"}
+                builder.setContentTitle(setTitle)
                     .addAction(
                         R.drawable.ic_action_vibrate,
                         "진동",
@@ -660,7 +665,8 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener {
             }
 
             is RunningJobState.None -> {
-                builder.setContentTitle("달리기 일시정지")
+                val setTitle = if(isGroupRunningMode){"그룹 달리기 일시정지"}else{"달리기 일시정지"}
+                builder.setContentTitle(setTitle)
                     .addAction(
                         R.drawable.ic_action_start,
                         "일시정지",
@@ -739,7 +745,7 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener {
 
     private fun disconnectFromGroupSocket() {
         if (isGroupRunningMode) {
-//            disconnectSocketUseCase()
+            disconnectSocketUseCase()
             currentGroupId = null
             currentSocketAuth = null
             currentGroupLeaderId = null

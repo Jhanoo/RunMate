@@ -34,6 +34,7 @@ import com.kakao.vectormap.LatLng
 import com.kakao.vectormap.MapLifeCycleCallback
 import com.kakao.vectormap.camera.CameraUpdateFactory
 import com.ssafy.locket.presentation.base.BaseFragment
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -41,6 +42,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
+@AndroidEntryPoint
 class PersonalHistoryFragment : BaseFragment<FragmentPersonalHistoryBinding>(
     FragmentPersonalHistoryBinding::bind,
     R.layout.fragment_personal_history
