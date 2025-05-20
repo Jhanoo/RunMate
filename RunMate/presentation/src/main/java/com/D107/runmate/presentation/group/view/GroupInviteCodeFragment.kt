@@ -62,6 +62,7 @@ class GroupInviteCodeFragment : BaseDialogFragment<FragmentGroupInviteCodeBindin
             val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText("Invite Code", inviteCode)
             clipboard.setPrimaryClip(clip)
+            showToastMessage("초대 코드가 복사되었습니다.")
         } else {
             showToastMessage("복사할 초대코드가 없습니다.")
         }

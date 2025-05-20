@@ -235,6 +235,8 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener {
         stopTimeTracking()
         stopLocationTracking()
         stopTracking()
+        currentGroupId = null
+        isGroupRunningMode = false
 
         if(repository.recordSize.value > 0) {
             CoroutineScope(Dispatchers.IO).launch {
@@ -640,7 +642,8 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener {
 
         return when (state) {
             is RunningJobState.Active -> {
-                builder.setContentTitle("달리기 진행 중")
+                val setTitle = if(isGroupRunningMode){"그룹 달리기 진행중"}else{"달리기 진행 중"}
+                builder.setContentTitle(setTitle)
                     .addAction(
                         R.drawable.ic_action_vibrate,
                         "진동",
@@ -660,7 +663,8 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener {
             }
 
             is RunningJobState.None -> {
-                builder.setContentTitle("달리기 일시정지")
+                val setTitle = if(isGroupRunningMode){"그룹 달리기 일시정지"}else{"달리기 일시정지"}
+                builder.setContentTitle(setTitle)
                     .addAction(
                         R.drawable.ic_action_start,
                         "일시정지",

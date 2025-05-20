@@ -1,18 +1,26 @@
 package com.D107.runmate.presentation.wearable
 
 import android.Manifest
+import android.animation.ValueAnimator
 import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Matrix
+import android.graphics.drawable.AnimationDrawable
 import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
+import android.view.animation.LinearInterpolator
 import android.widget.ArrayAdapter
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -27,6 +35,7 @@ import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentWearableBinding
 import com.D107.runmate.presentation.utils.ManagerAnalysisProcessState
 import com.D107.runmate.presentation.wearable.state.InsoleCardState
+import com.D107.runmate.presentation.wearable.viewmodel.AnalysisProcessState
 import com.D107.runmate.presentation.wearable.viewmodel.InsoleViewModel
 import com.google.android.material.button.MaterialButton
 import com.ssafy.locket.presentation.base.BaseFragment
@@ -53,6 +62,7 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
 
     private var calibrationInstructionDialog: AlertDialog? = null
 
+    private var dialogPanningValueAnimator: ValueAnimator? = null
 
     // --- 권한 요청 관련 ---
     private val requiredPermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -118,7 +128,7 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
 
         binding.btnDiagnoseInsole.setOnClickListener {
             if (viewModel.connectionState.value == InsoleConnectionState.FULLY_CONNECTED) {
-                viewModel.initiateTimedDiagnosis(15) // 15초 진단 시작
+                viewModel.initiateTimedDiagnosis(10) // 15초 진단 시작
             } else {
                 showToast("스마트 인솔이 완전히 연결되어야 진단할 수 있습니다.")
             }
@@ -126,11 +136,11 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
 
         binding.btnDiagnoseNoResultsInsole.setOnClickListener {
             if (viewModel.connectionState.value == InsoleConnectionState.FULLY_CONNECTED) {
-                viewModel.initiateTimedDiagnosis(15) // 15초 진단 시작
+                Timber.d("click diagnosisInsole")
+                viewModel.initiateTimedDiagnosis(10) // 15초 진단 시작
             } else {
                 showToast("스마트 인솔이 완전히 연결되어야 진단할 수 있습니다.")
             }
-//            viewModel.startDiagnosis()
         }
     }
 
@@ -215,7 +225,7 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
                     }
                 }
                 launch {
-                    viewModel.savedGaitAnalysisResult.collect { savedResult ->
+                    viewModel.saveGaitAnalysisResult.collect { savedResult ->
                         Timber.d("Saved Gait Analysis Result collected: ${savedResult != null}")
                         updateDiagnosisResultUI(savedResult) // UI 업데이트
                     }
@@ -224,8 +234,8 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
                     viewModel.analysisProcessState.collect { state ->
                         Timber.d("AnalysisState collected: $state")
                         when (state) {
-                            ManagerAnalysisProcessState.ANALYZING -> showDiagnosisProgressDialog()
-                            ManagerAnalysisProcessState.CALIBRATING->{
+                            AnalysisProcessState.ANALYZING -> showDiagnosisProgressDialog()
+                            AnalysisProcessState.CALIBRATING->{
                                 showCalibrationInstructionDialog()
                             }
                             else -> {
@@ -309,8 +319,9 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
 //            var analysisText = "걸음걸이 패턴: ${getGaitPatternString(result.overallGaitPattern)}\n" // 수정
 //            analysisText += "- 왼쪽 평균 Yaw: ${result.averageLeftYaw?.let { String.format("%.1f°", it) } ?: "N/A"}\n"
 //            analysisText += "- 오른쪽 평균 Yaw: ${result.averageRightYaw?.let { String.format("%.1f°", it) } ?: "N/A"}\n"
+            Timber.d("GaitResult : ${result}")
             var gaitDiff:Float =result.averageRightYaw!!-result.averageLeftYaw!!
-            val gaitResultDescriptionString = getGaitPatternString(gaitDiff,result.overallGaitPattern)
+            val gaitResultDescriptionString = getGaitPatternString(result)
 
 
             binding.tvAnalysisDescriptionInsole.text = gaitResultDescriptionString
@@ -406,6 +417,68 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
             GaitPatternType.OUT_TOEING -> TextUtils.concat(String.format("현제 발의 각도는 %.1f으로 ", gaitResultDescription)+"팔자걸음으로 진단되었습니다.\n",getText(R.string.out_toeing_description))
             GaitPatternType.NEUTRAL -> String.format("현제 발의 각도는 %.1f으로 ", gaitResultDescription)+"정상걸음으로 진단되었습니다.\n"
             GaitPatternType.UNKNOWN -> "알 수 없음"
+        }
+    }
+
+    private fun getGaitPatternString(result: GaitAnalysisResult): CharSequence {
+        val dominantPattern = result.overallGaitPattern
+        val patternDistribution = result.gaitPatternDistribution
+
+        // GaitPatternType.UNKNOWN을 제외한, 실제 진단된 패턴들의 총 스텝 수
+        val totalDiagnosedSteps = patternDistribution
+            .filterKeys { it != GaitPatternType.UNKNOWN }
+            .values
+            .sum()
+
+        // 디버깅용 로그 (필요시 사용)
+        // Timber.d("Dominant Pattern: $dominantPattern")
+        // Timber.d("Pattern Distribution: $patternDistribution")
+        // Timber.d("Total Diagnosed Steps: $totalDiagnosedSteps")
+
+        if (dominantPattern == GaitPatternType.UNKNOWN || totalDiagnosedSteps == 0) {
+            // 아직 분석할 데이터가 충분하지 않거나, 모든 스텝이 UNKNOWN으로 판단된 경우
+            val totalSteps = result.totalLeftSteps + result.totalRightSteps
+            return if (totalSteps < 10) { // 예: 최소 10걸음 미만일 경우
+                "걸음걸이 분석을 위해 좀 더 걸어주세요."
+            } else {
+                "걸음걸이 패턴을 분석 중이거나, 판단 가능한 데이터가 부족합니다."
+            }
+        }
+
+        val dominantPatternCount = patternDistribution[dominantPattern] ?: 0
+        val percentage = if (totalDiagnosedSteps > 0) {
+            (dominantPatternCount.toDouble() / totalDiagnosedSteps * 100.0)
+        } else {
+            0.0 // 이 경우는 위의 if문에서 대부분 걸러지지만, 방어적 코딩
+        }
+
+        val patternNameString = when (dominantPattern) {
+            GaitPatternType.IN_TOEING -> "안짱걸음"
+            GaitPatternType.OUT_TOEING -> "팔자걸음"
+            GaitPatternType.NEUTRAL -> "정상걸음"
+            GaitPatternType.UNKNOWN -> "알 수 없음" // 이 케이스는 위의 if문에서 처리됨
+        }
+
+        // "진단 걸음 중 N.N%로 OOO걸음의 비중이 가장 높은 것으로 진단되었습니다." 형식
+        val mainMessage = String.format(
+            "진단된 걸음 중 %.1f%%로 %s의 비중이 가장 높습니다.",
+            percentage,
+            patternNameString
+        )
+
+        // 각 패턴에 대한 상세 설명 리소스 ID
+        val detailedDescriptionResId = when (dominantPattern) {
+            GaitPatternType.IN_TOEING -> R.string.in_toeing_description // string.xml에 정의 필요
+            GaitPatternType.OUT_TOEING -> R.string.out_toeing_description // string.xml에 정의 필요
+            else -> null // UNKNOWN 또는 기타 경우는 상세 설명 없음
+        }
+
+        return if (detailedDescriptionResId != null) {
+            // 기본 메시지와 상세 설명을 합쳐서 반환
+            TextUtils.concat(mainMessage, "\n\n", getText(detailedDescriptionResId))
+        } else {
+            // 기본 메시지만 반환
+            mainMessage
         }
     }
     private fun getFootStrikeString(strike: FootStrikeType): String {
@@ -543,7 +616,6 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
     }
 
     private fun showDiagnosisProgressDialog() {
-        // 이미 다이얼로그가 보여지고 있다면 아무것도 하지 않음
         if (diagnosisProgressDialog != null && diagnosisProgressDialog!!.isShowing) {
             return
         }
@@ -552,30 +624,125 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
         val titleTextView = dialogView.findViewById<TextView>(R.id.tv_dialog_progress_title)
         val messageTextView = dialogView.findViewById<TextView>(R.id.tv_dialog_progress_message)
         val cancelButton = dialogView.findViewById<MaterialButton>(R.id.btn_cancel_progress_dialog)
-        // ProgressBar는 XML에서 indeterminate="true"로 설정했으므로 특별히 제어할 필요 없음
 
-        // 필요시 텍스트 설정 (XML에 이미 있다면 생략 가능)
-        // titleTextView.text = "보행 분석 중"
-        messageTextView.text = "15초 동안 데이터를 측정합니다..." // 예시, 필요시 ViewModel 등에서 가져오기
+        val cvLoadingDiagnosis = dialogView.findViewById<CardView>(R.id.cv_loading_diagnosis) // CardView
+        val ivManagerLoadingDiagnosis = dialogView.findViewById<ImageView>(R.id.iv_manager_loading_diagnosis) // 배경 이미지
+        val ivGifTonieDiagnosis = dialogView.findViewById<ImageView>(R.id.iv_gif_tonie_diagnosis) // Tonie GIF
+
+        messageTextView.text = "10초 동안 데이터를 측정합니다..."
 
         val builder = AlertDialog.Builder(requireContext())
             .setView(dialogView)
-            .setCancelable(false) // 이 다이얼로그는 코드에서만 닫히도록 (취소 버튼으로)
+            .setCancelable(false)
 
         diagnosisProgressDialog = builder.create()
 
+
+        diagnosisProgressDialog?.setOnShowListener {
+
+            dialogPanningValueAnimator?.cancel()
+            dialogPanningValueAnimator = setupPanningAnimationForItem(
+                ivManagerLoadingDiagnosis,
+                R.drawable.loading_forest_bg, // 사용할 배경 이미지 리소스
+                cvLoadingDiagnosis,           // 애니메이션 기준이 될 CardView
+                requireContext()
+            )
+            dialogPanningValueAnimator?.start()
+
+            // Tonie 프레임 애니메이션 설정 및 시작
+            setupFrameAnimationForItem(
+                ivGifTonieDiagnosis,
+                R.drawable.tonie_animation // Tonie 애니메이션 리소스 (animation-list drawable)
+            )
+        }
+
         cancelButton.setOnClickListener {
-            viewModel.stopRealTimeAnalysis(saveResult = false)
-            showToast("분석이 취소되었습니다.") // 사용자에게 피드백
             diagnosisProgressDialog?.dismiss()
         }
 
-        // 다이얼로그 배경을 투명하게 (선택 사항, XML에서 이미 배경 처리했다면)
-        diagnosisProgressDialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        // 다이얼로그가 닫힐 때 애니메이션 리소스 정리
+        diagnosisProgressDialog?.setOnDismissListener {
+            dialogPanningValueAnimator?.cancel()
+            dialogPanningValueAnimator = null // 참조 해제
 
-        if (!diagnosisProgressDialog!!.isShowing) { // 다시 한번 확인 후 show
+            val tonieAnimation = ivGifTonieDiagnosis.background as? AnimationDrawable
+            tonieAnimation?.stop()
+
+        }
+
+
+        if (diagnosisProgressDialog?.isShowing == false) {
             diagnosisProgressDialog?.show()
         }
+    }
+
+    private fun setupPanningAnimationForItem(
+        imageView: ImageView,
+        imageResId: Int,
+        containerView: View, // 애니메이션의 기준이 될 뷰 (여기서는 CardView)
+        context: Context
+    ): ValueAnimator {
+        val imageDrawable = AppCompatResources.getDrawable(context, imageResId)
+            ?: throw IllegalArgumentException("Drawable $imageResId not found")
+
+        imageView.setImageDrawable(imageDrawable)
+        imageView.scaleType = ImageView.ScaleType.MATRIX
+
+        val imageIntrinsicWidth = imageDrawable.intrinsicWidth.toFloat()
+        val imageIntrinsicHeight = imageDrawable.intrinsicHeight.toFloat()
+
+        // ValueAnimator는 containerView의 크기가 확정된 후에 설정 및 시작되어야 합니다.
+        // 이 함수는 ValueAnimator를 생성하여 반환하고, 시작은 외부에서 (ViewTreeObserver나 onShowListener 등)
+        val animator = ValueAnimator.ofFloat(0f, 1f).apply { // 0f to 1f 로 한 사이클 표현
+            duration = 10000 // 10초 동안 한 방향으로 이동
+            repeatCount = ValueAnimator.INFINITE
+            repeatMode = ValueAnimator.RESTART // RESTART 또는 REVERSE 선택 가능
+            interpolator = LinearInterpolator()
+
+            addUpdateListener { animation ->
+                if (containerView.width == 0 || containerView.height == 0) {
+                    return@addUpdateListener // 아직 뷰 크기 확정 안됨
+                }
+
+                val matrix = Matrix()
+                val animatedValue = animation.animatedValue as Float // 0.0f ~ 1.0f
+
+                // 이미지 스케일 계산 (이미지의 높이를 컨테이너 뷰의 높이에 맞춤)
+                val viewHeight = containerView.height.toFloat()
+                val viewWidth = containerView.width.toFloat()
+
+                val scale = viewHeight / imageIntrinsicHeight
+                matrix.postScale(scale, scale)
+
+                // 스케일링된 이미지 너비
+                val scaledImageWidth = imageIntrinsicWidth * scale
+
+                // 이미지가 뷰보다 작으면 애니메이션 의미가 없을 수 있으므로, 최소 뷰 너비만큼은 이동하도록 처리
+                // 또는 이미지가 뷰보다 작으면 패닝을 안 하거나 다른 효과를 줄 수 있습니다.
+                // 여기서는 이미지가 뷰보다 크다고 가정하고, 초과분만큼 이동합니다.
+                val maxTranslateX = scaledImageWidth - viewWidth
+                var currentTranslateX = 0f
+
+                if (maxTranslateX > 0) {
+                    currentTranslateX = -animatedValue * maxTranslateX // 왼쪽으로 이동
+                }
+                // 만약 이미지가 뷰 너비보다 작다면, currentTranslateX는 0 또는 음수가 될 수 있습니다.
+                // 이 경우 중앙 정렬 등의 추가 로직이 필요할 수 있습니다.
+                // 예: val startX = (viewWidth - scaledImageWidth) / 2f (이미지가 뷰보다 작을 때 중앙 정렬)
+                // matrix.postTranslate(startX + currentTranslateX, 0f)
+
+                matrix.postTranslate(currentTranslateX, 0f)
+                imageView.imageMatrix = matrix
+            }
+        }
+        return animator
+    }
+
+    // 범용 프레임 애니메이션 (AnimationDrawable) 설정 함수
+    private fun setupFrameAnimationForItem(imageView: ImageView, animationResId: Int) {
+        imageView.setBackgroundResource(animationResId) // XML에서 src 대신 background로 설정하는 것이 일반적
+        val animationDrawable = imageView.background as? AnimationDrawable
+        animationDrawable?.start()
     }
 
 

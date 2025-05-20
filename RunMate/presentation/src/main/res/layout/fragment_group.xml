@@ -9,10 +9,10 @@
 
 
     <ImageView
-        android:id="@+id/img_sad_emoji_group"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:src="@drawable/ic_sad_emoji"
+        android:id="@+id/iv_tonie"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:src="@drawable/tonie_round"
         app:layout_constraintBottom_toTopOf="@+id/tv_no_group_message_group"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -27,14 +27,14 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:gravity="center"
-        android:text="현제 가입된 그룹이 없습니다."
+        android:text="현재 가입된 그룹이 없습니다."
         android:textColor="@color/text"
         android:textSize="24sp"
         android:fontFamily="@font/pretendard_bold"
 
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/img_sad_emoji_group" />
+        app:layout_constraintTop_toBottomOf="@+id/iv_tonie" />
 
     <TextView
         android:id="@+id/tv_create_join_group_group"
