@@ -49,6 +49,20 @@
             android:foregroundServiceType="location"
             android:exported="false" />
 
+        <service
+            android:name=".presentation.service.DataLayerListenerService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
+                <data android:scheme="wear" android:host="*" android:pathPrefix="/jwt_token" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <data android:scheme="wear" android:host="*" android:pathPrefix="/sync_request" />
+            </intent-filter>
+        </service>
+
+
         <uses-library
             android:name="com.google.android.wearable"
             android:required="true" />
