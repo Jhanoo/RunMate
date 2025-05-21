@@ -108,7 +108,7 @@ class PersonalHistoryFragment : BaseFragment<FragmentPersonalHistoryBinding>(
                             binding.tvDistance.text = getString(R.string.course_distance, state.historyDetail.myRunItem.distance)
                             binding.tvDateGroupInfo.text = getString(R.string.running_date, convertIsoToCustomFormat(state.historyDetail.myRunItem.startTime), convertIsoToCustomFormat(state.historyDetail.myRunItem.endTime))
                             binding.tvTime.text = getString(R.string.running_time, time / 60, time % 60)
-                            binding.tvBpm.text = "-" // TODO 추후 HR 연결하여 데이터 수정
+                            binding.tvBpm.text = if(state.historyDetail.myRunItem.avgBpm == 0.0) "-" else getString(R.string.running_avg_bpm, state.historyDetail.myRunItem.avgBpm)
                             binding.tvAvgPace.text = getString(R.string.running_pace, (state.historyDetail.myRunItem.avgPace.toInt())/60, (state.historyDetail.myRunItem.avgPace.toInt())%60)
                             binding.tvCadence.text = getString(R.string.running_avg_cadence, state.historyDetail.myRunItem.avgCadence)
                             binding.tvAltitude.text = getString(R.string.running_avg_altitude, state.historyDetail.myRunItem.avgElevation)

@@ -334,8 +334,8 @@ class MainActivity : ComponentActivity() {
                         val distance =
                             backStackEntry.arguments?.getString("distance") ?: "0.0"
                         val time = backStackEntry.arguments?.getString("time") ?: "0:00:00"
-                        val avgPace =
-                            backStackEntry.arguments?.getString("avgPace") ?: "--'--\""
+                        val avgPace = "--'--\""
+//                            backStackEntry.arguments?.getString("avgPace") ?: "--'--\""
                         val maxHeartRate =
                             backStackEntry.arguments?.getString("maxHeartRate")
                                 ?.toIntOrNull() ?: 0

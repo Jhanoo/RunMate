@@ -35,7 +35,7 @@ import kotlinx.coroutines.runBlocking
 import java.util.Date
 import kotlin.coroutines.cancellation.CancellationException
 
-
+private const val TAG = "RunningViewModel"
 @HiltViewModel
 class RunningViewModel @Inject constructor(
     private val getHeartRateUseCase: GetHeartRateUseCase,
@@ -78,7 +78,7 @@ class RunningViewModel @Inject constructor(
     // 페이스
     private val _currentPace = MutableStateFlow(0)
     val currentPace: StateFlow<Int> = _currentPace.asStateFlow()
-    private val _formattedPace = MutableStateFlow("0:00")
+    private val _formattedPace = MutableStateFlow("0'00\"")
     val formattedPace: StateFlow<String> = _formattedPace.asStateFlow()
 
     private var lastCalculatedDistance = 0.0 // 마지막으로 계산에 사용된 거리 값을 저장하는 변수
@@ -234,6 +234,7 @@ class RunningViewModel @Inject constructor(
             // 페이스 변경 감지 및 서비스에 전달
             currentPace.collect { paceInSeconds ->
                 // Update formatted pace for UI
+                Log.d(TAG, "observeHeartRateAndPaceForTracking: ${paceInSeconds}")
                 _formattedPace.value = formatPaceToString(paceInSeconds)
                 // Pass the raw seconds value to the service
                 LocationTrackingService.updatePace(paceInSeconds)

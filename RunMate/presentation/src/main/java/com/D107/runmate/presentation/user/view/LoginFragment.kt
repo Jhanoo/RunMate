@@ -48,7 +48,7 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(
 
                     is LoginViewModel.LoginUiState.Success -> {
                         // 로그인 성공
-                        WatchDataUtils.sendTokenToWatch(requireContext(), state.data.accessToken)
+//                        WatchDataUtils.sendTokenToWatch(requireContext(), state.data.accessToken)
                         showLoading(false)
                         navigateToMain()
                     }
