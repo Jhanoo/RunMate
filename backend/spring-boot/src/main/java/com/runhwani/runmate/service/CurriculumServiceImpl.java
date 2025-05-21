@@ -91,7 +91,8 @@ public class CurriculumServiceImpl implements CurriculumService {
         // 7) Todo 저장
         schedule.forEach((date, content) -> {
             // content가 "<숫자>km"로 시작하면 isDone=false, 아니면 null
-            Boolean isDoneVal = content.matches("^\\d+(?:\\.\\d+)?km.*") ? false : null;
+            // content에서 거리(km) 추출하여 거리 기반의 훈련인지 판단
+            Boolean isDoneVal = content.matches("^.*?:\\s*(\\d+(?:\\.\\d+)?)(km|m).*") ? false : null;
 
             Todo todo = Todo.builder()
                     .todoId(UUID.randomUUID())
@@ -160,23 +161,32 @@ public class CurriculumServiceImpl implements CurriculumService {
         DateTimeFormatter fmt = DateTimeFormatter.ISO_LOCAL_DATE;
 
         StringBuilder sb = new StringBuilder();
+
         // (A) 프롬프트 역할 설정
         sb.append("당신은 전문 마라톤 트레이너입니다.\n");
-        sb.append("다음 정보를 바탕으로, 훈련 시작일부터 목표일까지 하루 단위 JSON 배열을 생성해주세요.\n\n");
+        sb.append("사용자의 다음 정보를 바탕으로 과학적 근거에 기반해 마라톤 훈련 계획을 생성해주세요.\n\n");
 
         // (B) 목표 정보
-        sb.append("목표 마라톤 거리: ").append(req.getGoalDist()).append("\n")
-                .append("목표 날짜: ").append(goalDate.format(fmt)).append("\n")
-                .append("훈련 시작 날짜: ").append(startDate.format(fmt)).append("\n")
-                .append("마라톤 경험 유무: ").append(req.isRunExp() ? "있음" : "없음").append("\n")
-                .append("달릴 수 있는 거리: ").append(req.getDistExp()).append("\n")
-                .append("일주일 달리기 빈도: ").append(req.getFreqExp()).append("\n\n");
+        sb.append("### 사용자 정보\n")
+                .append("- 목표 마라톤 거리: ").append(req.getGoalDist()).append("\n")
+                .append("- 목표 날짜: ").append(goalDate.format(fmt)).append("\n")
+                .append("- 훈련 시작 날짜: ").append(startDate.format(fmt)).append("\n")
+                .append("- 마라톤 경험: ").append(req.isRunExp() ? "있음" : "없음").append("\n")
+                .append("- 현재 달릴 수 있는 최대 거리: ").append(req.getDistExp()).append("\n")
+                .append("- 일주일 달리기 빈도: ").append(req.getFreqExp()).append("\n\n");
 
         // (C) 최근 1달 기록
         if (!histories.isEmpty()) {
-            sb.append("사용자의 최근 러닝 기록:\n");
+            sb.append("### 최근 러닝 기록:\n");
             int idx = 1;
             for (History h : histories) {
+                // 거리 0.1km 미만, 페이스가 비현실적(2분/km 미만 또는 15분/km 초과), 심박수가 비정상(40미만, 220초과)인 경우 제외
+                if (h.getDistance() < 0.1
+                        || h.getAvgPace() < 2 || h.getAvgPace() > 15
+                        || h.getAvgBpm() < 40 || h.getAvgBpm() > 220) {
+                    continue;
+                }
+
                 sb.append(idx++).append(". ")
                         .append("시작: ").append(h.getStartTime()).append(", ")
                         .append("종료: ").append(h.getEndTime()).append(", ")
@@ -188,26 +198,31 @@ public class CurriculumServiceImpl implements CurriculumService {
             sb.append("\n");
         }
 
-        // (D) 출력 형식 지시
-        sb.append("요구사항:\n")
-                .append("1. ").append(startDate.format(fmt))
-                .append("부터 ").append(goalDate.format(fmt))
-                .append("까지 날짜별로 JSON 객체를 하루 하나씩 생성해주세요.\n")
-                .append("2. 달리기 거리 조언(예: 3km 달리기, 5km 달리기)을 제시할 때, " +
-                        "반드시 문장의 맨 앞이 ‘3km’, ‘5km’처럼 '<거리>km' 형태로 시작하도록 해주세요.\n")
-                .append("3. 출력은 반드시 다음과 같은 JSON 객체 형태로만 보여주세요:\n")
-                .append("""
-                        ```json
-                        {
-                          "data": [
-                            { "date": "YYYY-MM-DD", "todo": "구체적 훈련 조언 문장" },
-                            …
-                          ]
-                        }
-                        ```
-                        """)
-                .append("4. 추가 설명이나 메타데이터는 절대 포함하지 마시고, 위 형식만 지켜주세요.");
+        sb.append("### 훈련 계획 생성 원칙 (필수 준수)\n")
+                .append("1. 훈련 계획은 일주일 단위로 구성하고, 다음 요소들을 반드시 포함합니다:\n")
+                .append("  - 장거리 LSD 주 1회 (전체 거리의 30~50%, 페이스는 마라톤 목표페이스보다 60~90초/km 느림)\n")
+                .append("  - 템포런 또는 젖산역치 훈련 주 1회 (5km 또는 10km 레이스 페이스로 20~40분)\n")
+                .append("  - 인터벌 훈련 주 1회 (최대산소섭취량 VO2max 향상을 위한 고강도 반복주)\n")
+                .append("  - 회복주 주 1~2회 (가볍게 천천히 3~8km)\n")
+                .append("2. 매주 최소 하루는 완전 휴식일을 포함합니다.\n")
+                .append("3. 사용자의 최근 기록을 고려하여 현실적이고 무리 없는 계획을 제안합니다.\n")
+                .append("4. 각 훈련의 목적을 명시적으로 포함합니다 (예: 장거리주 - 유산소 지구력 향상).\n")
+                .append("5. 사용자의 훈련 시작 날짜부터 목표 날짜까지 모든 날짜에 대해 하루도 빠짐없이 매일 단위의 훈련 계획을 제공해야 합니다.\n\n");
 
+        // (D) 출력 형식 지시
+        sb.append("### 출력 JSON 요구사항\n")
+                .append("훈련 계획은 반드시 다음 형식으로만 제공합니다:\n")
+                .append("```json\n")
+                .append("{\n")
+                .append("  \"data\": [\n")
+                .append("    {\"date\": \"YYYY-MM-DD\", \"todo\": \"<훈련종류>: <거리>km, <추천 페이스 또는 심박존>, 목적: <훈련 목적>\"},\n")
+                .append("    ...\n")
+                .append("  ]\n")
+                .append("}\n")
+                .append("```\n")
+                .append("- 추가 설명이나 메타데이터는 절대 포함하지 마십시오.\n")
+                .append("- 예시 Todo: \"장거리주: 15km, 6:30min/km 페이스, 목적: 유산소 지구력 향상\"\n");
+        
         return sb.toString();
     }
 
