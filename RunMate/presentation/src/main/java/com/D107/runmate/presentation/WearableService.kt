@@ -20,6 +20,7 @@ class WearableService: Service(), DataClient.OnDataChangedListener {
 
     override fun onCreate() {
         super.onCreate()
+        Timber.d("onCreate")
         dataClient = Wearable.getDataClient(this)
         dataClient.addListener(this)
     }
@@ -54,6 +55,8 @@ class WearableService: Service(), DataClient.OnDataChangedListener {
                                 val avgCadence = dataMap.getInt("avgCadence")
 
                                 Timber.d("datachanged: $gpxFile, $distance, $avgPace, $startTime, $endTime, $avgElevation, $avgBpm, $startLocation, $avgCadence")
+                            } else {
+                                Timber.d("datachanged: ${item.uri.path}")
                             }
                         }
                     }

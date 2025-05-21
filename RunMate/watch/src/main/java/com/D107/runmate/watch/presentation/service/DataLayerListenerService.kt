@@ -8,8 +8,12 @@ import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.D107.runmate.watch.presentation.worker.GpxUploadWorker
 import com.google.android.gms.tasks.Tasks
@@ -26,6 +30,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 
 @AndroidEntryPoint
 class DataLayerListenerService : WearableListenerService() {
@@ -254,13 +259,24 @@ class DataLayerListenerService : WearableListenerService() {
             }
     }
 
-    private fun checkAndTransferPendingGpxFiles() {
+    fun checkAndTransferPendingGpxFiles() {
         // 폰과 연결되었을 때 대기 중인 GPX 파일 전송
-        WorkManager.getInstance(this).enqueueUniqueWork(
-            "transfer_gpx_files",
-            ExistingWorkPolicy.REPLACE,
-            OneTimeWorkRequestBuilder<GpxUploadWorker>().build()
-        )
+        Log.d(TAG, "checkAndTransferPendingGpxFiles: gpx 파일 찾기")
+//        val workRequest = PeriodicWorkRequestBuilder<GpxUploadWorker>(15, TimeUnit.MINUTES)
+//            .setInitialDelay(1, TimeUnit.MINUTES)
+//            .addTag("GpxUploadWorker") // 중복 실행 방지용 태그 추가
+//            .setConstraints(
+//                Constraints.Builder()
+//                    .setRequiredNetworkType(NetworkType.CONNECTED)
+//                    .build()
+//            )
+//            .build()
+//
+//        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+//            "transfer_gpx_files",
+//            ExistingPeriodicWorkPolicy.KEEP,
+//            workRequest
+//        )
     }
 
     // 러닝 상태 처리 함수

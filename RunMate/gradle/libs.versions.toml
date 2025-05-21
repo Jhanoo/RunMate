@@ -48,6 +48,7 @@ junitKtx = "1.2.1"
 uiTestJunit4Android = "1.8.0"
 hiltCommon = "1.2.0"
 uiTestJunit4 = "1.4.3"
+hiltWork = "1.2.0"
 
 [libraries]
 android = { module = "com.kakao.maps.open:android", version.ref = "android" }
@@ -105,6 +106,7 @@ androidx-material3-android = { group = "androidx.compose.material3", name = "mat
 androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }
 androidx-ui-test-junit4-android = { group = "androidx.compose.ui", name = "ui-test-junit4-android", version.ref = "uiTestJunit4Android" }
 androidx-hilt-common = { group = "androidx.hilt", name = "hilt-common", version.ref = "hiltCommon" }
+androidx-hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hiltWork" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

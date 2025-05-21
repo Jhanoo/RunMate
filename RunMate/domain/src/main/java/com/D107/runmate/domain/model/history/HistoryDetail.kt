@@ -7,5 +7,6 @@ data class HistoryDetail(
     val groupId: String?,
     val groupRunItem: List<GroupRun?>,
     val historyId: String,
-    val myRunItem: MyRun
+    val myRunItem: MyRun,
+    val startLocation: String
 ): BaseModel

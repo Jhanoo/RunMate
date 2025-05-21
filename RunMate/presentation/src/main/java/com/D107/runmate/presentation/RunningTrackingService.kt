@@ -498,10 +498,10 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener {
                     if(state is RunningRecordState.Exist) {
                         state.runningRecords.last().let {
                             val avgPace = 1000 / it.avgSpeed
-                            if(goalPace > avgPace) {
+                            if(goalPace - 15 > avgPace) {
                                 Timber.d("goalPace: first $goalPace, avgPace: $avgPace")
                                 triggerVibration()
-                            } else if(goalPace < avgPace) {
+                            } else if(goalPace + 15 < avgPace) {
                                 Timber.d("goalPace: second $goalPace, avgPace: $avgPace")
                                 triggerVibration()
                             } else {
@@ -813,10 +813,10 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener {
                     if(state is RunningRecordState.Exist) {
                         state.runningRecords.last().let {
                             val avgPace = 1000 / it.avgSpeed
-                            if(goalPace > avgPace) {
-                                tts?.speak("${goalPace - avgPace} 보다 빨라요", TextToSpeech.QUEUE_FLUSH, null, "tts1")
-                            } else if(goalPace < avgPace) {
-                                tts?.speak("${avgPace - goalPace} 보다 느려요", TextToSpeech.QUEUE_FLUSH, null, "tts2")
+                            if(goalPace - 15 > avgPace) {
+                                tts?.speak("목표 페이스보다 빨라요", TextToSpeech.QUEUE_FLUSH, null, "tts1")
+                            } else if(goalPace + 15 < avgPace) {
+                                tts?.speak("목표 페이스 보다 느려요", TextToSpeech.QUEUE_FLUSH, null, "tts2")
                             } else {
                                 Timber.d("정상속도거나 너무 빠르거나 느림")
                             }

@@ -34,6 +34,11 @@ import androidx.navigation.NavController
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.D107.runmate.watch.presentation.menu.MenuScreen
 import com.D107.runmate.watch.presentation.pace.PaceScreen
 import com.D107.runmate.watch.presentation.running.DisplayMode
@@ -46,6 +51,7 @@ import com.D107.runmate.watch.presentation.service.BluetoothService
 import com.D107.runmate.watch.presentation.service.DataLayerListenerService
 import com.D107.runmate.watch.presentation.splash.SplashScreen
 import com.D107.runmate.watch.presentation.theme.RunMateTheme
+import com.D107.runmate.watch.presentation.worker.GpxUploadWorker
 import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wearable.Node
 import com.google.android.gms.wearable.PutDataMapRequest
@@ -59,6 +65,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.ExecutionException
+import java.util.concurrent.TimeUnit
+import kotlin.random.Random
 
 private const val TAG = "MainActivity"
 @AndroidEntryPoint
@@ -100,6 +108,22 @@ class MainActivity : ComponentActivity() {
         val serviceIntent = Intent(this, DataLayerListenerService::class.java)
         startService(serviceIntent)
         Log.d("MainActivity", "DataLayerListenerService 명시적 시작")
+
+        val workRequest = PeriodicWorkRequestBuilder<GpxUploadWorker>(15, TimeUnit.MINUTES)
+            .setInitialDelay(1, TimeUnit.MINUTES)
+            .addTag("GpxUploadWorker") // 중복 실행 방지용 태그 추가
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build()
+            )
+            .build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "transfer_gpx_files",
+            ExistingPeriodicWorkPolicy.KEEP,
+            workRequest
+        )
 
         splashScreen.setKeepOnScreenCondition { false }
 
@@ -164,7 +188,9 @@ class MainActivity : ComponentActivity() {
                             onNavigateToPace = { navController.navigate("pace") },
                             onNavigateToAny = {
                                 val putDataMapRequest = PutDataMapRequest.create("/test")
-                                putDataMapRequest.dataMap.putInt("heart_rate_key", 125)
+                                val testInt = System.currentTimeMillis().toInt()
+                                Log.d(TAG, "onCreate: ${testInt}")
+                                putDataMapRequest.dataMap.putInt("heart_rate_key", testInt)
                                 val putDataReq = putDataMapRequest.asPutDataRequest()
                                 putDataReq.setUrgent()
                                 val putTask = Wearable.getDataClient(this@MainActivity).putDataItem(putDataReq)
