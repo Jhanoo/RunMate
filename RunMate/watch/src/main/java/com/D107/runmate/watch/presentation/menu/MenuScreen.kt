@@ -39,7 +39,8 @@ import com.D107.runmate.watch.R
 @Composable
 fun MenuScreen(
     onNavigateToRunning: () -> Unit = {},
-    onNavigateToPace: () -> Unit = {}
+    onNavigateToPace: () -> Unit = {},
+    buttonsEnabled: Boolean = true
 ) {
     val listState = rememberScalingLazyListState()
 
@@ -60,8 +61,12 @@ fun MenuScreen(
                 Box(
                     modifier = Modifier
                         .size(120.dp)
-                        .background(colorResource(id = R.color.primary), shape = CircleShape)
-                        .clickable { onNavigateToRunning() },
+                        .background(
+                            color = if (buttonsEnabled) colorResource(id = R.color.primary)
+                            else colorResource(id = R.color.gray_text),
+                            shape = CircleShape
+                        )
+                        .clickable(enabled = buttonsEnabled) { onNavigateToRunning() },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -83,11 +88,12 @@ fun MenuScreen(
                     modifier = Modifier.fillMaxWidth(0.8f),
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = colorResource(id = R.color.black)
-                    )
+                    ),
+                    enabled = buttonsEnabled
                 ) {
                     Text(
                         text = "페이스",
-                        color = Color.White,
+                        color = if (buttonsEnabled) Color.White else Color.Gray,
                         fontSize = 28.sp,
                         textAlign = TextAlign.Center
                     )

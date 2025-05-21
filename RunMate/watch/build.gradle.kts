@@ -10,7 +10,7 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.D107.runmate.watch"
+        applicationId = "com.D107.runmate"
         minSdk = 30
         targetSdk = 34
         versionCode = 1
