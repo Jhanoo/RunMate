@@ -50,11 +50,16 @@ class GroupMemberAdapter(val leaderId:String) :
             if (!member.profileImage.isNullOrEmpty()) {
                 Glide.with(binding.root.context)
                     .load(member.profileImage)
-                    .placeholder(R.drawable.ic_user_profile)
+                    .placeholder(R.drawable.tonie_round)
+                    .error(R.drawable.tonie_round)
                     .circleCrop()
                     .into(binding.ivMemberProfile)
             }else{
-                binding.ivMemberProfile.setImageResource(R.drawable.ic_user_profile)
+                Glide.with(binding.root.context)
+                    .load(R.drawable.tonie_round)
+                    .placeholder(R.drawable.tonie_round)
+                    .circleCrop()
+                    .into(binding.ivMemberProfile)
             }
         }
     }

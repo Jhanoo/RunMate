@@ -126,8 +126,10 @@ class GpxUploadWorker @AssistedInject constructor(
                         dataMap.putInt("avgBpm", gpxFile.avgHeartRate)
                         dataMap.putString("courseId", "")
 
-                        val startLocation = extractStartLocationFromGpx(file)
-                        dataMap.putString("startLocation", startLocation)
+                        val startLat = extractStartLocationFromGpx(file, "lat")
+                        dataMap.putString("startLat", startLat)
+                        val startLon = extractStartLocationFromGpx(file, "lon")
+                        dataMap.putString("startLon", startLon)
 
                         dataMap.putString("groupId", "")
                         dataMap.putInt("avgCadence", gpxFile.avgCadence)
@@ -199,7 +201,7 @@ class GpxUploadWorker @AssistedInject constructor(
     }
 
     // GPX 파일에서 시작 위치를 추출하는 함수
-    private fun extractStartLocationFromGpx(gpxFile: File): String {
+       private fun extractStartLocationFromGpx(gpxFile: File, type: String ): String {
         try {
             // XML 파싱을 위한 간단한 방법
             val fileContent = gpxFile.readText()
@@ -211,7 +213,12 @@ class GpxUploadWorker @AssistedInject constructor(
             if (matchResult != null && matchResult.groupValues.size >= 3) {
                 val lat = matchResult.groupValues[1]
                 val lon = matchResult.groupValues[2]
-                return "$lat,$lon"
+
+                if(type == "lat") {
+                    return lat
+                } else if (type == "lon") {
+                    return lon
+                }
             }
 
             Log.w(TAG, "No track points found in GPX file")

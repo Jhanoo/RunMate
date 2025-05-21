@@ -13,6 +13,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
+import com.D107.runmate.domain.model.manager.CurriculumInfo
 import com.D107.runmate.presentation.R
 import com.D107.runmate.presentation.databinding.FragmentAIManagerLoadingBinding
 import com.D107.runmate.presentation.manager.viewmodel.CurriculumViewModel
@@ -41,28 +42,22 @@ class AIManagerLoadingFragment : BaseFragment<FragmentAIManagerLoadingBinding>(
             if (view.isAttachedToWindow && findNavController().currentDestination?.id == R.id.AIManagerLoadingFragment) {
                 // 커리큘럼 체크 시도
                 curriculumViewModel.getMyCurriculum()
+                curriculumViewModel.myCurriculum.collect{curriculum->
+                    Timber.d("curriculum: $curriculum")
+                    if(curriculum?.isSuccess == true){
+                        findNavController().navigate(
+                            R.id.AIManagerFragment,
+                            bundleOf("curriculumId" to curriculum.getOrDefault(CurriculumInfo(curriculumId = "")).curriculumId),
+                            NavOptions.Builder()
+                                .setPopUpTo(R.id.nav_graph, false) // 네비게이션 그래프의 루트까지 스택 제거 (최상위 화면 제외)
+                                .build()
+                        )
+                    }else{
+                        curriculumViewModel.getMyCurriculum()
+                    }
+                }
                 delay(1000) // API 응답 대기
 
-                // 커리큘럼 ID 확인
-                curriculumViewModel.myCurriculum.value?.getOrNull()?.let { curriculum ->
-                    Timber.d("타임아웃 후 커리큘럼 발견: ${curriculum.curriculumId}")
-                    findNavController().navigate(
-                        R.id.AIManagerFragment,
-                        bundleOf("curriculumId" to curriculum.curriculumId),
-                        NavOptions.Builder()
-                            .setPopUpTo(R.id.nav_graph, false) // 네비게이션 그래프의 루트까지 스택 제거 (최상위 화면 제외)
-                            .build()
-                    )
-                } ?: run {
-                    // 커리큘럼이 없으면 러닝 화면으로 이동
-                    findNavController().navigate(
-                        R.id.runningFragment,
-                        null,
-                        NavOptions.Builder()
-                            .setPopUpTo(R.id.nav_graph, false) // 네비게이션 그래프의 루트까지 스택 제거 (최상위 화면 제외)
-                            .build()
-                    )
-                }
             }
         }
     }

@@ -55,7 +55,7 @@ class AIManagerGoalFragment : BaseFragment<FragmentAIManagerGoalBinding>(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Timber.d("AIManagerGoal view created!")
-        setupObservers()
+//        setupObservers()
         setupMarathonResultListener()
         setClickListeners()
 

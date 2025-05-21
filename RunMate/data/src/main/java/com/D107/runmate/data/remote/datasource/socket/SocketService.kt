@@ -156,7 +156,7 @@ class SocketService @Inject constructor() {
                     val memberLocationData = MemberLocationData(
                         userId = data.getString("userId"),
                         nickname = data.getString("nickname"),
-                        profileImage = data.optString("profileImage", null),
+                        profileImage = if(data.optString("profileImage", null)=="null") null else data.optString("profileImage", null),
                         lat = data.getDouble("lat"),
                         lng = data.getDouble("lng"),
                         timestamp = data.getLong("timestamp")
