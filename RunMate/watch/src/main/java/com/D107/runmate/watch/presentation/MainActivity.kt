@@ -48,6 +48,7 @@ import com.D107.runmate.watch.presentation.splash.SplashScreen
 import com.D107.runmate.watch.presentation.theme.RunMateTheme
 import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wearable.Node
+import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.components.ActivityComponent
@@ -57,7 +58,9 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.ExecutionException
 
+private const val TAG = "MainActivity"
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private lateinit var runningViewModel: RunningViewModel
@@ -159,6 +162,31 @@ class MainActivity : ComponentActivity() {
                                 }
                             },
                             onNavigateToPace = { navController.navigate("pace") },
+                            onNavigateToAny = {
+                                val putDataMapRequest = PutDataMapRequest.create("/test")
+                                putDataMapRequest.dataMap.putInt("heart_rate_key", 125)
+                                val putDataReq = putDataMapRequest.asPutDataRequest()
+                                putDataReq.setUrgent()
+                                val putTask = Wearable.getDataClient(this@MainActivity).putDataItem(putDataReq)
+                                putTask.addOnSuccessListener {
+                                    // 성공적으로 전송됨
+                                    Log.d(TAG, "onCreate: success")
+                                }
+                                putTask.addOnFailureListener {
+                                    // 전송 실패
+                                    Log.d(TAG, "onCreate: fail")
+                                }
+//                                val putDataTask = dataClient.putDataItem(putDataReq)
+//                                try {
+//                                    Tasks.await(putDataTask).apply {
+//                                        Log.d("Updatehr in apply","125")
+//                                    }
+//                                } catch (e: ExecutionException) {
+//                                    Log.d("UpdateLight", "updateCalories: Failure ${e.printStackTrace()}")
+//                                } catch (e: InterruptedException) {
+//                                    Log.d("UpdateLight", "updateCalories: Failure ${e.printStackTrace()}")
+//                                }
+                            },
                             buttonsEnabled = menuButtonsEnabled
                         )
                     }

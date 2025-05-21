@@ -79,6 +79,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                 }
             }
 
+        startService(Intent(this, WearableService::class.java))
+
         // 뒤로가기
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {

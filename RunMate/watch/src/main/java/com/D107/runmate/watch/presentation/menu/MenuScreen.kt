@@ -40,6 +40,7 @@ import com.D107.runmate.watch.R
 fun MenuScreen(
     onNavigateToRunning: () -> Unit = {},
     onNavigateToPace: () -> Unit = {},
+    onNavigateToAny: () -> Unit = {},
     buttonsEnabled: Boolean = true
 ) {
     val listState = rememberScalingLazyListState()
@@ -93,6 +94,24 @@ fun MenuScreen(
                 ) {
                     Text(
                         text = "페이스",
+                        color = if (buttonsEnabled) Color.White else Color.Gray,
+                        fontSize = 28.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
+            item {
+                Button(
+                    onClick = onNavigateToAny,
+                    modifier = Modifier.fillMaxWidth(0.8f),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = colorResource(id = R.color.black)
+                    ),
+                    enabled = true
+                ) {
+                    Text(
+                        text = "무언가",
                         color = if (buttonsEnabled) Color.White else Color.Gray,
                         fontSize = 28.sp,
                         textAlign = TextAlign.Center
