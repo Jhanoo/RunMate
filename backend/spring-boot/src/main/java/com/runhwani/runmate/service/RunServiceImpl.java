@@ -104,7 +104,7 @@ public class RunServiceImpl implements RunService {
                 curriculumDao.updateTodoDone(todo.getTodoId());
             }
         }
-        
+
         return history.getHistoryId();
     }
 }

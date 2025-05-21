@@ -100,6 +100,9 @@ public class HistoryServiceImpl implements HistoryService {
         
         // 코스 ID 가져오기
         UUID courseId = convertToUUID(historyDetail.get("course_id"));
+
+        // 시작 위치 가져오기
+        String startLocation = (String) historyDetail.get("start_location");
         
         // 그룹 러닝 참여자 기록 조회 (그룹 ID가 있는 경우에만)
         List<GroupRunnerResponse> groupRunResponses = new ArrayList<>();
@@ -145,6 +148,7 @@ public class HistoryServiceImpl implements HistoryService {
                 .historyId(historyId)
                 .gpxFile(gpxFile)
                 .groupId(groupId)
+                .startLocation(startLocation)
                 .groupRun(groupRunResponses)
                 .myRun(myRunResponse)
                 .build();

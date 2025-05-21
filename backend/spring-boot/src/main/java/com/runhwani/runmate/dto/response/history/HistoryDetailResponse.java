@@ -23,7 +23,10 @@ public class HistoryDetailResponse {
 
     @Schema(description = "그룹 ID", example = "3fa85f64-5717-4562-b3fc-2c963f66afa8")
     private UUID groupId;
-    
+
+    @Schema(description = "시작 위치(주소)", example = "경북 구미시 임수동 94-1")
+    private String startLocation;
+
     @Schema(description = "그룹 러닝 참여자 기록 목록")
     private List<GroupRunnerResponse> groupRun;
     

@@ -80,30 +80,7 @@ public interface HistoryControllerDocs {
                             responseCode = "200",
                             description = "조회 성공",
                             content = @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = CommonResponse.class),
-                                    examples = @ExampleObject(
-                                            name = "히스토리 참여자 기록 상세 조회 성공 응답 예시",
-                                            value = """
-                                                    {
-                                                      "message": "히스토리 참여자 기록 상세 조회 성공",
-                                                      "data": {
-                                                        "userId": "u1234",
-                                                        "nickname": "달려라 후니",
-                                                        "profileImage": "https://runmate.com/images/u1234.jpg",
-                                                        "startTime": "2025-05-10T07:30:00",
-                                                        "endTime": "2025-05-10T08:00:00",
-                                                        "distance": 10.0,
-                                                        "gpxFile": "https://runmate-files.s3.amazonaws.com/gpx/abc123.gpx",
-                                                        "calories": 420,
-                                                        "avgCadence": 160,
-                                                        "avgPace": 330,
-                                                        "avgBpm": 150,
-                                                        "avgElevation": 9.7
-                                                      }
-                                                    }
-                                                    """
-                                    )
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE
                             )
                     ),
                     @ApiResponse(
