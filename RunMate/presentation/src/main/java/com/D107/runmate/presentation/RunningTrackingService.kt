@@ -261,7 +261,7 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener, DataClien
                             )
                             address?.let {
                                 val lastRecord = record.runningRecords.last()
-                                val avgPace = 16.6667 / lastRecord.avgSpeed
+                                val avgPace: Double = (1000 / lastRecord.avgSpeed).toDouble()
                                 val met = if(avgPace > 20*60) 1.0
                                 else if(avgPace > 10*60) 2.5
                                 else if(avgPace > 7.5*60) 5.0
@@ -499,7 +499,7 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener, DataClien
                 repository.runningRecord.collectLatest { state ->
                     if(state is RunningRecordState.Exist) {
                         state.runningRecords.last().let {
-                            val avgPace = 16.6667 / it.avgSpeed
+                            val avgPace = 1000 / it.avgSpeed
                             if(goalPace > avgPace) {
                                 Timber.d("goalPace: first $goalPace, avgPace: $avgPace")
                                 triggerVibration()
@@ -815,7 +815,7 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener, DataClien
                 repository.runningRecord.collectLatest { state ->
                     if(state is RunningRecordState.Exist) {
                         state.runningRecords.last().let {
-                            val avgPace = 16.6667 / it.avgSpeed
+                            val avgPace = 1000 / it.avgSpeed
                             if(goalPace > avgPace) {
                                 tts?.speak("${goalPace - avgPace} 보다 빨라요", TextToSpeech.QUEUE_FLUSH, null, "tts1")
                             } else if(goalPace < avgPace) {

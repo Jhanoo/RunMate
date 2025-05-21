@@ -196,7 +196,7 @@ class RunningTrackingRepositoryImpl @Inject constructor(
                                             time = runningRecord.currentTime,
                                             hr = 0, // 워치로부터 데이터받아와서 넣기 (hr리스트 만들어도 될 듯)
                                             cadence = runningRecord.cadence,
-                                            pace = if (runningRecord.currentSpeed == 0f) 0 else (16.6667 / runningRecord.currentSpeed).toInt()
+                                            pace = if (runningRecord.currentSpeed == 0f) 0 else (1000 / runningRecord.currentSpeed).toInt()
                                         )
                                     }
                             if (gpxWriter.isFileExists() != null) {
