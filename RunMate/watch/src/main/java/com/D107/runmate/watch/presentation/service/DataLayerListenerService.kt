@@ -1,5 +1,7 @@
 package com.D107.runmate.watch.presentation.service
 
+import android.bluetooth.BluetoothManager
+import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
@@ -10,6 +12,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.D107.runmate.watch.presentation.worker.GpxUploadWorker
+import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.DataMapItem
@@ -30,8 +33,59 @@ class DataLayerListenerService : WearableListenerService() {
     private val TAG = "DataLayerListenerService"
     private val TEST_MESSAGE_PATH = "/test_message"
 
+    private val SYNC_ATTEMPT_INTERVAL = 5 * 60 * 1000L // 5분마다 동기화 시도
 
+    private var syncHandler: Handler? = null
+    private val syncRunnable = object : Runnable {
+        override fun run() {
+            checkConnectionAndSync()
+            syncHandler?.postDelayed(this, SYNC_ATTEMPT_INTERVAL)
+        }
+    }
 
+    private fun checkConnectionAndSync() {
+        // 블루투스 상태 확인
+        val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        val bluetoothAdapter = bluetoothManager.adapter
+
+        // 블루투스가 꺼져 있으면 동기화 건너뜀
+        if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled) {
+            Log.d(TAG, "블루투스가 비활성화되어 있음 - 동기화 건너뜀")
+            return
+        }
+
+        scope.launch {
+            try {
+                val nodeClient = Wearable.getNodeClient(this@DataLayerListenerService)
+                val nodes = Tasks.await(nodeClient.connectedNodes)
+
+                if (nodes.isNotEmpty()) {
+                    Log.d(TAG, "연결된 노드 발견: ${nodes.size}개, 동기화 시작")
+                    checkAndTransferPendingGpxFiles()
+
+                    // 폰에 IDLE 상태 알림
+                    val messageClient = Wearable.getMessageClient(this@DataLayerListenerService)
+                    nodes.forEach { node ->
+                        try {
+                            val payload = ByteArray(1).apply { this[0] = STATE_IDLE.toByte() }
+                            Tasks.await(messageClient.sendMessage(node.id, RUNNING_STATE_PATH, payload))
+                            Log.d(TAG, "IDLE 상태 메시지 전송 성공: ${node.id}")
+                        } catch (e: Exception) {
+                            Log.e(TAG, "IDLE 상태 메시지 전송 실패: ${e.message}")
+                        }
+                    }
+
+                    // Activity에 버튼 비활성화 알림
+                    val intent = Intent("com.D107.runmate.watch.ACTION_DISABLE_BUTTONS")
+                    LocalBroadcastManager.getInstance(this@DataLayerListenerService).sendBroadcast(intent)
+                } else {
+                    Log.d(TAG, "연결된 노드 없음, 동기화 건너뜀")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "연결 확인 중 오류 발생: ${e.message}")
+            }
+        }
+    }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -65,6 +119,25 @@ class DataLayerListenerService : WearableListenerService() {
         Log.d(TAG, "onCreate: DataLayerListenerService 시작")
 
         testMessageReceiving()
+
+        startPeriodicSync()
+    }
+
+    private fun startPeriodicSync() {
+        syncHandler = Handler(Looper.getMainLooper())
+        syncHandler?.postDelayed(syncRunnable, SYNC_ATTEMPT_INTERVAL)
+        Log.d(TAG, "주기적 동기화 작업 시작됨 (${SYNC_ATTEMPT_INTERVAL/60000}분 간격)")
+    }
+
+    private fun stopPeriodicSync() {
+        syncHandler?.removeCallbacks(syncRunnable)
+        syncHandler = null
+        Log.d(TAG, "주기적 동기화 작업 중지됨")
+    }
+
+    override fun onDestroy() {
+        stopPeriodicSync()
+        super.onDestroy()
     }
 
     private fun testMessageReceiving() {
