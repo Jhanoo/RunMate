@@ -27,6 +27,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.navigation.NavController
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
@@ -57,6 +58,9 @@ import java.util.Locale
 class MainActivity : ComponentActivity() {
     private lateinit var runningViewModel: RunningViewModel
 
+    private var navController: NavController? = null
+    private var menuButtonsEnabled = true
+
 //    private fun startHeartRateOnly() {
 //        lifecycleScope.launch {
 //            Log.d("HeartRate", "심박수 전송 시작")
@@ -70,6 +74,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setupMessageReceivers()
+
+        checkPhoneConnectionAndUpdateUI()
 
         val serviceIntent = Intent(this, DataLayerListenerService::class.java)
         startService(serviceIntent)
@@ -135,7 +141,8 @@ class MainActivity : ComponentActivity() {
                                     popUpTo("menu") { inclusive = true }
                                 }
                             },
-                            onNavigateToPace = { navController.navigate("pace") }
+                            onNavigateToPace = { navController.navigate("pace") },
+                            buttonsEnabled = menuButtonsEnabled
                         )
                     }
 
@@ -316,25 +323,152 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun checkPhoneConnectionAndUpdateUI() {
+        val nodeClient = Wearable.getNodeClient(this)
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val nodes = Tasks.await(nodeClient.connectedNodes)
+
+                withContext(Dispatchers.Main) {
+                    if (nodes.isNotEmpty()) {
+                        Log.d("MainActivity", "Phone connected: ${nodes.size} nodes found")
+                        // 폰 연결됨 - 버튼 비활성화, 데이터 동기화 요청
+                        menuButtonsEnabled = false
+
+                        // 폰에 연결됨을 알리기 위해 IDLE 상태 설정
+                        nodes.forEach { node ->
+                            sendStateToPhone(node.id, DataLayerListenerService.STATE_IDLE)
+                        }
+                    } else {
+                        Log.d("MainActivity", "No phone connected - enabling standalone mode")
+                        // 폰 연결 안됨 - 독립 모드 활성화 (버튼 활성화)
+                        menuButtonsEnabled = true
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Error checking nodes: ${e.message}", e)
+                // 오류 발생 시 독립 모드로 동작
+                withContext(Dispatchers.Main) {
+                    menuButtonsEnabled = true
+                }
+            }
+        }
+    }
+
+    // 폰에 상태 전송 메서드
+    private fun sendStateToPhone(nodeId: String, state: Int) {
+        val messageClient = Wearable.getMessageClient(this)
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                // 상태 값을 바이트 배열로 변환
+                val payload = ByteArray(1).apply { this[0] = state.toByte() }
+
+                messageClient.sendMessage(nodeId, DataLayerListenerService.RUNNING_STATE_PATH, payload)
+                    .addOnSuccessListener {
+                        Log.d("MainActivity", "Successfully sent state $state to phone")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("MainActivity", "Failed to send state to phone: ${e.message}")
+                    }
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Error sending state to phone: ${e.message}", e)
+            }
+        }
+    }
+
     private fun setupMessageReceivers() {
         // Test message receiver
         val testMessageReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 val message = intent.getStringExtra("message") ?: "메시지 없음"
-
                 Log.d("MainActivity", "테스트 메시지 수신: $message")
-
-                // 토스트 표시
                 Toast.makeText(this@MainActivity, "📱➡️⌚ $message", Toast.LENGTH_LONG).show()
+            }
+        }
+
+        // 러닝 상태 브로드캐스트 리시버들
+        val runStateReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                Log.d("MainActivity", "러닝 상태 브로드캐스트 수신: ${intent.action}")
+
+                when (intent.action) {
+                    DataLayerListenerService.ACTION_START_RUNNING -> {
+                        // 러닝 화면으로 이동
+                        navController?.navigate("running") {
+                            popUpTo(0) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }
+
+                    DataLayerListenerService.ACTION_PAUSE_RUNNING -> {
+                        // 진행 중이던 상태를 일시정지하고 PauseScreen으로 이동
+                        runningViewModel.pauseTimer()
+                        val mode = DisplayMode.TIME
+                        val data = runningViewModel.formattedTime.value
+                        navController?.navigate("pause/${mode.name}/$data") {
+                            popUpTo(0) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }
+
+                    DataLayerListenerService.ACTION_FINISH_RUNNING -> {
+                        // 러닝 종료하고 ResultScreen으로 이동
+                        val distance = String.format("%.1f", runningViewModel.distance.value)
+                        val time = runningViewModel.formattedTime.value
+                        val avgPace = runningViewModel.avgPace.value
+                        val maxHeartRate = runningViewModel.maxHeartRate.value
+                        val avgHeartRate = runningViewModel.avgHeartRate.value
+
+                        navController?.navigate("result/$distance/$time/$avgPace/$maxHeartRate/$avgHeartRate") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+
+                    "com.D107.runmate.watch.ACTION_DISABLE_BUTTONS" -> {
+                        // 메뉴 화면 버튼 비활성화
+                        menuButtonsEnabled = false
+                    }
+
+                    "com.D107.runmate.watch.ACTION_RETURN_TO_MENU" -> {
+                        // 메뉴 화면으로 자동 이동
+                        navController?.navigate("menu") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                }
             }
         }
 
         // 리시버 등록
         LocalBroadcastManager.getInstance(this).apply {
-            registerReceiver(testMessageReceiver, IntentFilter("com.D107.runmate.watch.TEST_MESSAGE"))
+            registerReceiver(
+                testMessageReceiver,
+                IntentFilter("com.D107.runmate.watch.TEST_MESSAGE")
+            )
+
+            // 러닝 상태 리시버 등록
+            registerReceiver(
+                runStateReceiver,
+                IntentFilter(DataLayerListenerService.ACTION_START_RUNNING)
+            )
+            registerReceiver(
+                runStateReceiver,
+                IntentFilter(DataLayerListenerService.ACTION_PAUSE_RUNNING)
+            )
+            registerReceiver(
+                runStateReceiver,
+                IntentFilter(DataLayerListenerService.ACTION_FINISH_RUNNING)
+            )
+            registerReceiver(
+                runStateReceiver,
+                IntentFilter("com.D107.runmate.watch.ACTION_DISABLE_BUTTONS")
+            )
+            registerReceiver(
+                runStateReceiver,
+                IntentFilter("com.D107.runmate.watch.ACTION_RETURN_TO_MENU")
+            )
         }
     }
-
 
 
     private fun checkPhoneConnection() {
@@ -379,7 +513,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
 
 
     // 블루투스 연결 성공 후 심박수 전송 시작

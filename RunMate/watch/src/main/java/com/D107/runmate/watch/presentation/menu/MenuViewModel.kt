@@ -24,19 +24,8 @@
 //    private val _heartRate = MutableStateFlow(0)
 //    val heartRate: StateFlow<Int> = _heartRate.asStateFlow()
 //
-//    // 토큰 상태
-//    private val _jwtToken = MutableStateFlow<String?>(null)
-//    val jwtToken: StateFlow<String?> = _jwtToken.asStateFlow()
 //
 //    init {
-//        // 토큰 상태 수집
-//        viewModelScope.launch {
-//            bluetoothService.isConnected() { token ->
-//                _jwtToken.value = token
-//                Log.d("Token", "JWT 토큰 상태 변경: ${token?.take(10)}...")
-//            }
-//        }
-//
 //        viewModelScope.launch {
 //            wearableService.connectedToPhone.collect { isConnected ->
 //                _isBluetoothConnected.value = isConnected
