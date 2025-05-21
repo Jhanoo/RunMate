@@ -68,6 +68,8 @@ class GroupRepositoryImpl @Inject constructor(
             val response = groupDataSource.leaveGroup()
             if (response is ApiResponse.Success) {
                 emit(ResponseStatus.Success(Unit))
+            }else if(response is ApiResponse.Error){
+                emit(ResponseStatus.Error(NetworkError(message = "${response.error}")))
             }
         } catch (e: Exception) {
             Timber.e("${e.message}")

@@ -178,7 +178,6 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
         }
 
         binding.btnVibrate.setOnClickListener {
-//            viewModel.sendLocation(36.104342, 128.418323)
             if (mainViewModel.isVibration.value) {
 
                 binding.btnVibrate.setImageResource(R.drawable.ic_running_btn_vibrate_off)
@@ -186,14 +185,20 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
 
                 binding.btnVibrate.setImageResource(R.drawable.ic_running_btn_vibrate_on)
             }
+            mContext?.let {
+                RunningTrackingService.toggleVibrateService(it)
+            }
+
         }
 
         binding.btnSound.setOnClickListener {
-//            viewModel.sendLocation(36.108355, 128.415780)
             if (mainViewModel.isSound.value) {
                 binding.btnSound.setImageResource(R.drawable.ic_running_btn_sound_off)
             } else {
                 binding.btnSound.setImageResource(R.drawable.ic_running_btn_sound_on)
+            }
+            mContext?.let {
+                RunningTrackingService.toggleSoundService(it)
             }
         }
 
@@ -263,6 +268,15 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
                         } else {
                             Timber.d("onViewCreated: state else")
                         }
+                    }
+                }
+                launch {
+                    viewModel.groupMemberLocation.collect { groupMemberLocation ->
+                        groupMemberLocation?.let {
+                            Timber.d("onViewCreated: groupMemberLocation $it")
+                            handleLocationUpdate(it)
+                        }
+
                     }
                 }
 
@@ -370,15 +384,7 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
 
         }
         viewLifecycleOwner.lifecycleScope.launch {
-            launch {
-                viewModel.groupMemberLocation.collect { groupMemberLocation ->
-                    groupMemberLocation?.let {
-                        Timber.d("onViewCreated: groupMemberLocation $it")
-                        handleLocationUpdate(it)
-                    }
 
-                }
-            }
             launch {
                 mainViewModel.runningRecord.collectLatest { state ->
                     if (state is RunningRecordState.Exist) {
@@ -515,6 +521,7 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
         userId: String,
         userProfileUrl: String = "https://picsum.photos/200/300"
     ) {
+        Timber.d("addMarker userId $userId")
         mContext?.let {
             CoroutineScope(Dispatchers.IO).launch {
                 val profileBitmap: Bitmap? = if (userProfileUrl.isNullOrEmpty()) {
@@ -550,6 +557,7 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
                             userLabels[userId]?.let { userLabel ->
                                 userLabel.remove()
                             }
+                            Timber.d("addMarker userId2 $userId")
 
                             val styles = map.labelManager
                                 ?.addLabelStyles(LabelStyles.from(LabelStyle.from(profilePng)))
@@ -570,7 +578,6 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
         // ViewModel의 memberLastLocations (이것은 Repository를 통해 업데이트됨)
         lifecycleScope.launch {
             viewModel.groupMemberDatas.first().forEach { (userId, memberLocationData) ->
-
                 addMarker(
                     memberLocationData.lat,
                     memberLocationData.lng,
@@ -728,7 +735,7 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
         return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
     }
 
-    fun handleLocationUpdate(locationData: MemberLocationData) {
+    fun handleLocationUpdate(locationData : MemberLocationData) {
         if (kakaoMap == null) {
             Timber.w("KakaoMap is not ready yet.")
             return
@@ -745,9 +752,8 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
             label?.moveTo(mapPoint, 500)
             Timber.d("Moved label for user ${locationData.userId} to ${locationData.lat}, ${locationData.lng}")
         } else {
-            // 새로운 유저: Label 생성 및 추가
             val labelOptions = LabelOptions.from(mapPoint)
-                .setTexts(LabelTextBuilder().setTexts(locationData.nickname)) // 닉네임으로 Label 텍스트 설정
+                .setTexts(LabelTextBuilder().setTexts(locationData.nickname))
 
             addMarker(
                 locationData.lat,
