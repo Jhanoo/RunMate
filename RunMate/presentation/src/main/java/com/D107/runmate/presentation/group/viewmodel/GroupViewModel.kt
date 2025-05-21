@@ -207,7 +207,9 @@ class GroupViewModel @Inject constructor(
     fun hasGroupHistory(){
         viewModelScope.launch {
             hasGroupHistoryUseCase().collect{result->
+                Timber.d("hasGroupHistory : $result")
                 if(result is ResponseStatus.Success){
+                    Timber.d("hasGroupHistory : here!")
                     _uiEvent.emit(GroupUiEvent.ToggleGroupRunningFinishVisible(result.data))
                 }
             }

@@ -99,11 +99,9 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
         setClickListenner()
         initmap()
         observeViewModel()
-        viewModel.hasGroupHistory()
         viewModel.connectToServer(
             SocketAuth(
                 mainViewModel.userId.value!!,
@@ -224,30 +222,30 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    if (mainViewModel.userLocation.value is UserLocationState.Initial) {
-                        mContext?.let {
-                            val location =
-                                LocationUtils.getLocation(
-                                    it,
-                                    (getActivityContext(it) as MainActivity)
-                                )
-                            mainViewModel.setUserLocation(
-                                UserLocationState.Exist(
-                                    listOf(
-                                        LocationModel(
-                                            location.latitude,
-                                            location.longitude,
-                                            location.altitude,
-                                            location.speed
-                                        )
-                                    )
+            if (mainViewModel.userLocation.value is UserLocationState.Initial) {
+                Timber.d("UserLocation Init!")
+                mContext?.let {
+                    val location =
+                        LocationUtils.getLocation(
+                            it,
+                            (getActivityContext(it) as MainActivity)
+                        )
+                    mainViewModel.setUserLocation(
+                        UserLocationState.Exist(
+                            listOf(
+                                LocationModel(
+                                    location.latitude,
+                                    location.longitude,
+                                    location.altitude,
+                                    location.speed
                                 )
                             )
-                        }
-                    }
+                        )
+                    )
                 }
+            }
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+
 
                 launch {
                     mainViewModel.time.collectLatest { it ->
@@ -305,6 +303,7 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
                             }
 
                             is GroupUiEvent.ToggleGroupRunningFinishVisible -> {
+                                Timber.d("hasGroup : ${event.visible}")
                                 if (event.visible) {
                                     binding.btnFinishGroup.visibility = View.VISIBLE
                                     binding.btnStart.visibility = View.GONE
@@ -519,7 +518,7 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
         latitude: Double,
         longitude: Double,
         userId: String,
-        userProfileUrl: String = "https://picsum.photos/200/300"
+        userProfileUrl: String
     ) {
         Timber.d("addMarker userId $userId")
         mContext?.let {
@@ -624,7 +623,7 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
     override fun onResume() {
         super.onResume()
         binding.mapView.resume()
-
+        viewModel.hasGroupHistory()
         (activity as? MainActivity)?.showHamburgerBtn()
         viewModel.startObservingLocationUpdates()
         Timber.d("trackingStatus: ${mainViewModel.trackingStatus.value}")
@@ -818,7 +817,8 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
             addMarker(
                 state.locations.last().latitude,
                 state.locations.last().longitude,
-                mainViewModel.userId.value ?: ""
+                mainViewModel.userId.value ?: "",
+                mainViewModel.profileImage.value?:""
             )
         }
     }

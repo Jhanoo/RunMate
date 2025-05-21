@@ -205,12 +205,17 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                     Glide.with(this@MainActivity)
                         .load(profileImageUrl)
                         .placeholder(R.drawable.ic_drawer_profile)
-                        .error(R.drawable.ic_drawer_profile)
+                        .error(R.drawable.tonie_round)
                         .circleCrop()
                         .into(headerBinding.ivProfile)
                 } else {
                     // 기본 이미지 설정
-                    headerBinding.ivProfile.setImageResource(R.drawable.ic_drawer_profile)
+                    Glide.with(this@MainActivity)
+                        .load(R.drawable.tonie_round)
+                        .placeholder(R.drawable.tonie_round)
+                        .error(R.drawable.tonie_round)
+                        .circleCrop()
+                        .into(headerBinding.ivProfile)
                 }
             }
         }
