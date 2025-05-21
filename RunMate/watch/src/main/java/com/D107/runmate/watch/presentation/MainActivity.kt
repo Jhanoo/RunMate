@@ -2,10 +2,15 @@ package com.D107.runmate.watch.presentation
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Half.toFloat
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -21,6 +26,7 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
@@ -33,8 +39,11 @@ import com.D107.runmate.watch.presentation.running.RunningData
 import com.D107.runmate.watch.presentation.running.RunningScreen
 import com.D107.runmate.watch.presentation.running.RunningViewModel
 import com.D107.runmate.watch.presentation.service.BluetoothService
+import com.D107.runmate.watch.presentation.service.DataLayerListenerService
 import com.D107.runmate.watch.presentation.splash.SplashScreen
 import com.D107.runmate.watch.presentation.theme.RunMateTheme
+import com.google.android.gms.tasks.Tasks
+import com.google.android.gms.wearable.Wearable
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.components.ActivityComponent
 import kotlinx.coroutines.Dispatchers
@@ -48,17 +57,23 @@ import java.util.Locale
 class MainActivity : ComponentActivity() {
     private lateinit var runningViewModel: RunningViewModel
 
-    private fun startHeartRateOnly() {
-        lifecycleScope.launch {
-            Log.d("HeartRate", "심박수 전송 시작")
-            runningViewModel.startHeartRateOnlyTracking(applicationContext)
-        }
-    }
+//    private fun startHeartRateOnly() {
+//        lifecycleScope.launch {
+//            Log.d("HeartRate", "심박수 전송 시작")
+//            runningViewModel.startHeartRateOnlyTracking(applicationContext)
+//        }
+//    }
 
     @SuppressLint("StateFlowValueCalledInComposition", "DefaultLocale")
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+
+        setupMessageReceivers()
+
+        val serviceIntent = Intent(this, DataLayerListenerService::class.java)
+        startService(serviceIntent)
+        Log.d("MainActivity", "DataLayerListenerService 명시적 시작")
 
         splashScreen.setKeepOnScreenCondition { false }
 
@@ -299,9 +314,73 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
-
     }
+
+    private fun setupMessageReceivers() {
+        // Test message receiver
+        val testMessageReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                val message = intent.getStringExtra("message") ?: "메시지 없음"
+
+                Log.d("MainActivity", "테스트 메시지 수신: $message")
+
+                // 토스트 표시
+                Toast.makeText(this@MainActivity, "📱➡️⌚ $message", Toast.LENGTH_LONG).show()
+            }
+        }
+
+        // 리시버 등록
+        LocalBroadcastManager.getInstance(this).apply {
+            registerReceiver(testMessageReceiver, IntentFilter("com.D107.runmate.watch.TEST_MESSAGE"))
+        }
+    }
+
+
+
+    private fun checkPhoneConnection() {
+        val nodeClient = Wearable.getNodeClient(this)
+        lifecycleScope.launch(Dispatchers.IO) {  // Dispatchers.IO 추가
+            try {
+                val nodes = Tasks.await(nodeClient.connectedNodes)
+                withContext(Dispatchers.Main) {  // UI 업데이트는 메인 스레드로
+                    Log.d("MainActivity", "Connected nodes: ${nodes.size}")
+                    if (nodes.isNotEmpty()) {
+                        Log.d("MainActivity", "BLE 연결 성공: 폰과 워치 연결됨")
+                        Toast.makeText(this@MainActivity, "폰과 연결됨", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Log.d("MainActivity", "BLE 연결 실패: 연결된 기기 없음")
+                    }
+                }
+
+                nodes.forEach { node ->
+                    Log.d("MainActivity", "Connected to node: ${node.displayName}, id: ${node.id}")
+                    requestTokenFromPhone(node.id)
+                }
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Error checking connected nodes: ${e.message}", e)
+            }
+        }
+    }
+
+    private fun requestTokenFromPhone(nodeId: String) {
+        val messageClient = Wearable.getMessageClient(this)
+        lifecycleScope.launch(Dispatchers.IO) {  // Dispatchers.IO 추가
+            try {
+                Log.d("MainActivity", "Requesting token from phone...")
+                messageClient.sendMessage(nodeId, "/request_token", ByteArray(0))
+                    .addOnSuccessListener {
+                        Log.d("MainActivity", "Token request sent to node: $nodeId")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("MainActivity", "Failed to send token request: ${e.message}", e)
+                    }
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Failed to send token request: ${e.message}", e)
+            }
+        }
+    }
+
+
 
     // 블루투스 연결 성공 후 심박수 전송 시작
     private fun connectToApp(deviceAddress: String) {
