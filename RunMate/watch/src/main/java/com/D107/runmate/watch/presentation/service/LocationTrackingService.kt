@@ -84,7 +84,7 @@ class LocationTrackingService : Service() {
         private var lastHeartRate = 0
 
         // 현재 페이스 가져오는 방법
-        private var currentPace = "0'00\""
+        private var currentPace = 0
 
         private var lastCadence = 0
 
@@ -92,7 +92,7 @@ class LocationTrackingService : Service() {
             lastHeartRate = heartRate
         }
 
-        fun updatePace(pace: String) {
+        fun updatePace(pace: Int) {
             currentPace = pace
         }
 
