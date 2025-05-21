@@ -1,13 +1,12 @@
 package com.runhwani.runmate.service;
 
+import com.runhwani.runmate.dao.CourseDao;
 import com.runhwani.runmate.dao.GroupDao;
 import com.runhwani.runmate.dao.HistoryDao;
-import com.runhwani.runmate.dao.CourseDao;
 import com.runhwani.runmate.dto.response.history.*;
 import com.runhwani.runmate.exception.CustomException;
 import com.runhwani.runmate.exception.ErrorCode;
 import com.runhwani.runmate.model.Group;
-import com.runhwani.runmate.model.History;
 import com.runhwani.runmate.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +38,7 @@ public class HistoryServiceImpl implements HistoryService {
         // SecurityContext에서 현재 인증된 사용자의 ID 가져오기
         String userIdStr = SecurityUtil.getCurrentUserEmail()
                 .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED_USER));
-        
+
         // UUID로 변환
         UUID userId;
         try {
@@ -47,21 +46,21 @@ public class HistoryServiceImpl implements HistoryService {
         } catch (IllegalArgumentException e) {
             throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
-        
+
         // 페이지 번호는 1부터 시작하지만, offset은 0부터 시작
         int offset = (page - 1) * size;
-        
+
         // 전체 기록 수 조회
         long total = historyDao.countByUserId(userId);
-        
+
         // 페이징된 기록 조회 (코스명, 그룹명 포함)
         List<Map<String, Object>> historyDetails = historyDao.findHistoryDetailsWithPaging(userId, offset, size);
-        
+
         // DTO 변환
         List<HistoryResponse> historyResponses = historyDetails.stream()
                 .map(this::convertToHistoryResponse)
                 .collect(Collectors.toList());
-        
+
         // 응답 객체 생성
         return HistoryListResponse.builder()
                 .total(total)
@@ -70,14 +69,14 @@ public class HistoryServiceImpl implements HistoryService {
                 .histories(historyResponses)
                 .build();
     }
-    
+
     @Override
     @Transactional(readOnly = true)
     public HistoryDetailResponse getHistoryDetail(UUID historyId) {
         // 현재 인증된 사용자의 ID 가져오기
         String userIdStr = SecurityUtil.getCurrentUserEmail()
                 .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED_USER));
-        
+
         // UUID로 변환
         UUID userId;
         try {
@@ -85,29 +84,30 @@ public class HistoryServiceImpl implements HistoryService {
         } catch (IllegalArgumentException e) {
             throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
-        
+
         // 히스토리 상세 정보 조회
         Map<String, Object> historyDetail = historyDao.findHistoryDetailById(historyId);
         if (historyDetail == null) {
             throw new CustomException(ErrorCode.ENTITY_NOT_FOUND, "히스토리 정보를 찾을 수 없습니다: " + historyId);
         }
-        
+
         // 그룹 ID 가져오기
         UUID groupId = convertToUUID(historyDetail.get("group_id"));
-        
+
         // GPX 파일 경로 가져오기
         String gpxFile = (String) historyDetail.get("gpx_file");
-        
+
         // 코스 ID 가져오기
         UUID courseId = convertToUUID(historyDetail.get("course_id"));
 
         // 시작 위치 가져오기
         String startLocation = (String) historyDetail.get("start_location");
-        
+
         // 그룹 러닝 참여자 기록 조회 (그룹 ID가 있는 경우에만)
         List<GroupRunnerResponse> groupRunResponses = new ArrayList<>();
         if (groupId != null) {
             List<Map<String, Object>> groupRunners = historyDao.findGroupRunnersByGroupId(groupId);
+
             groupRunResponses = groupRunners.stream()
                     .map(runner -> {
                         UUID runnerId = convertToUUID(runner.get("user_id"));
@@ -119,30 +119,30 @@ public class HistoryServiceImpl implements HistoryService {
                     })
                     .collect(Collectors.toList());
         }
-        
+
         // 내 상세 기록 조회
         Map<String, Object> myRunDetail = historyDao.findMyRunDetail(historyId, userId);
         if (myRunDetail == null) {
             throw new CustomException(ErrorCode.FORBIDDEN_ACCESS, "해당 기록에 접근 권한이 없습니다.");
         }
-        
+
         // 코스 추가 여부 확인
         boolean addedToCourse = false;
         boolean courseLiked = false;
         int courseLikes = 0;
-        
+
         if (courseId != null) {
             addedToCourse = historyDao.isAddedToCourse(courseId, userId);
-            
+
             // 코스 좋아요 정보 조회
             courseLiked = courseDao.existsCourseLike(userId, courseId);
             courseLikes = courseDao.countLikesByCourseId(courseId);
         }
-        
+
         // 내 상세 기록 변환
         MyRunDetailResponse myRunResponse = convertToMyRunDetailResponse(
-            myRunDetail, addedToCourse, courseLiked, courseLikes);
-        
+                myRunDetail, addedToCourse, courseLiked, courseLikes);
+
         // 응답 객체 생성
         return HistoryDetailResponse.builder()
                 .historyId(historyId)
@@ -153,14 +153,14 @@ public class HistoryServiceImpl implements HistoryService {
                 .myRun(myRunResponse)
                 .build();
     }
-    
+
     @Override
     @Transactional(readOnly = true)
     public RunnerDetailResponse getRunnerDetail(UUID groupId, UUID userId) {
         // 현재 인증된 사용자의 ID 가져오기
         String currentUserIdStr = SecurityUtil.getCurrentUserEmail()
                 .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED_USER));
-        
+
         // UUID로 변환
         UUID currentUserId;
         try {
@@ -168,14 +168,12 @@ public class HistoryServiceImpl implements HistoryService {
         } catch (IllegalArgumentException e) {
             throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
-        
+
         // 히스토리 참여자 상세 정보 조회
         RunnerDetailResponse runnerDetail = historyDao.findRunnerDetailByHistoryIdAndUserId(groupId, userId);
         if (runnerDetail == null) {
             throw new CustomException(ErrorCode.ENTITY_NOT_FOUND, "해당 사용자의 기록을 찾을 수 없습니다.");
         }
-
-        log.debug("runnerDetail: {}", runnerDetail);
 
         return runnerDetail;
     }
@@ -198,26 +196,26 @@ public class HistoryServiceImpl implements HistoryService {
         // UUID 변환
         UUID historyId = convertToUUID(historyDetail.get("history_id"));
         UUID groupId = convertToUUID(historyDetail.get("group_id"));
-        
+
         // 시간 관련 데이터 변환
         OffsetDateTime startTime = convertToOffsetDateTime(historyDetail.get("start_time"));
         OffsetDateTime endTime = convertToOffsetDateTime(historyDetail.get("end_time"));
-        
+
         // 달린 시간 계산 (초 단위)
         long duration = 0;
         if (startTime != null && endTime != null) {
             duration = Duration.between(startTime, endTime).getSeconds();
         }
-        
+
         // 그룹 멤버 프로필 이미지 조회
         List<String> members = new ArrayList<>();
         if (groupId != null) {
             members = historyDao.findGroupMemberProfilesByGroupId(groupId);
         }
-        
+
         // 거리 변환
         Double distance = convertToDouble(historyDetail.get("distance"));
-        
+
         return HistoryResponse.builder()
                 .historyId(historyId)
                 .courseName((String) historyDetail.get("course_name"))
@@ -229,20 +227,18 @@ public class HistoryServiceImpl implements HistoryService {
                 .myDistance(distance)
                 .build();
     }
-    
+
     /**
      * Map을 GroupRunnerResponse로 변환
      */
     private GroupRunnerResponse convertToGroupRunnerResponse(Map<String, Object> map, boolean courseLiked) {
-        OffsetDateTime startTime = convertToOffsetDateTime(map.get("start_time"));
-        OffsetDateTime endTime = convertToOffsetDateTime(map.get("end_time"));
-        
-        // 시간 계산 (초 단위)
+        var timeObj = map.get("time");
         long time = 0;
-        if (startTime != null && endTime != null) {
-            time = Duration.between(startTime, endTime).getSeconds();
+
+        if (timeObj instanceof Number) {
+            time = ((Number) timeObj).longValue();
         }
-        
+
         return GroupRunnerResponse.builder()
                 .userId(convertToUUID(map.get("user_id")))
                 .nickname((String) map.get("nickname"))
@@ -252,25 +248,26 @@ public class HistoryServiceImpl implements HistoryService {
                 .courseLiked(courseLiked)
                 .build();
     }
-    
+
     /**
      * Map을 MyRunDetailResponse로 변환
      */
     private MyRunDetailResponse convertToMyRunDetailResponse(
-            Map<String, Object> map, 
-            boolean addedToCourse, 
-            boolean courseLiked, 
+            Map<String, Object> map,
+            boolean addedToCourse,
+            boolean courseLiked,
             int courseLikes) {
-        
+
         OffsetDateTime startTime = convertToOffsetDateTime(map.get("start_time"));
         OffsetDateTime endTime = convertToOffsetDateTime(map.get("end_time"));
-        
+
         // 시간 계산 (초 단위)
         long time = 0;
         if (startTime != null && endTime != null) {
             time = Duration.between(startTime, endTime).getSeconds();
         }
-        
+
+
         return MyRunDetailResponse.builder()
                 .distance(convertToDouble(map.get("distance")))
                 .time(time)
@@ -286,7 +283,7 @@ public class HistoryServiceImpl implements HistoryService {
                 .endTime(endTime)
                 .build();
     }
-    
+
     /**
      * Object를 UUID로 변환 (null 처리 포함)
      */
@@ -299,7 +296,7 @@ public class HistoryServiceImpl implements HistoryService {
         }
         return UUID.fromString(obj.toString());
     }
-    
+
     /**
      * Object를 OffsetDateTime으로 변환 (null 처리 포함)
      */
@@ -316,7 +313,7 @@ public class HistoryServiceImpl implements HistoryService {
         }
         throw new IllegalArgumentException("Cannot convert to OffsetDateTime: " + obj.getClass());
     }
-    
+
     /**
      * Object를 Double로 변환 (null 처리 포함)
      */
@@ -332,7 +329,7 @@ public class HistoryServiceImpl implements HistoryService {
         }
         return Double.parseDouble(obj.toString());
     }
-    
+
     /**
      * Object를 Long으로 변환 (null 처리 포함)
      */
