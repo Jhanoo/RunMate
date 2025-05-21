@@ -23,6 +23,7 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import com.kakao.vectormap.LatLng
 import com.kakao.vectormap.camera.CameraUpdateFactory
 import com.ssafy.locket.presentation.base.BaseFragment
@@ -66,10 +67,41 @@ class ChartFragment : BaseFragment<FragmentChartBinding>(
         CoroutineScope(Dispatchers.IO).launch {
             mContext?.let {
                 val trackPoints = parseGpx(inputStream)
+                var paceEntries = mutableListOf<Entry>()
+                val paceDataSets = mutableListOf<ILineDataSet>()
                 withContext(Dispatchers.Main) {
-                    Timber.d("trackPoints in ChartFragment ${trackPoints.size}")
-                    val paceEntries = trackPoints.mapIndexed { index, trackPoint ->
-                        Entry((index*5).toFloat(), trackPoint.pace!!.toFloat())
+                    for ((index, point) in trackPoints.withIndex()) {
+                        if (point.pace != 0) {
+                            paceEntries.add(Entry((index*5).toFloat(), point.pace!!.toFloat()))
+                        } else {
+                            if (paceEntries.isNotEmpty()) {
+                                val dataSet = LineDataSet(paceEntries, "페이스 변화 그래프").apply {
+                                    color = getColor(R.color.primary)
+                                    lineWidth = 2f
+                                    mode = LineDataSet.Mode.CUBIC_BEZIER
+                                    cubicIntensity = 0.2f
+                                    setDrawCircles(false)
+                                    setDrawValues(false)
+                                    isHighlightEnabled = false
+                                }
+                                dataSet.setDrawValues(false)
+                                paceDataSets.add(dataSet)
+                                paceEntries = mutableListOf()
+                            }
+                        }
+                    }
+                    if(paceEntries.isNotEmpty()){
+                        val dataSet = LineDataSet(paceEntries, "페이스 변화 그래프").apply {
+                            color = resources.getColor(R.color.primary)
+                            lineWidth = 2f
+                            mode = LineDataSet.Mode.CUBIC_BEZIER
+                            cubicIntensity = 0.2f
+                            setDrawCircles(false)
+                            setDrawValues(false)
+                            isHighlightEnabled = false
+                        }
+                        dataSet.setDrawValues(false)
+                        paceDataSets.add(dataSet)
                     }
 
                     val cadenceEntries = trackPoints.mapIndexed { index, tp ->
@@ -108,13 +140,7 @@ class ChartFragment : BaseFragment<FragmentChartBinding>(
                         }
                     }
 
-                    setupLineChart(
-                        chart = binding.chartPace,
-                        entries = paceEntries,
-                        label = "페이스 변화 그래프",
-                        lineColor = it.resources.getColor(R.color.primary),
-                        yValueFormatter = paceFormatter
-                    )
+                    setupPaceChart(binding.chartPace, paceDataSets, paceFormatter)
 
                     setupLineChart(
                         chart = binding.chartCadence,
@@ -160,6 +186,43 @@ class ChartFragment : BaseFragment<FragmentChartBinding>(
             setDrawValues(false)
             isHighlightEnabled = false
         }
+
+        chart.apply {
+            data = LineData(dataSet)
+            description.isEnabled = false
+            legend.isEnabled = false
+            axisRight.isEnabled = false
+            setScaleEnabled(false)
+            setPinchZoom(false)
+            isDoubleTapToZoomEnabled = false
+            xAxis.position = com.github.mikephil.charting.components.XAxis.XAxisPosition.BOTTOM
+            xAxis.setDrawGridLines(false)
+            axisRight.setDrawGridLines(false)
+            axisLeft.apply {
+                setDrawGridLines(false)
+                axisMinimum = 0f
+                granularity = 0.5f
+                valueFormatter = yValueFormatter
+            }
+            animateY(1000)
+            invalidate()
+        }
+    }
+
+    private fun setupPaceChart(
+        chart: LineChart,
+        dataSet: MutableList<ILineDataSet>,
+        yValueFormatter: ValueFormatter
+    ) {
+//        val dataSet = LineDataSet(entries, label).apply {
+//            color = lineColor
+//            lineWidth = 2f
+//            mode = LineDataSet.Mode.CUBIC_BEZIER
+//            cubicIntensity = 0.2f
+//            setDrawCircles(false)
+//            setDrawValues(false)
+//            isHighlightEnabled = false
+//        }
 
         chart.apply {
             data = LineData(dataSet)

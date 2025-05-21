@@ -81,12 +81,6 @@ class UserDataStoreSource @Inject constructor(
         }
     }
 
-    suspend fun saveFcmToken(fcmToken: String) {
-        dataStore.edit { preferences ->
-            preferences[FCM_TOKEN] = fcmToken
-        }
-    }
-
     val nickname: Flow<String?> = dataStore.data.map { preferences ->
         preferences[NICKNAME]
     }
@@ -109,10 +103,6 @@ class UserDataStoreSource @Inject constructor(
 
     val weight: Flow<Double?> = dataStore.data.map { preferences ->
         preferences[WEIGHT]
-    }
-
-    val fcmToken: Flow<String?> = dataStore.data.map { preferences ->
-        preferences[FCM_TOKEN]
     }
 
     val leftInsoleAddressFlow: Flow<String?> = dataStore.data

@@ -332,6 +332,7 @@ class RunningFragment : BaseFragment<FragmentRunningBinding>(
         }
 
         binding.btnEnd.setOnClickListener {
+            binding.btnEnd.isClickable = false
             mContext?.let {
                 RunningTrackingService.stopService(it)
             }

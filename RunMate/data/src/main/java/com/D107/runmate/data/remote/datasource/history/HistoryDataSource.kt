@@ -8,5 +8,5 @@ import com.D107.runmate.data.remote.response.history.UserHistoryDetailResponse
 interface HistoryDataSource {
     suspend fun getHistoryList(): ApiResponse<HistoryResponse>
     suspend fun getHistoryDetail(historyId: String): ApiResponse<HistoryDetailResponse>
-    suspend fun getHistoryDetailByUserId(historyId: String, userId: String): ApiResponse<UserHistoryDetailResponse>
+    suspend fun getHistoryDetailByUserId(groupId: String, userId: String): ApiResponse<UserHistoryDetailResponse>
 }

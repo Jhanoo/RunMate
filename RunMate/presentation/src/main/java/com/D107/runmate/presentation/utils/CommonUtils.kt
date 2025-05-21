@@ -21,6 +21,7 @@ import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
+import java.time.Duration
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.time.LocalDateTime
@@ -130,8 +131,6 @@ object CommonUtils {
 
     fun getGpxInputStream(context: Context): InputStream? {
         return try {
-//            val file = context.assets.open("test_3.gpx") // test용
-            //            file
             val file = File(context.filesDir, "running_tracking.gpx") // 실제로 작성한 파일
             FileInputStream(file)
         } catch (e: Exception) {
@@ -149,6 +148,12 @@ object CommonUtils {
         return zonedDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
     }
 
+    fun convertIsoToCustomFormat(input: String): String {
+        val odt = OffsetDateTime.parse(input)
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        return odt.format(formatter)
+    }
+
     fun formatSecondsToHMS(seconds: Int): String {
         val hours = seconds / 3600
         val minutes = (seconds % 3600) / 60
@@ -161,9 +166,11 @@ object CommonUtils {
         val secs = seconds % 60
         return String.format("%02d:%02d", minutes, secs)
     }
-}
 
-sealed class ToastType {
-    object DEFAULT : ToastType()
-    object ERROR : ToastType()
+    fun getSecondsBetween(time1: String, time2: String): Long {
+        val formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME // 변경된 포맷터
+        val dateTime1 = OffsetDateTime.parse(time1, formatter) // OffsetDateTime으로 변경
+        val dateTime2 = OffsetDateTime.parse(time2, formatter) // OffsetDateTime으로 변경
+        return Duration.between(dateTime1, dateTime2).seconds
+    }
 }

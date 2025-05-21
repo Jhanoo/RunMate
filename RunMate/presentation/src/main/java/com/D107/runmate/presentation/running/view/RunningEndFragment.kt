@@ -22,6 +22,7 @@ import com.D107.runmate.presentation.running.RunningEndState
 import com.D107.runmate.presentation.running.CourseViewModel
 import com.D107.runmate.presentation.running.HistoryDetailState
 import com.D107.runmate.presentation.running.RunningEndViewModel
+import com.D107.runmate.presentation.utils.CommonUtils.convertDateTime
 import com.D107.runmate.presentation.utils.CommonUtils.dateformatMMdd
 import com.D107.runmate.presentation.utils.CommonUtils.getGpxInputStream
 import com.D107.runmate.presentation.utils.GpxParser.parseGpx
@@ -92,7 +93,7 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
                     )
                     val startLocation = mainViewModel.userLocation.value
                     binding.tvDistance.text = getString(R.string.course_distance, lastRecord.distance)
-                    binding.tvDateGroupInfo.text = getString(R.string.running_date, firstRecord.currentTime, lastRecord.currentTime)
+                    binding.tvDateGroupInfo.text = getString(R.string.running_date, convertDateTime(firstRecord.currentTime), convertDateTime(lastRecord.currentTime))
                     binding.tvTime.text = getString(R.string.running_time, time / 60, time % 60)
                     binding.tvBpm.text = "-" // TODO 추후 HR 연결하여 데이터 수정
                     binding.tvAvgPace.text = getPaceFromSpeed(lastRecord.avgSpeed)
@@ -247,12 +248,6 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
             // 코스 모드인 경우
             binding.btnAddCourse.visibility = View.GONE
             binding.ivLike.visibility = View.VISIBLE
-
-            // TODO 사용자 좋아요 여부 좋아요 x
-            binding.ivLike.setImageResource(R.drawable.ic_course_like_inactive)
-
-            // TODO 사용자 좋아요 여부 좋아요 o
-            binding.ivLike.setImageResource(R.drawable.ic_course_like)
         }
     }
 

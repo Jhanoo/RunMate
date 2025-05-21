@@ -42,6 +42,7 @@ import com.bumptech.glide.Glide
 import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wearable.Wearable
 import com.google.android.material.navigation.NavigationView
+import com.google.firebase.messaging.FirebaseMessaging
 import com.ssafy.locket.presentation.base.BaseActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
@@ -69,6 +70,14 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         checkWearableConnection()
 
         addTestMessageButton()
+
+        FirebaseMessaging.getInstance().token
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val token = task.result
+                    viewModel.saveFcmToken(token)
+                }
+            }
 
         // 뒤로가기
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {

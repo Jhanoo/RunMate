@@ -47,4 +47,11 @@ class DataStoreRepositoryImpl @Inject constructor(
     override suspend fun saveHeight(height: Double) {
         dataStore.saveHeight(height)
     }
+
+    override val fcmToken: Flow<String?> = dataStore.fcmToken
+
+
+    override suspend fun saveFcmToken(fcmToken: String) {
+        dataStore.saveFcmToken(fcmToken)
+    }
 }

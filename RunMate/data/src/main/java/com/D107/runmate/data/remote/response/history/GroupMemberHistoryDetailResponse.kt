@@ -10,7 +10,7 @@ data class GroupMemberHistoryDetailResponse(
     val endTime: String,
     val gpxFile: String,
     val nickname: String,
-    val profileImage: String,
+    val profileImage: String?,
     val startTime: String,
     val userId: String
 )

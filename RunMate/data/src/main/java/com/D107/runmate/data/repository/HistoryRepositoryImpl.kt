@@ -13,7 +13,6 @@ import com.D107.runmate.domain.model.history.UserHistoryDetail
 import com.D107.runmate.domain.repository.history.HistoryRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import timber.log.Timber
 import javax.inject.Inject
 
 class HistoryRepositoryImpl @Inject constructor(
@@ -21,7 +20,6 @@ class HistoryRepositoryImpl @Inject constructor(
 ) : HistoryRepository {
     override suspend fun getHistoryList(): Flow<ResponseStatus<HistoryInfo>> {
         return flow {
-            try {
                 when (val response = historyDataSource.getHistoryList()) {
                     is ApiResponse.Error -> emit(
                         ResponseStatus.Error(
@@ -38,22 +36,11 @@ class HistoryRepositoryImpl @Inject constructor(
                         emit(ResponseStatus.Success(response.data!!.toDomainModel()))
                     }
                 }
-            } catch (e: Exception) {
-                Timber.e("${e.message}")
-                emit(
-                    ResponseStatus.Error(
-                        NetworkError(
-                            message = e.message ?: "",
-                        )
-                    )
-                )
-            }
         }
     }
 
     override suspend fun getHistoryDetail(historyId: String): Flow<ResponseStatus<HistoryDetail>> {
         return flow {
-            try {
                 when (val response = historyDataSource.getHistoryDetail(historyId = historyId)) {
                     is ApiResponse.Error -> emit(
                         ResponseStatus.Error(
@@ -68,16 +55,6 @@ class HistoryRepositoryImpl @Inject constructor(
 
                     is ApiResponse.Success -> emit(ResponseStatus.Success(response.data!!.toDomainModel()))
                 }
-            } catch (e: Exception) {
-                Timber.e("${e.message}")
-                emit(
-                    ResponseStatus.Error(
-                        NetworkError(
-                            message = e.message ?: "",
-                        )
-                    )
-                )
-            }
         }
     }
 

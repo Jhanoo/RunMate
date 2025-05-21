@@ -97,6 +97,11 @@ dependencies {
 
 
     implementation ("com.google.android.flexbox:flexbox:3.0.0")
+
+    // FCM 사용 위한 plugins
+    implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
+    implementation(libs.firebase.messaging.ktx)
+
 }
 
 kapt {

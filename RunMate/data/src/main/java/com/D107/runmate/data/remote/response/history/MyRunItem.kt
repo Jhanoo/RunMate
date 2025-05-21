@@ -16,11 +16,13 @@ data class MyRunItem(
     val courseLiked: Boolean,
     val courseLikes: Int,
     val distance: Double,
-    val time: Long
+    val time: Long,
+    val startTime: String,
+    val endTime: String
 ): BaseResponse {
     companion object: DataMapper<MyRunItem, MyRun> {
         override fun MyRunItem.toDomainModel(): MyRun {
-            return MyRun(addedToCourse, avgBpm, avgPace, calories, avgCadence, avgElevation, courseLiked, courseLikes, distance, time)
+            return MyRun(addedToCourse, avgBpm, avgPace, calories, avgCadence, avgElevation, courseLiked, courseLikes, distance, time, startTime, endTime)
         }
     }
 }

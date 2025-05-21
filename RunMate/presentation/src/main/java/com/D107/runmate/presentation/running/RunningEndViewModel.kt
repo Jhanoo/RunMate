@@ -32,7 +32,7 @@ class RunningEndViewModel @Inject constructor(
                 if(it){
                     Timber.d("파일삭제")
                 }else{
-                    Timber.d("파일삭제실패")
+                    Timber.d("파일삭제 실패")
                 }
             }
         }
