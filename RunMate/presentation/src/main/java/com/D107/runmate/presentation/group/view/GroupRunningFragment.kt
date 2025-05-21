@@ -385,7 +385,7 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
         viewLifecycleOwner.lifecycleScope.launch {
 
             launch {
-                mainViewModel.runningRecord.collectLatest { state ->
+                mainViewModel.runningRecord.collect { state ->
                     if (state is RunningRecordState.Exist) {
                         if (state.runningRecords.size > 1) {
                             val locationValue = mainViewModel.userLocation.value

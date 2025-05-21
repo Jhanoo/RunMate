@@ -128,7 +128,7 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
 
         binding.btnDiagnoseInsole.setOnClickListener {
             if (viewModel.connectionState.value == InsoleConnectionState.FULLY_CONNECTED) {
-                viewModel.initiateTimedDiagnosis(10) // 15초 진단 시작
+                viewModel.initiateTimedDiagnosis(15) // 15초 진단 시작
             } else {
                 showToast("스마트 인솔이 완전히 연결되어야 진단할 수 있습니다.")
             }
@@ -294,10 +294,7 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
             // 결과 있음
             binding.layoutAnalysisResultsInsole.visibility = View.VISIBLE
             binding.layoutNoDiagnosisInsole.visibility = View.GONE
-            binding.btnDiagnoseNoResultsInsole.visibility = View.GONE // 결과 없 음 화면의 버튼 숨김
-
-            val totalSteps = result.totalLeftSteps + result.totalRightSteps
-            if (totalSteps == 0) return // 걸음 수 없으면 업데이트 안 함
+            binding.btnDiagnoseNoResultsInsole.visibility = View.GONE
 
             // --- 착지 분포 계산 (좌우 합산) ---
             val totalStrikeCounts = mutableMapOf<FootStrikeType, Int>()
@@ -308,98 +305,125 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
                 totalStrikeCounts[type] = (totalStrikeCounts[type] ?: 0) + count
             }
 
-            val midfootPercent = ((totalStrikeCounts[FootStrikeType.MIDFOOT] ?: 0).toFloat() / totalSteps * 100).roundToInt()
-            val forefootPercent = ((totalStrikeCounts[FootStrikeType.FOREFOOT] ?: 0).toFloat() / totalSteps * 100).roundToInt()
-            val rearfootPercent = ((totalStrikeCounts[FootStrikeType.REARFOOT] ?: 0).toFloat() / totalSteps * 100).roundToInt()
+            // UNKNOWN을 제외한 유효 걸음 수 계산
+            val validTotalStepsForPercentage = (totalStrikeCounts[FootStrikeType.REARFOOT] ?: 0) +
+                    (totalStrikeCounts[FootStrikeType.MIDFOOT] ?: 0) +
+                    (totalStrikeCounts[FootStrikeType.FOREFOOT] ?: 0)
+
+            var midfootPercent = 0
+            var forefootPercent = 0
+            var rearfootPercent = 0
+
+            if (validTotalStepsForPercentage > 0) {
+                midfootPercent = ((totalStrikeCounts[FootStrikeType.MIDFOOT] ?: 0).toFloat() / validTotalStepsForPercentage * 100).roundToInt()
+                forefootPercent = ((totalStrikeCounts[FootStrikeType.FOREFOOT] ?: 0).toFloat() / validTotalStepsForPercentage * 100).roundToInt()
+                rearfootPercent = ((totalStrikeCounts[FootStrikeType.REARFOOT] ?: 0).toFloat() / validTotalStepsForPercentage * 100).roundToInt()
+            }
+            // 만약 validTotalStepsForPercentage가 0이면, 모든 퍼센트는 0으로 유지됩니다.
 
             binding.tvMidfootValueInsole.text = String.format(Locale.getDefault(), "%d%%", midfootPercent)
             binding.tvForefootValueInsole.text = String.format(Locale.getDefault(), "%d%%", forefootPercent)
             binding.tvHeelValueInsole.text = String.format(Locale.getDefault(), "%d%%", rearfootPercent)
 
-//            var analysisText = "걸음걸이 패턴: ${getGaitPatternString(result.overallGaitPattern)}\n" // 수정
-//            analysisText += "- 왼쪽 평균 Yaw: ${result.averageLeftYaw?.let { String.format("%.1f°", it) } ?: "N/A"}\n"
-//            analysisText += "- 오른쪽 평균 Yaw: ${result.averageRightYaw?.let { String.format("%.1f°", it) } ?: "N/A"}\n"
             Timber.d("GaitResult : ${result}")
-//            var gaitDiff:Float =result.averageRightYaw!!-result.averageLeftYaw!!
             val gaitResultDescriptionString = getGaitPatternString(result)
-
-
             binding.tvAnalysisDescriptionInsole.text = gaitResultDescriptionString
-            when(result.overallGaitPattern){
+
+            when (result.overallGaitPattern) {
                 GaitPatternType.IN_TOEING -> {
                     binding.tvGaitResultInsole.text = "안짱걸음"
                     binding.ivGaitInsole.setImageResource(R.drawable.img_in_toeing)
-                    binding.ivFootstrikeInsole.visibility = View.VISIBLE
                 }
-                GaitPatternType.OUT_TOEING->{
-                    binding.tvGaitResultInsole.text = "팔짜걸음"
+                GaitPatternType.OUT_TOEING -> {
+                    binding.tvGaitResultInsole.text = "팔자걸음"
                     binding.ivGaitInsole.setImageResource(R.drawable.img_out_toeing)
-                    binding.ivFootstrikeInsole.visibility = View.VISIBLE
-                }GaitPatternType.NEUTRAL->{
+                }
+                GaitPatternType.NEUTRAL -> {
                     binding.tvGaitResultInsole.text = "정상걸음"
                     binding.ivGaitInsole.setImageResource(R.drawable.img_neutral_toeing)
-                    binding.ivFootstrikeInsole.visibility = View.VISIBLE
-                }else->{
+                }
+                else -> { // null 또는 GaitPatternType.UNKNOWN 등
                     binding.tvGaitResultInsole.text = "알수 없음"
-                    binding.ivFootstrikeInsole.visibility = View.GONE
-
+                    binding.ivGaitInsole.setImageResource(0) // 또는 기본 placeholder 이미지
                 }
             }
 
-            var strikeType = FootStrikeType.UNKNOWN
-            var maxPercent = -1
-
-
-            binding.tvDiagnosisDateInsole.text = formatTimestampToKoreanDate(result.timestamp?:0L)
+            binding.tvDiagnosisDateInsole.text = formatTimestampToKoreanDate(result.timestamp ?: 0L)
             binding.tvDiagnosisDateInsole.visibility = View.VISIBLE
-            if (forefootPercent > maxPercent) {
-                maxPercent = forefootPercent
-                strikeType = FootStrikeType.FOREFOOT
-            }
-            // 주의: 동률일 경우, 위에서부터 순서대로 첫 번째 것이 선택됨.
-            // 만약 MIDFOOT와 FOREFOOT가 동률이고 MIDFOOT를 우선하고 싶다면, MIDFOOT를 먼저 비교.
-            if (midfootPercent > maxPercent) {
-                maxPercent = midfootPercent
-                strikeType = FootStrikeType.MIDFOOT
-            }
-            if (rearfootPercent > maxPercent) {
-                // maxPercent = rearfootPercent // 마지막이므로 maxPercent 업데이트는 불필요할 수 있음
-                strikeType = FootStrikeType.REARFOOT
-            }
-            // 만약 모든 퍼센트가 0이거나 매우 낮아 유효한 dominant를 찾지 못했다면 (totalStrikeCounts가 비어있는 등),
-            // dominantStrikeTypeForImage는 초기값 UNKNOWN 유지
 
-            // 모든 퍼센트가 0인 경우 (즉, totalStrikeCounts에 유효한 데이터가 없었던 경우) 처리
-            if (totalStrikeCounts.isEmpty() || maxPercent <= 0) { // maxPercent <= 0 조건 추가
-                strikeType = FootStrikeType.UNKNOWN
+            // 가장 높은 비율의 착지 타입 결정
+            var dominantStrikeType = FootStrikeType.UNKNOWN
+            var maxPercentCalculated = -1 // 계산된 퍼센트 중 최대값을 저장 (0%도 감지하기 위해 -1로 시작)
+
+
+
+            if (forefootPercent > maxPercentCalculated) {
+                maxPercentCalculated = forefootPercent
+                dominantStrikeType = FootStrikeType.FOREFOOT
+            }
+
+            if (midfootPercent > maxPercentCalculated) {
+                maxPercentCalculated = midfootPercent
+                dominantStrikeType = FootStrikeType.MIDFOOT
+            } else if (midfootPercent == maxPercentCalculated && dominantStrikeType != FootStrikeType.MIDFOOT && midfootPercent > 0) {
             }
 
 
-            val footstrikeImageResource = when (strikeType) {
+            if (rearfootPercent > maxPercentCalculated) {
+                dominantStrikeType = FootStrikeType.REARFOOT
+            } else if (rearfootPercent == maxPercentCalculated && dominantStrikeType != FootStrikeType.REARFOOT && rearfootPercent > 0) {
+                // 동률 처리 (예: REARFOOT를 더 선호한다면)
+                // dominantStrikeType = FootStrikeType.REARFOOT
+            }
+
+            if (maxPercentCalculated <= 0) { // 유효한 착지가 없거나 모두 0%인 경우
+                dominantStrikeType = FootStrikeType.UNKNOWN
+            }
+
+            val footstrikeImageResource = when (dominantStrikeType) {
                 FootStrikeType.REARFOOT -> R.drawable.img_rearfoot
                 FootStrikeType.MIDFOOT -> R.drawable.img_midfoot
                 FootStrikeType.FOREFOOT -> R.drawable.img_forefoot
-                FootStrikeType.UNKNOWN -> R.drawable.img_no_insole
+                FootStrikeType.UNKNOWN -> R.drawable.img_no_insole // 또는 다른 기본/숨김 처리용 이미지
             }
-            val footStringDescription = when(strikeType){
+            val footStringDescription = when (dominantStrikeType) {
                 FootStrikeType.REARFOOT -> getText(R.string.rearfoot_strike_description)
                 FootStrikeType.MIDFOOT -> getText(R.string.midfoot_strike_description)
                 FootStrikeType.FOREFOOT -> getText(R.string.forefoot_strike_description)
                 FootStrikeType.UNKNOWN -> getText(R.string.unknown_strike_description)
             }
 
-
             binding.tvFootstrikeDescriptionInsole.text = footStringDescription
             binding.ivFootstrikeInsole.setImageResource(footstrikeImageResource)
+
+            // 착지 이미지는 dominantStrikeType에 따라 보이거나 숨김
+            if (dominantStrikeType != FootStrikeType.UNKNOWN && result.overallGaitPattern != null /*&& result.overallGaitPattern != GaitPatternType.UNKNOWN <- 필요시 추가 */) {
+                // 걸음 패턴도 유효하고, 주 착지 타입도 UNKNOWN이 아닐 때만 표시
+                binding.ivFootstrikeInsole.visibility = View.VISIBLE
+            } else {
+                binding.ivFootstrikeInsole.visibility = View.GONE
+            }
+
             binding.btnDiagnoseInsole.visibility = View.VISIBLE
 
         } else {
-            // 결과 없음 또는 유효하지 않음
+            // 결과 없음 또는 유효하지 않음 (totalLeftSteps, totalRightSteps 모두 0이하)
             binding.layoutAnalysisResultsInsole.visibility = View.GONE
             binding.layoutNoDiagnosisInsole.visibility = View.VISIBLE
-            binding.btnDiagnoseNoResultsInsole.visibility = View.VISIBLE // 결과 없음 화면의 버튼 표시
+            binding.btnDiagnoseNoResultsInsole.visibility = View.VISIBLE
             binding.btnDiagnoseInsole.visibility = View.GONE
             binding.tvDiagnosisDateInsole.visibility = View.GONE
+
+            // 상세 결과 UI 초기화
+            binding.tvMidfootValueInsole.text = "N/A"
+            binding.tvForefootValueInsole.text = "N/A"
+            binding.tvHeelValueInsole.text = "N/A"
+            binding.tvGaitResultInsole.text = "데이터 없음"
+            binding.ivGaitInsole.setImageResource(0) // 또는 기본 이미지
+            binding.tvAnalysisDescriptionInsole.text = "분석 결과가 없습니다."
+
+            binding.ivFootstrikeInsole.visibility = View.GONE
+            binding.tvFootstrikeDescriptionInsole.text = "" // 착지 설명도 초기화
 
             // 인솔 연결 상태에 따라 추가 메시지 표시
             binding.tvConnectInsoleMessageInsole.visibility = if (viewModel.connectionState.value != InsoleConnectionState.FULLY_CONNECTED) {
