@@ -33,9 +33,17 @@ public class MarathonServiceImpl implements MarathonService {
         List<MarathonResponse> result = new ArrayList<>();
         for (Marathon m : marathons) {
             List<MarathonDistance> mdList = distanceDao.findByMarathonId(m.getMarathonId());
+            // 1) 모든 distance 문자열을 "숫자km" 포맷으로 바꿔치기
+            mdList.replaceAll(md -> {
+                String num = md.getDistance().replaceAll("[^\\d.]", "");
+                md.setDistance(num + "km");
+                return md;
+            });
+
+            // 2) 숫자 기준으로 오름차순 정렬
             mdList.sort(Comparator.comparingDouble(md ->
-                    Double.parseDouble(md.getDistance().replaceAll("[^\\d.]", "")))
-            );
+                    Double.parseDouble(md.getDistance().replaceAll("[^\\d.]", ""))
+            ));
 
             List<String> distList = new ArrayList<>();
             for (MarathonDistance md : mdList) {
@@ -58,9 +66,17 @@ public class MarathonServiceImpl implements MarathonService {
     public MarathonResponse getMarathon(UUID marathonId) {
         Marathon m = marathonDao.findById(marathonId);
         List<MarathonDistance> mdList = distanceDao.findByMarathonId(marathonId);
+        // 1) 모든 distance 문자열을 "숫자km" 포맷으로 바꿔치기
+        mdList.replaceAll(md -> {
+            String num = md.getDistance().replaceAll("[^\\d.]", "");
+            md.setDistance(num + "km");
+            return md;
+        });
+
+        // 2) 숫자 기준으로 오름차순 정렬
         mdList.sort(Comparator.comparingDouble(md ->
-                Double.parseDouble(md.getDistance().replaceAll("[^\\d.]", "")))
-        );
+                Double.parseDouble(md.getDistance().replaceAll("[^\\d.]", ""))
+        ));
 
         List<String> distList = new ArrayList<>();
         for (MarathonDistance md : mdList) {
