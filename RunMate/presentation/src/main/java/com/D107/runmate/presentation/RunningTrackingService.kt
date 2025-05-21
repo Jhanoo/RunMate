@@ -395,7 +395,7 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener, DataClien
     private fun createNotification(): Notification {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("러닝 준비 중")
-            .setSmallIcon(R.drawable.image_tonie_small)
+            .setSmallIcon(R.drawable.ic_logo)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -649,7 +649,7 @@ class RunningTrackingService : Service(), TextToSpeech.OnInitListener, DataClien
 
     private fun getNotificationBuilder(state: RunningJobState): NotificationCompat.Builder {
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_drawer_menu)
+            .setSmallIcon(R.drawable.ic_logo)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
