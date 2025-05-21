@@ -76,8 +76,11 @@ class RunningViewModel @Inject constructor(
     private var isDistanceMonitoring = false
 
     // 페이스
-    private val _currentPace = MutableStateFlow("0'00")
-    val currentPace: StateFlow<String> = _currentPace.asStateFlow()
+    private val _currentPace = MutableStateFlow(0)
+    val currentPace: StateFlow<Int> = _currentPace.asStateFlow()
+    private val _formattedPace = MutableStateFlow("0:00")
+    val formattedPace: StateFlow<String> = _formattedPace.asStateFlow()
+
     private var lastCalculatedDistance = 0.0 // 마지막으로 계산에 사용된 거리 값을 저장하는 변수
     private var lastPaceCalculationTime = 0L // 마지막으로 계산에 사용된 시간 저장
     private val CURRENT_PACE_WINDOW = 30000L // 30초 윈도우
@@ -229,14 +232,16 @@ class RunningViewModel @Inject constructor(
 
         viewModelScope.launch {
             // 페이스 변경 감지 및 서비스에 전달
-            currentPace.collect { pace ->
-                LocationTrackingService.updatePace(pace)
+            currentPace.collect { paceInSeconds ->
+                // Update formatted pace for UI
+                _formattedPace.value = formatPaceToString(paceInSeconds)
+                // Pass the raw seconds value to the service
+                LocationTrackingService.updatePace(paceInSeconds)
             }
         }
 
         viewModelScope.launch {
             cadence.collect { cadenceValue ->
-                // 서비스에 캐이던스 업데이트 함수가 있다면 사용
                 Log.d("Cadence", "캐이던스 현재값: $cadenceValue")
             }
         }
@@ -310,20 +315,21 @@ class RunningViewModel @Inject constructor(
                 val distanceChange = newest.second - oldest.second
 
                 if (timeSeconds > 5 && distanceChange > 0.005) {
-                    val newPace = calculatePaceUseCase(distanceChange, timeSeconds.toLong())
-                    _currentPace.value = newPace
+                    val paceInSeconds = calculatePaceUseCase(distanceChange, timeSeconds.toLong())
+                    _currentPace.value = paceInSeconds.toInt()
 
                     // 페이스 기록 추가 (5초마다)
                     val paceRecordTime = System.currentTimeMillis()
-                    if (paceRecordTime - lastPaceRecordTime >= 5000 && newPace != "--'--\"") {
-                        paceRecords.add(newPace)
+                    if (paceRecordTime - lastPaceRecordTime >= 5000 && paceInSeconds.toInt() > 0) {
+                        paceRecords.add(formatPaceToString(paceInSeconds.toInt()))
                         lastPaceRecordTime = paceRecordTime
 
                         // 평균 페이스 계산
                         calculateAveragePace()
                     }
                 } else {
-                    _currentPace.value = "--'--\""
+                    _currentPace.value = 0 // Use 0 for invalid pace
+                    _formattedPace.value = "--:--"
                 }
             }
         }
@@ -463,7 +469,7 @@ class RunningViewModel @Inject constructor(
         _runningTime.value = 0L
         _formattedTime.value = "0:00:00"
         _distance.value = 0.0
-        _currentPace.value = "0'00\""
+        _currentPace.value = 0
         _maxHeartRate.value = 0
         _avgHeartRate.value = 0
         _avgPace.value = "--'--\""
@@ -489,6 +495,21 @@ class RunningViewModel @Inject constructor(
         val endTime = trackPoints.maxByOrNull { it.time }?.time ?: Date()
         val avgElevation = trackPoints.map { it.elevation }.average()
 
+        // Calculate average pace as a double (minutes as decimal)
+        val avgPaceDouble = if (_avgPace.value != "--'--\"") {
+            // Parse the average pace string to get total seconds
+            val parts = _avgPace.value.replace("'", ":").replace("\"", "").split(":")
+            if (parts.size >= 2) {
+                val minutes = parts[0].toDoubleOrNull() ?: 0.0
+                val seconds = parts[1].toDoubleOrNull() ?: 0.0
+                minutes + (seconds / 60.0) // Convert to decimal minutes
+            } else {
+                0.0
+            }
+        } else {
+            0.0
+        }
+
         // GPX 파일 생성
         return createGpxFileUseCase(
             runName = runName,
@@ -496,7 +517,7 @@ class RunningViewModel @Inject constructor(
             totalTime = _runningTime.value,
             avgHeartRate = _avgHeartRate.value,
             maxHeartRate = _maxHeartRate.value,
-            avgPace = _avgPace.value,
+            avgPace = avgPaceDouble,
             avgCadence = _cadence.value,
             startTime = startTime,
             endTime = endTime,

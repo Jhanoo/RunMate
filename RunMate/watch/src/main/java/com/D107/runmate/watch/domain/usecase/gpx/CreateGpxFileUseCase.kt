@@ -19,7 +19,7 @@ class CreateGpxFileUseCase @Inject constructor(
         totalTime: Long,
         avgHeartRate: Int,
         maxHeartRate: Int,
-        avgPace: String,
+        avgPace: Double,
         avgCadence: Int,
         startTime: Date,
         endTime: Date,
@@ -49,18 +49,14 @@ class CreateGpxFileUseCase @Inject constructor(
             val validPaces = trackPoints
                 .map { it.pace }
                 .filter {
-                    it != "--'--\"" && it != "0'00\"" &&
-                            it.matches(Regex("\\d+'\\d+\"")) // 숫자'숫자" 형식인지 확인
+                    it > 0
                 }
-                .map { paceToSeconds(it) }
 
             val avgPaceSeconds = if (validPaces.isNotEmpty()) {
                 validPaces.average()
             } else {
                 0.0
             }
-
-            val avgPace = secondsToPace(avgPaceSeconds.toLong())
 
             // 유효한 케이던스 값만 추출하여 평균 계산
             val validCadences = trackPoints
@@ -94,7 +90,7 @@ class CreateGpxFileUseCase @Inject constructor(
                 totalTime = totalTime,
                 avgHeartRate = avgHeartRate,
                 maxHeartRate = maxHeartRate,
-                avgPace = avgPace,
+                avgPace = avgPaceSeconds,
                 avgCadence = avgCadence,
                 startTime = startTime,
                 endTime = endTime,
@@ -124,19 +120,19 @@ class CreateGpxFileUseCase @Inject constructor(
     }
 
     // 페이스 문자열을 초로 변환
-    private fun paceToSeconds(pace: String): Long {
-        try {
-            val parts = pace.split("'", "\"")
-            if (parts.size >= 2) {
-                val minutes = parts[0].toLong()
-                val seconds = parts[1].toLong()
-                return minutes * 60 + seconds
-            }
-        } catch (e: Exception) {
-            Log.e("GPX", "페이스 변환 실패: $pace", e)
-        }
-        return 0
-    }
+//    private fun paceToSeconds(pace: String): Long {
+//        try {
+//            val parts = pace.split("'", "\"")
+//            if (parts.size >= 2) {
+//                val minutes = parts[0].toLong()
+//                val seconds = parts[1].toLong()
+//                return minutes * 60 + seconds
+//            }
+//        } catch (e: Exception) {
+//            Log.e("GPX", "페이스 변환 실패: $pace", e)
+//        }
+//        return 0
+//    }
 
     // 초를 페이스 문자열로 변환
     private fun secondsToPace(totalSeconds: Long): String {

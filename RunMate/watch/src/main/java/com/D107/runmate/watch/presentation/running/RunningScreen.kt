@@ -92,7 +92,7 @@ fun RunningScreen(
     // 실시간 BPM 반영
     val currentRunningData = remember(pace, bpm, formattedTime, distance, currentPace) {
         RunningData(
-            pace = if (pace != "0:00") pace.replace(":", "'") + "\"" else currentPace,
+            pace = if (currentPace is Int) formatPaceToString(currentPace) else currentPace as String,
             bpm = bpm.toString(),
             distance = String.format("%.2f", distance),
             time = formattedTime,
@@ -215,7 +215,7 @@ fun RunningScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = currentPace,
+                                text = formatPaceToString(currentPace),
                                 fontSize = 21.sp,
                                 fontWeight = FontWeight.Normal,
                                 fontStyle = FontStyle.Normal,
@@ -345,6 +345,12 @@ fun RunningScreen(
             )
         }
     }
+}
+
+fun formatPaceToString(paceInSeconds: Int): String {
+    val minutes = paceInSeconds / 60
+    val seconds = paceInSeconds % 60
+    return String.format("%d:%02d", minutes, seconds)
 }
 
 @Composable

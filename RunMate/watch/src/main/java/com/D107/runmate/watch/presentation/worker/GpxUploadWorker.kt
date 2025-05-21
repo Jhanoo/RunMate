@@ -117,8 +117,7 @@ class GpxUploadWorker @AssistedInject constructor(
 
                         dataMap.putDouble("distance", gpxFile.totalDistance)
 
-                        val paceDouble = convertPaceStringToDouble(gpxFile.avgPace)
-                        dataMap.putDouble("avgPace", paceDouble)
+                        dataMap.putDouble("avgPace", gpxFile.avgPace)
 
                         dataMap.putString("calories", "")
                         dataMap.putLong("startTime", gpxFile.startTime.time)
@@ -185,35 +184,17 @@ class GpxUploadWorker @AssistedInject constructor(
     // 페이스 문자열을 Double로 변환하는 함수 (예: "5'23"" -> 5.23)
     private fun convertPaceStringToDouble(paceString: String): Double {
         try {
-            // 페이스 포맷이 "5'23""와 같은 형식이라면:
-            val parts = paceString.split("'", "'\"", "\"")
+            // Parse pace in format "5:23" to minutes as double
+            val parts = paceString.split(":")
             if (parts.size >= 2) {
                 val minutes = parts[0].toDoubleOrNull() ?: 0.0
                 val seconds = parts[1].toDoubleOrNull() ?: 0.0
-
-                // 초를 소수점 형태로 변환 (초/60 = 분의 소수점 부분)
-                val secondsAsFraction = seconds / 60.0
-
-                // 소수점 두 자리로 반올림
-                return String.format("%.2f", minutes + secondsAsFraction).toDouble()
+                return minutes + (seconds / 60.0)
             }
-
-            // "5:23" 형식이라면:
-            if (paceString.contains(":")) {
-                val parts = paceString.split(":")
-                if (parts.size >= 2) {
-                    val minutes = parts[0].toDoubleOrNull() ?: 0.0
-                    val seconds = parts[1].toDoubleOrNull() ?: 0.0
-
-                    val secondsAsFraction = seconds / 60.0
-                    return String.format("%.2f", minutes + secondsAsFraction).toDouble()
-                }
-            }
-
-            // 숫자만 있는 경우 그대로 반환
+            // If it's already a numeric value, return it
             return paceString.toDoubleOrNull() ?: 0.0
         } catch (e: Exception) {
-            Log.e(TAG, "Error converting pace: $paceString", e)
+            Log.e("Pace", "Error converting pace: $paceString", e)
             return 0.0
         }
     }
