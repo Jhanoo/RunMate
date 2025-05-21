@@ -85,13 +85,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-//    private fun startHeartRateOnly() {
-//        lifecycleScope.launch {
-//            Log.d("HeartRate", "심박수 전송 시작")
-//            runningViewModel.startHeartRateOnlyTracking(applicationContext)
-//        }
-//    }
-
     @SuppressLint("StateFlowValueCalledInComposition", "DefaultLocale")
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -108,22 +101,6 @@ class MainActivity : ComponentActivity() {
         val serviceIntent = Intent(this, DataLayerListenerService::class.java)
         startService(serviceIntent)
         Log.d("MainActivity", "DataLayerListenerService 명시적 시작")
-
-        val workRequest = PeriodicWorkRequestBuilder<GpxUploadWorker>(15, TimeUnit.MINUTES)
-            .setInitialDelay(1, TimeUnit.MINUTES)
-            .addTag("GpxUploadWorker") // 중복 실행 방지용 태그 추가
-            .setConstraints(
-                Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .build()
-            )
-            .build()
-
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            "transfer_gpx_files",
-            ExistingPeriodicWorkPolicy.KEEP,
-            workRequest
-        )
 
         splashScreen.setKeepOnScreenCondition { false }
 
@@ -202,16 +179,6 @@ class MainActivity : ComponentActivity() {
                                     // 전송 실패
                                     Log.d(TAG, "onCreate: fail")
                                 }
-//                                val putDataTask = dataClient.putDataItem(putDataReq)
-//                                try {
-//                                    Tasks.await(putDataTask).apply {
-//                                        Log.d("Updatehr in apply","125")
-//                                    }
-//                                } catch (e: ExecutionException) {
-//                                    Log.d("UpdateLight", "updateCalories: Failure ${e.printStackTrace()}")
-//                                } catch (e: InterruptedException) {
-//                                    Log.d("UpdateLight", "updateCalories: Failure ${e.printStackTrace()}")
-//                                }
                             },
                             buttonsEnabled = menuButtonsEnabled
                         )
@@ -447,35 +414,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
-//        lifecycleScope.launch(Dispatchers.IO) {
-//            try {
-//                val nodes = Tasks.await(nodeClient.connectedNodes)
-//
-//                withContext(Dispatchers.Main) {
-//                    if (nodes.isNotEmpty()) {
-//                        Log.d("MainActivity", "Phone connected: ${nodes.size} nodes found")
-//                        // 폰 연결됨 - 버튼 비활성화, 데이터 동기화 요청
-//                        menuButtonsEnabled = false
-//
-//                        // 폰에 연결됨을 알리기 위해 IDLE 상태 설정
-//                        nodes.forEach { node ->
-//                            sendStateToPhone(node.id, DataLayerListenerService.STATE_IDLE)
-//                        }
-//                    } else {
-//                        Log.d("MainActivity", "No phone connected - enabling standalone mode")
-//                        // 폰 연결 안됨 - 독립 모드 활성화 (버튼 활성화)
-//                        menuButtonsEnabled = true
-//                    }
-//                }
-//            } catch (e: Exception) {
-//                Log.e("MainActivity", "Error checking nodes: ${e.message}", e)
-//                // 오류 발생 시 독립 모드로 동작
-//                withContext(Dispatchers.Main) {
-//                    menuButtonsEnabled = true
-//                }
-//            }
-//        }
     }
 
     // 연결되지 않은 상태 UI 업데이트

@@ -85,7 +85,6 @@ class GpxUploadWorker @AssistedInject constructor(
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
             // 전송 대기 중인 GPX 파일 목록 가져오기
-            Log.d(TAG, "doWork: check doWork start")
             val pendingFiles = gpxRepository.getPendingGpxFiles().first()
             Log.d(TAG, "Found ${pendingFiles.size} pending GPX files")
 

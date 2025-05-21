@@ -8,7 +8,7 @@ import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
 @HiltAndroidApp
-class WatchApplication : Application(), Configuration.Provider {
+class WatchApplication : Application(){
     @Inject
     lateinit var bluetoothService: BluetoothService
 
@@ -19,20 +19,11 @@ class WatchApplication : Application(), Configuration.Provider {
 //            return instance.bluetoothService
 //        }
 //    }
-    @Inject
-    lateinit var workerFactory: HiltWorkerFactory
-
-    override val workManagerConfiguration: Configuration
-        get() = Configuration.Builder()
-            .setWorkerFactory(workerFactory)
-            .build()
 
     override fun onCreate() {
         super.onCreate()
 //        GpxUploadWorker.schedulePeriodic(this)
 //        instance = this
     }
-
-
 
 }

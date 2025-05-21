@@ -100,24 +100,6 @@ fun MenuScreen(
                     )
                 }
             }
-
-            item {
-                Button(
-                    onClick = onNavigateToAny,
-                    modifier = Modifier.fillMaxWidth(0.8f),
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = colorResource(id = R.color.black)
-                    ),
-                    enabled = true
-                ) {
-                    Text(
-                        text = "무언가",
-                        color = if (buttonsEnabled) Color.White else Color.Gray,
-                        fontSize = 28.sp,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
         }
     }
 }

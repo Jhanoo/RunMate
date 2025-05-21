@@ -90,14 +90,14 @@ class RunningViewModel @Inject constructor(
     lateinit var calculatePaceUseCase: CalculatePaceUseCase
 
     // 페이스 기록 및 심박수 기록 저장 리스트
-    private val paceRecords = mutableListOf<String>()
+    private val paceRecords = mutableListOf<Int>()
     private val heartRateRecords = mutableListOf<Int>()
     private var lastHeartRateRecordTime = 0L
     private var lastPaceRecordTime = 0L
 
     // 평균 페이스와 평균 심박수 계산 결과
-    private val _avgPace = MutableStateFlow("--'--\"")
-    val avgPace: StateFlow<String> = _avgPace.asStateFlow()
+    private val _avgPace = MutableStateFlow(0.0)
+    val avgPace: StateFlow<Double> = _avgPace.asStateFlow()
 
     private val _avgHeartRate = MutableStateFlow(0)
     val avgHeartRate: StateFlow<Int> = _avgHeartRate.asStateFlow()
@@ -316,12 +316,12 @@ class RunningViewModel @Inject constructor(
 
                 if (timeSeconds > 5 && distanceChange > 0.005) {
                     val paceInSeconds = calculatePaceUseCase(distanceChange, timeSeconds.toLong())
-                    _currentPace.value = paceInSeconds.toInt()
+                    _currentPace.value = paceInSeconds
 
                     // 페이스 기록 추가 (5초마다)
                     val paceRecordTime = System.currentTimeMillis()
                     if (paceRecordTime - lastPaceRecordTime >= 5000 && paceInSeconds.toInt() > 0) {
-                        paceRecords.add(formatPaceToString(paceInSeconds.toInt()))
+                        paceRecords.add(paceInSeconds)
                         lastPaceRecordTime = paceRecordTime
 
                         // 평균 페이스 계산
@@ -329,7 +329,7 @@ class RunningViewModel @Inject constructor(
                     }
                 } else {
                     _currentPace.value = 0 // Use 0 for invalid pace
-                    _formattedPace.value = "--:--"
+                    _formattedPace.value = "0'00"
                 }
             }
         }
@@ -338,33 +338,30 @@ class RunningViewModel @Inject constructor(
     // 평균 페이스 계산
     private fun calculateAveragePace() {
         if (paceRecords.isEmpty()) {
-            _avgPace.value = "--'--\""
+            _avgPace.value = 0.0
             return
         }
 
         // 페이스를 초로 변환하여 평균 계산
-        var totalSeconds = 0L
+        var totalSeconds = 0
         var validCount = 0
 
         paceRecords.forEach { pace ->
-            if (pace != "--'--\"") {
-                val parts = pace.split("'", "\"")
-                if (parts.size >= 2) {
-                    val minutes = parts[0].toIntOrNull() ?: 0
-                    val seconds = parts[1].toIntOrNull() ?: 0
+            if (pace != 0) {
+                    val minutes = pace/60 ?: 0
+                    val seconds = pace%60 ?: 0
                     totalSeconds += (minutes * 60 + seconds)
                     validCount++
                 }
-            }
         }
 
         if (validCount > 0) {
             val avgSeconds = totalSeconds / validCount
             val avgMinutes = avgSeconds / 60
             val avgSecs = avgSeconds % 60
-            _avgPace.value = String.format("%d'%02d\"", avgMinutes, avgSecs)
+            _avgPace.value = avgSeconds.toDouble()
         } else {
-            _avgPace.value = "--'--\""
+            _avgPace.value = 0.0
         }
     }
 
@@ -472,7 +469,7 @@ class RunningViewModel @Inject constructor(
         _currentPace.value = 0
         _maxHeartRate.value = 0
         _avgHeartRate.value = 0
-        _avgPace.value = "--'--\""
+        _avgPace.value = 0.0
         lastPaceCalculationTime = 0L
         lastCalculatedDistance = 0.0
         lastHeartRateRecordTime = 0L
@@ -496,19 +493,19 @@ class RunningViewModel @Inject constructor(
         val avgElevation = trackPoints.map { it.elevation }.average()
 
         // Calculate average pace as a double (minutes as decimal)
-        val avgPaceDouble = if (_avgPace.value != "--'--\"") {
-            // Parse the average pace string to get total seconds
-            val parts = _avgPace.value.replace("'", ":").replace("\"", "").split(":")
-            if (parts.size >= 2) {
-                val minutes = parts[0].toDoubleOrNull() ?: 0.0
-                val seconds = parts[1].toDoubleOrNull() ?: 0.0
-                minutes + (seconds / 60.0) // Convert to decimal minutes
-            } else {
-                0.0
-            }
-        } else {
-            0.0
-        }
+//        val avgPaceDouble = if ( != "--'--\"") {
+//            // Parse the average pace string to get total seconds
+//            val parts = _avgPace.value.replace("'", ":").replace("\"", "").split(":")
+//            if (parts.size >= 2) {
+//                val minutes = parts[0].toDoubleOrNull() ?: 0.0
+//                val seconds = parts[1].toDoubleOrNull() ?: 0.0
+//                minutes + (seconds / 60.0) // Convert to decimal minutes
+//            } else {
+//                0.0
+//            }
+//        } else {
+//            0.0
+//        }
 
         // GPX 파일 생성
         return createGpxFileUseCase(
@@ -517,7 +514,7 @@ class RunningViewModel @Inject constructor(
             totalTime = _runningTime.value,
             avgHeartRate = _avgHeartRate.value,
             maxHeartRate = _maxHeartRate.value,
-            avgPace = avgPaceDouble,
+            avgPace = _avgPace.value,
             avgCadence = _cadence.value,
             startTime = startTime,
             endTime = endTime,
