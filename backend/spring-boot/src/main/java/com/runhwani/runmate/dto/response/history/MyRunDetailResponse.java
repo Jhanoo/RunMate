@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.OffsetDateTime;
+
 @Getter
 @Builder
 @NoArgsConstructor
@@ -41,4 +43,10 @@ public class MyRunDetailResponse {
     
     @Schema(description = "코스 좋아요 수", example = "42")
     private int courseLikes;
+    
+    @Schema(description = "시작 시각", example = "2023-05-10T07:30:00+09:00")
+    private OffsetDateTime startTime;
+    
+    @Schema(description = "종료 시각", example = "2023-05-10T08:00:00+09:00")
+    private OffsetDateTime endTime;
 } 

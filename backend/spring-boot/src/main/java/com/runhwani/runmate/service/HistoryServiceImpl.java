@@ -278,6 +278,8 @@ public class HistoryServiceImpl implements HistoryService {
                 .addedToCourse(addedToCourse)
                 .courseLiked(courseLiked)
                 .courseLikes(courseLikes)
+                .startTime(startTime)
+                .endTime(endTime)
                 .build();
     }
     

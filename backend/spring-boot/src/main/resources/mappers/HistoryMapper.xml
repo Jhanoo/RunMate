@@ -142,7 +142,9 @@
             h.calories,
             h.avg_cadence,
             h.avg_elevation,
-            h.course_id
+            h.course_id,
+            h.start_time,
+            h.end_time
         FROM 
             histories h
         WHERE 
