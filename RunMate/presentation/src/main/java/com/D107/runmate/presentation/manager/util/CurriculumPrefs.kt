@@ -23,34 +23,13 @@ object CurriculumPrefs {
         Timber.d("커리큘럼 새로고침 시간이 저장되었습니다: $formattedDate ($currentTime)")
     }
 
-    fun canRefresh(context: Context): Boolean {
-        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        val lastRefreshTime = prefs.getLong(KEY_LAST_REFRESH, 0L)
-
-        // 저장된 값이 없으면 true 반환 (첫 실행 시 항상 가능)
-        if (lastRefreshTime == 0L) {
-            Timber.d("커리큘럼 새로고침 시간이 아직 저장되지 않았습니다. 새로고침 가능.")
-            return true
-        }
-
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-        val formattedDate = dateFormat.format(Date(lastRefreshTime))
-
-        val currentTime = System.currentTimeMillis()
-        val diffDays = TimeUnit.MILLISECONDS.toDays(currentTime - lastRefreshTime)
-
-        val canRefresh = diffDays >= 7
-        Timber.d("마지막 새로고침 시간: $formattedDate, 경과 시간: ${diffDays}일, 새로고침 가능 여부: $canRefresh")
-
-        return canRefresh // 7일 후에 refresh 가능하도록 설정
-    }
-
 //    fun canRefresh(context: Context): Boolean {
 //        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 //        val lastRefreshTime = prefs.getLong(KEY_LAST_REFRESH, 0L)
 //
 //        // 저장된 값이 없으면 true 반환 (첫 실행 시 항상 가능)
 //        if (lastRefreshTime == 0L) {
+//            Timber.d("커리큘럼 새로고침 시간이 아직 저장되지 않았습니다. 새로고침 가능.")
 //            return true
 //        }
 //
@@ -58,12 +37,33 @@ object CurriculumPrefs {
 //        val formattedDate = dateFormat.format(Date(lastRefreshTime))
 //
 //        val currentTime = System.currentTimeMillis()
-//        val diffMinutes = TimeUnit.MILLISECONDS.toMinutes(currentTime - lastRefreshTime)
+//        val diffDays = TimeUnit.MILLISECONDS.toDays(currentTime - lastRefreshTime)
 //
-//        val canRefresh = diffMinutes >= 1
+//        val canRefresh = diffDays >= 7
+//        Timber.d("마지막 새로고침 시간: $formattedDate, 경과 시간: ${diffDays}일, 새로고침 가능 여부: $canRefresh")
 //
-//        return canRefresh // 1분 후에 refresh 가능하도록 설정
+//        return canRefresh // 7일 후에 refresh 가능하도록 설정
 //    }
+
+    fun canRefresh(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val lastRefreshTime = prefs.getLong(KEY_LAST_REFRESH, 0L)
+
+        // 저장된 값이 없으면 true 반환 (첫 실행 시 항상 가능)
+        if (lastRefreshTime == 0L) {
+            return true
+        }
+
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        val formattedDate = dateFormat.format(Date(lastRefreshTime))
+
+        val currentTime = System.currentTimeMillis()
+        val diffMinutes = TimeUnit.MILLISECONDS.toMinutes(currentTime - lastRefreshTime)
+
+        val canRefresh = diffMinutes >= 1
+
+        return canRefresh // 1분 후에 refresh 가능하도록 설정
+    }
 
     // SharedPreferences에 저장된 모든 값 출력 (디버깅용)
     fun logAllPreferences(context: Context) {

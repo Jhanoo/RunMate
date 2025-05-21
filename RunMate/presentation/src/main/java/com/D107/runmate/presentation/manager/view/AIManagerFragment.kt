@@ -35,6 +35,7 @@ import android.widget.RadioGroup
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.D107.runmate.data.remote.api.MarathonService
 import com.D107.runmate.data.remote.common.ApiResponse
@@ -108,224 +109,254 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
         binding.ivRefresh.apply {
             setImageResource(if (canRefresh) R.drawable.refresh else R.drawable.refresh_no)
             isClickable = canRefresh
-            setOnClickListener(if (canRefresh) { _ -> showCurriculumModifyDialog() } else null)
+            setOnClickListener(if (canRefresh) { _ -> showInformModifyDialog() } else null)
         }
     }
 
-    private fun showCurriculumModifyDialog() {
-        CurriculumPrefs.saveRefreshTime(requireContext())
+    private fun showInformModifyDialog() {
+//        CurriculumPrefs.saveRefreshTime(requireContext())
         val dialog = Dialog(requireContext())
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        dialog.setContentView(R.layout.dialog_curriculum_modify)
+        dialog.setContentView(R.layout.dialog_new_curriculum)
 
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.window?.setLayout(
-            ViewGroup.LayoutParams.MATCH_PARENT,
+            (resources.displayMetrics.widthPixels * 0.9).toInt(),
             ViewGroup.LayoutParams.WRAP_CONTENT
         )
 
-        val curriculumViewModel = ViewModelProvider(requireActivity()).get(CurriculumViewModel::class.java)
-        val currentCurriculum = curriculumViewModel.myCurriculum.value?.getOrNull()
-
-        if (currentCurriculum == null) {
-            Toast.makeText(requireContext(), "커리큘럼 정보를 가져올 수 없습니다", Toast.LENGTH_SHORT).show()
-            dialog.dismiss()
-            return
-        }
-
         val btnClose = dialog.findViewById<ImageView>(R.id.btn_close)
-        val btnConfirm = dialog.findViewById<Button>(R.id.btn_confirm)
-
-        val etMarathonName = dialog.findViewById<EditText>(R.id.et_marathon_name)
-        val distanceGroup = dialog.findViewById<RadioGroup>(R.id.distance_options)
-        val prepGroup = dialog.findViewById<RadioGroup>(R.id.preparation_options)
-
-        // 모든 거리 라디오 버튼의 텍스트 색상 초기화
-        for (i in 0 until distanceGroup.childCount) {
-            val radioButton = distanceGroup.getChildAt(i) as RadioButton
-            radioButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
-        }
-
-        // 모든 준비기간 라디오 버튼의 텍스트 색상 초기화
-        for (i in 0 until prepGroup.childCount) {
-            val radioButton = prepGroup.getChildAt(i) as RadioButton
-            radioButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
-        }
-
-        // 선택된 버튼의 텍스트 색상 설정
-        distanceGroup.findViewById<RadioButton>(distanceGroup.checkedRadioButtonId)?.setTextColor(
-            ContextCompat.getColor(requireContext(), R.color.white)
-        )
-
-        prepGroup.findViewById<RadioButton>(prepGroup.checkedRadioButtonId)?.setTextColor(
-            ContextCompat.getColor(requireContext(), R.color.white)
-        )
-
-        // 거리 라디오 그룹 선택 리스너 설정
-        distanceGroup.setOnCheckedChangeListener { group, checkedId ->
-            // 모든 버튼 텍스트 색상 초기화
-            for (i in 0 until group.childCount) {
-                val radioButton = group.getChildAt(i) as RadioButton
-                radioButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
-            }
-
-            // 선택된 버튼 텍스트 색상 변경
-            group.findViewById<RadioButton>(checkedId)?.setTextColor(
-                ContextCompat.getColor(requireContext(), R.color.white)
-            )
-        }
-
-        // 준비기간 라디오 그룹 선택 리스너 설정
-        prepGroup.setOnCheckedChangeListener { group, checkedId ->
-            // 모든 버튼 텍스트 색상 초기화
-            for (i in 0 until group.childCount) {
-                val radioButton = group.getChildAt(i) as RadioButton
-                radioButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
-            }
-
-            // 선택된 버튼 텍스트 색상 변경
-            group.findViewById<RadioButton>(checkedId)?.setTextColor(
-                ContextCompat.getColor(requireContext(), R.color.white)
-            )
-        }
 
         btnClose.setOnClickListener {
             dialog.dismiss()
         }
 
-        Timber.d("마라톤 정보 가져오기 시작:  ${currentCurriculum.marathonId}")
-
-        // 마라톤 ID로 마라톤 정보 요청
-        curriculumViewModel.getMarathonById(currentCurriculum.marathonId)
-
-        // 마라톤 정보 가져오기
-        lifecycleScope.launch {
-            // 마라톤 정보 관찰
-            curriculumViewModel.marathonInfo.collect { marathonResult ->
-                marathonResult?.fold(
-                    onSuccess = { marathon ->
-                        Timber.d("마라톤 정보 가져오기 성공: ${marathon.title}")
-
-                        // marathon은 이제 MarathonInfo 타입입니다
-                        etMarathonName.setText(marathon.title)
-
-                        // 현재 거리 선택
-                        when (currentCurriculum.goalDist) {
-                            "5km" -> {
-                                distanceGroup.check(R.id.rb_run_0)
-                                distanceGroup.findViewById<RadioButton>(R.id.rb_run_0)?.setTextColor(
-                                    ContextCompat.getColor(requireContext(), R.color.white)
-                                )
-                            }
-                            "10km" -> {
-                                distanceGroup.check(R.id.rb_run_1_2)
-                                distanceGroup.findViewById<RadioButton>(R.id.rb_run_1_2)?.setTextColor(
-                                    ContextCompat.getColor(requireContext(), R.color.white)
-                                )
-                            }
-                            "21.0975km", "21km" -> {
-                                distanceGroup.check(R.id.rb_run_3_4)
-                                distanceGroup.findViewById<RadioButton>(R.id.rb_run_3_4)?.setTextColor(
-                                    ContextCompat.getColor(requireContext(), R.color.white)
-                                )
-                            }
-                            "42.195km", "42km" -> {
-                                distanceGroup.check(R.id.rb_run_5_more)
-                                distanceGroup.findViewById<RadioButton>(R.id.rb_run_5_more)?.setTextColor(
-                                    ContextCompat.getColor(requireContext(), R.color.white)
-                                )
-                            }
-                        }
-                    },
-                    onFailure = { error ->
-                        Timber.e("마라톤 정보 가져오기 실패: ${error.message}")
-                    }
-                )
-            }
-        }
+        val btnConfirm = dialog.findViewById<Button>(R.id.btn_create_curriculum)
 
         btnConfirm.setOnClickListener {
             CurriculumPrefs.saveRefreshTime(requireContext())
 
-            // 선택된 거리 값 가져오기
-            val goalDist = when (distanceGroup.checkedRadioButtonId) {
-                R.id.rb_run_0 -> "5km"
-                R.id.rb_run_1_2 -> "10km"
-                R.id.rb_run_3_4 -> "21.0975km"
-                R.id.rb_run_5_more -> "42.195km"
-                else -> "10km"
-            }
-
-            // 준비 기간에 따라 목표 날짜 계산
-            val calendar = Calendar.getInstance()
-            val weeksToAdd = when (prepGroup.checkedRadioButtonId) {
-                R.id.rb_prev_0 -> 4
-                R.id.rb_prev_1 -> 6
-                R.id.rb_prev_3 -> 8
-                R.id.rb_prev_4 -> 12
-                R.id.rb_prev_5 -> 20
-                else -> 6
-            }
-            calendar.add(Calendar.WEEK_OF_YEAR, weeksToAdd)
-
-            // ISO 8601 형식으로 변환
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.getDefault())
-            val goalDate = dateFormat.format(calendar.time)
-
-            // 커리큘럼 업데이트
-            val updatedCurriculum = currentCurriculum.copy(
-                goalDist = goalDist,
-                goalDate = goalDate
-            )
-            CurriculumPrefs.saveRefreshTime(requireContext())
-
             dialog.dismiss()
 
-            findNavController().navigate(
-                R.id.AIManagerLoadingFragment,
-                null,
-                androidx.navigation.NavOptions.Builder()
-                    .setPopUpTo(R.id.AIManagerFragment, true)  // AIManagerFragment에서 시작
-                    .build()
-            )
-
-            curriculumViewModel.updateCurriculum(updatedCurriculum)
-
-            // 결과 관찰
-            lifecycleScope.launch {
-                curriculumViewModel.curriculumCreationResult.collect { result ->
-                    result?.fold(
-                        onSuccess = { curriculumId ->
-                            Timber.d("커리큘럼 업데이트 성공: ${curriculumId}")
-
-                            // AIManagerFragment로 이동
-                            findNavController().navigate(
-                                R.id.AIManagerFragment,
-                                bundleOf("curriculumId" to curriculumId),
-                                androidx.navigation.NavOptions.Builder()
-                                    .setPopUpTo(R.id.AIManagerLoadingFragment, true)
-                                    .build()
-                            )
-
-                            updateRefreshButton()
-                        },
-                        onFailure = { error ->
-                            Timber.e("커리큘럼 업데이트 실패: ${error.message}")
-                            Toast.makeText(requireContext(), "커리큘럼 업데이트 실패: ${error.message}", Toast.LENGTH_SHORT).show()
-
-                            // 오류 발생 시 AIManagerFragment로 돌아가기
-                            findNavController().popBackStack()
-                        }
-                    )
-                }
-            }
-
-
-            Toast.makeText(context, "목표가 수정되었습니다", Toast.LENGTH_SHORT).show()
+            findNavController().navigate(R.id.AIManagerExpMarathonFragment)
         }
-
         dialog.show()
     }
+
+//    private fun showCurriculumModifyDialog() {
+//        CurriculumPrefs.saveRefreshTime(requireContext())
+//        val dialog = Dialog(requireContext())
+//        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+//        dialog.setContentView(R.layout.dialog_curriculum_modify)
+//
+//        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+//        dialog.window?.setLayout(
+//            ViewGroup.LayoutParams.MATCH_PARENT,
+//            ViewGroup.LayoutParams.WRAP_CONTENT
+//        )
+//
+//        val curriculumViewModel = ViewModelProvider(requireActivity()).get(CurriculumViewModel::class.java)
+//        val currentCurriculum = curriculumViewModel.myCurriculum.value?.getOrNull()
+//
+//        if (currentCurriculum == null) {
+//            Toast.makeText(requireContext(), "커리큘럼 정보를 가져올 수 없습니다", Toast.LENGTH_SHORT).show()
+//            dialog.dismiss()
+//            return
+//        }
+//
+//        val btnClose = dialog.findViewById<ImageView>(R.id.btn_close)
+//        val btnConfirm = dialog.findViewById<Button>(R.id.btn_confirm)
+//
+//        val etMarathonName = dialog.findViewById<EditText>(R.id.et_marathon_name)
+//        val distanceGroup = dialog.findViewById<RadioGroup>(R.id.distance_options)
+//        val prepGroup = dialog.findViewById<RadioGroup>(R.id.preparation_options)
+//
+//        // 모든 거리 라디오 버튼의 텍스트 색상 초기화
+//        for (i in 0 until distanceGroup.childCount) {
+//            val radioButton = distanceGroup.getChildAt(i) as RadioButton
+//            radioButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+//        }
+//
+//        // 모든 준비기간 라디오 버튼의 텍스트 색상 초기화
+//        for (i in 0 until prepGroup.childCount) {
+//            val radioButton = prepGroup.getChildAt(i) as RadioButton
+//            radioButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+//        }
+//
+//        // 선택된 버튼의 텍스트 색상 설정
+//        distanceGroup.findViewById<RadioButton>(distanceGroup.checkedRadioButtonId)?.setTextColor(
+//            ContextCompat.getColor(requireContext(), R.color.white)
+//        )
+//
+//        prepGroup.findViewById<RadioButton>(prepGroup.checkedRadioButtonId)?.setTextColor(
+//            ContextCompat.getColor(requireContext(), R.color.white)
+//        )
+//
+//        // 거리 라디오 그룹 선택 리스너 설정
+//        distanceGroup.setOnCheckedChangeListener { group, checkedId ->
+//            // 모든 버튼 텍스트 색상 초기화
+//            for (i in 0 until group.childCount) {
+//                val radioButton = group.getChildAt(i) as RadioButton
+//                radioButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+//            }
+//
+//            // 선택된 버튼 텍스트 색상 변경
+//            group.findViewById<RadioButton>(checkedId)?.setTextColor(
+//                ContextCompat.getColor(requireContext(), R.color.white)
+//            )
+//        }
+//
+//        // 준비기간 라디오 그룹 선택 리스너 설정
+//        prepGroup.setOnCheckedChangeListener { group, checkedId ->
+//            // 모든 버튼 텍스트 색상 초기화
+//            for (i in 0 until group.childCount) {
+//                val radioButton = group.getChildAt(i) as RadioButton
+//                radioButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+//            }
+//
+//            // 선택된 버튼 텍스트 색상 변경
+//            group.findViewById<RadioButton>(checkedId)?.setTextColor(
+//                ContextCompat.getColor(requireContext(), R.color.white)
+//            )
+//        }
+//
+//        btnClose.setOnClickListener {
+//            dialog.dismiss()
+//        }
+//
+//        Timber.d("마라톤 정보 가져오기 시작:  ${currentCurriculum.marathonId}")
+//
+//        // 마라톤 ID로 마라톤 정보 요청
+//        curriculumViewModel.getMarathonById(currentCurriculum.marathonId)
+//
+//        // 마라톤 정보 가져오기
+//        lifecycleScope.launch {
+//            // 마라톤 정보 관찰
+//            curriculumViewModel.marathonInfo.collect { marathonResult ->
+//                marathonResult?.fold(
+//                    onSuccess = { marathon ->
+//                        Timber.d("마라톤 정보 가져오기 성공: ${marathon.title}")
+//
+//                        // marathon은 이제 MarathonInfo 타입입니다
+//                        etMarathonName.setText(marathon.title)
+//
+//                        // 현재 거리 선택
+//                        when (currentCurriculum.goalDist) {
+//                            "5km" -> {
+//                                distanceGroup.check(R.id.rb_run_0)
+//                                distanceGroup.findViewById<RadioButton>(R.id.rb_run_0)?.setTextColor(
+//                                    ContextCompat.getColor(requireContext(), R.color.white)
+//                                )
+//                            }
+//                            "10km" -> {
+//                                distanceGroup.check(R.id.rb_run_1_2)
+//                                distanceGroup.findViewById<RadioButton>(R.id.rb_run_1_2)?.setTextColor(
+//                                    ContextCompat.getColor(requireContext(), R.color.white)
+//                                )
+//                            }
+//                            "21.0975km", "21km" -> {
+//                                distanceGroup.check(R.id.rb_run_3_4)
+//                                distanceGroup.findViewById<RadioButton>(R.id.rb_run_3_4)?.setTextColor(
+//                                    ContextCompat.getColor(requireContext(), R.color.white)
+//                                )
+//                            }
+//                            "42.195km", "42km" -> {
+//                                distanceGroup.check(R.id.rb_run_5_more)
+//                                distanceGroup.findViewById<RadioButton>(R.id.rb_run_5_more)?.setTextColor(
+//                                    ContextCompat.getColor(requireContext(), R.color.white)
+//                                )
+//                            }
+//                        }
+//                    },
+//                    onFailure = { error ->
+//                        Timber.e("마라톤 정보 가져오기 실패: ${error.message}")
+//                    }
+//                )
+//            }
+//        }
+//
+//        btnConfirm.setOnClickListener {
+//            CurriculumPrefs.saveRefreshTime(requireContext())
+//
+//            // 선택된 거리 값 가져오기
+//            val goalDist = when (distanceGroup.checkedRadioButtonId) {
+//                R.id.rb_run_0 -> "5km"
+//                R.id.rb_run_1_2 -> "10km"
+//                R.id.rb_run_3_4 -> "21.0975km"
+//                R.id.rb_run_5_more -> "42.195km"
+//                else -> "10km"
+//            }
+//
+//            // 준비 기간에 따라 목표 날짜 계산
+//            val calendar = Calendar.getInstance()
+//            val weeksToAdd = when (prepGroup.checkedRadioButtonId) {
+//                R.id.rb_prev_0 -> 4
+//                R.id.rb_prev_1 -> 6
+//                R.id.rb_prev_3 -> 8
+//                R.id.rb_prev_4 -> 12
+//                R.id.rb_prev_5 -> 20
+//                else -> 6
+//            }
+//            calendar.add(Calendar.WEEK_OF_YEAR, weeksToAdd)
+//
+//            // ISO 8601 형식으로 변환
+//            val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.getDefault())
+//            val goalDate = dateFormat.format(calendar.time)
+//
+//            // 커리큘럼 업데이트
+//            val updatedCurriculum = currentCurriculum.copy(
+//                goalDist = goalDist,
+//                goalDate = goalDate
+//            )
+//            CurriculumPrefs.saveRefreshTime(requireContext())
+//
+//            dialog.dismiss()
+//
+//            findNavController().navigate(
+//                R.id.AIManagerLoadingFragment,
+//                null,
+//                androidx.navigation.NavOptions.Builder()
+//                    .setPopUpTo(R.id.AIManagerFragment, true)  // AIManagerFragment에서 시작
+//                    .build()
+//            )
+//
+//            curriculumViewModel.updateCurriculum(updatedCurriculum)
+//
+//            // 결과 관찰
+//            lifecycleScope.launch {
+//                curriculumViewModel.curriculumCreationResult.collect { result ->
+//                    result?.fold(
+//                        onSuccess = { curriculumId ->
+//                            Timber.d("커리큘럼 업데이트 성공: ${curriculumId}")
+//
+//                            // AIManagerFragment로 이동
+//                            findNavController().navigate(
+//                                R.id.AIManagerFragment,
+//                                bundleOf("curriculumId" to curriculumId),
+//                                androidx.navigation.NavOptions.Builder()
+//                                    .setPopUpTo(R.id.AIManagerLoadingFragment, true)
+//                                    .build()
+//                            )
+//
+//                            updateRefreshButton()
+//                        },
+//                        onFailure = { error ->
+//                            Timber.e("커리큘럼 업데이트 실패: ${error.message}")
+//                            Toast.makeText(requireContext(), "커리큘럼 업데이트 실패: ${error.message}", Toast.LENGTH_SHORT).show()
+//
+//                            // 오류 발생 시 AIManagerFragment로 돌아가기
+//                            findNavController().popBackStack()
+//                        }
+//                    )
+//                }
+//            }
+//
+//
+//            Toast.makeText(context, "목표가 수정되었습니다", Toast.LENGTH_SHORT).show()
+//        }
+//
+//        dialog.show()
+//    }
 
     override fun onResume() {
         super.onResume()
