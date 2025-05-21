@@ -48,6 +48,6 @@ object GpxModule {
         gpxDao: com.D107.runmate.watch.data.local.GpxDao,
         apiService: GpxApiService
     ): GpxRepository {
-        return GpxRepositoryImpl(context, gpxDao, apiService)
+        return GpxRepositoryImpl(context, gpxDao)
     }
 }
