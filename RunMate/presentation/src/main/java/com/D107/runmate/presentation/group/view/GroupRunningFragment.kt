@@ -390,27 +390,27 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
                     if (state is RunningRecordState.Exist) {
                         if (state.runningRecords.size > 1) {
                             val locationValue = mainViewModel.userLocation.value
-                            if (locationValue is UserLocationState.Exist) {
-                                if(locationValue.locations.size>1) {
-                                    val currentLocation = LatLng.from(
-                                        locationValue.locations.last().latitude,
-                                        locationValue.locations.last().longitude
-                                    )
-                                    val prevLocation = LatLng.from(
-                                        locationValue.locations[locationValue.locations.size - 2].latitude,
-                                        locationValue.locations[locationValue.locations.size - 2].longitude
-                                    )
-                                    mContext?.let {
-                                        kakaoMap?.let {
-                                            addCoursePoint(
-                                                mContext!!,
-                                                kakaoMap!!,
-                                                prevLocation,
-                                                currentLocation
-                                            )
-                                        }
+                            if (locationValue is UserLocationState.Exist && locationValue.locations.size > 1) {
+
+                                val currentLocation = LatLng.from(
+                                    locationValue.locations.last().latitude,
+                                    locationValue.locations.last().longitude
+                                )
+                                val prevLocation = LatLng.from(
+                                    locationValue.locations[locationValue.locations.size - 2].latitude,
+                                    locationValue.locations[locationValue.locations.size - 2].longitude
+                                )
+                                mContext?.let {
+                                    kakaoMap?.let {
+                                        addCoursePoint(
+                                            mContext!!,
+                                            kakaoMap!!,
+                                            prevLocation,
+                                            currentLocation
+                                        )
                                     }
                                 }
+
 
                             }
                         }
@@ -453,8 +453,8 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
                     setCameraUpdateAndAddMarker(state)
                     viewLifecycleOwner.lifecycleScope.launch {
                         withContext(Dispatchers.IO) {
-                            val latlngList:List<LatLng> = state.locations.map {
-                                LatLng.from(it.latitude,it.longitude)
+                            val latlngList: List<LatLng> = state.locations.map {
+                                LatLng.from(it.latitude, it.longitude)
                             }
                             KakaoMapUtil.addMoveLine(requireContext(), kakaoMap!!, latlngList)
                         }
@@ -735,7 +735,7 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
         return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
     }
 
-    fun handleLocationUpdate(locationData : MemberLocationData) {
+    fun handleLocationUpdate(locationData: MemberLocationData) {
         if (kakaoMap == null) {
             Timber.w("KakaoMap is not ready yet.")
             return

@@ -34,7 +34,9 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.D107.runmate.data.remote.api.MarathonService
@@ -88,14 +90,16 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
         val curriculumViewModel = ViewModelProvider(requireActivity()).get(CurriculumViewModel::class.java)
 
         // 현재 커리큘럼 정보 가져오기
-        lifecycleScope.launch {
-            curriculumViewModel.myCurriculum.collect { result ->
-                result?.getOrNull()?.let { curriculum ->
-                    // goalDist 값 가져오기
-                    val goalDist = curriculum.goalDist
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                curriculumViewModel.myCurriculum.collect { result ->
+                    result?.getOrNull()?.let { curriculum ->
+                        // goalDist 값 가져오기
+                        val goalDist = curriculum.goalDist
 
-                    // TextView에 설정
-                    binding.tvGoalValue.text = goalDist
+                        // TextView에 설정
+                        binding.tvGoalValue.text = goalDist
+                    }
                 }
             }
         }
@@ -512,7 +516,7 @@ class AIManagerFragment : BaseFragment<FragmentAIManagerBinding>(
                     day = formattedDay,
                     scheduleText = todo.content,
 //                    isCompleted = true,
-                    isCompleted = todo.isDone ?: false,
+                    isCompleted = todo.isDone
 //                    todoId = todo.todoId
                 )
             } catch (e: Exception) {

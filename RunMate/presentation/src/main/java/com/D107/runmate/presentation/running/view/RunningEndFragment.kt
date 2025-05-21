@@ -79,6 +79,7 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
         viewLifecycleOwner.lifecycleScope.launch {
             mainViewModel.runningRecord.collectLatest {
                 if (it is RunningRecordState.Exist) {
+                    Timber.d("running record $it")
                     val time = mainViewModel.time.value
                     val lastRecord = it.runningRecords.last()
                     val firstRecord = it.runningRecords.first()
