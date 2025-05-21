@@ -72,16 +72,38 @@ public class RunServiceImpl implements RunService {
         Todo todo = curriculumDao.selectTodayTodoByUserId(userId);
 
         if (todo != null && todo.getIsDone() != null && !todo.getIsDone()) {
-            Pattern p = Pattern.compile("^([0-9]+(?:\\.[0-9]+)?)km.*");
-            Matcher m = p.matcher(todo.getContent());
+            String content = todo.getContent();
 
-            if (m.find()) {
-                double todoDist = Double.parseDouble(m.group(1));
+            double requiredDistKm = 0.0;
 
-                if (todoDist * 0.95 <= history.getDistance()) {
-                    curriculumDao.updateTodoDone(todo.getTodoId());
+            if (content.startsWith("인터벌:")) {
+                Pattern intervalPattern = Pattern.compile("(\\d+(?:\\.\\d+)?)m\\s*[×x]\\s*(\\d+)회");
+                Matcher intervalMatcher = intervalPattern.matcher(content);
+                if (intervalMatcher.find()) {
+                    double distancePerIntervalM = Double.parseDouble(intervalMatcher.group(1));
+                    int repeatCount = Integer.parseInt(intervalMatcher.group(2));
+                    requiredDistKm = (distancePerIntervalM * repeatCount) / 1000.0;
+                }
+            } else if (content.startsWith("템포런:")) {
+                // 템포런 구간 거리 합산
+                Pattern tempoPattern = Pattern.compile("(\\d+(?:\\.\\d+)?)km");
+                Matcher tempoMatcher = tempoPattern.matcher(content);
+                while (tempoMatcher.find()) {
+                    requiredDistKm += Double.parseDouble(tempoMatcher.group(1));
+                }
+            } else {
+                // 일반 km 기반 훈련 (LSD, 회복주 등)
+                Pattern p = Pattern.compile("^[^:]+:\\s*(\\d+(?:\\.\\d+)?)km.*");
+                Matcher m = p.matcher(content);
+                if (m.find()) {
+                    requiredDistKm = Double.parseDouble(m.group(1));
                 }
             }
+
+            if (requiredDistKm > 0 && requiredDistKm * 0.95 <= history.getDistance()) {
+                curriculumDao.updateTodoDone(todo.getTodoId());
+            }
+
         }
         return history.getHistoryId();
     }
