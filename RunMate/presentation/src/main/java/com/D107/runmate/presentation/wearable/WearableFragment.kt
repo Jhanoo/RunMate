@@ -653,7 +653,7 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
         val ivManagerLoadingDiagnosis = dialogView.findViewById<ImageView>(R.id.iv_manager_loading_diagnosis) // 배경 이미지
         val ivGifTonieDiagnosis = dialogView.findViewById<ImageView>(R.id.iv_gif_tonie_diagnosis) // Tonie GIF
 
-        messageTextView.text = "10초 동안 데이터를 측정합니다..."
+        messageTextView.text = "15초 동안 데이터를 측정합니다..."
 
         val builder = AlertDialog.Builder(requireContext())
             .setView(dialogView)
