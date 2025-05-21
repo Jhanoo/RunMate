@@ -153,79 +153,83 @@ public class CurriculumServiceImpl implements CurriculumService {
     private String buildPrompt(List<History> histories, CurriculumCreateRequest req) {
         // 1. 서울 시간대로 오늘과 시작 날짜 계산
         ZoneId seoul = ZoneId.of("Asia/Seoul");
-        LocalDate todaySeoul = LocalDate.now(seoul);
-        // 다음 날부터 훈련을 시작한다고 가정
-        LocalDate startDate = todaySeoul.plusDays(1);
+        LocalDate startDate = LocalDate.now(seoul);
         LocalDate goalDate = req.getGoalDate().toLocalDate();
-        // 날짜 포맷터 (예: "2025-06-01")
         DateTimeFormatter fmt = DateTimeFormatter.ISO_LOCAL_DATE;
 
         StringBuilder sb = new StringBuilder();
 
-        // (A) 프롬프트 역할 설정
+        // (A) 역할 및 목적
         sb.append("당신은 전문 마라톤 트레이너입니다.\n");
-        sb.append("사용자의 다음 정보를 바탕으로 과학적 근거에 기반해 마라톤 훈련 계획을 생성해주세요.\n\n");
+        sb.append("사용자의 정보를 바탕으로 과학적 근거에 기반한 맞춤형 마라톤 훈련 계획을 생성해주세요.\n\n");
 
-        // (B) 목표 정보
+        // (B) 사용자 정보
         sb.append("### 사용자 정보\n")
-                .append("- 목표 마라톤 거리: ").append(req.getGoalDist()).append("\n")
+                .append("- 목표 마라톤 거리: ").append(req.getGoalDist()).append("km\n")
                 .append("- 목표 날짜: ").append(goalDate.format(fmt)).append("\n")
                 .append("- 훈련 시작 날짜: ").append(startDate.format(fmt)).append("\n")
                 .append("- 마라톤 경험: ").append(req.isRunExp() ? "있음" : "없음").append("\n")
-                .append("- 현재 달릴 수 있는 최대 거리: ").append(req.getDistExp()).append("\n")
-                .append("- 일주일 달리기 빈도: ").append(req.getFreqExp()).append("\n\n");
+                .append("- 최대 달리기 거리: ").append(req.getDistExp()).append("km\n")
+                .append("- 주간 주행 빈도: ").append(req.getFreqExp()).append("회\n\n");
 
-        // (C) 최근 1달 기록
+        // (C) 최근 기록 (이상치 제외)
         if (!histories.isEmpty()) {
             sb.append("### 최근 러닝 기록:\n");
             int idx = 1;
             for (History h : histories) {
-                // 거리 0.1km 미만, 페이스가 비현실적(2분/km 미만 또는 15분/km 초과), 심박수가 비정상(40미만, 220초과)인 경우 제외
                 if (h.getDistance() < 0.1
                         || h.getAvgPace() < 2 || h.getAvgPace() > 15
-                        || h.getAvgBpm() < 40 || h.getAvgBpm() > 220) {
-                    continue;
-                }
-
+                        || h.getAvgBpm() < 40 || h.getAvgBpm() > 220) continue;
                 sb.append(idx++).append(". ")
                         .append("시작: ").append(h.getStartTime()).append(", ")
                         .append("종료: ").append(h.getEndTime()).append(", ")
                         .append("거리: ").append(h.getDistance()).append("km, ")
-                        .append("평균 케이던스: ").append(h.getAvgCadence()).append("spm, ")
-                        .append("평균 페이스: ").append(h.getAvgPace()).append("min/km, ")
-                        .append("평균 심박수: ").append(h.getAvgBpm()).append("bpm\n");
+                        .append("케이던스: ").append(h.getAvgCadence()).append("spm, ")
+                        .append("페이스: ").append(h.getAvgPace()).append("min/km, ")
+                        .append("심박: ").append(h.getAvgBpm()).append("bpm\n");
             }
             sb.append("\n");
         }
 
-        sb.append("### 훈련 계획 생성 원칙 (필수 준수)\n")
-                .append("1. 훈련 계획은 일주일 단위로 구성하고, 다음 요소들을 반드시 포함합니다:\n")
-                .append("  - 장거리 LSD 주 1회 (전체 거리의 30~80%, 페이스는 마라톤 목표페이스보다 60~90초/km 느림)\n")
-                .append("  - 템포런 또는 젖산역치 훈련 주 1회 (5km 또는 10km 레이스 페이스로 20~40분)\n")
-                .append("  - 인터벌 훈련 주 1회 (최대산소섭취량 VO2max 향상을 위한 고강도 반복주)\n")
-                .append("  - 회복주 주 1~2회 (가볍게 천천히 3~8km)\n")
-                .append("2. 매주 최소 하루는 완전 휴식일을 포함합니다.\n")
-                .append("3. 사용자의 최근 기록을 고려하여 현실적이고 무리 없는 계획을 제안합니다.\n")
-                .append("4. 각 훈련의 목적을 명시적으로 포함합니다 (예: 장거리주 - 유산소 지구력 향상).\n")
-                .append("5. 사용자의 훈련 시작 날짜부터 목표 날짜까지 모든 날짜에 대해 하루도 빠짐없이 매일 단위의 훈련 계획을 제공해야 합니다.\n\n");
+        // (D) 이론적 근거: 에너지 시스템 및 지구력 유형
+        sb.append("### 에너지 시스템 및 지구력 유형\n")
+                .append("- STE(단거리): 35초–2분, 최대강도, HR 185–195bpm, VO₂max 100%, 젖산 10–18 mmol/L\n")
+                .append("- MTE(중거리): 2–10분, 최대강도, HR 190–200bpm, VO₂max 95–100%, 젖산 12–20 mmol/L\n")
+                .append("- LTE(장거리): 10분–6시간 이상, 중간~저강도, HR 60–80% HRmax, VO₂max 50–90%, 젖산 <5 mmol/L\n\n");
 
-        sb.append("### 거리 표기 양식 (필수 준수)\n")
-                .append("1. 모든 거리는 숫자 뒤에 단위와 함께 붙여 씁니다. (예: 12km)\n")
-                .append("2. 인터벌 반복 표기는 “거리단위 x 횟수” 형태로 씁니다. (예: 0.8km x 4회)\n");
+        // (E) 훈련 방식 및 페이스 가이드
+        sb.append("### 훈련 방식 및 페이스 가이드라인\n")
+                .append("- 회복주: Zone1 (60–70% HRmax), 7:30–8:30 min/km\n")
+                .append("- 장거리 지구력주: Zone2 (70–85% HRmax), 목표페이스 +60–90초/km\n")
+                .append("- 중간 속도 지속주: Zone3 (85–90% HRmax), 페이스 3:55–3:42 min/km\n")
+                .append("- 템포주: 5–10 km, 레이스페이스 ±10%, 20–40분 유지\n")
+                .append("- 인터벌: 확장형 8–15분 부하(60–70% 부하), 단기형 100–400 m 스퍼트(레이스페이스), 회복 조깅 400 m\n")
+                .append("- 파틀렉: 1–2시간, 예열 + 스퍼트(50–200 m) + 조깅/언덕 반복 + 쿨다운\n\n");
 
-        // (D) 출력 형식 지시
+        // (F) 주간 블록 구성
+        sb.append("### 주간 훈련 블록 구성\n")
+                .append("1. 중간 속도 지속주 1회  2. 장거리 지구력주 1회  3. 템포주 1회\n")
+                .append("4. 인터벌 1회  5. 파틀렉 1회  6. 회복주 1–2회  7. 휴식일 1회\n\n");
+
+        // (G) 거리 표기 양식
+        sb.append("### 거리 표기 양식\n")
+                .append("1. 숫자+단위(km) 예: 12km, 0.8km\n")
+                .append("2. 인터벌 반복: 거리 x 횟수 예: 0.8km x 4회\n")
+                .append("3. 구간별 표기(템포/회복): 쉼표 구분 km 예: 2km, 2km, 1km\n\n");
+
+        // (H) 출력 JSON 스키마
         sb.append("### 출력 JSON 요구사항\n")
-                .append("훈련 계획은 반드시 다음 형식으로만 제공합니다:\n")
+                .append("- 데이터 배열에는 훈련 시작 날짜(" + startDate.format(fmt) + ")부터 목표 날짜(" + goalDate.format(fmt) + ")까지 모든 날짜(휴식일 포함)가 누락 없이 포함되어야 합니다.\n")
                 .append("```json\n")
                 .append("{\n")
                 .append("  \"data\": [\n")
-                .append("    {\"date\": \"YYYY-MM-DD\", \"todo\": \"<훈련종류>: <거리>km, <추천 페이스 또는 심박존>, 목적: <훈련 목적>\"},\n")
+                .append("    {\"date\": \"YYYY-MM-DD\", \"todo\": \"<훈련종류>: <거리><단위>(km 또는 m), <페이스/심박존>, 목적: <훈련 목적>\"},\n")
                 .append("    ...\n")
                 .append("  ]\n")
                 .append("}\n")
                 .append("```\n")
-                .append("- 추가 설명이나 메타데이터는 절대 포함하지 마십시오.\n")
-                .append("- 예시 Todo: \"장거리주: 15km, 6:30min/km 페이스, 목적: 유산소 지구력 향상\"\n");
+                .append("- 추가 설명/메타데이터 금지\n")
+                .append("- 예시: \"장거리 지구력주: 15km, 6:30min/km, 목적: 유산소 지구력 향상\"\n");
 
         return sb.toString();
     }

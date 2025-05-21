@@ -64,7 +64,7 @@ public class RunServiceImpl implements RunService {
         // 3-3) 평균 페이스 새롭게 계산
         double updatedAvgPace = (
                 ((prevAvg != null ? prevAvg : 0.0) * (count - 1)) + req.getAvgPace()
-                ) / count;
+        ) / count;
         // 3-4) users table update
         userDao.updateAvgPace(userId, updatedAvgPace);
         log.debug("User({}) avg_pace updated to {}", userId, updatedAvgPace);
@@ -77,23 +77,23 @@ public class RunServiceImpl implements RunService {
             double requiredDistKm = 0.0;
 
             if (content.startsWith("인터벌:")) {
-                Pattern intervalPattern = Pattern.compile("(\\d+(?:\\.\\d+)?)km\\s*[×x]\\s*(\\d+)회");
-                Matcher intervalMatcher = intervalPattern.matcher(content);
-                if (intervalMatcher.find()) {
-                    double distancePerIntervalM = Double.parseDouble(intervalMatcher.group(1));
-                    int repeatCount = Integer.parseInt(intervalMatcher.group(2));
-                    requiredDistKm = distancePerIntervalM * repeatCount;
+                Pattern p = Pattern.compile("(\\d+(?:\\.\\d+)?)km\\s*[×x]\\s*(\\d+)회");
+                Matcher m = p.matcher(content);
+                if (m.find()) {
+                    double distanceKm = Double.parseDouble(m.group(1));
+                    int repeatCount = Integer.parseInt(m.group(2));
+                    requiredDistKm = distanceKm * repeatCount;
                 }
-            } else if (content.startsWith("템포런:")) {
+            } else if (content.startsWith("템포주:")) {
                 // 템포런 구간 거리 합산
-                Pattern tempoPattern = Pattern.compile("(\\d+(?:\\.\\d+)?)km");
-                Matcher tempoMatcher = tempoPattern.matcher(content);
-                while (tempoMatcher.find()) {
-                    requiredDistKm += Double.parseDouble(tempoMatcher.group(1));
+                Pattern p = Pattern.compile("(\\d+(?:\\.\\d+)?)km");
+                Matcher m = p.matcher(content);
+                while (m.find()) {
+                    requiredDistKm += Double.parseDouble(m.group(1));
                 }
             } else {
                 // 일반 km 기반 훈련 (LSD, 회복주 등)
-                Pattern p = Pattern.compile("^[^:]+:\\s*(\\d+(?:\\.\\d+)?)km.*");
+                Pattern p = Pattern.compile("^[^:]+:\\s*(\\d+(?:\\.\\d+)?)km");
                 Matcher m = p.matcher(content);
                 if (m.find()) {
                     requiredDistKm = Double.parseDouble(m.group(1));
@@ -103,8 +103,8 @@ public class RunServiceImpl implements RunService {
             if (requiredDistKm > 0 && requiredDistKm * 0.95 <= history.getDistance()) {
                 curriculumDao.updateTodoDone(todo.getTodoId());
             }
-
         }
+        
         return history.getHistoryId();
     }
 }
