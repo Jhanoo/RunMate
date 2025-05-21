@@ -77,12 +77,12 @@ public class RunServiceImpl implements RunService {
             double requiredDistKm = 0.0;
 
             if (content.startsWith("인터벌:")) {
-                Pattern intervalPattern = Pattern.compile("(\\d+(?:\\.\\d+)?)m\\s*[×x]\\s*(\\d+)회");
+                Pattern intervalPattern = Pattern.compile("(\\d+(?:\\.\\d+)?)km\\s*[×x]\\s*(\\d+)회");
                 Matcher intervalMatcher = intervalPattern.matcher(content);
                 if (intervalMatcher.find()) {
                     double distancePerIntervalM = Double.parseDouble(intervalMatcher.group(1));
                     int repeatCount = Integer.parseInt(intervalMatcher.group(2));
-                    requiredDistKm = (distancePerIntervalM * repeatCount) / 1000.0;
+                    requiredDistKm = distancePerIntervalM * repeatCount;
                 }
             } else if (content.startsWith("템포런:")) {
                 // 템포런 구간 거리 합산

@@ -200,7 +200,7 @@ public class CurriculumServiceImpl implements CurriculumService {
 
         sb.append("### 훈련 계획 생성 원칙 (필수 준수)\n")
                 .append("1. 훈련 계획은 일주일 단위로 구성하고, 다음 요소들을 반드시 포함합니다:\n")
-                .append("  - 장거리 LSD 주 1회 (전체 거리의 30~50%, 페이스는 마라톤 목표페이스보다 60~90초/km 느림)\n")
+                .append("  - 장거리 LSD 주 1회 (전체 거리의 30~80%, 페이스는 마라톤 목표페이스보다 60~90초/km 느림)\n")
                 .append("  - 템포런 또는 젖산역치 훈련 주 1회 (5km 또는 10km 레이스 페이스로 20~40분)\n")
                 .append("  - 인터벌 훈련 주 1회 (최대산소섭취량 VO2max 향상을 위한 고강도 반복주)\n")
                 .append("  - 회복주 주 1~2회 (가볍게 천천히 3~8km)\n")
@@ -208,6 +208,10 @@ public class CurriculumServiceImpl implements CurriculumService {
                 .append("3. 사용자의 최근 기록을 고려하여 현실적이고 무리 없는 계획을 제안합니다.\n")
                 .append("4. 각 훈련의 목적을 명시적으로 포함합니다 (예: 장거리주 - 유산소 지구력 향상).\n")
                 .append("5. 사용자의 훈련 시작 날짜부터 목표 날짜까지 모든 날짜에 대해 하루도 빠짐없이 매일 단위의 훈련 계획을 제공해야 합니다.\n\n");
+
+        sb.append("### 거리 표기 양식 (필수 준수)\n")
+                .append("1. 모든 거리는 숫자 뒤에 단위와 함께 붙여 씁니다. (예: 12km)\n")
+                .append("2. 인터벌 반복 표기는 “거리단위 x 횟수” 형태로 씁니다. (예: 0.8km x 4회)\n");
 
         // (D) 출력 형식 지시
         sb.append("### 출력 JSON 요구사항\n")
@@ -222,7 +226,7 @@ public class CurriculumServiceImpl implements CurriculumService {
                 .append("```\n")
                 .append("- 추가 설명이나 메타데이터는 절대 포함하지 마십시오.\n")
                 .append("- 예시 Todo: \"장거리주: 15km, 6:30min/km 페이스, 목적: 유산소 지구력 향상\"\n");
-        
+
         return sb.toString();
     }
 
