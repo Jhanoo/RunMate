@@ -2,12 +2,15 @@ package com.D107.runmate.watch.presentation
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Half.toFloat
 import android.util.Log
 import android.widget.Toast
@@ -44,6 +47,7 @@ import com.D107.runmate.watch.presentation.service.DataLayerListenerService
 import com.D107.runmate.watch.presentation.splash.SplashScreen
 import com.D107.runmate.watch.presentation.theme.RunMateTheme
 import com.google.android.gms.tasks.Tasks
+import com.google.android.gms.wearable.Node
 import com.google.android.gms.wearable.Wearable
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.components.ActivityComponent
@@ -61,6 +65,15 @@ class MainActivity : ComponentActivity() {
     private var navController: NavController? = null
     private var menuButtonsEnabled = true
 
+    private val CONNECTION_CHECK_INTERVAL = 15000L // 15초마다 확인
+    private var connectionCheckHandler: Handler? = null
+    private val connectionCheckRunnable = object : Runnable {
+        override fun run() {
+            checkPhoneConnectionAndUpdateUI()
+            connectionCheckHandler?.postDelayed(this, CONNECTION_CHECK_INTERVAL)
+        }
+    }
+
 //    private fun startHeartRateOnly() {
 //        lifecycleScope.launch {
 //            Log.d("HeartRate", "심박수 전송 시작")
@@ -75,7 +88,11 @@ class MainActivity : ComponentActivity() {
 
         setupMessageReceivers()
 
+        // 초기 연결 상태 확인
         checkPhoneConnectionAndUpdateUI()
+
+        // 주기적 연결 상태 확인
+        startConnectionMonitoring()
 
         val serviceIntent = Intent(this, DataLayerListenerService::class.java)
         startService(serviceIntent)
@@ -323,36 +340,107 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun startConnectionMonitoring() {
+        connectionCheckHandler = Handler(Looper.getMainLooper())
+        connectionCheckHandler?.postDelayed(connectionCheckRunnable, CONNECTION_CHECK_INTERVAL)
+        Log.d("MainActivity", "주기적 연결 상태 모니터링 시작")
+    }
+
+    private fun stopConnectionMonitoring() {
+        connectionCheckHandler?.removeCallbacks(connectionCheckRunnable)
+        connectionCheckHandler = null
+        Log.d("MainActivity", "주기적 연결 상태 모니터링 중지")
+    }
+
+    override fun onDestroy() {
+        stopConnectionMonitoring()
+        super.onDestroy()
+    }
+
     private fun checkPhoneConnectionAndUpdateUI() {
+        // 1단계: 블루투스 어댑터 확인
+        val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        val bluetoothAdapter = bluetoothManager.adapter
+
+        // 블루투스가 꺼져 있으면 연결되지 않은 것으로 간주
+        if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled) {
+            Log.d("MainActivity", "블루투스가 비활성화되어 있음 - 연결 없음")
+            updateUIForDisconnectedState()
+            return
+        }
+
+        // 2단계: Wear OS 노드 확인
         val nodeClient = Wearable.getNodeClient(this)
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val nodes = Tasks.await(nodeClient.connectedNodes)
 
                 withContext(Dispatchers.Main) {
+                    // 노드가 있고 블루투스도 켜져 있으면 연결된 것으로 간주
                     if (nodes.isNotEmpty()) {
-                        Log.d("MainActivity", "Phone connected: ${nodes.size} nodes found")
-                        // 폰 연결됨 - 버튼 비활성화, 데이터 동기화 요청
-                        menuButtonsEnabled = false
-
-                        // 폰에 연결됨을 알리기 위해 IDLE 상태 설정
-                        nodes.forEach { node ->
-                            sendStateToPhone(node.id, DataLayerListenerService.STATE_IDLE)
-                        }
+                        Log.d("MainActivity", "Phone connected: ${nodes.size} nodes found, 블루투스 활성화됨")
+                        updateUIForConnectedState(nodes)
                     } else {
-                        Log.d("MainActivity", "No phone connected - enabling standalone mode")
-                        // 폰 연결 안됨 - 독립 모드 활성화 (버튼 활성화)
-                        menuButtonsEnabled = true
+                        Log.d("MainActivity", "연결된 노드 없음")
+                        updateUIForDisconnectedState()
                     }
                 }
             } catch (e: Exception) {
                 Log.e("MainActivity", "Error checking nodes: ${e.message}", e)
                 // 오류 발생 시 독립 모드로 동작
                 withContext(Dispatchers.Main) {
-                    menuButtonsEnabled = true
+                    updateUIForDisconnectedState()
                 }
             }
         }
+
+//        lifecycleScope.launch(Dispatchers.IO) {
+//            try {
+//                val nodes = Tasks.await(nodeClient.connectedNodes)
+//
+//                withContext(Dispatchers.Main) {
+//                    if (nodes.isNotEmpty()) {
+//                        Log.d("MainActivity", "Phone connected: ${nodes.size} nodes found")
+//                        // 폰 연결됨 - 버튼 비활성화, 데이터 동기화 요청
+//                        menuButtonsEnabled = false
+//
+//                        // 폰에 연결됨을 알리기 위해 IDLE 상태 설정
+//                        nodes.forEach { node ->
+//                            sendStateToPhone(node.id, DataLayerListenerService.STATE_IDLE)
+//                        }
+//                    } else {
+//                        Log.d("MainActivity", "No phone connected - enabling standalone mode")
+//                        // 폰 연결 안됨 - 독립 모드 활성화 (버튼 활성화)
+//                        menuButtonsEnabled = true
+//                    }
+//                }
+//            } catch (e: Exception) {
+//                Log.e("MainActivity", "Error checking nodes: ${e.message}", e)
+//                // 오류 발생 시 독립 모드로 동작
+//                withContext(Dispatchers.Main) {
+//                    menuButtonsEnabled = true
+//                }
+//            }
+//        }
+    }
+
+    // 연결되지 않은 상태 UI 업데이트
+    private fun updateUIForDisconnectedState() {
+        menuButtonsEnabled = true
+        // 필요한 경우 UI 갱신을 위한 추가 코드
+        Log.d("MainActivity", "독립 모드로 전환 - 버튼 활성화")
+    }
+
+    // 연결된 상태 UI 업데이트
+    private fun updateUIForConnectedState(nodes: List<Node>) {
+        menuButtonsEnabled = false
+
+        // 폰에 연결됨을 알리기 위해 IDLE 상태 설정
+        nodes.forEach { node ->
+            sendStateToPhone(node.id, DataLayerListenerService.STATE_IDLE)
+        }
+
+        Log.d("MainActivity", "폰 연결 모드 - 버튼 비활성화")
     }
 
     // 폰에 상태 전송 메서드
@@ -427,6 +515,13 @@ class MainActivity : ComponentActivity() {
                     "com.D107.runmate.watch.ACTION_DISABLE_BUTTONS" -> {
                         // 메뉴 화면 버튼 비활성화
                         menuButtonsEnabled = false
+                        Log.d("MainActivity", "버튼 비활성화 요청 수신")
+                    }
+
+                    "com.D107.runmate.watch.ACTION_ENABLE_BUTTONS" -> {
+                        // 메뉴 화면 버튼 활성화
+                        menuButtonsEnabled = true
+                        Log.d("MainActivity", "버튼 활성화 요청 수신")
                     }
 
                     "com.D107.runmate.watch.ACTION_RETURN_TO_MENU" -> {
@@ -466,6 +561,10 @@ class MainActivity : ComponentActivity() {
             registerReceiver(
                 runStateReceiver,
                 IntentFilter("com.D107.runmate.watch.ACTION_RETURN_TO_MENU")
+            )
+            registerReceiver(
+                runStateReceiver,
+                IntentFilter("com.D107.runmate.watch.ACTION_ENABLE_BUTTONS")
             )
         }
     }

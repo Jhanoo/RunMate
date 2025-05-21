@@ -29,9 +29,7 @@ import javax.inject.Singleton
 @Singleton
 class GpxRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val gpxDao: GpxDao,
-    private val gpxApiService: GpxApiService,
-    private val gpxEntity: GpxEntity
+    private val gpxDao: GpxDao
 ) : GpxRepository {
 
     // 메모리 버퍼 크기 제한 설정
