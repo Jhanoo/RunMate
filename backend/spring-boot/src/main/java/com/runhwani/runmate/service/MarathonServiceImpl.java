@@ -11,12 +11,13 @@ import org.springframework.stereotype.Service;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class MarathonServiceImpl implements MarathonService{
+public class MarathonServiceImpl implements MarathonService {
 
     private final MarathonDao marathonDao;
     private final MarathonDistanceDao distanceDao;
@@ -30,8 +31,11 @@ public class MarathonServiceImpl implements MarathonService{
 
         // 2. 마라톤 거리 조회 & 파싱
         List<MarathonResponse> result = new ArrayList<>();
-        for(Marathon m : marathons) {
+        for (Marathon m : marathons) {
             List<MarathonDistance> mdList = distanceDao.findByMarathonId(m.getMarathonId());
+            mdList.sort(Comparator.comparingDouble(md ->
+                    Double.parseDouble(md.getDistance().replaceAll("[^\\d.]", "")))
+            );
 
             List<String> distList = new ArrayList<>();
             for (MarathonDistance md : mdList) {
@@ -39,12 +43,12 @@ public class MarathonServiceImpl implements MarathonService{
             }
 
             result.add(MarathonResponse.builder()
-                            .marathonId(m.getMarathonId())
-                            .name(m.getName())
-                            .date(m.getDate().toLocalDate())
-                            .location(m.getLocation())
-                            .distance(distList)
-                            .build()
+                    .marathonId(m.getMarathonId())
+                    .name(m.getName())
+                    .date(m.getDate().toLocalDate())
+                    .location(m.getLocation())
+                    .distance(distList)
+                    .build()
             );
         }
         return result;
@@ -54,6 +58,9 @@ public class MarathonServiceImpl implements MarathonService{
     public MarathonResponse getMarathon(UUID marathonId) {
         Marathon m = marathonDao.findById(marathonId);
         List<MarathonDistance> mdList = distanceDao.findByMarathonId(marathonId);
+        mdList.sort(Comparator.comparingDouble(md ->
+                Double.parseDouble(md.getDistance().replaceAll("[^\\d.]", "")))
+        );
 
         List<String> distList = new ArrayList<>();
         for (MarathonDistance md : mdList) {
