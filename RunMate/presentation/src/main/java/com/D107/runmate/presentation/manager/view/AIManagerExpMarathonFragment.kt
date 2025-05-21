@@ -10,6 +10,7 @@ import com.D107.runmate.presentation.databinding.FragmentAIManagerExpMarathonBin
 import com.D107.runmate.presentation.manager.viewmodel.CurriculumViewModel
 import com.ssafy.locket.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 
 @AndroidEntryPoint
 class AIManagerExpMarathonFragment : BaseFragment<FragmentAIManagerExpMarathonBinding>(
@@ -92,6 +93,7 @@ class AIManagerExpMarathonFragment : BaseFragment<FragmentAIManagerExpMarathonBi
         }
 
         binding.btnConfirmExp.setOnClickListener {
+            Timber.d("ExpMarathon Confirm!")
             findNavController().navigate(R.id.action_aiManagerExp_to_aiManagerGoal)
         }
     }

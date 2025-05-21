@@ -12,19 +12,21 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import com.D107.runmate.watch.domain.model.GpxFile
 import com.D107.runmate.watch.domain.model.GpxUploadStatus
 import com.D107.runmate.watch.domain.repository.GpxRepository
 import com.google.android.gms.tasks.Tasks
+import com.google.android.gms.wearable.Asset
+import com.google.android.gms.wearable.DataClient
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.io.FileInputStream
+import java.nio.ByteBuffer
 import java.util.concurrent.TimeUnit
 
 @HiltWorker
@@ -34,8 +36,12 @@ class GpxUploadWorker @AssistedInject constructor(
     private val gpxRepository: GpxRepository
 ) : CoroutineWorker(context, workerParams) {
 
+    private val dataClient: DataClient = Wearable.getDataClient(context)
+
+
     companion object {
         private const val TAG = "GpxUploadWorker"
+
         private const val WORK_NAME = "gpx_upload_work"
         private const val KEY_FILE_ID = "file_id"
 
@@ -76,48 +82,192 @@ class GpxUploadWorker @AssistedInject constructor(
         }
     }
 
-    override suspend fun doWork(): Result {
-        val fileId = inputData.getLong(KEY_FILE_ID, -1L)
+    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+        try {
+            // 전송 대기 중인 GPX 파일 목록 가져오기
+            val pendingFiles = gpxRepository.getPendingGpxFiles().first()
+            Log.d(TAG, "Found ${pendingFiles.size} pending GPX files")
 
-        return try {
-            if (fileId != -1L) {
-                // 특정 파일 업로드
-                uploadSpecificFile(fileId)
-            } else {
-                // 모든 대기 중인 파일 업로드
-                uploadPendingFiles()
+            if (pendingFiles.isEmpty()) {
+                return@withContext Result.success()
             }
+
+            pendingFiles.forEach { gpxFile ->
+                try {
+                    // 파일 경로로부터 File 객체 생성
+                    val file = File(gpxFile.filePath)
+                    if (!file.exists()) {
+                        Log.e(TAG, "GPX file not found: ${gpxFile.filePath}")
+                        gpxRepository.updateGpxFileStatus(gpxFile.id, GpxUploadStatus.FAILED)
+                        return@forEach
+                    }
+
+                    // 상태를 UPLOADING으로 변경
+                    gpxRepository.updateGpxFileStatus(gpxFile.id, GpxUploadStatus.UPLOADING)
+
+                    // 파일을 Asset으로 변환
+                    val asset = createAssetFromFile(file)
+
+                    // DataMap에 추가하여 전송 준비
+                    val request = PutDataMapRequest.create("/gpx_file").apply {
+                        dataMap.putAsset("gpx_asset", asset)
+                        dataMap.putLong("id", gpxFile.id)
+                        dataMap.putLong("timestamp", System.currentTimeMillis())
+
+                        dataMap.putDouble("distance", gpxFile.totalDistance)
+
+                        val paceDouble = convertPaceStringToDouble(gpxFile.avgPace)
+                        dataMap.putDouble("avgPace", paceDouble)
+
+                        dataMap.putString("calories", "")
+                        dataMap.putLong("startTime", gpxFile.startTime.time)
+                        dataMap.putLong("endTime", gpxFile.endTime.time)
+
+                        dataMap.putDouble("avgElevation", gpxFile.avgElevation)
+                        dataMap.putInt("avgBpm", gpxFile.avgHeartRate)
+                        dataMap.putString("courseId", "")
+
+                        val startLocation = extractStartLocationFromGpx(file)
+                        dataMap.putString("startLocation", startLocation)
+
+                        dataMap.putString("groupId", "")
+                        dataMap.putInt("avgCadence", gpxFile.avgCadence)
+                    }
+
+                    // 데이터 전송
+                    val putDataReq = request.asPutDataRequest()
+                    putDataReq.setUrgent()
+                    val result = Tasks.await(dataClient.putDataItem(putDataReq))
+
+                    if (result != null) {
+                        Log.d(TAG, "Successfully sent GPX file: ${file.name}")
+                        gpxRepository.updateGpxFileStatus(gpxFile.id, GpxUploadStatus.SUCCESS)
+                    } else {
+                        Log.e(TAG, "Failed to send GPX file: ${file.name}")
+                        gpxRepository.updateGpxFileStatus(gpxFile.id, GpxUploadStatus.FAILED)
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error sending GPX file: ${e.message}", e)
+                    gpxRepository.updateGpxFileStatus(gpxFile.id, GpxUploadStatus.FAILED)
+                }
+            }
+
             Result.success()
         } catch (e: Exception) {
-            Log.e(TAG, "업로드 작업 실패: ${e.message}", e)
-            Result.retry()
+            Log.e(TAG, "Worker failed: ${e.message}", e)
+            Result.failure()
+        }
+    }
+
+    private suspend fun createAssetFromFile(file: File): Asset = withContext(Dispatchers.IO) {
+        // 파일 읽기
+        val fileSize = file.length().toInt()
+        val bytes = ByteArray(fileSize)
+
+        FileInputStream(file).use { inputStream ->
+            var bytesRead = 0
+            var result: Int
+            while (bytesRead < fileSize) {
+                result = inputStream.read(bytes, bytesRead, fileSize - bytesRead)
+                if (result == -1) break
+                bytesRead += result
+            }
+        }
+
+        // ByteBuffer로 변환 후 Asset 생성
+        val buffer = ByteBuffer.allocate(fileSize)
+        buffer.put(bytes)
+        buffer.position(0)
+        Asset.createFromBytes(buffer.array())
+    }
+
+    // 페이스 문자열을 Double로 변환하는 함수 (예: "5'23"" -> 5.23)
+    private fun convertPaceStringToDouble(paceString: String): Double {
+        try {
+            // 페이스 포맷이 "5'23""와 같은 형식이라면:
+            val parts = paceString.split("'", "'\"", "\"")
+            if (parts.size >= 2) {
+                val minutes = parts[0].toDoubleOrNull() ?: 0.0
+                val seconds = parts[1].toDoubleOrNull() ?: 0.0
+
+                // 초를 소수점 형태로 변환 (초/60 = 분의 소수점 부분)
+                val secondsAsFraction = seconds / 60.0
+
+                // 소수점 두 자리로 반올림
+                return String.format("%.2f", minutes + secondsAsFraction).toDouble()
+            }
+
+            // "5:23" 형식이라면:
+            if (paceString.contains(":")) {
+                val parts = paceString.split(":")
+                if (parts.size >= 2) {
+                    val minutes = parts[0].toDoubleOrNull() ?: 0.0
+                    val seconds = parts[1].toDoubleOrNull() ?: 0.0
+
+                    val secondsAsFraction = seconds / 60.0
+                    return String.format("%.2f", minutes + secondsAsFraction).toDouble()
+                }
+            }
+
+            // 숫자만 있는 경우 그대로 반환
+            return paceString.toDoubleOrNull() ?: 0.0
+        } catch (e: Exception) {
+            Log.e(TAG, "Error converting pace: $paceString", e)
+            return 0.0
+        }
+    }
+
+    // GPX 파일에서 시작 위치를 추출하는 함수
+    private fun extractStartLocationFromGpx(gpxFile: File): String {
+        try {
+            // XML 파싱을 위한 간단한 방법
+            val fileContent = gpxFile.readText()
+
+            // <trkpt> 태그를 찾아 첫 번째 위치 추출
+            val pattern = """<trkpt\s+lat="([^"]+)"\s+lon="([^"]+)"""".toRegex()
+            val matchResult = pattern.find(fileContent)
+
+            if (matchResult != null && matchResult.groupValues.size >= 3) {
+                val lat = matchResult.groupValues[1]
+                val lon = matchResult.groupValues[2]
+                return "$lat,$lon"
+            }
+
+            Log.w(TAG, "No track points found in GPX file")
+            return ""
+        } catch (e: Exception) {
+            Log.e(TAG, "Error extracting start location from GPX file", e)
+            return ""
         }
     }
 
     private suspend fun uploadSpecificFile(fileId: Long): Boolean {
-        Log.d(TAG, "파일 ID: $fileId 폰으로 전송 시작")
+        Log.d(TAG, "파일 ID: $fileId 업로드 시작")
+
         // 상태를 UPLOADING으로 업데이트
         gpxRepository.updateGpxFileStatus(fileId, GpxUploadStatus.UPLOADING)
-        // DB에서 파일 정보 조회
-        val gpxFileInfo = gpxRepository.getGpxFileById(fileId) ?: return false
-        val file = File(gpxFileInfo.filePath)
 
+        // DB에서 파일 정보 조회
+        val file = File(gpxRepository.getGpxFileById(fileId)?.filePath ?: return false)
         if (!file.exists()) {
             Log.e(TAG, "파일이 존재하지 않음: ${file.absolutePath}")
             gpxRepository.updateGpxFileStatus(fileId, GpxUploadStatus.FAILED)
             return false
         }
-        // 폰으로 데이터 전송 시도
-        val isTransferred = transferToPhone(file, gpxFileInfo)
-        // 전송 결과에 따라 상태 업데이트
-        if (isTransferred) {
+
+        // 파일 업로드 시도
+        val uploadSuccess = gpxRepository.uploadGpxFile(file)
+
+        // 업로드 결과에 따라 상태 업데이트
+        if (uploadSuccess) {
             gpxRepository.updateGpxFileStatus(fileId, GpxUploadStatus.SUCCESS)
-            Log.d(TAG, "파일 폰 전송 성공: $fileId")
+            Log.d(TAG, "파일 업로드 성공: $fileId")
         } else {
             gpxRepository.updateGpxFileStatus(fileId, GpxUploadStatus.FAILED)
-            Log.e(TAG, "파일 폰 전송 실패: $fileId")
+            Log.e(TAG, "파일 업로드 실패: $fileId")
         }
-        return isTransferred
+
+        return uploadSuccess
     }
 
     private suspend fun uploadPendingFiles(): Boolean {
@@ -139,67 +289,5 @@ class GpxUploadWorker @AssistedInject constructor(
         }
 
         return allSuccess
-    }
-
-    // 폰에 파일 전송하는 함수 추가
-    private fun transferToPhone(file: File, gpxFileInfo: GpxFile): Boolean {
-        try {
-            // 데이터 클라이언트 생성
-            val dataClient = Wearable.getDataClient(applicationContext)
-
-            // 파일 내용 읽기
-            val fileContent = file.readBytes()
-
-            // 결과 데이터 생성
-            val resultData = PutDataMapRequest.create("/running_result").apply {
-                dataMap.putDouble("avgPace", convertPaceToDouble(gpxFileInfo.avgPace))
-                dataMap.putDouble("calories", 0.0) // 칼로리는 0.0으로 고정
-                dataMap.putString("endTime", formatISODate(gpxFileInfo.endTime))
-                dataMap.putDouble("avgElevation", gpxFileInfo.avgElevation)
-                dataMap.putDouble("avgBpm", gpxFileInfo.avgHeartRate.toDouble())
-                dataMap.putString("startTime", formatISODate(gpxFileInfo.startTime))
-                dataMap.putDouble("distance", gpxFileInfo.totalDistance)
-                dataMap.putString("courseId", "") // 빈 문자열
-                dataMap.putString("startLocation", "") // 빈 문자열
-                dataMap.putString("groupId", "") // 빈 문자열
-                dataMap.putDouble("avgCadence", gpxFileInfo.avgCadence.toDouble())
-
-                // GPX 파일 바이너리 데이터
-                dataMap.putByteArray("gpxFile", fileContent)
-            }
-
-            val request = resultData.asPutDataRequest()
-            request.setUrgent()
-
-            // 데이터 전송
-            val task = dataClient.putDataItem(request)
-            return Tasks.await(task) != null
-        } catch (e: Exception) {
-            Log.e("GpxTransfer", "파일 전송 중 오류 발생: ${e.message}", e)
-            return false
-        }
-    }
-
-    // 보조 함수: 페이스 문자열을 Double로 변환
-    private fun convertPaceToDouble(gpxFileInfo: String): Double {
-        // 예: "5'30\"" -> 5.5
-        try {
-            val avgPace = "5.23" // 임시값, 실제로는 계산 필요
-            return avgPace.toDouble()
-        } catch (e: Exception) {
-            return 0.0
-        }
-    }
-
-    // 보조 함수: 칼로리 계산 (간단한 추정)
-    private fun calculateCalories(gpxFileInfo: GpxFile): Double {
-        // 평균적인 사람이 1km 달릴 때 약 60kcal 소모
-        return gpxFileInfo.totalDistance * 60.0
-    }
-
-    // ISO 8601 형식으로 날짜 포맷팅
-    private fun formatISODate(date: Date): String {
-        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.getDefault())
-        return sdf.format(date)
     }
 }

@@ -54,7 +54,7 @@ class AIManagerGoalFragment : BaseFragment<FragmentAIManagerGoalBinding>(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        Timber.d("AIManagerGoal view created!")
         setupObservers()
         setupMarathonResultListener()
         setClickListeners()
@@ -253,6 +253,7 @@ class AIManagerGoalFragment : BaseFragment<FragmentAIManagerGoalBinding>(
 
                                 // 성공 시 로딩 화면에서 AIManagerFragment로 이동
                                 Timber.d("커리큘럼 생성 성공: 생성된 ID = $curriculumId")
+                                curriculumViewModel.clearCurriculumResult()
                                 findNavController().navigate(
                                     R.id.AIManagerFragment,
                                     bundleOf("curriculumId" to curriculumId),

@@ -37,7 +37,10 @@ import com.D107.runmate.presentation.databinding.DrawerHeaderBinding
 import com.D107.runmate.presentation.manager.viewmodel.CurriculumViewModel
 import com.D107.runmate.presentation.utils.LocationUtils.getLocation
 import com.D107.runmate.presentation.utils.PermissionChecker
+import com.D107.runmate.presentation.utils.WatchDataUtils
 import com.bumptech.glide.Glide
+import com.google.android.gms.tasks.Tasks
+import com.google.android.gms.wearable.Wearable
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.messaging.FirebaseMessaging
 import com.ssafy.locket.presentation.base.BaseActivity
@@ -62,6 +65,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // BLE 연결 상태 확인
+        checkWearableConnection()
+
+        addTestMessageButton()
 
         FirebaseMessaging.getInstance().token
             .addOnCompleteListener { task ->
@@ -142,6 +150,36 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                 }
             }
         })
+    }
+
+    private fun addTestMessageButton() {
+        lifecycleScope.launch {
+            delay(5000)
+            Timber.d("Testing message to watch")
+            WatchDataUtils.sendTestMessage(this@MainActivity)
+            Toast.makeText(this@MainActivity, "Test message sent to watch", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun checkWearableConnection() {
+        lifecycleScope.launch {
+            try {
+                val nodeClient = Wearable.getNodeClient(this@MainActivity)
+                val connectedNodesTask = nodeClient.connectedNodes
+                val connectedNodes = Tasks.await(connectedNodesTask) // Tasks 클래스 사용
+
+                if (connectedNodes.isNotEmpty()) {
+                    Timber.d("워치 BLE 연결됨: ${connectedNodes.size}개 기기 발견")
+                    for (node in connectedNodes) { // forEach 대신 for 루프 사용
+                        Timber.d("연결된 기기: id=${node.id}, 이름=${node.displayName}")
+                    }
+                } else {
+                    Timber.d("워치 연결 없음: 연결된 Wear OS 기기가 없습니다")
+                }
+            } catch (e: Exception) {
+                Timber.e("워치 연결 확인 중 오류: ${e.message}")
+            }
+        }
     }
 
     private fun observeUserInfo() {

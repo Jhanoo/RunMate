@@ -18,16 +18,51 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <ProgressBar
-        android:id="@+id/progress_bar_dialog"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:indeterminate="true"
-        app:layout_constraintTop_toBottomOf="@id/tv_dialog_progress_title"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cv_loading_diagnosis"
+        android:layout_width="248dp"
+        android:layout_height="248dp"
+        android:backgroundTint="@color/black"
+        app:cardCornerRadius="124dp"
+        app:cardElevation="0dp"
+        android:layout_marginTop="36dp"
+        app:layout_constraintBottom_toTopOf="@+id/tv_dialog_progress_message"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/tv_dialog_progress_title"
+        app:layout_constraintVertical_bias="0.5">
+
+        <ImageView
+            android:id="@+id/iv_manager_loading_diagnosis"
+            android:layout_width="wrap_content"
+            android:layout_height="248dp"
+            android:contentDescription="Loading animation"
+            android:scaleType="matrix" />
+
+    </androidx.cardview.widget.CardView>
+
+    <ImageView
+        android:layout_width="248dp"
+        android:layout_height="30dp"
+
+        android:adjustViewBounds="true"
+        android:translationY="-30dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cv_loading_diagnosis"
+        android:background="@color/white"/>
+
+    <ImageView
+        android:id="@+id/iv_gif_tonie_diagnosis"
+        android:layout_width="350dp"
+        android:layout_height="350dp"
+        android:adjustViewBounds="true"
+        android:translationY="-34dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_dialog_progress_title"
+        app:layout_constraintTop_toTopOf="@+id/cv_loading_diagnosis"
+        tools:ignore="MissingConstraints" />
 
 
     <TextView
@@ -39,7 +74,7 @@
         android:text="데이터를 측정합니다..."
         android:textSize="16sp"
         android:fontFamily="@font/pretendard_medium"
-        app:layout_constraintTop_toBottomOf="@id/progress_bar_dialog"
+        app:layout_constraintTop_toBottomOf="@id/cv_loading_diagnosis"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

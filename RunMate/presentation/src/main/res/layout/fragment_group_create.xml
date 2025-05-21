@@ -43,6 +43,7 @@
         android:background="@android:color/darker_gray"
         android:backgroundTint="#F5F5F5"
         android:hint="그룹명"
+        android:maxLength="12"
         android:inputType="text"
         android:padding="12dp"
         app:layout_constraintEnd_toEndOf="parent"

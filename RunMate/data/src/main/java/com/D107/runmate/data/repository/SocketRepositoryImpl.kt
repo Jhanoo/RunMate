@@ -44,6 +44,7 @@ class SocketRepositoryImpl @Inject constructor(
 
     override fun observeLocationUpdates(): Flow<MemberLocationData> = flow {
         socketService.observeLocationUpdates().collect{ memberLocationData ->
+            Timber.d("observeMemberLocationData $memberLocationData")
             _memberLocationDatas.update { currentMap ->
                 val newMap = currentMap.toMutableMap()
                 newMap[memberLocationData.userId] = memberLocationData

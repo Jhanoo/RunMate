@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -149,6 +150,8 @@ class GroupViewModel @Inject constructor(
                     Timber.d("LeaveGroup Success")
                     _currentGroup.value = null
                     _uiEvent.emit(GroupUiEvent.GoToGroup)
+                }else{
+                    finishGroup()
                 }
             }
         }
@@ -176,6 +179,13 @@ class GroupViewModel @Inject constructor(
             startGroupUseCase().collect{result->
                 if(result is ResponseStatus.Success){
                     Timber.d("StartGroup Success")
+                    _currentGroup.update {
+                        it?.copy(
+                            status = 1
+                        )
+                    }
+
+
                     _uiEvent.emit(GroupUiEvent.GoToGroupRunning)
                 }
             }
@@ -187,9 +197,9 @@ class GroupViewModel @Inject constructor(
             finishGroupUseCase().collect { result ->
                 if (result is ResponseStatus.Success) {
                     Timber.d("FinishGroup Success")
-                    _uiEvent.emit(GroupUiEvent.GoToGroup)
                     _courseDetail.value = CourseDetailState.Initial
                 }
+                _uiEvent.emit(GroupUiEvent.GoToGroup)
             }
         }
     }
@@ -234,6 +244,7 @@ class GroupViewModel @Inject constructor(
 
     fun joinGroupSocket() {
         viewModelScope.launch {
+            Timber.d("joinGroupSocket ${currentGroup.value}")
             if ((currentGroup.value?.status ?: 0) == 1) {
                 joinGroupSocketUseCase(currentGroup.value?.groupId?:"")
                 startObservingLocationUpdates()

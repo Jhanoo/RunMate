@@ -7,20 +7,18 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.util.Half.toFloat
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.BlendMode.Companion.Screen
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
@@ -29,6 +27,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.navigation.NavController
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
@@ -44,6 +43,8 @@ import com.D107.runmate.watch.presentation.service.BluetoothService
 import com.D107.runmate.watch.presentation.service.DataLayerListenerService
 import com.D107.runmate.watch.presentation.splash.SplashScreen
 import com.D107.runmate.watch.presentation.theme.RunMateTheme
+import com.google.android.gms.tasks.Tasks
+import com.google.android.gms.wearable.Wearable
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.components.ActivityComponent
 import kotlinx.coroutines.Dispatchers
@@ -52,45 +53,37 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private lateinit var runningViewModel: RunningViewModel
 
-    private lateinit var runningStateReceiver: BroadcastReceiver
+    private var navController: NavController? = null
+    private var menuButtonsEnabled = true
 
-    private var shouldNavigateToRunning = false
-    private var shouldNavigateToPause = false
-    private var shouldNavigateToResult = false
-
-    @Inject
-    lateinit var bluetoothService: BluetoothService
+//    private fun startHeartRateOnly() {
+//        lifecycleScope.launch {
+//            Log.d("HeartRate", "심박수 전송 시작")
+//            runningViewModel.startHeartRateOnlyTracking(applicationContext)
+//        }
+//    }
 
     @SuppressLint("StateFlowValueCalledInComposition", "DefaultLocale")
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
 
-        // ble 연동 관련
-        registerRunningStateReceiver()
-        handleNavigationIntent(intent)
+        setupMessageReceivers()
+
+        checkPhoneConnectionAndUpdateUI()
+
+        val serviceIntent = Intent(this, DataLayerListenerService::class.java)
+        startService(serviceIntent)
+        Log.d("MainActivity", "DataLayerListenerService 명시적 시작")
 
         splashScreen.setKeepOnScreenCondition { false }
 
         setTheme(android.R.style.Theme_DeviceDefault)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT)
-                != PackageManager.PERMISSION_GRANTED
-            ) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.BLUETOOTH_CONNECT),
-                    BLUETOOTH_PERMISSION_REQUEST_CODE
-                )
-            }
-        }
 
         // 권환 확인 및 요청
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.BODY_SENSORS)
@@ -109,8 +102,6 @@ class MainActivity : ComponentActivity() {
             )
         }
 
-
-
         setContent {
             RunMateTheme {
                 val navController = rememberSwipeDismissableNavController()
@@ -124,32 +115,6 @@ class MainActivity : ComponentActivity() {
                 var savedRunningData by remember { mutableStateOf(RunningData()) }
 
                 this@MainActivity.runningViewModel = runningViewModel
-
-                LaunchedEffect(shouldNavigateToRunning, shouldNavigateToPause, shouldNavigateToResult) {
-                    when {
-                        shouldNavigateToRunning -> {
-                            navController.navigate("running") {
-                                popUpTo("menu") { inclusive = true }
-                            }
-                            shouldNavigateToRunning = false
-                        }
-                        shouldNavigateToPause -> {
-                            // 현재 화면 상태에 따라 적절한 파라미터로 pause 화면으로 이동
-                            // 간단한 구현을 위해 기본값 사용
-                            navController.navigate("pause/TIME/0:00:00") {
-                                popUpTo("running") { inclusive = true }
-                            }
-                            shouldNavigateToPause = false
-                        }
-                        shouldNavigateToResult -> {
-                            // 결과 화면으로 이동 (기본값 사용)
-                            navController.navigate("result/0.0/0:00:00/--'--\"/0/0") {
-                                popUpTo(0) { inclusive = true }
-                            }
-                            shouldNavigateToResult = false
-                        }
-                    }
-                }
 
                 SwipeDismissableNavHost(
                     navController = navController,
@@ -176,7 +141,8 @@ class MainActivity : ComponentActivity() {
                                     popUpTo("menu") { inclusive = true }
                                 }
                             },
-                            onNavigateToPace = { navController.navigate("pace") }
+                            onNavigateToPace = { navController.navigate("pace") },
+                            buttonsEnabled = menuButtonsEnabled
                         )
                     }
 
@@ -355,133 +321,218 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
-
     }
 
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        intent?.let { handleNavigationIntent(it) }
-    }
+    private fun checkPhoneConnectionAndUpdateUI() {
+        val nodeClient = Wearable.getNodeClient(this)
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val nodes = Tasks.await(nodeClient.connectedNodes)
 
-    private fun handleNavigationIntent(intent: Intent) {
-        when (intent.action) {
-            "navigate_to_running" -> {
-                // 런닝 화면으로 이동 로직
-                // SwipeDismissableNavHost 내부에서 사용할 수 있도록 플래그 설정
-                // setContent 블록 내부에서 참조할 수 있는 플래그 변수
-                shouldNavigateToRunning = true
-            }
+                withContext(Dispatchers.Main) {
+                    if (nodes.isNotEmpty()) {
+                        Log.d("MainActivity", "Phone connected: ${nodes.size} nodes found")
+                        // 폰 연결됨 - 버튼 비활성화, 데이터 동기화 요청
+                        menuButtonsEnabled = false
 
-            "navigate_to_pause" -> {
-                shouldNavigateToPause = true
-            }
-
-            "navigate_to_result" -> {
-                shouldNavigateToResult = true
+                        // 폰에 연결됨을 알리기 위해 IDLE 상태 설정
+                        nodes.forEach { node ->
+                            sendStateToPhone(node.id, DataLayerListenerService.STATE_IDLE)
+                        }
+                    } else {
+                        Log.d("MainActivity", "No phone connected - enabling standalone mode")
+                        // 폰 연결 안됨 - 독립 모드 활성화 (버튼 활성화)
+                        menuButtonsEnabled = true
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Error checking nodes: ${e.message}", e)
+                // 오류 발생 시 독립 모드로 동작
+                withContext(Dispatchers.Main) {
+                    menuButtonsEnabled = true
+                }
             }
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    // 폰에 상태 전송 메서드
+    private fun sendStateToPhone(nodeId: String, state: Int) {
+        val messageClient = Wearable.getMessageClient(this)
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                // 상태 값을 바이트 배열로 변환
+                val payload = ByteArray(1).apply { this[0] = state.toByte() }
 
-        // 리시버 해제
-        LocalBroadcastManager.getInstance(this)
-            .unregisterReceiver(runningStateReceiver)
+                messageClient.sendMessage(nodeId, DataLayerListenerService.RUNNING_STATE_PATH, payload)
+                    .addOnSuccessListener {
+                        Log.d("MainActivity", "Successfully sent state $state to phone")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("MainActivity", "Failed to send state to phone: ${e.message}")
+                    }
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Error sending state to phone: ${e.message}", e)
+            }
+        }
     }
 
-    private fun registerRunningStateReceiver() {
-        runningStateReceiver = object : BroadcastReceiver() {
+    private fun setupMessageReceivers() {
+        // Test message receiver
+        val testMessageReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
-                // 액티비티 내에서 setContent 블록 안에 있는 navController에 직접 접근할 수 없음
-                // 대신 화면 전환을 위한 Intent를 사용
+                val message = intent.getStringExtra("message") ?: "메시지 없음"
+                Log.d("MainActivity", "테스트 메시지 수신: $message")
+                Toast.makeText(this@MainActivity, "📱➡️⌚ $message", Toast.LENGTH_LONG).show()
+            }
+        }
+
+        // 러닝 상태 브로드캐스트 리시버들
+        val runStateReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                Log.d("MainActivity", "러닝 상태 브로드캐스트 수신: ${intent.action}")
+
                 when (intent.action) {
                     DataLayerListenerService.ACTION_START_RUNNING -> {
-                        // RunningScreen으로 전환하는 로직
-                        val runningIntent =
-                            Intent(this@MainActivity, MainActivity::class.java).apply {
-                                action = "navigate_to_running"
-                                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                            }
-                        startActivity(runningIntent)
+                        // 러닝 화면으로 이동
+                        navController?.navigate("running") {
+                            popUpTo(0) { inclusive = true }
+                            launchSingleTop = true
+                        }
                     }
 
                     DataLayerListenerService.ACTION_PAUSE_RUNNING -> {
-                        // PauseScreen으로 전환하는 로직
-                        val pauseIntent =
-                            Intent(this@MainActivity, MainActivity::class.java).apply {
-                                action = "navigate_to_pause"
-                                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                            }
-                        startActivity(pauseIntent)
+                        // 진행 중이던 상태를 일시정지하고 PauseScreen으로 이동
+                        runningViewModel.pauseTimer()
+                        val mode = DisplayMode.TIME
+                        val data = runningViewModel.formattedTime.value
+                        navController?.navigate("pause/${mode.name}/$data") {
+                            popUpTo(0) { inclusive = true }
+                            launchSingleTop = true
+                        }
                     }
 
                     DataLayerListenerService.ACTION_FINISH_RUNNING -> {
-                        // ResultScreen으로 전환하는 로직
-                        val resultIntent =
-                            Intent(this@MainActivity, MainActivity::class.java).apply {
-                                action = "navigate_to_result"
-                                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                            }
-                        startActivity(resultIntent)
+                        // 러닝 종료하고 ResultScreen으로 이동
+                        val distance = String.format("%.1f", runningViewModel.distance.value)
+                        val time = runningViewModel.formattedTime.value
+                        val avgPace = runningViewModel.avgPace.value
+                        val maxHeartRate = runningViewModel.maxHeartRate.value
+                        val avgHeartRate = runningViewModel.avgHeartRate.value
+
+                        navController?.navigate("result/$distance/$time/$avgPace/$maxHeartRate/$avgHeartRate") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+
+                    "com.D107.runmate.watch.ACTION_DISABLE_BUTTONS" -> {
+                        // 메뉴 화면 버튼 비활성화
+                        menuButtonsEnabled = false
+                    }
+
+                    "com.D107.runmate.watch.ACTION_RETURN_TO_MENU" -> {
+                        // 메뉴 화면으로 자동 이동
+                        navController?.navigate("menu") {
+                            popUpTo(0) { inclusive = true }
+                        }
                     }
                 }
             }
         }
 
         // 리시버 등록
-        val filter = IntentFilter().apply {
-            addAction(DataLayerListenerService.ACTION_START_RUNNING)
-            addAction(DataLayerListenerService.ACTION_PAUSE_RUNNING)
-            addAction(DataLayerListenerService.ACTION_RESUME_RUNNING)
-            addAction(DataLayerListenerService.ACTION_FINISH_RUNNING)
-        }
+        LocalBroadcastManager.getInstance(this).apply {
+            registerReceiver(
+                testMessageReceiver,
+                IntentFilter("com.D107.runmate.watch.TEST_MESSAGE")
+            )
 
-        LocalBroadcastManager.getInstance(this)
-            .registerReceiver(runningStateReceiver, filter)
+            // 러닝 상태 리시버 등록
+            registerReceiver(
+                runStateReceiver,
+                IntentFilter(DataLayerListenerService.ACTION_START_RUNNING)
+            )
+            registerReceiver(
+                runStateReceiver,
+                IntentFilter(DataLayerListenerService.ACTION_PAUSE_RUNNING)
+            )
+            registerReceiver(
+                runStateReceiver,
+                IntentFilter(DataLayerListenerService.ACTION_FINISH_RUNNING)
+            )
+            registerReceiver(
+                runStateReceiver,
+                IntentFilter("com.D107.runmate.watch.ACTION_DISABLE_BUTTONS")
+            )
+            registerReceiver(
+                runStateReceiver,
+                IntentFilter("com.D107.runmate.watch.ACTION_RETURN_TO_MENU")
+            )
+        }
     }
 
 
-    // M권한 요청 결과 처리
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        when (requestCode) {
-            BODY_SENSOR_PERMISSION_REQUEST_CODE -> {
-                if ((grantResults.isNotEmpty() &&
-                            grantResults[0] == PackageManager.PERMISSION_GRANTED &&
-                            grantResults.size >= 3 &&
-                            grantResults[1] == PackageManager.PERMISSION_GRANTED &&
-                            grantResults[2] == PackageManager.PERMISSION_GRANTED)
-                ) {
-                    Log.d("Permission", "센서 및 위치 권한 승인됨")
-                    // 권한이 승인되었을 때 필요한 초기화 작업
-                } else {
-                    Log.e("Permission", "센서 또는 위치 권한이 거부됨")
-                    // 권한이 거부되었을 때 사용자에게 알림
+    private fun checkPhoneConnection() {
+        val nodeClient = Wearable.getNodeClient(this)
+        lifecycleScope.launch(Dispatchers.IO) {  // Dispatchers.IO 추가
+            try {
+                val nodes = Tasks.await(nodeClient.connectedNodes)
+                withContext(Dispatchers.Main) {  // UI 업데이트는 메인 스레드로
+                    Log.d("MainActivity", "Connected nodes: ${nodes.size}")
+                    if (nodes.isNotEmpty()) {
+                        Log.d("MainActivity", "BLE 연결 성공: 폰과 워치 연결됨")
+                        Toast.makeText(this@MainActivity, "폰과 연결됨", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Log.d("MainActivity", "BLE 연결 실패: 연결된 기기 없음")
+                    }
                 }
+
+                nodes.forEach { node ->
+                    Log.d("MainActivity", "Connected to node: ${node.displayName}, id: ${node.id}")
+                    requestTokenFromPhone(node.id)
+                }
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Error checking connected nodes: ${e.message}", e)
             }
+        }
+    }
 
-            BLUETOOTH_PERMISSION_REQUEST_CODE -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.d("Bluetooth", "블루투스 권한 승인됨")
-                    // 블루투스 권한이 승인되었을 때 필요한 초기화 작업
-                } else {
-                    Log.e("Bluetooth", "블루투스 권한 거부됨")
-                    // 블루투스 권한이 거부되었을 때 사용자에게 알림
-                }
+    private fun requestTokenFromPhone(nodeId: String) {
+        val messageClient = Wearable.getMessageClient(this)
+        lifecycleScope.launch(Dispatchers.IO) {  // Dispatchers.IO 추가
+            try {
+                Log.d("MainActivity", "Requesting token from phone...")
+                messageClient.sendMessage(nodeId, "/request_token", ByteArray(0))
+                    .addOnSuccessListener {
+                        Log.d("MainActivity", "Token request sent to node: $nodeId")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("MainActivity", "Failed to send token request: ${e.message}", e)
+                    }
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Failed to send token request: ${e.message}", e)
+            }
+        }
+    }
+
+
+    // 블루투스 연결 성공 후 심박수 전송 시작
+    private fun connectToApp(deviceAddress: String) {
+        lifecycleScope.launch {
+            val bluetoothService = BluetoothService(applicationContext)
+            if (bluetoothService.connectToDevice(deviceAddress)) {
+                // 연결 성공 - 심박수만 전송 모드 시작
+                Log.d("Bluetooth", "앱에 연결 성공")
+                // 수정된 부분: 클래스 멤버 변수 사용
+                runningViewModel.startHeartRateOnlyTracking(applicationContext)
+            } else {
+                // 연결 실패
+                Log.e("Bluetooth", "앱에 연결 실패")
             }
         }
     }
 
     companion object {
         private const val BODY_SENSOR_PERMISSION_REQUEST_CODE = 1
-        private const val BLUETOOTH_PERMISSION_REQUEST_CODE = 2
     }
 }
 
