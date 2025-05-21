@@ -320,7 +320,7 @@ class WearableFragment : BaseFragment<FragmentWearableBinding>(
 //            analysisText += "- 왼쪽 평균 Yaw: ${result.averageLeftYaw?.let { String.format("%.1f°", it) } ?: "N/A"}\n"
 //            analysisText += "- 오른쪽 평균 Yaw: ${result.averageRightYaw?.let { String.format("%.1f°", it) } ?: "N/A"}\n"
             Timber.d("GaitResult : ${result}")
-            var gaitDiff:Float =result.averageRightYaw!!-result.averageLeftYaw!!
+//            var gaitDiff:Float =result.averageRightYaw!!-result.averageLeftYaw!!
             val gaitResultDescriptionString = getGaitPatternString(result)
 
 

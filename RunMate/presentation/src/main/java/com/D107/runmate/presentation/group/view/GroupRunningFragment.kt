@@ -523,9 +523,11 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
         Timber.d("addMarker userId $userId")
         mContext?.let {
             CoroutineScope(Dispatchers.IO).launch {
-                val profileBitmap: Bitmap? = if (userProfileUrl.isNullOrEmpty()) {
+                val profileBitmap: Bitmap? = if (userProfileUrl.isEmpty()) {
+                    Timber.d("locationData : ${userProfileUrl}")
                     BitmapFactory.decodeResource(resources, R.drawable.tonie)
                 } else {
+                    Timber.d("locationData : ${userProfileUrl}")
                     getBitmapFromURL(userProfileUrl)
                 }
                 profileBitmap?.let { bitmap ->
@@ -753,7 +755,8 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
         } else {
             val labelOptions = LabelOptions.from(mapPoint)
                 .setTexts(LabelTextBuilder().setTexts(locationData.nickname))
-
+            Timber.d("locationData : $locationData")
+            Timber.d("userImage! ${locationData.profileImage} ${locationData.profileImage.equals("null")}")
             addMarker(
                 locationData.lat,
                 locationData.lng,
@@ -814,6 +817,7 @@ class GroupRunningFragment : BaseFragment<FragmentGroupRunningBinding>(
                 userProfileImg
             )
         } else {
+
             addMarker(
                 state.locations.last().latitude,
                 state.locations.last().longitude,

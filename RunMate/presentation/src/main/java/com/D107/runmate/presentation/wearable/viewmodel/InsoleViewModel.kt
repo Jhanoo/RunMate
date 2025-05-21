@@ -406,6 +406,7 @@ class InsoleViewModel @Inject constructor(
                     }
                 }
                 .collect { status ->
+                    Timber.d("insoleobserve status : $status")
                     when (status) {
                         is ResponseStatus.Success -> {
                             val data = status.data
@@ -459,6 +460,7 @@ class InsoleViewModel @Inject constructor(
             Timber.w("이미 캘리브레이션 또는 분석이 진행 중입니다.")
             return
         }
+        Timber.d("진단시작!")
 
         viewModelScope.launch {
             _analysisProcessState.value = AnalysisProcessState.CALIBRATING
