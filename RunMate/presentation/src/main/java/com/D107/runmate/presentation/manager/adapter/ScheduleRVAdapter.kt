@@ -54,27 +54,27 @@ class ScheduleRVAdapter :
 
         init {
             // 체크박스 클릭 리스너
-            binding.checkboxSchedule.setOnClickListener {
-                val position = adapterPosition
-                if (position != RecyclerView.NO_POSITION) {
-                    val item = getItem(position)
-                    // 클릭 이벤트 처리 (체크박스 상태 반영)
-                    item.isCompleted = binding.checkboxSchedule.isChecked
-                    itemClickListener?.onClick(it, item, position)
-                }
-            }
-
-            // 텍스트 라벨 클릭 리스너 - 체크박스와 동일한 기능
-            binding.checkboxLabel.setOnClickListener {
-                val position = adapterPosition
-                if (position != RecyclerView.NO_POSITION) {
-                    val item = getItem(position)
-                    // 체크박스 상태 토글
-                    binding.checkboxSchedule.isChecked = !binding.checkboxSchedule.isChecked
-                    item.isCompleted = binding.checkboxSchedule.isChecked
-                    itemClickListener?.onClick(it, item, position)
-                }
-            }
+//            binding.checkboxSchedule.setOnClickListener {
+//                val position = adapterPosition
+//                if (position != RecyclerView.NO_POSITION) {
+//                    val item = getItem(position)
+//                    // 클릭 이벤트 처리 (체크박스 상태 반영)
+//                    item.isCompleted = binding.checkboxSchedule.isChecked
+//                    itemClickListener?.onClick(it, item, position)
+//                }
+//            }
+//
+//            // 텍스트 라벨 클릭 리스너 - 체크박스와 동일한 기능
+//            binding.checkboxLabel.setOnClickListener {
+//                val position = adapterPosition
+//                if (position != RecyclerView.NO_POSITION) {
+//                    val item = getItem(position)
+//                    // 체크박스 상태 토글
+//                    binding.checkboxSchedule.isChecked = !binding.checkboxSchedule.isChecked
+//                    item.isCompleted = binding.checkboxSchedule.isChecked
+//                    itemClickListener?.onClick(it, item, position)
+//                }
+//            }
         }
 
         fun bind(item: ScheduleItem) {
@@ -83,7 +83,7 @@ class ScheduleRVAdapter :
 
             // 체크박스에는 텍스트 없이 isCompleted 상태만 반영
             binding.checkboxSchedule.text = null
-            binding.checkboxSchedule.isChecked = item.isCompleted ?: false
+            binding.checkboxSchedule.isChecked = item.isCompleted ?: true
 
             // 일정 텍스트는 별도의 TextView에 설정
             binding.checkboxLabel.text = item.scheduleText

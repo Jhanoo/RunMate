@@ -139,6 +139,10 @@ class CurriculumViewModel @Inject constructor(
         }
     }
 
+    fun clearCurriculumResult(){
+        _curriculumCreationResult.value = null
+    }
+
     // 마라톤 정보 가져오기
     fun getMarathonById(marathonId: String) {
         viewModelScope.launch {

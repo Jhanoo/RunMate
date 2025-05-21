@@ -37,10 +37,10 @@ class SplashFragment : BaseFragment<FragmentSplashBinding>(
 
     private fun observeLoginStatus() {
         navigationJob = viewLifecycleOwner.lifecycleScope.launch {
-            delay(2000) // 2초 대기 (애니메이션 보여주기 위한 최소 시간)
+            delay(2000)
 
             viewModel.isLoggedIn.collectLatest { isLoggedIn ->
-                if (!isAdded || isDetached) return@collectLatest
+//                if (!isAdded || isDetached) return@collectLatest
                 if (isLoggedIn) {
                     // 로그인된 상태면 메인 화면으로 이동
                     findNavController().navigate(R.id.action_splashFragment_to_runningFragment)
