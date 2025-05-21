@@ -35,7 +35,7 @@ class GroupHistoryFragment : BaseFragment<FragmentGroupHistoryBinding>(
     R.layout.fragment_group_history
 ) {
     private val mainViewModel: MainViewModel by activityViewModels()
-    private val historyViewModel: HistoryViewModel by viewModels()
+    private val historyViewModel: HistoryViewModel by activityViewModels()
 //    private val args: GroupHistoryFragmentArgs by navArgs()
     private lateinit var groupHistoryRVAdapter: GroupHistoryRVAdapter
 
@@ -45,38 +45,56 @@ class GroupHistoryFragment : BaseFragment<FragmentGroupHistoryBinding>(
         initAdapter()
         initUI()
 
-//        historyViewModel.getHistoryDetail(args.historyId)
+        binding.btnBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
     }
 
     private fun initUI() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            historyViewModel.historyDetail.collectLatest { state ->
-                when (state) {
-                    is HistoryDetailState.Success -> {
-                        binding.tvMyName.text = mainViewModel.nickname.value
-                        binding.tvMyPace.text = getString(R.string.running_pace, (state.historyDetail.myRunItem.avgPace).toInt()/60, (state.historyDetail.myRunItem.avgPace).toInt()%60)
-                        binding.tvMyDistance.text = getString(R.string.running_distance_int, state.historyDetail.myRunItem.distance.toInt())
-                        binding.tvMyDuration.text = if(state.historyDetail.myRunItem.time >= 3600) {
-                            formatSecondsToHMS(state.historyDetail.myRunItem.time.toInt())
-                        } else {
-                            formatSecondsToMS(state.historyDetail.myRunItem.time.toInt())
-                        }
-                        groupHistoryRVAdapter.submitList(state.historyDetail.groupRunItem)
-                    }
-
-                    is HistoryDetailState.Error -> {
-                        Timber.d("getHistoryDetail Error {${state.message}}")
-                    }
-
-                    is HistoryDetailState.Initial -> {
-                        Timber.d("getHistoryDetail Initial")
-                    }
-                }
+        val state = historyViewModel.historyDetail.value
+        Timber.d("state ${state}")
+        if(state is HistoryDetailState.Success) {
+            Timber.d("state ${state.historyDetail}")
+            binding.tvMyName.text = mainViewModel.nickname.value
+            binding.tvMyPace.text = getString(R.string.running_pace, (state.historyDetail.myRunItem.avgPace).toInt()/60, (state.historyDetail.myRunItem.avgPace).toInt()%60)
+            binding.tvMyDistance.text = getString(R.string.running_distance_int, state.historyDetail.myRunItem.distance.toInt())
+            binding.tvMyDuration.text = if(state.historyDetail.myRunItem.time >= 3600) {
+                formatSecondsToHMS(state.historyDetail.myRunItem.time.toInt())
+            } else {
+                formatSecondsToMS(state.historyDetail.myRunItem.time.toInt())
             }
+            groupHistoryRVAdapter.submitList(state.historyDetail.groupRunItem)
         }
+
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            historyViewModel.historyDetail.collectLatest { state ->
+//                when (state) {
+//                    is HistoryDetailState.Success -> {
+//                        binding.tvMyName.text = mainViewModel.nickname.value
+//                        binding.tvMyPace.text = getString(R.string.running_pace, (state.historyDetail.myRunItem.avgPace).toInt()/60, (state.historyDetail.myRunItem.avgPace).toInt()%60)
+//                        binding.tvMyDistance.text = getString(R.string.running_distance_int, state.historyDetail.myRunItem.distance.toInt())
+//                        binding.tvMyDuration.text = if(state.historyDetail.myRunItem.time >= 3600) {
+//                            formatSecondsToHMS(state.historyDetail.myRunItem.time.toInt())
+//                        } else {
+//                            formatSecondsToMS(state.historyDetail.myRunItem.time.toInt())
+//                        }
+//                        groupHistoryRVAdapter.submitList(state.historyDetail.groupRunItem)
+//                    }
+//
+//                    is HistoryDetailState.Error -> {
+//                        Timber.d("getHistoryDetail Error {${state.message}}")
+//                    }
+//
+//                    is HistoryDetailState.Initial -> {
+//                        Timber.d("getHistoryDetail Initial")
+//                    }
+//                }
+//            }
+//        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             historyViewModel.historyUserDetailEvent.collectLatest {
+                Timber.d("historyUserDetailEvent ${it}")
                 if(it) {
                     val action = GroupHistoryFragmentDirections.actionGroupHistoryFragmentToPersonalHistoryFragment("group")
                     findNavController().navigate(action)
@@ -99,8 +117,12 @@ class GroupHistoryFragment : BaseFragment<FragmentGroupHistoryBinding>(
                 Timber.d("groupRun ${data}")
                 // TODO 상세 화면 이동
                 val historyDetail = historyViewModel.historyDetail.value
+
                 if(historyDetail is HistoryDetailState.Success) {
+                    Timber.d("historyDetailState ${historyDetail}")
                     historyViewModel.getGroupUserHistoryDetail(historyDetail.historyDetail.groupId!!, data.userId)
+                } else {
+                    Timber.d("historyDetailState ${historyDetail}")
                 }
             }
         }
@@ -108,6 +130,5 @@ class GroupHistoryFragment : BaseFragment<FragmentGroupHistoryBinding>(
 
     override fun onPause() {
         super.onPause()
-//        historyViewModel.resetHistoryDetail()
     }
 }

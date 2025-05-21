@@ -89,7 +89,7 @@ class HistoryViewModel @Inject constructor(
                     is ResponseStatus.Error -> {
                         Timber.d("getHistoryDetail Error {${status.error}}")
                         _historyUserDetailEvent.emit(false)
-                        _historyDetail.value = HistoryDetailState.Error(status.error.message)
+                        _historyUserDetail.value = UserHistoryDetailState.Error(status.error.message)
                     }
                 }
             }

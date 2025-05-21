@@ -62,7 +62,6 @@ class RunningRecordFragment : BaseFragment<FragmentRunningRecordBinding>(
                             findNavController().navigate(R.id.action_runningRecordFragment_to_runningEndFragment)
                         }
                         TrackingStatus.RUNNING -> {
-                            Timber.d("onResume: TrackingStatus.RUNNING")
                             binding.groupBtnPause.visibility = View.GONE
                             binding.groupBtnRunning.visibility = View.VISIBLE
                             mContext?.let {

@@ -28,7 +28,6 @@ class RunMateFirebaseMessagingService : FirebaseMessagingService() {
             val data = message.data
             messageTitle = data["title"].orEmpty()
             messageContent = data["body"].orEmpty()
-
         }
 
         Timber.d("messageTitle: $messageTitle, messageContent: $messageContent")

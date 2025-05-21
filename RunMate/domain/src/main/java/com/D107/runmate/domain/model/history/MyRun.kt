@@ -12,5 +12,7 @@ data class MyRun(
     val courseLiked: Boolean,
     val courseLikes: Int,
     val distance: Double,
-    val time: Long
+    val time: Long,
+    val startTime: String,
+    val endTime: String
 ): BaseModel

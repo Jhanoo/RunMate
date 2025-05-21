@@ -21,6 +21,8 @@ import com.D107.runmate.presentation.running.CourseViewModel
 import com.D107.runmate.presentation.running.HistoryDetailState
 import com.D107.runmate.presentation.running.RunningEndViewModel
 import com.D107.runmate.presentation.running.view.RunningEndFragmentDirections
+import com.D107.runmate.presentation.utils.CommonUtils.convertDateTime
+import com.D107.runmate.presentation.utils.CommonUtils.convertIsoToCustomFormat
 import com.D107.runmate.presentation.utils.CommonUtils.dateformatMMdd
 import com.D107.runmate.presentation.utils.CommonUtils.getGpxInputStream
 import com.D107.runmate.presentation.utils.CommonUtils.getSecondsBetween
@@ -56,7 +58,7 @@ class PersonalHistoryFragment : BaseFragment<FragmentPersonalHistoryBinding>(
     private val courseViewModel: CourseViewModel by viewModels()
     private lateinit var dialog: CourseAddDialog
     private val args: PersonalHistoryFragmentArgs by navArgs()
-    private val historyViewModel: HistoryViewModel by viewModels()
+    private val historyViewModel: HistoryViewModel by activityViewModels()
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -70,8 +72,6 @@ class PersonalHistoryFragment : BaseFragment<FragmentPersonalHistoryBinding>(
         initEvent()
         initMap()
 
-//        historyViewModel.getGroupUserHistoryDetail(args.groupId, args.userId)
-
         if(args.type == "group") {
             viewLifecycleOwner.lifecycleScope.launch {
                 historyViewModel.historyUserDetail.collectLatest { state ->
@@ -80,53 +80,51 @@ class PersonalHistoryFragment : BaseFragment<FragmentPersonalHistoryBinding>(
                             Timber.d("state Success {${state.userHistoryDetail}}")
                             val time = getSecondsBetween(state.userHistoryDetail.startTime, state.userHistoryDetail.endTime)
                             binding.tvDistance.text = getString(R.string.course_distance, state.userHistoryDetail.distance)
-                            binding.tvDateGroupInfo.text = getString(R.string.running_date, state.userHistoryDetail.startTime, state.userHistoryDetail.endTime)
+                            binding.tvDateGroupInfo.text = getString(R.string.running_date, convertIsoToCustomFormat(state.userHistoryDetail.startTime), convertIsoToCustomFormat(state.userHistoryDetail.endTime))
                             binding.tvTime.text = getString(R.string.running_time, time / 60, time % 60)
                             binding.tvBpm.text = "-" // TODO 추후 HR 연결하여 데이터 수정
                             binding.tvAvgPace.text = getString(R.string.running_pace, (state.userHistoryDetail.avgPace.toInt())/60, (state.userHistoryDetail.avgPace.toInt())%60)
                             binding.tvCadence.text = getString(R.string.running_avg_cadence, state.userHistoryDetail.avgCadence)
                             binding.tvAltitude.text = getString(R.string.running_avg_altitude, state.userHistoryDetail.avgElevation)
-                            binding.tvCalorie.text = state.userHistoryDetail.calories.toString()
+                            binding.tvCalorie.text = getString(R.string.running_avg_calories, state.userHistoryDetail.calories)
                         }
 
                         is UserHistoryDetailState.Error -> {
-                            Timber.d("getHistoryDetail Error {${state.message}}")
+                            Timber.d("getUserHistoryDetail Error {${state.message}}")
                         }
 
                         is UserHistoryDetailState.Initial -> {
-                            Timber.d("getHistoryDetail Initial")
+                            Timber.d("getUserHistoryDetail Initial")
                         }
                     }
                 }
             }
         } else if(args.type == "personal") {
-            // 없는 데이터 존재
-//            viewLifecycleOwner.lifecycleScope.launch {
-//                historyViewModel.historyDetail.collectLatest { state ->
-//                    when (state) {
-//                        is HistoryDetailState.Success -> {
-//                            Timber.d("state Success {${state.historyDetail}}")
-//                            val time = getSecondsBetween(state.historyDetail.myRunItem.startTime, state.userHistoryDetail.endTime)
-//                            binding.tvDistance.text = getString(R.string.course_distance, state.userHistoryDetail.distance)
-//                            binding.tvDateGroupInfo.text = getString(R.string.running_date, state.userHistoryDetail.startTime, state.userHistoryDetail.endTime)
-//                            binding.tvTime.text = getString(R.string.running_time, time / 60, time % 60)
-//                            binding.tvBpm.text = "-" // TODO 추후 HR 연결하여 데이터 수정
-//                            binding.tvAvgPace.text = getString(R.string.running_pace, (state.userHistoryDetail.avgPace.toInt())/60, (state.userHistoryDetail.avgPace.toInt())%60)
-//                            binding.tvCadence.text = getString(R.string.running_avg_cadence, state.userHistoryDetail.avgCadence)
-//                            binding.tvAltitude.text = getString(R.string.running_avg_altitude, state.userHistoryDetail.avgElevation)
-//                            binding.tvCalorie.text = state.userHistoryDetail.calories.toString()
-//                        }
-//
-//                        is HistoryDetailState.Error -> {
-//                            Timber.d("getHistoryDetail Error {${state.message}}")
-//                        }
-//
-//                        is HistoryDetailState.Initial -> {
-//                            Timber.d("getHistoryDetail Initial")
-//                        }
-//                    }
-//                }
-//            }
+            viewLifecycleOwner.lifecycleScope.launch {
+                historyViewModel.historyDetail.collectLatest { state ->
+                    when (state) {
+                        is HistoryDetailState.Success -> {
+                            val time = getSecondsBetween(state.historyDetail.myRunItem.startTime, state.historyDetail.myRunItem.endTime)
+                            binding.tvDistance.text = getString(R.string.course_distance, state.historyDetail.myRunItem.distance)
+                            binding.tvDateGroupInfo.text = getString(R.string.running_date, convertIsoToCustomFormat(state.historyDetail.myRunItem.startTime), convertIsoToCustomFormat(state.historyDetail.myRunItem.endTime))
+                            binding.tvTime.text = getString(R.string.running_time, time / 60, time % 60)
+                            binding.tvBpm.text = "-" // TODO 추후 HR 연결하여 데이터 수정
+                            binding.tvAvgPace.text = getString(R.string.running_pace, (state.historyDetail.myRunItem.avgPace.toInt())/60, (state.historyDetail.myRunItem.avgPace.toInt())%60)
+                            binding.tvCadence.text = getString(R.string.running_avg_cadence, state.historyDetail.myRunItem.avgCadence)
+                            binding.tvAltitude.text = getString(R.string.running_avg_altitude, state.historyDetail.myRunItem.avgElevation)
+                            binding.tvCalorie.text = getString(R.string.running_avg_calories, state.historyDetail.myRunItem.calories)
+                        }
+
+                        is HistoryDetailState.Error -> {
+                            Timber.d("getHistoryDetail Error {${state.message}}")
+                        }
+
+                        is HistoryDetailState.Initial -> {
+                            Timber.d("getHistoryDetail Initial")
+                        }
+                    }
+                }
+            }
         }else {
             // 예외 상황
         }
@@ -156,11 +154,20 @@ class PersonalHistoryFragment : BaseFragment<FragmentPersonalHistoryBinding>(
         }
 
         binding.btnChart.setOnClickListener {
-            val historyDetail = courseViewModel.historyDetail.value
-            if(historyDetail is HistoryDetailState.Success) {
-                val action = RunningEndFragmentDirections.actionRunningEndFragmentToChartFragment(historyDetail.historyDetail.gpxFile)
-                findNavController().navigate(action)
+            if(args.type == "personal") {
+                val historyDetail = historyViewModel.historyDetail.value
+                if(historyDetail is HistoryDetailState.Success) {
+                    val action = PersonalHistoryFragmentDirections.actionPersonalHistoryFragmentToChartFragment(historyDetail.historyDetail.gpxFile)
+                    findNavController().navigate(action)
+                }
+            } else if(args.type == "group") {
+                val historyUserDetail = historyViewModel.historyUserDetail.value
+                if(historyUserDetail is UserHistoryDetailState.Success) {
+                    val action = PersonalHistoryFragmentDirections.actionPersonalHistoryFragmentToChartFragment(historyUserDetail.userHistoryDetail.gpxFile)
+                    findNavController().navigate(action)
+                }
             }
+
         }
 
         binding.btnAddCourse.setOnClickListener {
@@ -206,8 +213,14 @@ class PersonalHistoryFragment : BaseFragment<FragmentPersonalHistoryBinding>(
                 kakaoMap = p0
                 viewLifecycleOwner.lifecycleScope.launch {
                     withContext(Dispatchers.IO) {
-                        if(historyViewModel.historyUserDetail.value is UserHistoryDetailState.Success){
+                        if(args.type == "group" && historyViewModel.historyUserDetail.value is UserHistoryDetailState.Success){
                             (historyViewModel.historyUserDetail.value as UserHistoryDetailState.Success).userHistoryDetail.gpxFile?.let{
+                                withContext(Dispatchers.IO) {
+                                    drawGpxFile(GpxParser.getGpxInputStream(it))
+                                }
+                            }
+                        } else if(args.type == "personal" && historyViewModel.historyDetail.value is HistoryDetailState.Success) {
+                            (historyViewModel.historyDetail.value as HistoryDetailState.Success).historyDetail.gpxFile?.let{
                                 withContext(Dispatchers.IO) {
                                     drawGpxFile(GpxParser.getGpxInputStream(it))
                                 }

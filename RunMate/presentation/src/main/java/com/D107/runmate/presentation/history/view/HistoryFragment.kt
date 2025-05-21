@@ -7,18 +7,14 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.D107.runmate.domain.model.course.CourseInfo
 import com.D107.runmate.domain.model.history.History
 import com.D107.runmate.presentation.MainViewModel
 import com.D107.runmate.presentation.R
-import com.D107.runmate.presentation.course.adapter.CourseRVAdapter
-import com.D107.runmate.presentation.course.view.CourseSearchFragmentDirections
 import com.D107.runmate.presentation.databinding.FragmentHistoryBinding
-import com.D107.runmate.presentation.history.HistoryDetailState
 import com.D107.runmate.presentation.history.HistoryListState
 import com.D107.runmate.presentation.history.HistoryViewModel
 import com.D107.runmate.presentation.history.adapter.HistoryRVAdapter
-import com.D107.runmate.presentation.running.CourseSearchState
+import com.D107.runmate.presentation.running.HistoryDetailState
 import com.ssafy.locket.presentation.base.BaseFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -31,7 +27,7 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>(
     R.layout.fragment_history
 ) {
     private lateinit var historyRVAdapter: HistoryRVAdapter
-    private val historyViewModel: HistoryViewModel by viewModels()
+    private val historyViewModel: HistoryViewModel by activityViewModels()
     private val mainViewModel: MainViewModel by activityViewModels()
     private lateinit var dialog: FilterDialog
     private var setting: List<Int?> =
@@ -67,7 +63,7 @@ class HistoryFragment : BaseFragment<FragmentHistoryBinding>(
                     historyViewModel.historyDetail.value.let { historyDetail ->
                         if (historyDetail is HistoryDetailState.Success) {
                             if (historyDetail.historyDetail.groupId == null) {
-                                val action = HistoryFragmentDirections.actionHistoryFragmentToPersonalHistoryFragment("Personal")
+                                val action = HistoryFragmentDirections.actionHistoryFragmentToPersonalHistoryFragment("personal")
                                 findNavController().navigate(action)
                             } else {
                                 findNavController().navigate(R.id.action_historyFragment_to_groupHistoryFragment)

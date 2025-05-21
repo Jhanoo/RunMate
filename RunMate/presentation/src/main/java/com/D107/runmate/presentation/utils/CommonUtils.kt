@@ -148,6 +148,12 @@ object CommonUtils {
         return zonedDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
     }
 
+    fun convertIsoToCustomFormat(input: String): String {
+        val odt = OffsetDateTime.parse(input)
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        return odt.format(formatter)
+    }
+
     fun formatSecondsToHMS(seconds: Int): String {
         val hours = seconds / 3600
         val minutes = (seconds % 3600) / 60
@@ -162,14 +168,9 @@ object CommonUtils {
     }
 
     fun getSecondsBetween(time1: String, time2: String): Long {
-        val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
-        val dateTime1 = LocalDateTime.parse(time1, formatter)
-        val dateTime2 = LocalDateTime.parse(time2, formatter)
+        val formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME // 변경된 포맷터
+        val dateTime1 = OffsetDateTime.parse(time1, formatter) // OffsetDateTime으로 변경
+        val dateTime2 = OffsetDateTime.parse(time2, formatter) // OffsetDateTime으로 변경
         return Duration.between(dateTime1, dateTime2).seconds
     }
-}
-
-sealed class ToastType {
-    object DEFAULT : ToastType()
-    object ERROR : ToastType()
 }
