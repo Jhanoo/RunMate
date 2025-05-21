@@ -113,11 +113,25 @@ class GpxUploadWorker @AssistedInject constructor(
                         dataMap.putAsset("gpx_asset", asset)
                         dataMap.putLong("id", gpxFile.id)
                         dataMap.putLong("timestamp", System.currentTimeMillis())
+
                         dataMap.putDouble("distance", gpxFile.totalDistance)
-                        dataMap.putLong("time", gpxFile.totalTime)
-                        dataMap.putInt("avg_heart_rate", gpxFile.avgHeartRate)
-                        dataMap.putInt("max_heart_rate", gpxFile.maxHeartRate)
-                        dataMap.putString("avg_pace", gpxFile.avgPace)
+
+                        val paceDouble = convertPaceStringToDouble(gpxFile.avgPace)
+                        dataMap.putDouble("avgPace", paceDouble)
+
+                        dataMap.putString("calories", "")
+                        dataMap.putLong("startTime", gpxFile.startTime.time)
+                        dataMap.putLong("endTime", gpxFile.endTime.time)
+
+                        dataMap.putDouble("avgElevation", gpxFile.avgElevation)
+                        dataMap.putInt("avgBpm", gpxFile.avgHeartRate)
+                        dataMap.putString("courseId", "")
+
+                        val startLocation = extractStartLocationFromGpx(file)
+                        dataMap.putString("startLocation", startLocation)
+
+                        dataMap.putString("groupId", "")
+                        dataMap.putInt("avgCadence", gpxFile.avgCadence)
                     }
 
                     // 데이터 전송
@@ -165,6 +179,66 @@ class GpxUploadWorker @AssistedInject constructor(
         buffer.put(bytes)
         buffer.position(0)
         Asset.createFromBytes(buffer.array())
+    }
+
+    // 페이스 문자열을 Double로 변환하는 함수 (예: "5'23"" -> 5.23)
+    private fun convertPaceStringToDouble(paceString: String): Double {
+        try {
+            // 페이스 포맷이 "5'23""와 같은 형식이라면:
+            val parts = paceString.split("'", "'\"", "\"")
+            if (parts.size >= 2) {
+                val minutes = parts[0].toDoubleOrNull() ?: 0.0
+                val seconds = parts[1].toDoubleOrNull() ?: 0.0
+
+                // 초를 소수점 형태로 변환 (초/60 = 분의 소수점 부분)
+                val secondsAsFraction = seconds / 60.0
+
+                // 소수점 두 자리로 반올림
+                return String.format("%.2f", minutes + secondsAsFraction).toDouble()
+            }
+
+            // "5:23" 형식이라면:
+            if (paceString.contains(":")) {
+                val parts = paceString.split(":")
+                if (parts.size >= 2) {
+                    val minutes = parts[0].toDoubleOrNull() ?: 0.0
+                    val seconds = parts[1].toDoubleOrNull() ?: 0.0
+
+                    val secondsAsFraction = seconds / 60.0
+                    return String.format("%.2f", minutes + secondsAsFraction).toDouble()
+                }
+            }
+
+            // 숫자만 있는 경우 그대로 반환
+            return paceString.toDoubleOrNull() ?: 0.0
+        } catch (e: Exception) {
+            Log.e(TAG, "Error converting pace: $paceString", e)
+            return 0.0
+        }
+    }
+
+    // GPX 파일에서 시작 위치를 추출하는 함수
+    private fun extractStartLocationFromGpx(gpxFile: File): String {
+        try {
+            // XML 파싱을 위한 간단한 방법
+            val fileContent = gpxFile.readText()
+
+            // <trkpt> 태그를 찾아 첫 번째 위치 추출
+            val pattern = """<trkpt\s+lat="([^"]+)"\s+lon="([^"]+)"""".toRegex()
+            val matchResult = pattern.find(fileContent)
+
+            if (matchResult != null && matchResult.groupValues.size >= 3) {
+                val lat = matchResult.groupValues[1]
+                val lon = matchResult.groupValues[2]
+                return "$lat,$lon"
+            }
+
+            Log.w(TAG, "No track points found in GPX file")
+            return ""
+        } catch (e: Exception) {
+            Log.e(TAG, "Error extracting start location from GPX file", e)
+            return ""
+        }
     }
 
     private suspend fun uploadSpecificFile(fileId: Long): Boolean {
