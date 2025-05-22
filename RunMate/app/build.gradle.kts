@@ -1,0 +1,96 @@
+import java.util.Properties
+
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.jetbrains.kotlin.android)
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
+    id("com.google.gms.google-services")
+    id("kotlin-parcelize")
+}
+val properties = Properties().apply {
+    load(rootProject.file("apikey.properties").inputStream())
+}
+
+val restApiKey: String = properties.getProperty("rest_api_key") ?: ""
+val nativeApiKey: String = properties.getProperty("native_api_key") ?: ""
+val serverUrl: String = properties.getProperty("base_url") ?: ""
+val kakaoApiUrl: String = properties.getProperty("kakao_url") ?: ""
+val manifestNativeAppKey: String = properties.getProperty("manifest_native_app_key") ?: ""
+
+android {
+    namespace = "com.D107.runmate"
+    compileSdk = 34
+
+    defaultConfig {
+        applicationId = "com.D107.runmate"
+        minSdk = 28
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "REST_API_KEY", restApiKey)
+        buildConfigField("String", "NATIVE_API_KEY", nativeApiKey)
+        buildConfigField("String", "BASE_URL", serverUrl)
+        buildConfigField("String", "KAKAO_API_URL", kakaoApiUrl)
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            manifestPlaceholders["NATIVE_API_KEY"] = manifestNativeAppKey
+        }
+        debug {
+            isMinifyEnabled = false
+            manifestPlaceholders["NATIVE_API_KEY"] = manifestNativeAppKey
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+    buildFeatures {
+        buildConfig = true
+    }
+}
+
+dependencies {
+    implementation(project(":domain"))
+    implementation(project(":data"))
+    implementation(project(":presentation"))
+
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.constraintlayout)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+
+    // Hilt
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
+
+    // KakaoMap
+    implementation(libs.android)
+
+    //Timber
+    implementation("com.jakewharton.timber:timber:5.0.1")
+
+    //파이어베이스
+    implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
+    implementation(libs.firebase.messaging.ktx)
+}
+
+kapt {
+    correctErrorTypes = true
+}

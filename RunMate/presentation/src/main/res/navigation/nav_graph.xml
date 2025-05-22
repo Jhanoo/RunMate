@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/splashFragment">
+
+    <fragment
+        android:id="@+id/splashFragment"
+        android:name="com.D107.runmate.presentation.user.view.SplashFragment"
+        android:label="fragment_splash"
+        tools:layout="@layout/fragment_splash">
+        <action
+            android:id="@+id/action_splashFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true" />
+<!--        app:launchSingleTop="true"-->
+
+        <action
+            android:id="@+id/action_splashFragment_to_runningFragment"
+            app:destination="@id/runningFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.D107.runmate.presentation.user.view.LoginFragment"
+        android:label="fragment_login"
+        tools:layout="@layout/fragment_login">
+
+        <action
+            android:id="@+id/action_loginFragment_to_runningFragment"
+            app:destination="@id/runningFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+
+        <action
+            android:id="@+id/action_loginFragment_to_joinFragment"
+            app:destination="@id/JoinFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/JoinFragment"
+        android:name="com.D107.runmate.presentation.user.view.JoinFragment"
+        android:label="fragment_join"
+        tools:layout="@layout/fragment_id_pw_join">
+
+        <action
+            android:id="@+id/action_joinFragment_to_join2Fragment"
+            app:destination="@id/Join2Fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/Join2Fragment"
+        android:name="com.D107.runmate.presentation.user.view.Join2Fragment"
+        android:label="fragment_join2"
+        tools:layout="@layout/fragment_personal_join">
+
+        <action
+            android:id="@+id/action_join2Fragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/Join2Fragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/AIManagerIntroFragment"
+        android:name="com.D107.runmate.presentation.manager.view.AIManagerIntroFragment"
+        android:label="fragment_a_i_manager_intro"
+        tools:layout="@layout/fragment_a_i_manager_intro">
+        <action
+            android:id="@+id/action_aiManagerIntro_to_aiManagerExp"
+            app:destination="@id/AIManagerExpMarathonFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/AIManagerExpMarathonFragment"
+        android:name="com.D107.runmate.presentation.manager.view.AIManagerExpMarathonFragment"
+        android:label="fragment_a_i_manager_exp_marathon"
+        tools:layout="@layout/fragment_a_i_manager_exp_marathon">
+        <action
+            android:id="@+id/action_aiManagerExp_to_aiManagerGoal"
+            app:destination="@id/AIManagerGoalFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/AIManagerGoalFragment"
+        android:name="com.D107.runmate.presentation.manager.view.AIManagerGoalFragment"
+        android:label="fragment_a_i_manager_goal"
+        tools:layout="@layout/fragment_a_i_manager_goal">
+        <action
+            android:id="@+id/action_aiManagerGoal_to_aiSearchMarathon"
+            app:destination="@id/AIManagerSearchMarathonFragment" />
+        <action
+            android:id="@+id/action_aiManagerGoal_to_aiManager"
+            app:destination="@id/AIManagerFragment"
+            app:popUpTo="@id/AIManagerIntroFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/AIManagerLoadingFragment"
+        android:name="com.D107.runmate.presentation.manager.view.AIManagerLoadingFragment"
+        android:label="fragment_a_i_manager_loading"
+        tools:layout="@layout/fragment_a_i_manager_loading">
+
+        <action
+            android:id="@+id/action_aiManagerLoading_to_aiManager"
+            app:destination="@id/AIManagerFragment"
+            app:popUpTo="@id/AIManagerLoadingFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/AIManagerFragment"
+        android:name="com.D107.runmate.presentation.manager.view.AIManagerFragment"
+        android:label="fragment_a_i_manager"
+        tools:layout="@layout/fragment_a_i_manager" />
+
+
+
+
+    <fragment
+        android:id="@+id/AIManagerSearchMarathonFragment"
+        android:name="com.D107.runmate.presentation.manager.view.AIManagerSearchMarathonFragment"
+        android:label="fragment_a_i_manager_search_marathon"
+        tools:layout="@layout/fragment_a_i_manager_search_marathon" />
+
+    <fragment
+        android:id="@+id/runningFragment"
+        android:name="com.D107.runmate.presentation.running.view.RunningFragment"
+        android:label="fragment_running"
+        tools:layout="@layout/fragment_running">
+        <action
+            android:id="@+id/action_runningFragment_to_runningRecordFragment"
+            app:destination="@id/runningRecordFragment" />
+        <action
+            android:id="@+id/action_runningFragment_to_runningEndFragment"
+            app:destination="@id/runningEndFragment"
+            app:popUpTo="@id/runningFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_runningFragment_to_courseSettingFragment"
+            app:destination="@id/courseSettingFragment" />
+        <action
+            android:id="@+id/action_runningFragment_to_AIManagerIntroFragment"
+            app:destination="@+id/AIManagerIntroFragment"/>
+    </fragment>
+    <fragment
+        android:id="@+id/groupFragment"
+        android:name="com.D107.runmate.presentation.group.view.GroupFragment"
+        android:label="fragment_group"
+        tools:layout="@layout/fragment_group">
+        <action
+            android:id="@+id/action_groupFragment_to_groupCreateFragment"
+            app:destination="@id/groupCreateFragment" />
+        <action
+            android:id="@+id/action_groupFragment_to_groupInfoFragment"
+            app:destination="@id/groupInfoFragment"
+            app:launchSingleTop="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/groupCreateFragment"
+        android:name="com.D107.runmate.presentation.group.view.GroupCreateFragment"
+        android:label="fragment_group_create"
+        tools:layout="@layout/fragment_group_create">
+        <action
+            android:id="@+id/action_groupCreateFragment_to_placeSearchFragment"
+            app:destination="@id/placeSearchFragment" />
+        <action
+            android:id="@+id/action_groupCreateFragment_to_courseSettingFragment"
+            app:destination="@id/courseSettingFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/groupInfoFragment"
+        android:name="com.D107.runmate.presentation.group.view.GroupInfoFragment"
+        android:label="fragment_group_info"
+        tools:layout="@layout/fragment_group_info">
+        <action
+            android:id="@+id/action_groupInfoFragment_to_courseDetailFragment"
+            app:destination="@id/courseDetailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/placeSearchFragment"
+        android:name="com.D107.runmate.presentation.group.view.PlaceSearchFragment"
+        android:label="fragment_place_search"
+        tools:layout="@layout/fragment_place_search" />
+    <fragment
+        android:id="@+id/placeSelectFragment"
+        android:name="com.D107.runmate.presentation.group.view.PlaceSelectFragment"
+        android:label="fragment_place_select"
+        tools:layout="@layout/fragment_place_select" />
+
+
+    <fragment
+        android:id="@+id/historyFragment"
+        android:name="com.D107.runmate.presentation.history.view.HistoryFragment"
+        android:label="fragment_history"
+        tools:layout="@layout/fragment_history">
+        <action
+            android:id="@+id/action_historyFragment_to_groupHistoryFragment"
+            app:destination="@id/groupHistoryFragment" />
+        <action
+            android:id="@+id/action_historyFragment_to_personalHistoryFragment"
+            app:destination="@id/personalHistoryFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/wearableFragment"
+        android:name="com.D107.runmate.presentation.wearable.WearableFragment"
+        android:label="fragment_wearable"
+        tools:layout="@layout/fragment_wearable" />
+    <fragment
+        android:id="@+id/goalSettingFragment"
+        android:name="com.D107.runmate.presentation.manager.view.GoalSettingFragment"
+        android:label="fragment_goal_setting"
+        tools:layout="@layout/fragment_goal_setting" />
+    <fragment
+        android:id="@+id/runningRecordFragment"
+        android:name="com.D107.runmate.presentation.running.view.RunningRecordFragment"
+        android:label="fragment_running_record"
+        tools:layout="@layout/fragment_running_record">
+        <action
+            android:id="@+id/action_runningRecordFragment_to_runningEndFragment"
+            app:destination="@id/runningEndFragment"
+            app:popUpTo="@id/runningRecordFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/runningEndFragment"
+        android:name="com.D107.runmate.presentation.running.view.RunningEndFragment"
+        android:label="fragment_running_end"
+        tools:layout="@layout/fragment_running_end">
+        <argument
+            android:name="sourceScreen"
+            android:defaultValue="RUNNING_FRAGMENT"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_runningEndFragment_to_runningFragment"
+            app:destination="@id/runningFragment"
+            app:popUpTo="@id/runningEndFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_runningEndFragment_to_groupRrunningFragment"
+            app:destination="@id/groupRunningFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/runningEndFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_runningEndFragment_to_groupFragment"
+            app:destination="@id/groupFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/runningEndFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_runningEndFragment_to_chartFragment"
+            app:destination="@id/chartFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/courseSettingFragment"
+        android:name="com.D107.runmate.presentation.course.view.CourseSettingFragment"
+        android:label="fragment_course_setting"
+        tools:layout="@layout/fragment_course_setting">
+        <action
+            android:id="@+id/action_courseSettingFragment_to_courseSearchFragment"
+            app:destination="@id/courseSearchFragment" />
+        <action
+            android:id="@+id/action_courseSettingFragment_to_courseDetailFragment"
+            app:destination="@id/courseDetailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/courseSearchFragment"
+        android:name="com.D107.runmate.presentation.course.view.CourseSearchFragment"
+        android:label="fragment_course_search"
+        tools:layout="@layout/fragment_course_search">
+        <action
+            android:id="@+id/action_courseSearchFragment_to_courseDetailFragment"
+            app:destination="@id/courseDetailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/courseDetailFragment"
+        android:name="com.D107.runmate.presentation.course.view.CourseDetailFragment"
+        android:label="fragment_course_detail"
+        tools:layout="@layout/fragment_course_detail">
+        <argument
+            android:name="courseId"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_courseDetailFragment_to_runningFragment"
+            app:destination="@id/runningFragment"
+            app:popUpTo="@id/runningFragment"
+            app:popUpToInclusive="true"/>
+        <action
+            android:id="@+id/action_courseDetailFragment_to_groupCreateFragment"
+            app:destination="@id/groupCreateFragment"
+            app:popUpTo="@id/groupCreateFragment"
+            app:popUpToInclusive="true"/>
+    </fragment>
+    <fragment
+        android:id="@+id/chartFragment"
+        android:name="com.D107.runmate.presentation.running.view.ChartFragment"
+        android:label="fragment_chart"
+        tools:layout="@layout/fragment_chart" >
+        <argument
+            android:name="gpxFileUrl"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/groupRunningFragment"
+        android:name="com.D107.runmate.presentation.group.view.GroupRunningFragment"
+        android:label="fragment_group_running"
+        tools:layout="@layout/fragment_group_running">
+
+        <action
+            android:id="@+id/action_groupRunningFragment_to_runningRecordFragment"
+            app:destination="@id/runningRecordFragment" />
+        <action
+            android:id="@+id/action_groupRunningFragment_to_runningEndFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/groupRunningFragment"
+            app:popUpToInclusive="true"
+            app:destination="@id/runningEndFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/groupHistoryFragment"
+        android:name="com.D107.runmate.presentation.history.view.GroupHistoryFragment"
+        android:label="fragment_group_history"
+        tools:layout="@layout/fragment_group_history" >
+        <argument
+            android:name="historyId"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_groupHistoryFragment_to_personalHistoryFragment"
+            app:destination="@id/personalHistoryFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/personalHistoryFragment"
+        android:name="com.D107.runmate.presentation.history.view.PersonalHistoryFragment"
+        android:label="fragment_personal_history"
+        tools:layout="@layout/fragment_personal_history" >
+        <action
+            android:id="@+id/action_personalHistoryFragment_to_chartFragment"
+            app:destination="@id/chartFragment" />
+        <argument
+            android:name="type"
+            app:argType="string" />
+    </fragment>
+
+
+</navigation>

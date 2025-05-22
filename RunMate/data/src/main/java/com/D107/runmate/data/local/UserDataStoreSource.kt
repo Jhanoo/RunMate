@@ -1,0 +1,167 @@
+package com.D107.runmate.data.local
+
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.doublePreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import com.D107.runmate.domain.model.smartinsole.GaitAnalysisResult
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import timber.log.Timber
+import javax.inject.Inject
+
+class UserDataStoreSource @Inject constructor(
+    private val dataStore: DataStore<Preferences>,
+    private val json: Json
+) {
+    companion object {
+        val NICKNAME = stringPreferencesKey("nickname")
+        val USER_ID = stringPreferencesKey("user_id")
+        val PROFILE_IMAGE = stringPreferencesKey("profile_image")
+        val ACCESS_TOKEN = stringPreferencesKey("access_token")
+        val LEFT_INSOLE_ADDRESS = stringPreferencesKey("left_insole_address")
+        val RIGHT_INSOLE_ADDRESS = stringPreferencesKey("right_insole_address")
+        val GAIT_ANALYSIS_RESULT = stringPreferencesKey("gait_analysis_result")
+        val WEIGHT = doublePreferencesKey("weight")
+        val HEIGHT = doublePreferencesKey("height")
+        val FCM_TOKEN = stringPreferencesKey("fcm_token")
+    }
+
+    suspend fun saveNickname(nickname: String) {
+        dataStore.edit { preferences ->
+            preferences[NICKNAME] = nickname
+        }
+    }
+
+    suspend fun saveProfileImage(profileImage: String?) {
+        dataStore.edit { preferences ->
+            if (profileImage != null) {
+                preferences[PROFILE_IMAGE] = profileImage
+            } else {
+                preferences.remove(PROFILE_IMAGE)
+            }
+        }
+    }
+
+    suspend fun saveUserId(userId: String) {
+        dataStore.edit { preferences ->
+            preferences[USER_ID] = userId
+        }
+    }
+
+    suspend fun saveAccessToken(accessToken: String) {
+        dataStore.edit { preferences ->
+            preferences[ACCESS_TOKEN] = accessToken
+        }
+    }
+
+    suspend fun saveGaitAnalysisResult(result: GaitAnalysisResult) {
+        val jsonString = json.encodeToString(result)
+        dataStore.edit { preferences ->
+            preferences[GAIT_ANALYSIS_RESULT] = jsonString
+        }
+    }
+
+    suspend fun saveWeight(weight: Double) {
+        dataStore.edit { preferences ->
+            preferences[WEIGHT] = weight
+        }
+    }
+
+    suspend fun saveHeight(height: Double) {
+        dataStore.edit { preferences ->
+            preferences[HEIGHT] = height
+        }
+    }
+
+    suspend fun saveFcmToken(fcmToken: String) {
+        dataStore.edit { preferences ->
+            preferences[FCM_TOKEN] = fcmToken
+        }
+    }
+
+    val nickname: Flow<String?> = dataStore.data.map { preferences ->
+        preferences[NICKNAME]
+    }
+
+    val userId: Flow<String?> = dataStore.data.map { preferences ->
+        preferences[USER_ID]
+    }
+
+    val profileImage: Flow<String?> = dataStore.data.map { preferences ->
+        preferences[PROFILE_IMAGE]
+    }
+
+    val accessToken: Flow<String?> = dataStore.data.map { preferences ->
+        preferences[ACCESS_TOKEN]
+    }
+
+    val height: Flow<Double?> = dataStore.data.map { preferences ->
+        preferences[HEIGHT]
+    }
+
+    val weight: Flow<Double?> = dataStore.data.map { preferences ->
+        preferences[WEIGHT]
+    }
+
+    val fcmToken: Flow<String?> = dataStore.data.map { preferences ->
+        preferences[FCM_TOKEN]
+    }
+
+    val leftInsoleAddressFlow: Flow<String?> = dataStore.data
+        .map { preferences ->
+            preferences[LEFT_INSOLE_ADDRESS]
+        }
+
+    val rightInsoleAddressFlow: Flow<String?> = dataStore.data
+        .map { preferences ->
+            preferences[RIGHT_INSOLE_ADDRESS]
+        }
+
+    val savedAddressesFlow: Flow<Pair<String?, String?>> =
+        leftInsoleAddressFlow.combine(rightInsoleAddressFlow) { left, right ->
+            Pair(left, right)
+        }
+
+    val savedGaitAnalysisResult: Flow<GaitAnalysisResult?> = flow {
+        val jsonString = dataStore.data
+            .map { preferences ->
+                preferences[GAIT_ANALYSIS_RESULT]
+            }
+            .first()
+
+        if (jsonString.isNullOrBlank()) {
+            Timber.d("No saved gait analysis found in DataStore.")
+            emit(null)
+        } else {
+            emit(json.decodeFromString<GaitAnalysisResult>(jsonString))
+        }
+    }
+
+    suspend fun saveInsoleAddresses(leftAddress: String, rightAddress: String) {
+        dataStore.edit { preferences ->
+            preferences[LEFT_INSOLE_ADDRESS] = leftAddress
+            preferences[RIGHT_INSOLE_ADDRESS] = rightAddress
+        }
+    }
+
+    suspend fun clearInsoleAddresses() {
+        dataStore.edit { preferences ->
+            preferences.remove(LEFT_INSOLE_ADDRESS)
+            preferences.remove(RIGHT_INSOLE_ADDRESS)
+        }
+    }
+
+    suspend fun clearAll() {
+        dataStore.edit { preferences ->
+            preferences.clear()
+        }
+    }
+}

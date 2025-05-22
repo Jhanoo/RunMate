@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"> <!-- 원하는 배경 (drawable) -->
+
+<!--    <TextView-->
+<!--        android:id="@+id/tvDialogTitle"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="인솔 삭제"-->
+<!--        android:textSize="20sp"-->
+<!--        android:textColor="@color/your_title_color"-->
+<!--        android:textStyle="bold"-->
+<!--        android:layout_gravity="center_horizontal"-->
+<!--        android:layout_marginBottom="16dp"/>-->
+
+<!--    <TextView-->
+<!--        android:id="@+id/tvDialogMessage"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="연결된 인솔을 삭제하시겠습니까?"-->
+<!--        android:textSize="16sp"-->
+<!--        android:textColor="@color/your_message_color"-->
+<!--        android:gravity="center_horizontal"-->
+<!--        android:layout_marginBottom="24dp"/>-->
+
+<!--    <LinearLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:orientation="horizontal">-->
+
+<!--        <Button-->
+<!--            android:id="@+id/btnDialogNegative"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_weight="1"-->
+<!--            android:text="취소"-->
+<!--            android:backgroundTint="@color/your_negative_button_color"-->
+<!--            android:textColor="@color/white"-->
+<!--            android:layout_marginEnd="8dp"/>-->
+
+<!--        <Button-->
+<!--            android:id="@+id/btnDialogPositive"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_weight="1"-->
+<!--            android:text="삭제"-->
+<!--            android:backgroundTint="@color/your_positive_button_color"-->
+<!--            android:textColor="@color/white"-->
+<!--            android:layout_marginStart="8dp"/>-->
+<!--    </LinearLayout>-->
+</LinearLayout>

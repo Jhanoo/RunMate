@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/bg_history_item"
+    android:padding="16dp"
+    android:layout_marginBottom="12dp">
+
+    <TextView
+        android:id="@+id/tv_type"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/pretendard_medium"
+        android:letterSpacing="-0.02"
+        android:textColor="@color/caption"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="개인" />
+
+    <TextView
+        android:id="@+id/tv_course_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/pretendard_medium"
+        android:letterSpacing="-0.02"
+        android:textColor="@color/text"
+        android:textSize="18sp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_type"
+        tools:text="달려라 화니 코스" />
+
+<!--    <ImageView-->
+<!--        android:id="@+id/iv_profile_1"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:src="@drawable/image_history_profile_test"-->
+<!--        android:layout_marginStart="8dp"-->
+<!--        app:layout_constraintBottom_toBottomOf="@+id/tv_course_name"-->
+<!--        app:layout_constraintStart_toEndOf="@+id/tv_course_name"-->
+<!--        app:layout_constraintTop_toTopOf="@+id/tv_course_name" />-->
+
+<!--    <ImageView-->
+<!--        android:id="@+id/iv_profile_2"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:src="@drawable/image_history_profile_test"-->
+<!--        android:layout_marginStart="-8dp"-->
+<!--        app:layout_constraintBottom_toBottomOf="@+id/tv_course_name"-->
+<!--        app:layout_constraintStart_toEndOf="@+id/iv_profile_1"-->
+<!--        app:layout_constraintTop_toTopOf="@+id/tv_course_name" />-->
+
+<!--    <ImageView-->
+<!--        android:id="@+id/iv_profile_3"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:src="@drawable/image_history_profile_test"-->
+<!--        android:layout_marginStart="-8dp"-->
+<!--        app:layout_constraintBottom_toBottomOf="@+id/tv_course_name"-->
+<!--        app:layout_constraintStart_toEndOf="@+id/iv_profile_2"-->
+<!--        app:layout_constraintTop_toTopOf="@+id/tv_course_name" />-->
+
+    <TextView
+        android:id="@+id/tv_course_start_location"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/pretendard_medium"
+        android:letterSpacing="-0.02"
+        android:textColor="@color/caption"
+        android:textSize="16sp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_course_name"
+        tools:text="경상북도 구미시" />
+
+    <TextView
+        android:id="@+id/tv_history_date_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/pretendard_medium"
+        android:letterSpacing="-0.02"
+        android:text="일시"
+        android:textColor="@color/text"
+        android:textSize="16sp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_course_start_location" />
+
+    <TextView
+        android:id="@+id/tv_history_date"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/pretendard_medium"
+        android:letterSpacing="-0.02"
+        android:textColor="@color/text"
+        android:textSize="16sp"
+        android:autoSizeMaxTextSize="16sp"
+        android:autoSizeMinTextSize="6sp"
+        android:autoSizeTextType="uniform"
+        android:ellipsize="none"
+        android:maxLines="1"
+        app:layout_constraintEnd_toStartOf="@+id/tv_history_distance"
+        app:layout_constraintStart_toEndOf="@+id/tv_history_duration_title"
+        app:layout_constraintTop_toTopOf="@+id/tv_history_date_title"
+        tools:text="25/04/21" />
+
+    <TextView
+        android:id="@+id/tv_history_duration_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/pretendard_medium"
+        android:letterSpacing="-0.02"
+        android:text="주행 시간"
+        android:textColor="@color/text"
+        android:textSize="16sp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_history_date_title" />
+
+    <TextView
+        android:id="@+id/tv_history_duration"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:fontFamily="@font/pretendard_medium"
+        android:letterSpacing="-0.02"
+        android:textColor="@color/text"
+        android:textSize="16sp"
+        android:autoSizeMaxTextSize="16sp"
+        android:autoSizeMinTextSize="6sp"
+        android:autoSizeTextType="uniform"
+        android:ellipsize="none"
+        android:maxLines="1"
+        app:layout_constraintEnd_toStartOf="@+id/tv_history_distance"
+        app:layout_constraintStart_toEndOf="@+id/tv_history_duration_title"
+        app:layout_constraintTop_toTopOf="@+id/tv_history_duration_title"
+        tools:text="30:11" />
+
+    <TextView
+        android:id="@+id/tv_history_distance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text"
+        android:textSize="36sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_history_duration_title"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:text="5km" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_running_dialog">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="16dp"
+        android:text="필터"
+        android:textColor="@color/text"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/btn_close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:src="@drawable/ic_all_close"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_distance_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:letterSpacing="-0.02"
+        android:text="거리"
+        android:textColor="@color/text"
+        android:textSize="16sp"
+        android:fontFamily="@font/pretendard_medium"
+        app:layout_constraintStart_toStartOf="@+id/tv_title"
+        app:layout_constraintTop_toBottomOf="@+id/tv_title" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_distance_5"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_course_distance_item"
+        android:text="~5km"
+        android:layout_marginTop="12dp"
+        app:layout_constraintDimensionRatio="2.786"
+        android:padding="0dp"
+        app:layout_constraintEnd_toStartOf="@+id/btn_distance_10"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintStart_toStartOf="@+id/tv_distance_title"
+        app:layout_constraintTop_toBottomOf="@+id/tv_distance_title"
+        app:layout_constraintWidth_percent="0.1893" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_distance_10"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_course_distance_item"
+        android:text="~10km"
+        android:padding="0dp"
+        app:layout_constraintDimensionRatio="2.786"
+        app:layout_constraintEnd_toStartOf="@+id/btn_distance_half"
+        app:layout_constraintStart_toEndOf="@+id/btn_distance_5"
+        app:layout_constraintTop_toTopOf="@+id/btn_distance_5"
+        app:layout_constraintWidth_percent="0.1893" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_distance_half"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_course_distance_item"
+        android:text="~하프"
+        android:padding="0dp"
+        app:layout_constraintDimensionRatio="2.786"
+        app:layout_constraintEnd_toStartOf="@+id/btn_distance_full"
+        app:layout_constraintStart_toEndOf="@+id/btn_distance_10"
+        app:layout_constraintTop_toTopOf="@+id/btn_distance_10"
+        app:layout_constraintWidth_percent="0.1893" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_distance_full"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_course_distance_item"
+        android:text="~풀"
+        android:padding="0dp"
+        app:layout_constraintDimensionRatio="2.786"
+        app:layout_constraintEnd_toEndOf="@+id/tv_title"
+        app:layout_constraintStart_toEndOf="@+id/btn_distance_half"
+        app:layout_constraintTop_toTopOf="@+id/btn_distance_half"
+        app:layout_constraintWidth_percent="0.1893" />
+
+    <TextView
+        android:id="@+id/tv_like_title"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:letterSpacing="-0.02"
+        android:text="좋아요"
+        android:textColor="@color/text"
+        android:textSize="16sp"
+        android:fontFamily="@font/pretendard_medium"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_course_like"
+        app:layout_constraintStart_toStartOf="@+id/tv_title"
+        app:layout_constraintTop_toTopOf="@+id/iv_course_like" />
+
+    <ImageView
+        android:id="@+id/iv_course_like"
+        android:visibility="invisible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="4dp"
+        android:src="@drawable/ic_course_like_inactive"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintStart_toEndOf="@+id/tv_like_title"
+        app:layout_constraintTop_toBottomOf="@+id/btn_distance_5" />
+    
+    <RadioGroup
+        android:id="@+id/rg_type"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/btn_distance_5"
+        app:layout_constraintStart_toStartOf="@+id/btn_distance_5"
+        android:orientation="horizontal"
+        app:buttonTint="@color/primary">
+
+        <RadioButton
+            android:id="@+id/rb_all"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="전체" />
+
+        <RadioButton
+            android:id="@+id/rb_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="그룹"/>
+
+        <RadioButton
+            android:id="@+id/rb_indiv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="개인"/>
+
+    </RadioGroup>
+
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_reset"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/bg_all_btn_short_inactive"
+        android:text="지우기"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="3"
+        app:layout_constraintEnd_toStartOf="@+id/btn_confirm_short"
+        app:layout_constraintStart_toStartOf="@+id/tv_like_title"
+        app:layout_constraintTop_toBottomOf="@+id/iv_course_like" />
+
+    <Button
+        android:id="@+id/btn_confirm_short"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/bg_all_btn_short"
+        android:text="설정하기"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        app:layout_constraintDimensionRatio="3"
+        app:layout_constraintEnd_toEndOf="@+id/tv_title"
+        app:layout_constraintStart_toEndOf="@+id/btn_reset"
+        app:layout_constraintTop_toTopOf="@+id/btn_reset" />
+</androidx.constraintlayout.widget.ConstraintLayout>

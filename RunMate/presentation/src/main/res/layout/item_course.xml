@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:padding="12dp"
+    android:layout_marginBottom="16dp"
+    android:background="@drawable/bg_course_item">
+
+    <TextView
+        android:id="@+id/tv_course_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text"
+        android:textSize="16sp"
+        android:letterSpacing="-0.02"
+        android:maxLines="1"
+        android:ellipsize="marquee"
+        android:fontFamily="@font/pretendard_medium"
+        app:layout_constraintWidth_percent="0.275"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="달려라화니 코스" />
+
+    <TextView
+        android:id="@+id/tv_course_start_location"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:letterSpacing="-0.02"
+        android:textColor="@color/text"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/tv_course_owner"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_course_title"
+        tools:text="경상북도 구미" />
+
+    <ImageView
+        android:id="@+id/iv_distance_bg"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="12dp"
+        android:background="@drawable/bg_course_distance_item"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_course_title"
+        app:layout_constraintDimensionRatio="2.5"
+        app:layout_constraintStart_toEndOf="@+id/tv_course_title"
+        app:layout_constraintTop_toTopOf="@+id/tv_course_title" />
+
+    <TextView
+        android:id="@+id/tv_distance"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:gravity="center"
+        android:textColor="@color/text"
+        android:textSize="14sp"
+        android:letterSpacing="-0.02"
+        android:fontFamily="@font/pretendard_medium"
+        app:layout_constraintTop_toTopOf="@+id/iv_distance_bg"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_distance_bg"
+        app:layout_constraintStart_toStartOf="@+id/iv_distance_bg"
+        app:layout_constraintEnd_toEndOf="@+id/iv_distance_bg"
+        tools:text="5km" />
+
+    <TextView
+        android:id="@+id/tv_course_owner"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:letterSpacing="-0.02"
+        android:textColor="@color/text"
+        android:textSize="14sp"
+        android:maxLines="1"
+        android:autoSizeTextType="uniform"
+        android:ellipsize="none"
+        android:autoSizeMinTextSize="6sp"
+        android:autoSizeMaxTextSize="14sp"
+        app:layout_constraintWidth_percent="0.209"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_distance_bg"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/iv_distance_bg"
+        tools:text="코스 작성자" />
+
+    <ImageView
+        android:id="@+id/iv_profile"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/ic_course_profile"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_course_owner"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintEnd_toStartOf="@+id/tv_course_owner"
+        app:layout_constraintTop_toTopOf="@+id/tv_course_owner" />
+
+    <ImageView
+        android:id="@+id/iv_course_like"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        tools:background="@drawable/ic_course_like"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_course_like_cnt"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintStart_toStartOf="@+id/tv_course_start_location"
+        app:layout_constraintTop_toTopOf="@+id/tv_course_like_cnt" />
+
+    <TextView
+        android:id="@+id/tv_course_like_cnt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:letterSpacing="-0.02"
+        android:textColor="@color/text"
+        android:textSize="16sp"
+        app:layout_constraintStart_toEndOf="@+id/iv_course_like"
+        app:layout_constraintTop_toBottomOf="@+id/tv_course_start_location"
+        tools:text="12개" />
+
+    <ImageView
+        android:id="@+id/iv_course_altitude"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:background="@drawable/ic_course_altitude"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_course_like"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintStart_toEndOf="@+id/tv_course_like_cnt"
+        app:layout_constraintTop_toTopOf="@+id/iv_course_like" />
+
+    <TextView
+        android:id="@+id/tv_course_altitude"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:letterSpacing="-0.02"
+        android:textColor="@color/text"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_course_altitude"
+        app:layout_constraintStart_toEndOf="@+id/iv_course_altitude"
+        app:layout_constraintTop_toTopOf="@+id/tv_course_like_cnt"
+        tools:text="30m" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

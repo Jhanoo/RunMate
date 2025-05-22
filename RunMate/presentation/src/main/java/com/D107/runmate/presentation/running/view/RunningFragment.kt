@@ -1,0 +1,605 @@
+package com.D107.runmate.presentation.running.view
+
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
+import android.os.Bundle
+import android.util.Log
+import android.view.View
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
+import com.D107.runmate.domain.model.running.LocationModel
+import com.D107.runmate.domain.model.running.RunningRecordState
+import com.D107.runmate.domain.model.running.TrackingStatus
+import com.D107.runmate.domain.model.running.UserLocationState
+import com.D107.runmate.presentation.MainActivity
+import com.D107.runmate.presentation.MainViewModel
+import com.D107.runmate.presentation.R
+import com.D107.runmate.presentation.RunningTrackingService
+import com.D107.runmate.presentation.databinding.FragmentRunningBinding
+import com.D107.runmate.presentation.running.DailyTodoState
+import com.D107.runmate.presentation.running.DailyTodoViewModel
+import com.D107.runmate.presentation.running.RunningEndViewModel
+import com.D107.runmate.presentation.utils.CommonUtils
+import com.D107.runmate.presentation.utils.CommonUtils.getActivityContext
+import com.D107.runmate.presentation.utils.GpxParser
+import com.D107.runmate.presentation.utils.GpxParser.parseGpx
+import com.D107.runmate.presentation.utils.KakaoMapUtil.addCourseLine
+import com.D107.runmate.presentation.utils.KakaoMapUtil.addCoursePoint
+import com.D107.runmate.presentation.utils.KakaoMapUtil.addMoveLine
+import com.D107.runmate.presentation.utils.LocationUtils
+import com.D107.runmate.presentation.utils.SourceScreen
+import com.google.android.gms.wearable.PutDataMapRequest
+import com.google.android.gms.wearable.Wearable
+import com.kakao.vectormap.KakaoMap
+import com.kakao.vectormap.KakaoMapReadyCallback
+import com.kakao.vectormap.LatLng
+import com.kakao.vectormap.MapLifeCycleCallback
+import com.kakao.vectormap.camera.CameraUpdateFactory
+import com.kakao.vectormap.label.Label
+import com.kakao.vectormap.label.LabelOptions
+import com.kakao.vectormap.label.LabelStyle
+import com.kakao.vectormap.label.LabelStyles
+import com.ssafy.locket.presentation.base.BaseFragment
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import timber.log.Timber
+import java.io.ByteArrayOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.net.HttpURLConnection
+import java.net.URL
+import kotlin.random.Random
+
+private const val TAG = "RunningFragment"
+
+@AndroidEntryPoint
+class RunningFragment : BaseFragment<FragmentRunningBinding>(
+    FragmentRunningBinding::bind,
+    R.layout.fragment_running
+) {
+    private var kakaoMap: KakaoMap? = null
+    private val mainViewModel: MainViewModel by activityViewModels()
+    private val runningEndViewModel: RunningEndViewModel by viewModels()
+    private val dailyTodoViewModel: DailyTodoViewModel by viewModels()
+    private var mContext: Context? = null
+    private var userLabel: Label? = null
+    private lateinit var dialog: PaceSettingDialog
+    private var setting: List<Int> = listOf()
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        mContext = context
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        if(mainViewModel.courseId.value == null && mainViewModel.course.value.first != null){
+            mainViewModel.setCourse(null, null)
+        }
+
+        if (mainViewModel.userLocation.value is UserLocationState.Initial) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                mContext?.let {
+                    val location =
+                        LocationUtils.getLocation(it, (getActivityContext(it) as MainActivity))
+                    mainViewModel.setUserLocation(
+                        UserLocationState.Exist(
+                            listOf(
+                                LocationModel(
+                                    location.latitude,
+                                    location.longitude,
+                                    location.altitude,
+                                    location.speed
+                                )
+                            )
+                        )
+                    )
+                }
+            }
+        }
+
+        binding.mapView.start(object : MapLifeCycleCallback() {
+            override fun onMapDestroy() {
+            }
+
+            override fun onMapError(p0: Exception?) {
+                Log.d(TAG, "onMapError: ${p0?.message}")
+            }
+
+        }, object : KakaoMapReadyCallback() {
+            override fun onMapReady(p0: KakaoMap) {
+                kakaoMap = p0
+                userLabel = null
+                val state = mainViewModel.userLocation.value
+                if(state is UserLocationState.Exist){
+                    setCameraUpdateAndAddMarker(state)
+                }
+                loadLocationAndMove()
+                viewLifecycleOwner.lifecycleScope.launch {
+                    if(mainViewModel.course.value.second != null && mainViewModel.courseId.value != null){
+                        withContext(Dispatchers.IO) {
+                            drawGpxFile(GpxParser.getGpxInputStream(mainViewModel.course.value.second!!))
+                        }
+                    }
+                    val locations = mainViewModel.userLocation.value
+                    if(locations is UserLocationState.Exist){
+                        val latLngList: List<LatLng> = locations.locations.map { location ->
+                            LatLng.from(location.latitude, location.longitude)
+                        }
+                        mContext?.let {
+                            addMoveLine(it, p0, latLngList)
+                        }
+                    }
+                }
+            }
+
+            override fun getPosition(): LatLng {
+                mainViewModel.userLocation.value.let {
+                    if (it is UserLocationState.Exist) {
+                        return LatLng.from(
+                            it.locations.last().latitude,
+                            it.locations.last().longitude
+                        )
+                    }
+                }
+                val fallbackLocation = LocationUtils.getFallbackLocation()
+                return LatLng.from(fallbackLocation.latitude, fallbackLocation.longitude)
+            }
+        })
+
+        initEvent()
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            mainViewModel.time.collectLatest { it ->
+                binding.tvTime.text = getString(R.string.running_time, it / 60, it % 60)
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainViewModel.trackingStatus.collectLatest { status ->
+                    when (mainViewModel.trackingStatus.value) {
+                        TrackingStatus.STOPPED -> {
+                            findNavController().navigate(R.id.action_runningFragment_to_runningEndFragment)
+                        }
+
+                        TrackingStatus.RUNNING -> {
+                            binding.groupBtnStart.visibility = View.INVISIBLE
+                            binding.groupTodo.visibility = View.GONE
+                            binding.groupRecord.visibility = View.VISIBLE
+                            binding.groupBtnPause.visibility = View.GONE
+                            binding.groupBtnRunning.visibility = View.VISIBLE
+                            binding.tvNoCurriculum.visibility = View.GONE
+                            binding.cbDailyTodo.visibility = View.GONE
+                            mContext?.let {
+                                (getActivityContext(it) as MainActivity).hideHamburgerBtn()
+                            }
+                        }
+
+                        TrackingStatus.INITIAL -> {
+                            Timber.d("trackingStatus initial")
+                            binding.groupBtnStart.visibility = View.VISIBLE
+                            binding.groupTodo.visibility = View.VISIBLE
+                            binding.groupRecord.visibility = View.GONE
+                            binding.groupBtnPause.visibility = View.GONE
+                            binding.groupBtnRunning.visibility = View.GONE
+                            if(dailyTodoViewModel.dailyTodo.value is DailyTodoState.Success) {
+                                binding.tvNoCurriculum.visibility = View.GONE
+                                binding.cbDailyTodo.visibility = View.VISIBLE
+                            } else {
+                                binding.tvNoCurriculum.visibility = View.VISIBLE
+                                binding.cbDailyTodo.visibility = View.GONE
+                            }
+                            mContext?.let {
+                                (getActivityContext(it) as MainActivity).showHamburgerBtn()
+                            }
+                            runningEndViewModel.deleteFile()
+                        }
+
+                        TrackingStatus.PAUSED -> {
+                            binding.groupBtnStart.visibility = View.INVISIBLE
+                            binding.groupTodo.visibility = View.GONE
+                            binding.groupRecord.visibility = View.VISIBLE
+                            binding.groupBtnPause.visibility = View.VISIBLE
+                            binding.groupBtnRunning.visibility = View.GONE
+                            binding.tvNoCurriculum.visibility = View.GONE
+                            binding.cbDailyTodo.visibility = View.GONE
+                            mContext?.let {
+                                (getActivityContext(it) as MainActivity).hideHamburgerBtn()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            mainViewModel.runningRecord.collectLatest { state ->
+                if (state is RunningRecordState.Exist) {
+                    val locationValue = mainViewModel.userLocation.value
+                    if (state.runningRecords.size > 1) {
+                        if (locationValue is UserLocationState.Exist && locationValue.locations.size > 1) {
+                            val currentLocation = LatLng.from(
+                                locationValue.locations.last().latitude,
+                                locationValue.locations.last().longitude
+                            )
+                            val prevLocation = LatLng.from(
+                                locationValue.locations[locationValue.locations.size - 2].latitude,
+                                locationValue.locations[locationValue.locations.size - 2].longitude
+                            )
+                            mContext?.let {
+                                kakaoMap?.let {
+                                    addCoursePoint(
+                                        mContext!!,
+                                        kakaoMap!!,
+                                        prevLocation,
+                                        currentLocation
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    binding.tvDistance.text =
+                        getString(R.string.running_distance, state.runningRecords.last().distance)
+                    binding.tvPace.text =
+                        LocationUtils.getPaceFromSpeed(state.runningRecords.last().currentSpeed)
+                } else {
+                    Log.d(TAG, "onViewCreated: state else")
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            dailyTodoViewModel.dailyTodo.collectLatest { state ->
+                when(state) {
+                    is DailyTodoState.Success -> {
+                        Timber.d("getDailyTodo Success {${state.todo}}")
+                        binding.cbDailyTodo.text = state.todo.content
+                        binding.tvNoCurriculum.visibility = View.GONE
+                        binding.cbDailyTodo.visibility = View.VISIBLE
+                    }
+                    is DailyTodoState.Error -> {
+                        Timber.d("getDailyTodo Error {${state.message}}")
+                        binding.tvNoCurriculum.visibility = View.VISIBLE
+                        binding.cbDailyTodo.visibility = View.GONE
+                    }
+                    is DailyTodoState.Initial -> {
+                        Timber.d("getDailyTodo Initial")
+                    }
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            mainViewModel.course.collectLatest {
+                if(it.second != null && mainViewModel.courseId.value != null) {
+                    withContext(Dispatchers.IO) {
+                        drawGpxFile(GpxParser.getGpxInputStream(it.second!!))
+                    }
+                } else {
+                    Timber.d("course null")
+                }
+            }
+        }
+    }
+
+    private fun initEvent() {
+        binding.bgRunningRecord.setOnClickListener {
+            findNavController().navigate(R.id.action_runningFragment_to_runningRecordFragment)
+        }
+
+        binding.btnSetCourse.setOnClickListener {
+            mainViewModel.setSourceScreen(SourceScreen.RUNNING_FRAGMENT)
+            findNavController().navigate(R.id.action_runningFragment_to_courseSettingFragment)
+        }
+
+        binding.btnStart.setOnClickListener {
+            mContext?.let {
+                RunningTrackingService.startService(it)
+                (getActivityContext(it) as MainActivity).hideHamburgerBtn()
+                binding.groupBtnRunning.visibility = View.VISIBLE
+                binding.groupBtnStart.visibility = View.INVISIBLE
+                binding.groupRecord.visibility = View.VISIBLE
+                binding.groupTodo.visibility = View.GONE
+            }
+        }
+
+        binding.btnPause.setOnClickListener {
+            binding.groupBtnPause.visibility = View.VISIBLE
+            binding.groupBtnRunning.visibility = View.GONE
+            mContext?.let {
+                RunningTrackingService.pauseService(it)
+            }
+        }
+
+        binding.btnRestart.setOnClickListener {
+            binding.groupBtnPause.visibility = View.GONE
+            binding.groupBtnRunning.visibility = View.VISIBLE
+            mContext?.let {
+                RunningTrackingService.startService(it)
+            }
+        }
+
+        binding.btnEnd.setOnClickListener {
+            binding.btnEnd.isClickable = false
+            mContext?.let {
+                RunningTrackingService.stopService(it)
+            }
+        }
+
+        binding.btnVibrate.setOnClickListener {
+            if (mainViewModel.isVibration.value) {
+                binding.btnVibrate.setImageResource(R.drawable.ic_running_btn_vibrate_off)
+            } else {
+                binding.btnVibrate.setImageResource(R.drawable.ic_running_btn_vibrate_on)
+            }
+            mContext?.let {
+                RunningTrackingService.toggleVibrateService(it)
+            }
+        }
+
+        binding.btnSound.setOnClickListener {
+            if (mainViewModel.isSound.value) {
+                binding.btnSound.setImageResource(R.drawable.ic_running_btn_sound_off)
+            } else {
+                binding.btnSound.setImageResource(R.drawable.ic_running_btn_sound_on)
+            }
+            mContext?.let {
+                RunningTrackingService.toggleSoundService(it)
+            }
+        }
+
+        binding.btnSetPace.setOnClickListener {
+            dialog = PaceSettingDialog(setting) { value ->
+                if (value.size != 0) {
+                    mainViewModel.setGoalPace(value[0] * 60 + value[1])
+                } else {
+                    mainViewModel.setGoalPace(null)
+                }
+                setting = value
+            }
+            dialog.show(requireActivity().supportFragmentManager, "pace")
+        }
+
+        binding.bgTodo.setOnClickListener {
+            mContext?.let {
+                (getActivityContext(it) as MainActivity).setNavigation(R.id.drawer_manager)
+            }
+        }
+    }
+
+    private fun addMarker(latitude: Double, longitude: Double) {
+        mContext?.let {
+            CoroutineScope(Dispatchers.IO).launch {
+                val profileUrl = mainViewModel.profileImage.value
+                val profileBitmap = if(profileUrl == null) {
+                    BitmapFactory.decodeResource(resources, R.drawable.tonie)
+                } else {
+                    getBitmapFromURL(profileUrl)
+                }
+                profileBitmap?.let { bitmap ->
+                    val markerBg =
+                        BitmapFactory.decodeResource(
+                            it.resources,
+                            R.drawable.bg_running_marker_blue
+                        )
+                    val resizedMarkerBg =
+                        Bitmap.createScaledBitmap(
+                            markerBg,
+                            CommonUtils.dpToPx(it, 40f),
+                            CommonUtils.dpToPx(it, 60f),
+                            true
+                        )
+
+                    val combinedBitmap = createProfileMarker(resizedMarkerBg, bitmap)
+                    val profilePng = bitmapToPng(combinedBitmap)
+
+                    withContext(Dispatchers.Main) {
+                        kakaoMap?.let { map ->
+                            userLabel?.remove()
+
+                            val styles = map.labelManager
+                                ?.addLabelStyles(LabelStyles.from(LabelStyle.from(profilePng)))
+                            val options = LabelOptions.from(LatLng.from(latitude, longitude))
+                                .setStyles(styles)
+                            val layer = map.labelManager!!.layer
+                            userLabel = layer!!.addLabel(options)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        binding.mapView.resume()
+        dailyTodoViewModel.getDailyTodo()
+
+        when (mainViewModel.trackingStatus.value) {
+            TrackingStatus.STOPPED -> {
+                // 종료
+            }
+
+            TrackingStatus.RUNNING -> {
+                binding.groupBtnStart.visibility = View.INVISIBLE
+                binding.groupTodo.visibility = View.GONE
+                binding.groupRecord.visibility = View.VISIBLE
+                binding.groupBtnPause.visibility = View.GONE
+                binding.groupBtnRunning.visibility = View.VISIBLE
+                binding.tvNoCurriculum.visibility = View.GONE
+                binding.cbDailyTodo.visibility = View.GONE
+                mContext?.let {
+                    (getActivityContext(it) as MainActivity).hideHamburgerBtn()
+                }
+            }
+
+            TrackingStatus.INITIAL -> {
+                binding.groupBtnStart.visibility = View.VISIBLE
+                binding.groupTodo.visibility = View.VISIBLE
+                binding.groupRecord.visibility = View.GONE
+                binding.groupBtnPause.visibility = View.GONE
+                binding.groupBtnRunning.visibility = View.GONE
+                if(dailyTodoViewModel.dailyTodo.value is DailyTodoState.Success) {
+                    binding.tvNoCurriculum.visibility = View.GONE
+                    binding.cbDailyTodo.visibility = View.VISIBLE
+                } else {
+                    binding.tvNoCurriculum.visibility = View.VISIBLE
+                    binding.cbDailyTodo.visibility = View.GONE
+                }
+                mContext?.let {
+                    (getActivityContext(it) as MainActivity).showHamburgerBtn()
+                }
+                runningEndViewModel.deleteFile()
+            }
+
+            TrackingStatus.PAUSED -> {
+                binding.groupBtnStart.visibility = View.INVISIBLE
+                binding.groupTodo.visibility = View.GONE
+                binding.groupRecord.visibility = View.VISIBLE
+                binding.groupBtnPause.visibility = View.VISIBLE
+                binding.groupBtnRunning.visibility = View.GONE
+                binding.tvNoCurriculum.visibility = View.GONE
+                binding.cbDailyTodo.visibility = View.GONE
+                mContext?.let {
+                    (getActivityContext(it) as MainActivity).hideHamburgerBtn()
+                }
+            }
+        }
+    }
+
+    private fun loadLocationAndMove() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            mainViewModel.userLocation.collectLatest { state ->
+                when (state) {
+                    is UserLocationState.Exist -> {
+                        val tmpUserLabel = userLabel
+                        if (tmpUserLabel != null) {
+                            tmpUserLabel.moveTo(
+                                LatLng.from(
+                                    state.locations.last().latitude,
+                                    state.locations.last().longitude
+                                ), 800)
+                        } else {
+                            setCameraUpdateAndAddMarker(state)
+                        }
+                    }
+
+                    is UserLocationState.Initial -> {
+                        Timber.d("loadLocationAndMove UserLocationState Initial")
+                    }
+
+                    else -> {
+                        Timber.d("loadLocationAndMove UserLocationState else")
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        binding.mapView.pause()
+    }
+
+    private fun createProfileMarker(markerBackground: Bitmap, profileBitmap: Bitmap): Bitmap {
+        val resultBitmap = Bitmap.createBitmap(
+            markerBackground.width,
+            markerBackground.height,
+            Bitmap.Config.ARGB_8888
+        )
+        val canvas = Canvas(resultBitmap)
+
+        canvas.drawBitmap(markerBackground, 0f, 0f, null)
+
+        val profileSize = (markerBackground.width * 0.76).toInt()
+        val profileTop = (markerBackground.height * 0.08).toFloat()
+        val profileLeft = (markerBackground.width - profileSize) / 2f
+
+        val scaledProfile = Bitmap.createScaledBitmap(profileBitmap, profileSize, profileSize, true)
+
+        val output = Bitmap.createBitmap(profileSize, profileSize, Bitmap.Config.ARGB_8888)
+        val canvas2 = Canvas(output)
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        canvas2.drawCircle(profileSize / 2f, profileSize / 2f, profileSize / 2f, paint)
+        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
+        canvas2.drawBitmap(scaledProfile, 0f, 0f, paint)
+
+        canvas.drawBitmap(output, profileLeft, profileTop, null)
+
+        return resultBitmap
+    }
+
+    private fun getBitmapFromURL(src: String): Bitmap? {
+        try {
+            val url = URL(src)
+            val connection = (url.openConnection() as HttpURLConnection).apply {
+                doInput = true
+                connect()
+            }
+            val input = connection.inputStream
+            return BitmapFactory.decodeStream(input)
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return null
+        }
+    }
+
+    private fun bitmapToPng(bitmap: Bitmap): Bitmap {
+        val stream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        val byteArray = stream.toByteArray()
+        return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+    }
+
+    private fun drawGpxFile(inputStream: InputStream) {
+        CoroutineScope(Dispatchers.IO).launch {
+            mContext?.let {
+                val trackPoints = parseGpx(inputStream)
+                withContext(Dispatchers.Main) {
+                    val startPoint = trackPoints[0]
+                    Timber.d("startPoint ${startPoint.lat}, ${startPoint.lon}")
+                    val cameraUpdate = CameraUpdateFactory.newCenterPosition(
+                        LatLng.from(
+                            startPoint.lat,
+                            startPoint.lon
+                        )
+                    )
+                    kakaoMap?.let { map ->
+                        Timber.d("addCourseLine")
+                        map.moveCamera(cameraUpdate)
+                        addCourseLine(it, map, trackPoints)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun setCameraUpdateAndAddMarker(state: UserLocationState.Exist) {
+        val cameraUpdate = CameraUpdateFactory.newCenterPosition(
+            LatLng.from(
+                state.locations.last().latitude,
+                state.locations.last().longitude
+            )
+        )
+        kakaoMap?.moveCamera(cameraUpdate)
+        addMarker(
+            state.locations.last().latitude,
+            state.locations.last().longitude
+        )
+    }
+}
