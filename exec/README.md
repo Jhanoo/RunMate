@@ -1058,3 +1058,16 @@ server {
 | **FCM** (Firebase Cloud Messaging) | 앱 푸시 알림 전송에 사용Firebase Admin SDK 연동 |
 | **Mattermost** | Jenkins 빌드 결과를 실시간 알림으로 전송Webhook 기반 |
 | **Kakao 지도 API** | 위치 기반 기능 구현에 사용지도 표시, 주소-좌표 변환 등 제공 |
+
+### 🔥 Firebase
+
+| 항목             | 내용                                                          |
+| -------------- | ----------------------------------------------------------- |
+| **JSON 파일 위치** | `src/main/resources/runmate-xxx-firebase-adminsdk-xxx.json` |
+| **설정 경로**      | `application.yml > firebase.config-file`                    |
+| **초기화 코드 위치**  | `FirebaseConfig.java`        |
+| **사용 목적**      | FCM 푸시 알림 발송               |
+
+
+
+
