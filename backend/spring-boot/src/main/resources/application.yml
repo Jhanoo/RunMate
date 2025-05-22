@@ -1,0 +1,103 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-init-sql: SET TIME ZONE 'Asia/Seoul'
+      connection-timeout: 30000
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-test-query: SELECT 1
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      timeout: 10000
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1
+      connect-timeout: 10000
+  # multipart 설정
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 20MB
+      max-request-size: 20MB
+      resolve-lazily: true
+  # mvc 설정
+  mvc:
+    converters:
+      preferred-json-mapper: jackson
+  # 한국 시간 설정
+  jackson:
+    time-zone: Asia/Seoul
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  mapper-locations: classpath:mappers/*.xml
+  type-aliases-package: com.runhwani.runmate.model
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+
+
+jwt:
+  secret: ${JWT_SECRET:your-default-jwt-secret-key-should-be-very-long-and-secure}
+  token-validity-in-seconds: 86400
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    disable-swagger-default-url: true
+    enabled: true
+    config-url: /v3/api-docs/swagger-config
+    urls:
+      - url: /v3/api-docs
+        name: API Docs
+  api-docs:
+    path: /v3/api-docs
+  show-actuator: false
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
+
+logging:
+  level:
+    root: INFO
+    com.runhwani.runmate: DEBUG
+  pattern:
+    dateformat: yyyy-MM-dd HH:mm:ss.SSS,Asia/Seoul
+
+server:
+  port: 8080
+
+file:
+  upload-dir: ./uploads
+
+app:
+  base-url: ${APP_BASE_URL:https://k12d107.p.ssafy.io}
+
+openai:
+  api-key: ${OPENAI_API_KEY}
+
+# Firebase 설정
+firebase:
+  config-file: classpath:runmate-e11b0-firebase-adminsdk-fbsvc-358767a133.json
+  notification:
+    default-topic: all-users
+    default-icon: notification_icon
+    default-color: "#4CAF50"

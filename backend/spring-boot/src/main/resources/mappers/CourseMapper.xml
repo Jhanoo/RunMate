@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.runhwani.runmate.dao.CourseDao">
+<!-- 1. 코스 생성-->
+    <insert id="insertCourse" parameterType="com.runhwani.runmate.model.Course">
+        INSERT INTO courses (
+            course_id,
+            course_name,
+            is_shared,
+            distance,
+            avg_elevation,
+            start_location,
+            gpx_file,
+            created_by
+        ) VALUES (
+                     #{courseId},
+                     #{courseName},
+                     #{isShared},
+                     #{distance},
+                     #{avgElevation},
+                     #{startLocation},
+                     #{gpxFile},
+                     #{createdBy}
+                 )
+    </insert>
+
+<!--   2. 코스 삭제시 단일 코스 조회 -->
+    <select id="selectCourseById" parameterType="java.util.UUID" resultType="com.runhwani.runmate.model.Course">
+        SELECT course_id       AS courseId,
+               course_name     AS courseName,
+               is_shared       AS isShared,
+               distance        AS distance,
+               avg_elevation   AS avgElevation,
+               start_location  AS startLocation,
+               gpx_file        AS gpxFile,
+               created_by      AS createdBy
+        FROM courses
+        WHERE course_id = #{courseId}
+    </select>
+
+<!--    2. 코스 삭제-->
+    <update id="nullifyCourseReferenceInHistories" parameterType="java.util.UUID">
+        UPDATE histories
+        SET course_id = NULL
+        WHERE course_id = #{courseId}
+    </update>
+
+    <delete id="deleteCourse" parameterType="java.util.UUID">
+        DELETE FROM courses
+        WHERE course_id = #{courseId}
+    </delete>
+    
+<!--    CourseResponse 결과 매핑 -->
+    <resultMap id="CourseResultMap" type="com.runhwani.runmate.dto.response.course.CourseResponse">
+        <id     property="courseId"         column="course_id"/>
+        <result property="courseName"       column="course_name"/>
+        <result property="isShared"         column="is_shared"/>
+        <result property="distance"         column="distance"/>
+        <result property="avgElevation"     column="avg_elevation"/>
+        <result property="startLocation"    column="start_location"/>
+        <result property="creator.nickname"      column="nickname"/>
+        <result property="creator.profileImage"  column="profile_image"/>
+        <result property="likeCount"        column="like_count"/>
+        <result property="liked"        column="liked"/>
+    </resultMap>
+<!--    3. 코스 검색-->
+    <select id="searchCourses" parameterType="map" resultMap="CourseResultMap">
+        SELECT
+        c.course_id,
+        c.course_name,
+        c.is_shared,
+        c.distance,
+        c.avg_elevation,
+        c.start_location,
+        u.nickname,
+        u.profile_image,
+        COALESCE(l.like_count, 0) AS like_count,
+        EXISTS(
+        SELECT 1
+        FROM course_likes cl2
+        WHERE cl2.course_id = c.course_id
+        AND cl2.user_id = #{userId}
+        ) AS liked
+        FROM courses c
+        JOIN users u
+        ON c.created_by = u.user_id
+        LEFT JOIN (
+        SELECT course_id, COUNT(*) AS like_count
+        FROM course_likes
+        GROUP BY course_id
+        ) l
+        ON c.course_id = l.course_id
+        WHERE c.is_shared = TRUE
+        AND (
+        c.course_name ILIKE #{name}
+        OR u.nickname    ILIKE #{nickname}
+        OR c.start_location ILIKE #{location}
+        )
+        ORDER BY c.created_at DESC
+    </select>
+
+<!--    4. 최근 코스 조회-->
+    <select id="findRecentCourseIds" resultType="java.util.UUID">
+        SELECT DISTINCT course_id
+        FROM histories
+        WHERE user_id = #{userId}
+        AND course_id IS NOT NULL
+        AND created_at >= NOW() - INTERVAL '1 month'
+    </select>
+
+    <select id="findCoursesByIds" resultMap="CourseResultMap">
+        SELECT
+        c.course_id        AS course_id,
+        c.course_name      AS course_name,
+        c.is_shared        AS is_shared,
+        c.distance         AS distance,
+        c.avg_elevation    AS avg_elevation,
+        c.start_location   AS start_location,
+        u.nickname         AS nickname,
+        u.profile_image    AS profile_image,
+        (SELECT COUNT(*)
+        FROM course_likes cl
+        WHERE cl.course_id = c.course_id)       AS like_count,
+        EXISTS(
+        SELECT 1
+        FROM course_likes cl2
+        WHERE cl2.course_id = c.course_id
+        AND cl2.user_id = #{userId}
+        )                                        AS liked
+        FROM courses c
+        JOIN users u ON c.created_by = u.user_id
+        WHERE c.course_id IN
+        <foreach item="id" collection="courseIds" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ORDER BY c.created_at DESC
+    </select>
+    <!-- 5. 내가 만든 코스 조회 (수정) -->
+    <select id="findCoursesCreatedByUser" resultMap="CourseResultMap">
+        SELECT
+        c.course_id      AS course_id,
+        c.course_name    AS course_name,
+        c.is_shared      AS is_shared,
+        c.distance       AS distance,
+        c.avg_elevation  AS avg_elevation,
+        c.start_location AS start_location,
+        u.nickname       AS nickname,
+        u.profile_image  AS profile_image,
+        COALESCE(
+        (SELECT COUNT(*) FROM course_likes cl WHERE cl.course_id = c.course_id),
+        0
+        )                AS like_count,
+        EXISTS(
+        SELECT 1
+        FROM course_likes cl2
+        WHERE cl2.course_id = c.course_id
+        AND cl2.user_id = #{userId}
+        )                AS liked
+        FROM courses c
+        JOIN users u ON c.created_by = u.user_id
+        WHERE c.created_by = #{userId}
+        ORDER BY c.created_at DESC
+    </select>
+
+
+    <!-- 6. 전체 코스 조회 -->
+    <select id="findAllCourses" resultMap="CourseResultMap">
+        SELECT
+            c.course_id        AS course_id,
+            c.course_name      AS course_name,
+            c.is_shared        AS is_shared,
+            c.distance         AS distance,
+            c.avg_elevation    AS avg_elevation,
+            c.start_location   AS start_location,
+            u.nickname         AS nickname,
+            u.profile_image    AS profile_image,
+            COALESCE(l.like_count, 0) AS like_count,
+            EXISTS(
+                SELECT 1
+                FROM course_likes cl2
+                WHERE cl2.course_id = c.course_id
+                  AND cl2.user_id = #{userId}
+            ) AS liked
+        FROM courses c
+                 JOIN users u ON c.created_by = u.user_id
+                 LEFT JOIN (
+            SELECT course_id, COUNT(*) AS like_count
+            FROM course_likes
+            GROUP BY course_id
+        ) l ON l.course_id = c.course_id
+        WHERE c.is_shared = TRUE
+        ORDER BY c.created_at DESC
+    </select>
+
+
+<!--    7. 코스 상세 조회-->
+    <!-- 코스 상세 조회 -->
+    <select id="findCourseById" resultType="com.runhwani.runmate.model.Course">
+        SELECT
+            course_id    AS courseId,
+            course_name  AS courseName,
+            is_shared    AS isShared,
+            distance,
+            avg_elevation AS avgElevation,
+            start_location AS startLocation,
+            gpx_file     AS gpxFile,
+            created_by   AS createdBy,
+            created_at   AS createdAt
+        FROM courses
+        WHERE course_id = #{courseId}
+    </select>
+
+    <!-- 좋아요 개수 -->
+    <select id="countLikesByCourseId" resultType="int">
+        SELECT COUNT(*) FROM course_likes
+        WHERE course_id = #{courseId}
+    </select>
+
+    <!-- 전체 사용자 평균 페이스 -->
+    <select id="getAverageUserPace" resultType="double">
+        SELECT AVG(avg_pace) FROM users
+        WHERE avg_pace IS NOT NULL
+    </select>
+
+    <!-- 특정 사용자 페이스 -->
+    <select id="getUserPace" resultType="double">
+        SELECT avg_pace FROM users
+        WHERE user_id = #{userId}
+    </select>
+
+<!--    8. 코스 좋아요 업데이트-->
+    <!-- 좋아요 존재 여부 -->
+    <select id="existsCourseLike" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM course_likes
+        WHERE user_id = #{userId}
+          AND course_id = #{courseId}
+    </select>
+
+    <!-- 좋아요 삽입 -->
+    <insert id="insertCourseLike">
+        INSERT INTO course_likes (user_id, course_id)
+        VALUES (#{userId}, #{courseId})
+    </insert>
+
+    <!-- 좋아요 삭제 -->
+    <delete id="deleteCourseLike">
+        DELETE FROM course_likes
+        WHERE user_id = #{userId}
+          AND course_id = #{courseId}
+    </delete>
+</mapper>

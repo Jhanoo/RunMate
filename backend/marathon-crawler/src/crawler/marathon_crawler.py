@@ -1,0 +1,189 @@
+"""
+마라톤 웹사이트 크롤러 메인 모듈
+"""
+import os
+import logging
+import time
+import random
+from dotenv import load_dotenv
+
+from src.crawler.parser import (
+    get_marathon_list,
+    get_marathon_detail, 
+    parse_marathon_detail
+)
+from src.database.database import get_db_session, close_db_session
+from src.database.models import Marathon, MarathonDistance
+from src.utils.helpers import get_env_int, get_env_float, random_delay, retry
+
+# .env 파일 로드
+load_dotenv()
+
+# 환경 변수에서 설정 로드
+CRAWL_DELAY_MIN = get_env_float('CRAWL_DELAY_MIN', 1.0)
+CRAWL_DELAY_MAX = get_env_float('CRAWL_DELAY_MAX', 3.0)
+
+class MarathonCrawler:
+    """마라톤 웹사이트 크롤러 클래스"""
+    
+    def __init__(self):
+        """크롤러 초기화"""
+        self.session = get_db_session()
+        self.total_marathons = 0
+        self.logger = logging.getLogger(__name__)
+    
+    def __enter__(self):
+        """컨텍스트 매니저 진입"""
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """컨텍스트 매니저 종료 시 리소스 정리"""
+        close_db_session(self.session)
+    
+    @retry(max_attempts=3, exceptions=(Exception,))
+    def crawl_marathon_list(self, page=1):
+        """마라톤 목록 페이지 크롤링"""
+        self.logger.info(f"페이지 {page} 크롤링 시작")
+        
+        # 마라톤 목록 가져오기 (get_marathon_list 함수는 이미 파싱된 목록을 반환)
+        marathons = get_marathon_list(page)
+        
+        if not marathons:
+            self.logger.warning(f"페이지 {page}에서 마라톤 정보를 찾을 수 없습니다.")
+            return 0
+            
+        self.logger.info(f"페이지 {page}에서 {len(marathons)}개의 마라톤 정보 추출")
+        
+        # 각 마라톤 상세 정보 크롤링
+        for marathon in marathons:
+            try:
+                self._process_marathon_detail(marathon)
+                time.sleep(random.uniform(CRAWL_DELAY_MIN, CRAWL_DELAY_MAX))
+            except Exception as e:
+                self.logger.error(f"마라톤 상세 처리 실패: {str(e)}")
+        
+        return len(marathons)
+    
+    @random_delay(min_seconds=CRAWL_DELAY_MIN, max_seconds=CRAWL_DELAY_MAX)
+    def _process_marathon_detail(self, marathon):
+        """마라톤 상세 정보 처리"""
+        if 'url' not in marathon:
+            self.logger.warning(f"마라톤 URL 정보가 없습니다: {marathon.get('name', '이름 없음')}")
+            return
+        
+        # 이미 거리 정보가 있는 경우 상세 페이지 요청 건너뛰기
+        if 'distances' in marathon and marathon['distances']:
+            self.logger.info(f"마라톤 '{marathon.get('name', '이름 없음')}'의 거리 정보가 이미 있으므로 상세 페이지 요청을 건너뜁니다.")
+        else:
+            # 상세 페이지 크롤링
+            detail_html = get_marathon_detail(marathon['url'])
+            
+            # 상세 정보 파싱
+            details = parse_marathon_detail(detail_html)
+            
+            # 마라톤 정보와 상세 정보 병합
+            marathon.update(details)
+
+        # 데이터베이스에 저장
+        self._save_marathon(marathon)
+    
+    def _save_marathon(self, marathon_data):
+        """마라톤 정보를 데이터베이스에 저장"""
+        try:
+            # 1) 거리 정보가 없으면 저장 안 함
+            if 'distances' not in marathon_data or not marathon_data['distances']:
+                self.logger.warning(
+                    f"거리 정보가 없어 마라톤 저장을 건너뜁니다: {marathon_data.get('name','이름 없음')}"
+                )
+                return False
+
+            # 2) 필수 필드 확인
+            if not all(key in marathon_data and marathon_data[key]
+                       for key in ['name', 'date', 'location']):
+                self.logger.warning(
+                    f"필수 필드 누락: {marathon_data.get('name', '이름 없음')}"
+                )
+                return False
+
+            # 3) 이미 존재하는 마라톤 조회 (이름 + 날짜 기준)
+            existing_marathon = self.session.query(Marathon).filter_by(
+                name=marathon_data['name'],
+                date=marathon_data['date']
+            ).first()
+
+            if existing_marathon:
+                # -- 기존에 저장된 거리 리스트 추출
+                existing_distances = [d.distance for d in existing_marathon.distances]
+
+                # -- 새로 들어온 거리 리스트 중, 이미 DB에 모두 있는지 검사
+                new_distances = [
+                    d for d in marathon_data['distances']
+                    if d not in existing_distances
+                ]
+
+                if not new_distances:
+                    # >>> 모든 거리가 이미 DB에 존재하면 저장 건너뜀 <<<
+                    self.logger.info(
+                        f"'{marathon_data['name']}'는 새로운 거리 정보가 없어 저장을 건너뜁니다."
+                    )
+                    return False
+
+                # -- 추가할 거리 정보가 있을 경우만 뒤에서 저장 처리
+                self.logger.info(
+                    f"기존 마라톤 '{marathon_data['name']}'에 "
+                    f"{len(new_distances)}개의 새 거리 정보를 추가합니다."
+                )
+
+                # 4) 새로운 거리 정보만 DB에 추가
+                for distance_value in new_distances:
+                    distance = MarathonDistance(
+                        marathon_id=existing_marathon.marathon_id,
+                        distance=distance_value
+                    )
+                    self.session.add(distance)
+
+            else:
+                # --- 완전 신규 마라톤인 경우 ---
+                new_marathon = Marathon(
+                    name=marathon_data['name'],
+                    date=marathon_data['date'],
+                    location=marathon_data['location']
+                )
+                self.session.add(new_marathon)
+                self.session.flush()  # ID 발급 위해 flush
+
+                # 5) 신규 마라톤에 모든 거리 정보 추가
+                for distance_value in marathon_data['distances']:
+                    distance = MarathonDistance(
+                        marathon_id=new_marathon.marathon_id,
+                        distance=distance_value
+                    )
+                    self.session.add(distance)
+
+                self.logger.info(f"DB에 새 마라톤 추가: {marathon_data['name']}")
+                self.total_marathons += 1
+
+            # 6) 변경사항 커밋
+            self.session.commit()
+            return True
+
+        except Exception as e:
+            self.session.rollback()
+            self.logger.error(f"DB 저장 실패: {str(e)}")
+            return False
+
+    
+    def crawl(self):
+        """전체 크롤링 수행"""
+        try:
+            self.logger.info("마라톤 크롤링 시작")
+            
+            # 단일 페이지만 처리 (서브페이스 앱의 경우 페이지네이션이 복잡할 수 있음)
+            num_marathons = self.crawl_marathon_list()
+            self.logger.info(f"크롤링 완료: {num_marathons}개 마라톤")
+            
+            self.logger.info(f"크롤링 완료. 총 {self.total_marathons}개의 새 마라톤이 DB에 추가되었습니다.")
+            
+        except Exception as e:
+            self.logger.error(f"크롤링 중 오류 발생: {str(e)}")
+            raise

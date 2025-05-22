@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.runhwani.runmate.dao.GroupDao">
+
+    <!-- resultMap 정의 (컬럼↔필드 매핑) -->
+    <resultMap id="GroupResult" type="com.runhwani.runmate.model.Group">
+        <id column="group_id" property="groupId" javaType="java.util.UUID"/>
+        <result column="group_name" property="groupName"/>
+        <result column="leader_id" property="leaderId" javaType="java.util.UUID"/>
+        <result column="course_id" property="courseId" javaType="java.util.UUID"/>
+        <result column="start_time" property="startTime"/>
+        <result column="start_location" property="startLocation"/>
+        <result column="latitude" property="latitude"/>
+        <result column="longitude" property="longitude"/>
+        <result column="invite_code" property="inviteCode"/>
+        <result column="status" property="status"/>
+    </resultMap>
+
+    <!-- insert 구문 -->
+    <insert id="insertGroup" parameterType="com.runhwani.runmate.model.Group">
+        INSERT INTO groups (group_id,
+                            group_name,
+                            leader_id,
+                            course_id,
+                            start_time,
+                            start_location,
+                            latitude,
+                            longitude,
+                            invite_code)
+        VALUES (#{groupId},
+                #{groupName},
+                #{leaderId},
+                #{courseId},
+                #{startTime},
+                #{startLocation},
+                #{latitude},
+                #{longitude},
+                #{inviteCode})
+    </insert>
+
+    <insert id="insertGroupMember" parameterType="com.runhwani.runmate.model.GroupMember">
+        INSERT INTO group_members (member_id, group_id, user_id, joined_at)
+        VALUES (gen_random_uuid(),
+                #{groupId},
+                #{userId},
+                now())
+    </insert>
+
+    <select id="selectGroupByUserId" resultType="com.runhwani.runmate.model.Group">
+        SELECT g.group_id       AS groupId,
+               g.group_name     AS groupName,
+               g.leader_id      AS leaderId,
+               g.course_id      AS courseId,
+               g.start_time     AS startTime,
+               g.start_location AS startLocation,
+               g.latitude       AS latitude,
+               g.longitude      AS longitude,
+               g.invite_code    AS inviteCode,
+               g.status         AS status
+        FROM groups g
+                 JOIN group_members gm ON g.group_id = gm.group_id
+        WHERE gm.user_id = #{userId}
+          AND g.status != 2
+          AND gm.is_finished = false
+        LIMIT 1
+    </select>
+
+    <!-- 해당 그룹의 그룹원들 조회 -->
+    <select id="selectMembersByGroupId"
+            parameterType="java.util.UUID"
+            resultType="com.runhwani.runmate.dto.response.group.GroupMemberResponse">
+        SELECT gm.member_id    AS memberId,
+               gm.user_id      AS userId,
+               u.nickname      AS nickname,
+               u.profile_image AS profileImage
+        FROM group_members gm
+                 JOIN users u
+                      ON gm.user_id = u.user_id
+        WHERE gm.group_id = #{groupId}
+    </select>
+
+    <!-- 초대코드로 그룹 조회 -->
+    <select id="selectByInviteCode"
+            parameterType="string"
+            resultMap="GroupResult">
+        SELECT *
+        FROM groups
+        WHERE invite_code = #{inviteCode}
+          AND status = 0
+        LIMIT 1
+    </select>
+
+    <!-- 그룹 탈퇴: 레코드 삭제 -->
+    <update id="deleteMember" parameterType="java.util.UUID">
+        WITH target AS (
+            -- ① 해당 사용자의 활성(가장 최근) 그룹 멤버 정보
+            SELECT gm.group_id,
+                   gm.user_id,
+                   g.leader_id
+            FROM group_members gm
+                     JOIN groups g ON g.group_id = gm.group_id
+            WHERE gm.user_id = #{userId}
+              AND gm.is_finished = FALSE
+            ORDER BY gm.joined_at DESC
+            LIMIT 1),
+             del_group AS (
+                 -- ② 그룹장이면 groups 테이블에서 그룹 삭제
+                 DELETE FROM groups
+                     WHERE group_id = (SELECT group_id
+                                       FROM target
+                                       WHERE leader_id = #{userId})
+                     RETURNING group_id)
+        -- ③ 나머지: 그룹장일 때는 del_group.group_id(=전체 멤버), 아니면 target.group_id(=나만)
+        DELETE
+        FROM group_members
+        WHERE
+           -- 리더인 경우: 그룹에 속한 모든 멤버 삭제
+            (EXISTS (SELECT 1 FROM del_group)
+                AND group_id = (SELECT group_id FROM del_group))
+           OR
+           -- 일반 멤버인 경우: 해당 멤버 레코드만 삭제
+            (NOT EXISTS (SELECT 1 FROM del_group)
+                AND user_id = (SELECT target.user_id FROM target));
+    </update>
+
+    <!-- 완주 후 그룹 나가기 isFinished=true로 변경 -->
+    <update id="updateIsFinished" parameterType="java.util.UUID">
+        UPDATE group_members
+        SET is_finished = TRUE
+        WHERE member_id IN (
+            SELECT member_id
+            FROM group_members
+            WHERE user_id    = #{userId}
+              AND is_finished = FALSE
+            ORDER BY joined_at DESC
+            LIMIT 1
+        )
+    </update>
+
+    <update id="updateStatus" parameterType="map">
+        UPDATE groups
+        SET status = #{status}
+        WHERE group_id = #{groupId}
+    </update>
+
+</mapper>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.runhwani.runmate.dao.CurriculumDao">
+
+    <resultMap id="TodoResultMap" type="com.runhwani.runmate.model.Todo">
+        <id column="todo_id" property="todoId"/>
+        <result column="curriculum_id" property="curriculumId"/>
+        <result column="user_id" property="userId"/>
+        <result column="content" property="content"/>
+        <result column="is_done" property="isDone"/>
+        <result column="date" property="date"/>
+    </resultMap>
+
+    <insert id="insertCurriculum" parameterType="com.runhwani.runmate.model.Curriculum">
+        INSERT INTO curricula (curriculum_id,
+                               user_id,
+                               marathon_id,
+                               goal_dist,
+                               goal_date,
+                               run_exp,
+                               dist_exp,
+                               freq_exp)
+        VALUES (#{curriculumId},
+                #{userId},
+                #{marathonId},
+                #{goalDist},
+                #{goalDate},
+                #{runExp},
+                #{distExp},
+                #{freqExp})
+    </insert>
+
+    <insert id="insertTodo" parameterType="com.runhwani.runmate.model.Todo">
+        INSERT INTO todos (todo_id,
+                           curriculum_id,
+                           user_id,
+                           content,
+                           is_done,
+                           date)
+        VALUES (#{todoId},
+                #{curriculumId},
+                #{userId},
+                #{content},
+                #{isDone},
+                #{date})
+    </insert>
+
+    <select id="selectCurriculumByUserId" resultType="com.runhwani.runmate.model.Curriculum"
+            parameterType="java.util.UUID">
+        SELECT curriculum_id AS curriculumId,
+               user_id       AS userId,
+               marathon_id   AS marathonId,
+               goal_dist     AS goalDist,
+               goal_date     AS goalDate,
+               run_exp       AS runExp,
+               dist_exp      AS distExp,
+               freq_exp      AS freqExp,
+               is_finished   AS isFinished
+        FROM curricula
+        WHERE user_id = #{userId}
+          AND is_finished = false
+        LIMIT 1
+    </select>
+
+    <select id="selectTodoListByPeriod"
+            resultMap="TodoResultMap"
+            parameterType="map">
+        SELECT *
+        FROM todos
+        WHERE user_id = #{userId}
+          AND date &gt;= #{start}
+          AND date &lt; #{end}
+        ORDER BY date
+    </select>
+
+    <update id="updateCurriculumIsFinished" parameterType="java.util.UUID">
+        UPDATE curricula
+        SET is_finished = true
+        WHERE curriculum_id = #{curriculumId}
+          AND is_finished = false
+    </update>
+
+    <update id="updateCurriculumIsFinishedEveryDay">
+        UPDATE curricula
+        SET is_finished = TRUE
+        WHERE is_finished = FALSE
+          AND goal_date &lt; NOW()
+    </update>
+
+    <delete id="deleteTodoList" parameterType="java.util.UUID">
+        DELETE
+        FROM todos
+        WHERE user_id = #{userId}
+          AND date &gt; NOW()
+    </delete>
+
+    <update id="updateTodoDone" parameterType="java.util.UUID">
+        UPDATE todos
+        SET is_done = TRUE
+        WHERE todo_id = #{todoId}
+    </update>
+
+    <select id="selectTodayTodoByUserId" resultMap="TodoResultMap" parameterType="java.util.UUID">
+        SELECT *
+        FROM todos
+        WHERE date::date = CURRENT_DATE
+          AND user_id = #{userId}
+        LIMIT 1
+    </select>
+
+</mapper>

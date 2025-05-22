@@ -1,0 +1,232 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.runhwani.runmate.dao.HistoryDao">
+
+    <resultMap id="HistoryMap" type="com.runhwani.runmate.model.History">
+        <id column="history_id" property="historyId" javaType="java.util.UUID"/>
+        <id column="user_id" property="userId" javaType="java.util.UUID"/>
+        <id column="course_id" property="courseId" javaType="java.util.UUID"/>
+        <id column="group_id" property="groupId" javaType="java.util.UUID"/>
+        <result column="gpx_file" property="gpxFile"/>
+        <result column="start_location" property="startLocation"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="distance" property="distance"/>
+        <result column="avg_bpm" property="avgBpm"/>
+        <result column="avg_pace" property="avgPace"/>
+        <result column="avg_cadence" property="avgCadence"/>
+        <result column="avg_elevation" property="avgElevation"/>
+        <result column="calories" property="calories"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.runhwani.runmate.model.History">
+        INSERT INTO histories (history_id, user_id,
+        <if test="courseId != null">course_id,</if>
+        <if test="groupId != null">group_id,</if>
+        gpx_file, start_location,
+        start_time, end_time, distance, avg_bpm, avg_pace, avg_cadence,
+        avg_elevation, calories, created_at)
+        VALUES (#{historyId}, #{userId},
+        <if test="courseId != null">#{courseId},</if>
+        <if test="groupId != null">#{groupId},</if>
+        #{gpxFile}, #{startLocation},
+        #{startTime}, #{endTime}, #{distance}, #{avgBpm}, #{avgPace}, #{avgCadence},
+        #{avgElevation}, #{calories}, #{createdAt})
+    </insert>
+
+
+    <select id="findByUserId" resultMap="HistoryMap" parameterType="java.util.UUID">
+        SELECT * FROM histories
+        WHERE user_id = #{userId}
+        ORDER BY created_at DESC
+    </select>
+    
+    <select id="findHistoryDetailsWithPaging" resultType="map">
+        SELECT 
+            h.history_id,
+            h.user_id,
+            h.course_id,
+            h.group_id,
+            h.gpx_file,
+            h.start_location,
+            h.start_time,
+            h.end_time,
+            h.distance,
+            h.avg_bpm,
+            h.avg_pace,
+            h.avg_cadence,
+            h.avg_elevation,
+            h.calories,
+            h.created_at,
+            c.course_name,
+            g.group_name
+        FROM 
+            histories h
+        LEFT JOIN 
+            courses c ON h.course_id = c.course_id
+        LEFT JOIN 
+            groups g ON h.group_id = g.group_id
+        WHERE 
+            h.user_id = #{userId}
+        ORDER BY 
+            h.start_time DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+    
+    <select id="countByUserId" resultType="long">
+        SELECT COUNT(*) FROM histories
+        WHERE user_id = #{userId}
+    </select>
+    
+    <select id="findGroupMemberProfilesByGroupId" resultType="string">
+        SELECT u.profile_image
+        FROM users u
+        JOIN group_members gm ON u.user_id = gm.user_id
+        WHERE gm.group_id = #{groupId}
+    </select>
+
+    <select id="findHistoryDetailById" resultType="map">
+        SELECT 
+            h.history_id,
+            h.user_id,
+            h.course_id,
+            h.group_id,
+            h.gpx_file,
+            h.start_location,
+            h.start_time,
+            h.end_time,
+            h.distance,
+            h.avg_bpm,
+            h.avg_pace,
+            h.avg_cadence,
+            h.avg_elevation,
+            h.calories,
+            h.created_at,
+            c.course_name,
+            g.group_name
+        FROM 
+            histories h
+        LEFT JOIN 
+            courses c ON h.course_id = c.course_id
+        LEFT JOIN 
+            groups g ON h.group_id = g.group_id
+        WHERE 
+            h.history_id = #{historyId}
+    </select>
+    
+    <select id="findGroupRunnersByGroupId" resultType="map">
+        SELECT 
+            h.user_id,
+            u.nickname,
+            h.distance,
+            EXTRACT(EPOCH FROM (h.end_time - h.start_time)) AS time,
+            h.avg_pace
+        FROM 
+            histories h
+        JOIN 
+            users u ON h.user_id = u.user_id
+        WHERE 
+            h.group_id = #{groupId}
+        ORDER BY 
+            h.distance DESC, time ASC
+    </select>
+    
+    <select id="findMyRunDetail" resultType="map">
+        SELECT 
+            h.distance,
+            EXTRACT(EPOCH FROM (h.end_time - h.start_time)) AS time,
+            h.avg_pace,
+            h.avg_bpm,
+            h.calories,
+            h.avg_cadence,
+            h.avg_elevation,
+            h.course_id,
+            h.start_time,
+            h.end_time
+        FROM 
+            histories h
+        WHERE 
+            h.history_id = #{historyId}
+            AND h.user_id = #{userId}
+    </select>
+    
+    <select id="isAddedToCourse" resultType="boolean">
+        SELECT 
+            CASE WHEN COUNT(*) > 0 THEN true ELSE false END
+        FROM 
+            courses
+        WHERE 
+            course_id = #{courseId}
+            AND created_by = #{userId}
+    </select>
+
+    <select id="selectHistoryById" resultMap="HistoryMap" parameterType="java.util.UUID">
+        SELECT *
+        FROM histories
+        WHERE history_id = #{historyId}
+    </select>
+
+<!--    histories에 courseId 업데이트 합니다 총총-->
+    <update id="updateHistoryCourseId">
+        UPDATE histories
+        SET course_id = #{courseId}
+        WHERE history_id = #{historyId}
+    </update>
+
+    <select id="findByUserIdSinceDate"
+            parameterType="map"
+            resultType="com.runhwani.runmate.model.History">
+        SELECT
+            history_id       AS historyId,
+            user_id          AS userId,
+            course_id        AS courseId,
+            group_id         AS groupId,
+            gpx_file         AS gpxFile,
+            start_location   AS startLocation,
+            start_time       AS startTime,
+            end_time         AS endTime,
+            distance,
+            avg_bpm          AS avgBpm,
+            avg_pace         AS avgPace,
+            avg_cadence      AS avgCadence,
+            avg_elevation    AS avgElevation,
+            calories,
+            created_at       AS createdAt
+        FROM histories
+        WHERE user_id = #{userId}
+          AND created_at >= #{date}
+        ORDER BY created_at
+    </select>
+
+    <select id="findRunnerDetailByHistoryIdAndUserId" resultType="com.runhwani.runmate.dto.response.history.RunnerDetailResponse">
+        SELECT 
+            u.user_id       as userId,
+            u.nickname,
+            u.profile_image as profileImage,
+            h.start_time    as startTime,
+            h.end_time      as endTime,
+            h.distance,
+            h.gpx_file      as gpxFile,
+            h.calories,
+            h.avg_cadence   as avgCadence,
+            h.avg_pace      as avgPace,
+            h.avg_bpm       as avgBpm,
+            h.avg_elevation as avgElevation
+        FROM 
+            histories h
+        JOIN 
+            users u ON h.user_id = u.user_id
+        WHERE 
+            h.group_id = #{groupId}
+            AND h.user_id = #{userId}
+    </select>
+
+    <select id="existsByUserIdAndGroupId" resultType="boolean">
+        SELECT CASE WHEN COUNT(*) > 0 THEN TRUE ELSE FALSE END
+        FROM histories
+        WHERE user_id = #{userId}
+          AND group_id = #{groupId}
+    </select>
+</mapper>
