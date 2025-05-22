@@ -22,10 +22,12 @@ import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.time.Duration
+import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
@@ -172,5 +174,12 @@ object CommonUtils {
         val dateTime1 = OffsetDateTime.parse(time1, formatter) // OffsetDateTime으로 변경
         val dateTime2 = OffsetDateTime.parse(time2, formatter) // OffsetDateTime으로 변경
         return Duration.between(dateTime1, dateTime2).seconds
+    }
+
+    fun formatLongToIso8601(timeMillis: Long): String {
+        val zoneId = ZoneId.of("Asia/Seoul") // +09:00
+        val zonedDateTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timeMillis), zoneId)
+        val formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+        return zonedDateTime.format(formatter)
     }
 }

@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
+import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -184,6 +185,7 @@ class RunningTrackingRepositoryImpl @Inject constructor(
 
                         val altitudeSum = record.runningRecords.last().altitude + location.altitude
                         val cadenceSum = record.runningRecords.last().cadenceSum + cadence
+                        Timber.d("altitude Sum ${altitudeSum} ${location.altitude} ${record.runningRecords.last().altitude}")
                         val currentTime = time.value.takeIf { it > 0 } ?: 1
                         if (record.runningRecords.size == 120) {
                             val trackPoints =
@@ -196,7 +198,7 @@ class RunningTrackingRepositoryImpl @Inject constructor(
                                             time = runningRecord.currentTime,
                                             hr = 0, // 워치로부터 데이터받아와서 넣기 (hr리스트 만들어도 될 듯)
                                             cadence = runningRecord.cadence,
-                                            pace = if (runningRecord.currentSpeed == 0f) 0 else (16.6667 / runningRecord.currentSpeed).toInt()
+                                            pace = if (runningRecord.currentSpeed == 0f) 0 else (1000 / runningRecord.currentSpeed).toInt()
                                         )
                                     }
                             if (gpxWriter.isFileExists() != null) {

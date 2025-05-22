@@ -77,7 +77,7 @@ class WearableService @Inject constructor(
 
                                 Log.d(TAG, "JWT 토큰 수신됨: $tokenPreview (전체 길이: ${token.length})")
                                 serviceScope.launch {
-                                    saveJwtToken(token)
+//                                    saveJwtToken(token)
                                     _jwtToken.value = token
                                     Log.d(TAG, "JWT 토큰 StateFlow 업데이트 완료")
                                 }
@@ -100,62 +100,62 @@ class WearableService @Inject constructor(
         this.dataListener = dataListener
     }
 
-    private suspend fun saveJwtToken(token: String) {
-        try {
-            context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE).edit()
-                .putString("jwt_token", token)
-                .apply()
-
-            // 저장 확인을 위한 즉시 읽기
-            val savedToken = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
-                .getString("jwt_token", null)
-
-            if (savedToken != null) {
-                val tokenPreview = if (savedToken.length > 20)
-                    "${savedToken.substring(0, 10)}...${savedToken.substring(savedToken.length - 5)}"
-                else
-                    "짧은 토큰"
-
-                Log.d(TAG, "JWT 토큰 저장 성공: $tokenPreview (전체 길이: ${savedToken.length})")
-            } else {
-                Log.e(TAG, "JWT 토큰 저장 실패: 저장 후 읽기 시도했지만 null 값 반환됨")
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "JWT 토큰 저장 중 오류 발생: ${e.message}", e)
-        }
-    }
-
-    // 토큰 가져오기 기능
-    suspend fun getJwtToken(): String? {
-        return withContext(Dispatchers.IO) {
-            try {
-                val token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
-                    .getString("jwt_token", null)
-
-                if (token != null) {
-                    val tokenPreview = if (token.length > 20)
-                        "${token.substring(0, 10)}...${token.substring(token.length - 5)}"
-                    else
-                        "짧은 토큰"
-
-                    Log.d(TAG, "저장된 JWT 토큰 검색 성공: $tokenPreview (전체 길이: ${token.length})")
-
-                    // 저장된 토큰이 있으면 상태 업데이트
-                    if (_jwtToken.value != token) {
-                        _jwtToken.value = token
-                        Log.d(TAG, "JWT 토큰 StateFlow 업데이트 완료 (저장된 토큰에서)")
-                    }
-                } else {
-                    Log.d(TAG, "저장된 JWT 토큰 없음")
-                }
-
-                token
-            } catch (e: Exception) {
-                Log.e(TAG, "JWT 토큰 검색 중 오류 발생: ${e.message}", e)
-                null
-            }
-        }
-    }
+//    private suspend fun saveJwtToken(token: String) {
+//        try {
+//            context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE).edit()
+//                .putString("jwt_token", token)
+//                .apply()
+//
+//            // 저장 확인을 위한 즉시 읽기
+//            val savedToken = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+//                .getString("jwt_token", null)
+//
+//            if (savedToken != null) {
+//                val tokenPreview = if (savedToken.length > 20)
+//                    "${savedToken.substring(0, 10)}...${savedToken.substring(savedToken.length - 5)}"
+//                else
+//                    "짧은 토큰"
+//
+//                Log.d(TAG, "JWT 토큰 저장 성공: $tokenPreview (전체 길이: ${savedToken.length})")
+//            } else {
+//                Log.e(TAG, "JWT 토큰 저장 실패: 저장 후 읽기 시도했지만 null 값 반환됨")
+//            }
+//        } catch (e: Exception) {
+//            Log.e(TAG, "JWT 토큰 저장 중 오류 발생: ${e.message}", e)
+//        }
+//    }
+//
+//    // 토큰 가져오기 기능
+//    suspend fun getJwtToken(): String? {
+//        return withContext(Dispatchers.IO) {
+//            try {
+//                val token = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+//                    .getString("jwt_token", null)
+//
+//                if (token != null) {
+//                    val tokenPreview = if (token.length > 20)
+//                        "${token.substring(0, 10)}...${token.substring(token.length - 5)}"
+//                    else
+//                        "짧은 토큰"
+//
+//                    Log.d(TAG, "저장된 JWT 토큰 검색 성공: $tokenPreview (전체 길이: ${token.length})")
+//
+//                    // 저장된 토큰이 있으면 상태 업데이트
+//                    if (_jwtToken.value != token) {
+//                        _jwtToken.value = token
+//                        Log.d(TAG, "JWT 토큰 StateFlow 업데이트 완료 (저장된 토큰에서)")
+//                    }
+//                } else {
+//                    Log.d(TAG, "저장된 JWT 토큰 없음")
+//                }
+//
+//                token
+//            } catch (e: Exception) {
+//                Log.e(TAG, "JWT 토큰 검색 중 오류 발생: ${e.message}", e)
+//                null
+//            }
+//        }
+//    }
 
 
 
@@ -228,30 +228,30 @@ class WearableService @Inject constructor(
         }
     }
 
-    // 메시지 전송
-    suspend fun sendMessage(path: String, data: ByteArray): Boolean {
-        return try {
-            val node = connectedNode ?: findPhoneNode() ?: return false
+//    // 메시지 전송
+//    suspend fun sendMessage(path: String, data: ByteArray): Boolean {
+//        return try {
+//            val node = connectedNode ?: findPhoneNode() ?: return false
+//
+//            Tasks.await(messageClient.sendMessage(node.id, path, data))
+//            Log.d(TAG, "메시지 전송 성공: $path")
+//            true
+//        } catch (e: Exception) {
+//            Log.e(TAG, "메시지 전송 실패: $path, ${e.message}")
+//            false
+//        }
+//    }
 
-            Tasks.await(messageClient.sendMessage(node.id, path, data))
-            Log.d(TAG, "메시지 전송 성공: $path")
-            true
-        } catch (e: Exception) {
-            Log.e(TAG, "메시지 전송 실패: $path, ${e.message}")
-            false
-        }
-    }
-
-    // 심박수 데이터 전송
-    suspend fun sendHeartRate(heartRate: Int): Boolean {
-        return sendMessage("/heart_rate", byteArrayOf(heartRate.toByte()))
-    }
-
-    // 러닝 데이터 전송
-    suspend fun sendRunningData(heartRate: Int, pace: String, distance: Double, cadence: Int): Boolean {
-        val data = """{"hr":$heartRate,"pace":"$pace","distance":$distance,"cadence":$cadence}"""
-        return sendMessage("/running_data", data.toByteArray())
-    }
+//    // 심박수 데이터 전송
+//    suspend fun sendHeartRate(heartRate: Int): Boolean {
+//        return sendMessage("/heart_rate", byteArrayOf(heartRate.toByte()))
+//    }
+//
+//    // 러닝 데이터 전송
+//    suspend fun sendRunningData(heartRate: Int, pace: String, distance: Double, cadence: Int): Boolean {
+//        val data = """{"hr":$heartRate,"pace":"$pace","distance":$distance,"cadence":$cadence}"""
+//        return sendMessage("/running_data", data.toByteArray())
+//    }
 
     // 리소스 해제
     fun cleanup() {
@@ -283,7 +283,7 @@ class WearableService @Inject constructor(
 
                             // 토큰 저장 및 상태 업데이트
                             serviceScope.launch {
-                                saveJwtToken(token)
+//                                saveJwtToken(token)
                                 _jwtToken.value = token
                             }
                         }

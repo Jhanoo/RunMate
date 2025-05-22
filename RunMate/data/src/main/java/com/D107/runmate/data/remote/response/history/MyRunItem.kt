@@ -22,7 +22,19 @@ data class MyRunItem(
 ): BaseResponse {
     companion object: DataMapper<MyRunItem, MyRun> {
         override fun MyRunItem.toDomainModel(): MyRun {
-            return MyRun(addedToCourse, avgBpm, avgPace, calories, avgCadence, avgElevation, courseLiked, courseLikes, distance, time, startTime, endTime)
+            return MyRun(
+                addedToCourse = this.addedToCourse,
+                avgBpm = this.avgBpm,
+                avgPace = this.avgPace,
+                avgCadence = this.avgCadence,
+                calories = this.calories,
+                avgElevation = this.avgElevation,
+                courseLiked = this.courseLiked,
+                courseLikes = this.courseLikes,
+                distance = this.distance,
+                time = this.time,
+                startTime = this.startTime,
+                endTime = this.endTime)
         }
     }
 }

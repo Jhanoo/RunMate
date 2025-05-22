@@ -34,6 +34,11 @@ import androidx.navigation.NavController
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.D107.runmate.watch.presentation.menu.MenuScreen
 import com.D107.runmate.watch.presentation.pace.PaceScreen
 import com.D107.runmate.watch.presentation.running.DisplayMode
@@ -46,8 +51,10 @@ import com.D107.runmate.watch.presentation.service.BluetoothService
 import com.D107.runmate.watch.presentation.service.DataLayerListenerService
 import com.D107.runmate.watch.presentation.splash.SplashScreen
 import com.D107.runmate.watch.presentation.theme.RunMateTheme
+import com.D107.runmate.watch.presentation.worker.GpxUploadWorker
 import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wearable.Node
+import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.components.ActivityComponent
@@ -57,7 +64,11 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.TimeUnit
+import kotlin.random.Random
 
+private const val TAG = "MainActivity"
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private lateinit var runningViewModel: RunningViewModel
@@ -73,13 +84,6 @@ class MainActivity : ComponentActivity() {
             connectionCheckHandler?.postDelayed(this, CONNECTION_CHECK_INTERVAL)
         }
     }
-
-//    private fun startHeartRateOnly() {
-//        lifecycleScope.launch {
-//            Log.d("HeartRate", "심박수 전송 시작")
-//            runningViewModel.startHeartRateOnlyTracking(applicationContext)
-//        }
-//    }
 
     @SuppressLint("StateFlowValueCalledInComposition", "DefaultLocale")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -159,6 +163,23 @@ class MainActivity : ComponentActivity() {
                                 }
                             },
                             onNavigateToPace = { navController.navigate("pace") },
+                            onNavigateToAny = {
+                                val putDataMapRequest = PutDataMapRequest.create("/test")
+                                val testInt = System.currentTimeMillis().toInt()
+                                Log.d(TAG, "onCreate: ${testInt}")
+                                putDataMapRequest.dataMap.putInt("heart_rate_key", testInt)
+                                val putDataReq = putDataMapRequest.asPutDataRequest()
+                                putDataReq.setUrgent()
+                                val putTask = Wearable.getDataClient(this@MainActivity).putDataItem(putDataReq)
+                                putTask.addOnSuccessListener {
+                                    // 성공적으로 전송됨
+                                    Log.d(TAG, "onCreate: success")
+                                }
+                                putTask.addOnFailureListener {
+                                    // 전송 실패
+                                    Log.d(TAG, "onCreate: fail")
+                                }
+                            },
                             buttonsEnabled = menuButtonsEnabled
                         )
                     }
@@ -313,8 +334,8 @@ class MainActivity : ComponentActivity() {
                         val distance =
                             backStackEntry.arguments?.getString("distance") ?: "0.0"
                         val time = backStackEntry.arguments?.getString("time") ?: "0:00:00"
-                        val avgPace =
-                            backStackEntry.arguments?.getString("avgPace") ?: "--'--\""
+                        val avgPace = "--'--\""
+//                            backStackEntry.arguments?.getString("avgPace") ?: "--'--\""
                         val maxHeartRate =
                             backStackEntry.arguments?.getString("maxHeartRate")
                                 ?.toIntOrNull() ?: 0
@@ -393,35 +414,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
-//        lifecycleScope.launch(Dispatchers.IO) {
-//            try {
-//                val nodes = Tasks.await(nodeClient.connectedNodes)
-//
-//                withContext(Dispatchers.Main) {
-//                    if (nodes.isNotEmpty()) {
-//                        Log.d("MainActivity", "Phone connected: ${nodes.size} nodes found")
-//                        // 폰 연결됨 - 버튼 비활성화, 데이터 동기화 요청
-//                        menuButtonsEnabled = false
-//
-//                        // 폰에 연결됨을 알리기 위해 IDLE 상태 설정
-//                        nodes.forEach { node ->
-//                            sendStateToPhone(node.id, DataLayerListenerService.STATE_IDLE)
-//                        }
-//                    } else {
-//                        Log.d("MainActivity", "No phone connected - enabling standalone mode")
-//                        // 폰 연결 안됨 - 독립 모드 활성화 (버튼 활성화)
-//                        menuButtonsEnabled = true
-//                    }
-//                }
-//            } catch (e: Exception) {
-//                Log.e("MainActivity", "Error checking nodes: ${e.message}", e)
-//                // 오류 발생 시 독립 모드로 동작
-//                withContext(Dispatchers.Main) {
-//                    menuButtonsEnabled = true
-//                }
-//            }
-//        }
     }
 
     // 연결되지 않은 상태 UI 업데이트

@@ -15,5 +15,5 @@ data class TrackPointEntity(
     val time: Long,
     val heartRate: Int,
     val cadence: Int,
-    val pace: String
+    val pace: Int
 )

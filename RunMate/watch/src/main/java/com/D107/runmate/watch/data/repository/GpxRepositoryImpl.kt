@@ -141,7 +141,12 @@ class GpxRepositoryImpl @Inject constructor(
                     totalDistance = entity.totalDistance,
                     totalTime = entity.totalTime,
                     avgHeartRate = entity.avgHeartRate,
-                    maxHeartRate = entity.maxHeartRate
+                    maxHeartRate = entity.maxHeartRate,
+                    avgPace = entity.avgPace,
+                    avgCadence = entity.avgCadence,
+                    avgElevation = entity.avgElevation,
+                    startTime = Date(entity.startTime),
+                    endTime = Date(entity.endTime)
                 )
             }
         }

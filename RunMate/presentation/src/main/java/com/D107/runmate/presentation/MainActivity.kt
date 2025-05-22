@@ -69,7 +69,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         // BLE 연결 상태 확인
         checkWearableConnection()
 
-        addTestMessageButton()
+//        addTestMessageButton()
 
         FirebaseMessaging.getInstance().token
             .addOnCompleteListener { task ->
@@ -78,6 +78,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                     viewModel.saveFcmToken(token)
                 }
             }
+
+        startService(Intent(this, WearableService::class.java))
 
         // 뒤로가기
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
@@ -152,14 +154,14 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
         })
     }
 
-    private fun addTestMessageButton() {
-        lifecycleScope.launch {
-            delay(5000)
-            Timber.d("Testing message to watch")
-            WatchDataUtils.sendTestMessage(this@MainActivity)
-            Toast.makeText(this@MainActivity, "Test message sent to watch", Toast.LENGTH_SHORT).show()
-        }
-    }
+//    private fun addTestMessageButton() {
+//        lifecycleScope.launch {
+//            delay(5000)
+//            Timber.d("Testing message to watch")
+////            WatchDataUtils.sendTestMessage(this@MainActivity)
+//            Toast.makeText(this@MainActivity, "Test message sent to watch", Toast.LENGTH_SHORT).show()
+//        }
+//    }
 
     private fun checkWearableConnection() {
         lifecycleScope.launch {

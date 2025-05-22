@@ -93,7 +93,7 @@ class RunningEndFragment : BaseFragment<FragmentRunningEndBinding>(
                     )
                     val startLocation = mainViewModel.userLocation.value
                     binding.tvDistance.text = getString(R.string.course_distance, lastRecord.distance)
-                    binding.tvDateGroupInfo.text = getString(R.string.running_date, convertDateTime(firstRecord.currentTime), convertDateTime(lastRecord.currentTime))
+                    binding.tvDateGroupInfo.text = getString(R.string.running_date, firstRecord.currentTime, lastRecord.currentTime)
                     binding.tvTime.text = getString(R.string.running_time, time / 60, time % 60)
                     binding.tvBpm.text = "-" // TODO 추후 HR 연결하여 데이터 수정
                     binding.tvAvgPace.text = getPaceFromSpeed(lastRecord.avgSpeed)

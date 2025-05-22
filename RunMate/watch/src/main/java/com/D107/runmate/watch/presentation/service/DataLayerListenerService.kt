@@ -11,6 +11,9 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import com.D107.runmate.watch.domain.model.GpxUploadStatus
+import com.D107.runmate.watch.domain.repository.GpxRepository
+import com.D107.runmate.watch.presentation.util.GpxTransferUtil
 import com.D107.runmate.watch.presentation.worker.GpxUploadWorker
 import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wearable.DataEvent
@@ -25,7 +28,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class DataLayerListenerService : WearableListenerService() {
@@ -33,7 +38,10 @@ class DataLayerListenerService : WearableListenerService() {
     private val TAG = "DataLayerListenerService"
     private val TEST_MESSAGE_PATH = "/test_message"
 
-    private val SYNC_ATTEMPT_INTERVAL = 5 * 60 * 1000L // 5분마다 동기화 시도
+    private val SYNC_ATTEMPT_INTERVAL = 10 * 1000L // 5분마다 동기화 시도
+
+    @Inject
+    lateinit var gpxRepository: GpxRepository
 
     private var syncHandler: Handler? = null
     private val syncRunnable = object : Runnable {
@@ -255,12 +263,24 @@ class DataLayerListenerService : WearableListenerService() {
     }
 
     private fun checkAndTransferPendingGpxFiles() {
-        // 폰과 연결되었을 때 대기 중인 GPX 파일 전송
-        WorkManager.getInstance(this).enqueueUniqueWork(
-            "transfer_gpx_files",
-            ExistingWorkPolicy.REPLACE,
-            OneTimeWorkRequestBuilder<GpxUploadWorker>().build()
-        )
+        scope.launch {
+            try {
+                // 대기 중인 GPX 파일 목록 가져오기
+                val pendingFiles = gpxRepository.getPendingGpxFiles().first()
+                Log.d(TAG, "Found ${pendingFiles.size} pending GPX files")
+
+                for (gpxFile in pendingFiles) {
+                    val success = GpxTransferUtil.uploadGpxFile(applicationContext, gpxFile)
+                    if (success) {
+                        gpxRepository.updateGpxFileStatus(gpxFile.id, GpxUploadStatus.SUCCESS)
+                    } else {
+                        gpxRepository.updateGpxFileStatus(gpxFile.id, GpxUploadStatus.FAILED)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error transferring GPX files: ${e.message}", e)
+            }
+        }
     }
 
     // 러닝 상태 처리 함수

@@ -43,6 +43,7 @@
         android:textColor="@color/caption"
         android:textSize="20sp"
         android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/iv_divider_top"
         app:layout_constraintEnd_toEndOf="@+id/tv_time"
         app:layout_constraintStart_toStartOf="@+id/tv_time"
         app:layout_constraintTop_toBottomOf="@+id/tv_time" />
@@ -51,11 +52,12 @@
         android:id="@+id/iv_divider_top"
         android:layout_width="0dp"
         android:layout_height="4dp"
-        android:layout_marginTop="24dp"
         android:background="@drawable/bg_all_divider"
+        app:layout_constraintVertical_bias="0.1617"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_time_title" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tv_distance"
@@ -220,6 +222,8 @@
         android:textColor="@color/caption"
         android:textSize="20sp"
         android:textStyle="bold"
+        android:layout_marginBottom="20dp"
+        app:layout_constraintBottom_toTopOf="@+id/iv_divider_bottom"
         app:layout_constraintEnd_toEndOf="@+id/tv_cadence"
         app:layout_constraintStart_toStartOf="@+id/tv_cadence"
         app:layout_constraintTop_toBottomOf="@+id/tv_cadence" />
@@ -261,6 +265,7 @@
         android:textColor="@color/caption"
         android:textSize="20sp"
         android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_cadence_title"
         app:layout_constraintEnd_toEndOf="@+id/tv_bpm"
         app:layout_constraintStart_toStartOf="@+id/tv_bpm"
         app:layout_constraintTop_toBottomOf="@+id/tv_bpm" />
@@ -269,12 +274,12 @@
         android:id="@+id/iv_divider_bottom"
         android:layout_width="0dp"
         android:layout_height="4dp"
-        android:layout_marginTop="24dp"
         android:background="@drawable/bg_all_divider"
-        app:layout_constraintBottom_toTopOf="@+id/btn_pause"
+        app:layout_constraintVertical_bias="0.7462"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_cadence_title" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/btn_pause"
@@ -375,7 +380,7 @@
         android:id="@+id/group_btn_running"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
+        android:visibility="gone"
         app:constraint_referenced_ids="btn_sound, btn_vibrate, btn_pause" />
 
     <androidx.constraintlayout.widget.Group

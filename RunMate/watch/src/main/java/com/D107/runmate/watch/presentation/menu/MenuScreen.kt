@@ -40,6 +40,7 @@ import com.D107.runmate.watch.R
 fun MenuScreen(
     onNavigateToRunning: () -> Unit = {},
     onNavigateToPace: () -> Unit = {},
+    onNavigateToAny: () -> Unit = {},
     buttonsEnabled: Boolean = true
 ) {
     val listState = rememberScalingLazyListState()

@@ -37,6 +37,8 @@ import com.D107.runmate.presentation.utils.KakaoMapUtil.addCoursePoint
 import com.D107.runmate.presentation.utils.KakaoMapUtil.addMoveLine
 import com.D107.runmate.presentation.utils.LocationUtils
 import com.D107.runmate.presentation.utils.SourceScreen
+import com.google.android.gms.wearable.PutDataMapRequest
+import com.google.android.gms.wearable.Wearable
 import com.kakao.vectormap.KakaoMap
 import com.kakao.vectormap.KakaoMapReadyCallback
 import com.kakao.vectormap.LatLng
@@ -59,6 +61,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import kotlin.random.Random
 
 private const val TAG = "RunningFragment"
 

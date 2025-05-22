@@ -9,7 +9,7 @@ data class GpxTrackPoint(
     val time: Date,         // 시간
     val heartRate: Int,     // 심박수 (BPM)
     val cadence: Int,       // 케이던스
-    val pace: String        // 페이스 (분:초/km)
+    val pace: Int        // 페이스 (분:초/km)
 )
 
 // GPX 파일 메타데이터
@@ -41,7 +41,7 @@ data class GpxFile(
     val maxHeartRate: Int,         // 최대 심박수
 
     // 추가 필드들
-    val avgPace: String = "",     // 평균 페이스
+    val avgPace: Double,     // 평균 페이스
     val avgCadence: Int = 0,      // 평균 케이던스
     val startTime: Date = Date(), // 시작 시간
     val endTime: Date = Date(),   // 종료 시간

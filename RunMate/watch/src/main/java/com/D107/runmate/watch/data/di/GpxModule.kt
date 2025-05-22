@@ -45,8 +45,7 @@ object GpxModule {
     @Singleton
     fun provideGpxRepository(
         @ApplicationContext context: Context,
-        gpxDao: com.D107.runmate.watch.data.local.GpxDao,
-        apiService: GpxApiService
+        gpxDao: com.D107.runmate.watch.data.local.GpxDao
     ): GpxRepository {
         return GpxRepositoryImpl(context, gpxDao)
     }

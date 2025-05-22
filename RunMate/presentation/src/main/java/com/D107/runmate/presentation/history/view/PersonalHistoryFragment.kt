@@ -108,7 +108,7 @@ class PersonalHistoryFragment : BaseFragment<FragmentPersonalHistoryBinding>(
                             binding.tvDistance.text = getString(R.string.course_distance, state.historyDetail.myRunItem.distance)
                             binding.tvDateGroupInfo.text = getString(R.string.running_date, convertIsoToCustomFormat(state.historyDetail.myRunItem.startTime), convertIsoToCustomFormat(state.historyDetail.myRunItem.endTime))
                             binding.tvTime.text = getString(R.string.running_time, time / 60, time % 60)
-                            binding.tvBpm.text = "-" // TODO 추후 HR 연결하여 데이터 수정
+                            binding.tvBpm.text = if(state.historyDetail.myRunItem.avgBpm == 0.0) "-" else getString(R.string.running_avg_bpm, state.historyDetail.myRunItem.avgBpm)
                             binding.tvAvgPace.text = getString(R.string.running_pace, (state.historyDetail.myRunItem.avgPace.toInt())/60, (state.historyDetail.myRunItem.avgPace.toInt())%60)
                             binding.tvCadence.text = getString(R.string.running_avg_cadence, state.historyDetail.myRunItem.avgCadence)
                             binding.tvAltitude.text = getString(R.string.running_avg_altitude, state.historyDetail.myRunItem.avgElevation)
@@ -132,14 +132,31 @@ class PersonalHistoryFragment : BaseFragment<FragmentPersonalHistoryBinding>(
     }
 
     private fun initUI() {
-        if (mainViewModel.course.value.first == null) {
-            // 프리 모드인 경우
-            binding.btnAddCourse.visibility = View.VISIBLE
-            binding.ivLike.visibility = View.GONE
-        } else {
-            // 코스 모드인 경우
-            binding.btnAddCourse.visibility = View.GONE
-            binding.ivLike.visibility = View.VISIBLE
+        val historyDetail = historyViewModel.historyDetail.value
+        val userHistoryDetail = historyViewModel.historyUserDetail.value
+
+        if(historyDetail is HistoryDetailState.Success) {
+            if(args.type == "group") {
+                if(userHistoryDetail is UserHistoryDetailState.Success) {
+                    Timber.d("userId ${mainViewModel.userId.value}  ${userHistoryDetail.userHistoryDetail.userId}")
+                    Timber.d("addedToCourse ${historyDetail.historyDetail.myRunItem.addedToCourse}")
+                    if(userHistoryDetail.userHistoryDetail.userId.equals(mainViewModel.userId.value) && historyDetail.historyDetail.myRunItem.addedToCourse == false) {
+                        binding.btnAddCourse.visibility = View.VISIBLE
+                        binding.ivLike.visibility = View.GONE
+                    } else {
+                        binding.btnAddCourse.visibility = View.GONE
+                        binding.ivLike.visibility = View.VISIBLE
+                    }
+                }
+            } else {
+                if(historyDetail.historyDetail.myRunItem.addedToCourse) {
+                    binding.btnAddCourse.visibility = View.GONE
+                    binding.ivLike.visibility = View.VISIBLE
+                } else {
+                    binding.btnAddCourse.visibility = View.VISIBLE
+                    binding.ivLike.visibility = View.GONE
+                }
+            }
         }
     }
 
@@ -172,17 +189,14 @@ class PersonalHistoryFragment : BaseFragment<FragmentPersonalHistoryBinding>(
 
         binding.btnAddCourse.setOnClickListener {
             dialog = CourseAddDialog() {
-                val record = mainViewModel.runningRecord.value
-                if(record is RunningRecordState.Exist) {
-                    val lastRecord = record.runningRecords.last()
-
-                    var name = "${mainViewModel.nickname} ${dateformatMMdd(record.runningRecords.first().currentTime)}"
-
-                    if(it.first.isNotEmpty()) {
-                        name = it.first
-                    }
-                    courseViewModel.createCourse(lastRecord.altitudeSum/mainViewModel.recordSize.value, lastRecord.distance,
-                        mainViewModel.historyId.value!!, name, it.second, courseViewModel.address.value!!)
+                val historyDetail = historyViewModel.historyDetail.value
+                var name = "${mainViewModel.nickname}의 코스"
+                if(it.first.isNotEmpty()) {
+                    name = it.first
+                }
+                if(historyDetail is HistoryDetailState.Success) {
+                    courseViewModel.createCourse(historyDetail.historyDetail.myRunItem.avgElevation, historyDetail.historyDetail.myRunItem.distance.toFloat(),
+                        historyDetail.historyDetail.historyId, name, it.second, historyDetail.historyDetail.startLocation)
                 }
             }
             dialog.show(requireActivity().supportFragmentManager, "course_add")
