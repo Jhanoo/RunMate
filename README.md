@@ -1,13 +1,15 @@
 # 💗 **싸피 12기 2학기 자율 프로젝트**
 ## 당신의 발걸음을 책임질 마라톤 파트너 [런메이트]
-- 팀명 : **달려라 환이**
+- 팀명 : **달려라화니**
 - 팀원 : **정찬우, 김환, 이한나, 김미경, 한아영, 황선혁**
 
 </br>
 
 **개발 기간** : `2025/04/14(월) ~ 2025/05/22(목)`
 
-
+<br>
+## 🏃‍➡️ 캐릭터 소개
+<img src="https://github.com/RunHwani/RunMate/raw/master/images/tonie.gif?ref_type=heads" width="300" height="300"/>
 
 ## 목차
 1. [팀원 소개](#팀원-소개)
@@ -283,7 +285,3 @@
     - 전화 알림 예약(일정) API
     - 전화 내용 프롬프팅
 
-
-<br>
-## 🏃‍➡️ 캐릭터 소개
-<img src="https://lab.ssafy.com/s12-final/S12P31D107/-/raw/master/images/tonie.gif?ref_type=heads" />
