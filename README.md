@@ -5,11 +5,7 @@
 - 팀명 : **달려라화니**
 - 팀원 : **정찬우, 김환, 이한나, 김미경, 한아영, 황선혁**
 
-</br>
-
 **개발 기간** : `2025/04/14(월) ~ 2025/05/22(목)`
-
-<br>
 
 ## 🏃‍➡️ 캐릭터 소개
 
@@ -20,12 +16,10 @@
 1. [팀원 소개](#팀원-소개)
 2. [기술 스택](#기술-스택)
 3. [서비스 소개](#서비스-소개)
-4. [산출물](#산출물)
-5. [주요 기능 상세설명](#주요-기능-상세설명)
-6. [AI 활용내역](#AI-활용내역)
-7. [맡은 역할](#맡은-역할)
-
-</br>
+4. [주요 기능 상세설명](#주요-기능-상세설명)
+5. [AI 활용내역](#AI-활용내역)
+6. [맡은 역할](#맡은-역할)
+7. [산출물](#산출물)
 
 ## 📌팀원 소개
 
@@ -40,18 +34,13 @@
 | **한아영** | 팀원 | Android, UI/UX Design |
 | **황선혁** | 팀원 | Android, IoT          |
 
-<br>
-
 ## 📌기술 스택
-
-<left>
 
 ### 백엔드
 
 [![Spring%20Boot](https://img.shields.io/badge/springboot-6DB33F?logo=springboot&logoColor=white)](#)
 [![Postgres](https://img.shields.io/badge/Postgres-%23316192.svg?logo=postgresql&logoColor=white)](#)
 [![Java](https://img.shields.io/badge/Java-%23ED8B00.svg?logo=openjdk&logoColor=white)](#)
-
 [![Firebase](https://img.shields.io/badge/Firebase-039BE5?logo=Firebase&logoColor=white)](#)
 [![IntelliJ IDEA](https://img.shields.io/badge/IntelliJIDEA-000000?logo=intellij-idea&logoColor=white)](#)
 
@@ -78,7 +67,7 @@
 [![Figma](https://img.shields.io/badge/Figma-F24E1E?logo=figma&logoColor=white)](#)
 [![Canva](https://img.shields.io/badge/Canva-00C4CC?logo=Canva&logoColor=white)](#)
 
-### 상태 관리
+### 협업 도구
 
 [![Git](https://img.shields.io/badge/Git-F05032?logo=git&logoColor=fff)](#)
 [![GitLab](https://img.shields.io/badge/GitLab-FC6D26?logo=gitlab&logoColor=fff)](#)
@@ -86,17 +75,11 @@
 [![Mattermost](https://img.shields.io/badge/mattermost-002E5F?logo=mattermost&logoColor=fff)](#)
 [![Notion](https://img.shields.io/badge/Notion-000?logo=notion&logoColor=fff)](#)
 
-</left>
-
-<br>
-
-</br>
-
 ## 📌서비스 소개
 
 ### 1. 기획의도
 
-> “당신의 발걸음을 책임질 마라톤 파트너, RunMate”
+> "당신의 발걸음을 책임질 마라톤 파트너, RunMate"
 
 RunMate는 마라톤을 목표로 하는 사용자를 위해 AI 기반 훈련 커리큘럼을 제공하고,
 위치 기반 그룹 러닝과 음성 피드백, 스마트워치 연동까지 지원하는 올인원 러닝 파트너 앱입니다.
@@ -127,10 +110,6 @@ RunMate는 마라톤을 목표로 하는 사용자를 위해 AI 기반 훈련 �
 - 실시간 거리, 페이스, 심박 수 측정
 - 스마트폰-워치 연동으로 러닝 데이터 통합 분석
 
-<br>
-
-<br>
-
 ## 📌주요 기능 상세설명
 
 ### 1. 로그인 및 회원가입
@@ -140,9 +119,9 @@ RunMate는 마라톤을 목표로 하는 사용자를 위해 AI 기반 훈련 �
 - **로그인**: 기존 계정으로 로그인하여 개인화된 러닝 경험 제공
 - **회원가입**: 개인정보 입력을 통해 맞춤형 AI 커리큘럼 생성 기반 마련
 
-<img width="400" src="images/로그인.png" alt="로그인 화면"/>
-<img width="400" src="images/회원가입 - ID,PW.png" alt="회원가입 - ID/PW"/>
-<img width="400" src="images/회원가입 - 개인정보.png" alt="회원가입 - 개인정보"/>
+<img width="250" src="images/로그인.png" alt="로그인 화면"/>
+<img width="250" src="images/회원가입 - ID,PW.png" alt="회원가입 - ID/PW"/>
+<img width="250" src="images/회원가입 - 개인정보.png" alt="회원가입 - 개인정보"/>
 
 ### 2. 메인 러닝 화면
 
@@ -153,10 +132,10 @@ RunMate는 마라톤을 목표로 하는 사용자를 위해 AI 기반 훈련 �
 - **일시정지**: 러닝 중 일시정지 시 현재 상태 유지
 - **페이스 설정**: 목표 페이스 설정으로 안정적인 러닝 지원
 
-<img width="300" src="images/메인화면.png" alt="메인화면"/>
-<img width="300" src="images/메인화면 - 시작.png" alt="메인화면 - 시작"/>
-<img width="300" src="images/메인화면 - 일시정지.png" alt="메인화면 - 일시정지"/>
-<img width="300" src="images/메인화면 - 페이스설정.png" alt="메인화면 - 페이스설정"/>
+<img width="200" src="images/메인화면.png" alt="메인화면"/>
+<img width="200" src="images/메인화면 - 시작.png" alt="메인화면 - 시작"/>
+<img width="200" src="images/메인화면 - 일시정지.png" alt="메인화면 - 일시정지"/>
+<img width="200" src="images/메인화면 - 페이스설정.png" alt="메인화면 - 페이스설정"/>
 
 ### 3. 코스 선택 및 관리
 
@@ -168,11 +147,11 @@ RunMate는 마라톤을 목표로 하는 사용자를 위해 AI 기반 훈련 �
 - **내가 만든 코스**: 사용자가 직접 생성한 코스 바로가기
 - **코스 선택**: 코스 선택한 후 메인화면에 경로 표시
 
-<img width="300" src="images/코스선택 - 리스트.png" alt="코스선택 - 리스트"/>
-<img width="300" src="images/코스선택 - 상세.png" alt="코스선택 - 상세"/>
-<img width="300" src="images/코스선택 - 최근에 달린 코스.png" alt="코스선택 - 최근에 달린 코스"/>
-<img width="300" src="images/코스선택 - 내가 만든 코스.png" alt="코스선택 - 내가 만든 코스"/>
-<img width="300" src="images/메인화면 - 코스 경로.png" alt="메인화면 - 코스 경로"/>
+<img width="200" src="images/코스선택 - 리스트.png" alt="코스선택 - 리스트"/>
+<img width="200" src="images/코스선택 - 상세.png" alt="코스선택 - 상세"/>
+<img width="200" src="images/코스선택 - 최근에 달린 코스.png" alt="코스선택 - 최근에 달린 코스"/>
+<img width="200" src="images/코스선택 - 내가 만든 코스.png" alt="코스선택 - 내가 만든 코스"/>
+<img width="200" src="images/메인화면 - 코스 경로.png" alt="메인화면 - 코스 경로"/>
 
 ### 4. AI 매니저 기능
 
@@ -183,12 +162,12 @@ GPT 기반 AI가 사용자에게 맞춤형 마라톤 훈련 커리큘럼을 제�
 - **커리큘럼 생성**: AI가 분석한 맞춤형 훈련 스케줄 제공
 - **커리큘럼 변경**: 커리큘럼 새로 만들기
 
-<img width="300" src="images/AI 매니저 - 미생성.png" alt="AI 매니저 - 미생성"/>
-<img width="300" src="images/AI 매니저 - 메인.png" alt="AI 매니저 - 메인"/>
-<img width="300" src="images/AI 매니저 - 목표 설정1.png" alt="AI 매니저 - 목표 설정1"/>
-<img width="300" src="images/AI 매니저 - 목표 설정2.png" alt="AI 매니저 - 목표 설정2"/>
-<img width="300" src="images/AI 매니저 - 생성중.png" alt="AI 매니저 - 생성중"/>
-<img width="300" src="images/AI 매니저 - 커리큘럼 변경.png" alt="AI 매니저 - 커리큘럼 변경"/>
+<img width="200" src="images/AI 매니저 - 미생성.png" alt="AI 매니저 - 미생성"/>
+<img width="200" src="images/AI 매니저 - 메인.png" alt="AI 매니저 - 메인"/>
+<img width="200" src="images/AI 매니저 - 목표 설정1.png" alt="AI 매니저 - 목표 설정1"/>
+<img width="200" src="images/AI 매니저 - 목표 설정2.png" alt="AI 매니저 - 목표 설정2"/>
+<img width="200" src="images/AI 매니저 - 생성중.png" alt="AI 매니저 - 생성중"/>
+<img width="200" src="images/AI 매니저 - 커리큘럼 변경.png" alt="AI 매니저 - 커리큘럼 변경"/>
 
 ### 5. 그룹 러닝 기능
 
@@ -200,11 +179,11 @@ GPT 기반 AI가 사용자에게 맞춤형 마라톤 훈련 커리큘럼을 제�
 - **초대코드 가입**: 초대코드를 통한 그룹 참여
 - **초대코드 공유**: 그룹 초대코드 공유 기능
 
-<img width="300" src="images/그룹 - 미가입.png" alt="그룹 - 미가입"/>
-<img width="300" src="images/그룹 - 메인.png" alt="그룹 - 메인"/>
-<img width="300" src="images/그룹 - 생성.png" alt="그룹 - 생성"/>
-<img width="300" src="images/그룹 - 초대코드 가입.png" alt="그룹 - 초대코드 가입"/>
-<img width="300" src="images/그룹 - 초대코드 공유.png" alt="그룹 - 초대코드 공유"/>
+<img width="200" src="images/그룹 - 미가입.png" alt="그룹 - 미가입"/>
+<img width="200" src="images/그룹 - 메인.png" alt="그룹 - 메인"/>
+<img width="200" src="images/그룹 - 생성.png" alt="그룹 - 생성"/>
+<img width="200" src="images/그룹 - 초대코드 가입.png" alt="그룹 - 초대코드 가입"/>
+<img width="200" src="images/그룹 - 초대코드 공유.png" alt="그룹 - 초대코드 공유"/>
 
 ### 6. 러닝 히스토리 및 분석
 
@@ -215,10 +194,10 @@ GPT 기반 AI가 사용자에게 맞춤형 마라톤 훈련 커리큘럼을 제�
 - **그룹원 정보**: 그룹 러닝 시 다른 멤버들의 기록 확인
 - **차트 분석**: 러닝 데이터 시각화 및 트렌드 분석
 
-<img width="300" src="images/히스토리 - 메인.png" alt="히스토리 - 메인"/>
-<img width="300" src="images/히스토리 - 필터.png" alt="히스토리 - 필터"/>
-<img width="300" src="images/히스토리 - 그룹원 정보.png" alt="히스토리 - 그룹원 정보"/>
-<img width="300" src="images/차트.png" alt="차트"/>
+<img width="200" src="images/히스토리 - 메인.png" alt="히스토리 - 메인"/>
+<img width="200" src="images/히스토리 - 필터.png" alt="히스토리 - 필터"/>
+<img width="200" src="images/히스토리 - 그룹원 정보.png" alt="히스토리 - 그룹원 정보"/>
+<img width="200" src="images/차트.png" alt="차트"/>
 
 ### 7. 스마트워치 연동
 
@@ -229,16 +208,16 @@ GPT 기반 AI가 사용자에게 맞춤형 마라톤 훈련 커리큘럼을 제�
 - **일시정지 화면**: BPM, 시간 등 상세 정보 표시
 - **러닝 기록**: 워치에서 간편하게 러닝 기록 확인
 
-<img width="200" src="images/스마트워치 - 달리기중1.png" alt="스마트워치 - 달리기중1"/>
-<img width="200" src="images/스마트워치 - 달리기중2.png" alt="스마트워치 - 달리기중2"/>
-<img width="200" src="images/스마트워치 - 달리기중3.png" alt="스마트워치 - 달리기중3"/>
-<img width="200" src="images/스마트워치 - 페이스 설정.png" alt="스마트워치 - 페이스 설정"/>
-<img width="200" src="images/스마트워치 - 페이스.png" alt="스마트워치 - 페이스"/>
-<img width="200" src="images/스마트워치 - 일시정지 - BPM.png" alt="스마트워치 - 일시정지 - BPM"/>
-<img width="200" src="images/스마트워치 - 일시정지 - 시간.png" alt="스마트워치 - 일시정지 - 시간"/>
-<img width="200" src="images/스마트워치 - 러닝기록.png" alt="스마트워치 - 러닝기록"/>
-<img width="200" src="images/스마트워치 - 시작버튼.png" alt="스마트워치 - 시작버튼"/>
-<img width="200" src="images/스마트워치 - 버튼.png" alt="스마트워치 - 버튼"/>
+<img width="150" src="images/스마트워치 - 달리기중1.png" alt="스마트워치 - 달리기중1"/>
+<img width="150" src="images/스마트워치 - 달리기중2.png" alt="스마트워치 - 달리기중2"/>
+<img width="150" src="images/스마트워치 - 달리기중3.png" alt="스마트워치 - 달리기중3"/>
+<img width="150" src="images/스마트워치 - 페이스 설정.png" alt="스마트워치 - 페이스 설정"/>
+<img width="150" src="images/스마트워치 - 페이스.png" alt="스마트워치 - 페이스"/>
+<img width="150" src="images/스마트워치 - 일시정지 - BPM.png" alt="스마트워치 - 일시정지 - BPM"/>
+<img width="150" src="images/스마트워치 - 일시정지 - 시간.png" alt="스마트워치 - 일시정지 - 시간"/>
+<img width="150" src="images/스마트워치 - 러닝기록.png" alt="스마트워치 - 러닝기록"/>
+<img width="150" src="images/스마트워치 - 시작버튼.png" alt="스마트워치 - 시작버튼"/>
+<img width="150" src="images/스마트워치 - 버튼.png" alt="스마트워치 - 버튼"/>
 
 ### 8. 스마트 인솔 연동
 
@@ -250,14 +229,12 @@ GPT 기반 AI가 사용자에게 맞춤형 마라톤 훈련 커리큘럼을 제�
 - **진단 시작**: 발걸음 분석 시작
 - **분석 결과**: 상세한 발걸음 분석 데이터 제공
 
-<img width="300" src="images/스마트인솔 - 메인화면.png" alt="스마트인솔 - 메인화면"/>
-<img width="300" src="images/스마트인솔 - 블루투스 페어링.png" alt="스마트인솔 - 블루투스 페어링"/>
-<img width="300" src="images/스마트인솔 - 페어링 성공.png" alt="스마트인솔 - 페어링 성공"/>
-<img width="300" src="images/스마트인솔 - 진단시작.png" alt="스마트인솔 - 진단시작"/>
-<img width="300" src="images/스마트인솔 - 분석1.png" alt="스마트인솔 - 분석1"/>
-<img width="300" src="images/스마트인솔 - 분석2.png" alt="스마트인솔 - 분석2"/>
-
-<br>
+<img width="200" src="images/스마트인솔 - 메인화면.png" alt="스마트인솔 - 메인화면"/>
+<img width="200" src="images/스마트인솔 - 블루투스 페어링.png" alt="스마트인솔 - 블루투스 페어링"/>
+<img width="200" src="images/스마트인솔 - 페어링 성공.png" alt="스마트인솔 - 페어링 성공"/>
+<img width="200" src="images/스마트인솔 - 진단시작.png" alt="스마트인솔 - 진단시작"/>
+<img width="200" src="images/스마트인솔 - 분석1.png" alt="스마트인솔 - 분석1"/>
+<img width="200" src="images/스마트인솔 - 분석2.png" alt="스마트인솔 - 분석2"/>
 
 ## 📌AI 활용내역
 
@@ -296,4 +273,71 @@ RunMate의 AI 매니저는 GPT-4.1 모델을 활용하여 사용자 맞춤형 �
 - 발걸음 패턴 분석 (스마트 인솔 연동)
 - 개선점 및 권장사항 제시
 
-<br>
+## 📌맡은 역할
+
+### 정찬우 (팀장)
+
+- **Backend 개발**: Spring Boot 기반 REST API 개발
+- **AI Prompt 설계**: GPT-4.1 기반 커리큘럼 생성 프롬프트 설계
+- **프로젝트 관리**: 팀 전체 일정 관리 및 의사결정
+
+### 김환
+
+- **Backend 개발**: Spring Boot 서버 개발
+- **인프라 구축**: Docker, AWS, Jenkins CI/CD 파이프라인 구축
+- **데이터베이스 설계**: PostgreSQL 스키마 설계 및 최적화
+
+### 이한나
+
+- **Backend 개발**: Spring Boot API 개발
+- **크롤링 시스템**: 마라톤 정보 수집 및 데이터 처리
+- **데이터 분석**: 러닝 데이터 분석 및 통계 처리
+
+### 김미경
+
+- **Android 개발**: 메인 앱 개발 및 UI 구현
+- **스마트워치 연동**: 삼성 갤럭시 워치 앱 개발
+- **실시간 데이터 처리**: 워치-폰 간 데이터 동기화
+
+### 한아영
+
+- **Android 개발**: 사용자 인터페이스 및 사용자 경험 설계
+- **UI/UX 디자인**: Figma를 활용한 앱 디자인
+- **프론트엔드 로직**: 앱 내 비즈니스 로직 구현
+
+### 황선혁
+
+- **Android 개발**: 앱 기능 구현
+- **IoT 연동**: 스마트 인솔 하드웨어 연동
+- **블루투스 통신**: 센서 데이터 수집 및 처리
+
+## 📌산출물
+
+### 1. 소프트웨어 산출물
+
+- **Android 앱**: RunMate 메인 애플리케이션
+- **스마트워치 앱**: 삼성 갤럭시 워치용 러닝 앱
+- **Backend API**: Spring Boot 기반 REST API 서버
+- **크롤링 시스템**: Python 기반 마라톤 대회 정보 수집 시스템
+- **IoT 펌웨어**: 스마트 인솔용 Arduino 펌웨어
+
+### 2. 문서 산출물
+
+- **프로젝트 기획서**: 서비스 기획 및 요구사항 정의
+- **기술 명세서**: 시스템 아키텍처 및 기술 스택 문서
+- **API 문서**: REST API 명세서
+- **사용자 매뉴얼**: 앱 사용 가이드
+- **시연 시나리오**: 프로젝트 발표용 시연 시나리오
+
+### 3. 인프라 산출물
+
+- **Docker 컨테이너**: 애플리케이션 배포용 컨테이너
+- **CI/CD 파이프라인**: Jenkins 기반 자동화 배포 시스템
+- **클라우드 인프라**: AWS 기반 서버 인프라
+- **데이터베이스**: PostgreSQL 데이터베이스 스키마
+
+### 4. 디자인 산출물
+
+- **UI/UX 디자인**: Figma 기반 앱 디자인
+- **아이콘 및 이미지**: 앱 내 사용되는 그래픽 요소
+- **프로토타입**: 사용자 플로우 및 인터랙션 프로토타입
