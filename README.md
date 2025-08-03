@@ -138,10 +138,10 @@ RunMate는 마라톤을 목표로 하는 사용자를 위해 AI 기반 훈련 �
 
 <table>
 <tr>
-<td><img width="200" src="images/메인화면.png" alt="메인화면"/></td>
-<td><img width="200" src="images/메인화면 - 시작.png" alt="메인화면 - 시작"/></td>
-<td><img width="200" src="images/메인화면 - 일시정지.png" alt="메인화면 - 일시정지"/></td>
-<td><img width="200" src="images/메인화면 - 페이스설정.png" alt="메인화면 - 페이스설정"/></td>
+<td><img width="250" src="images/메인화면.png" alt="메인화면"/></td>
+<td><img width="250" src="images/메인화면 - 시작.png" alt="메인화면 - 시작"/></td>
+<td><img width="250" src="images/메인화면 - 일시정지.png" alt="메인화면 - 일시정지"/></td>
+<td><img width="250" src="images/메인화면 - 페이스설정.png" alt="메인화면 - 페이스설정"/></td>
 </tr>
 </table>
 
@@ -157,11 +157,13 @@ RunMate는 마라톤을 목표로 하는 사용자를 위해 AI 기반 훈련 �
 
 <table>
 <tr>
-<td><img width="200" src="images/코스선택 - 리스트.png" alt="코스선택 - 리스트"/></td>
-<td><img width="200" src="images/코스선택 - 상세.png" alt="코스선택 - 상세"/></td>
-<td><img width="200" src="images/코스선택 - 최근에 달린 코스.png" alt="코스선택 - 최근에 달린 코스"/></td>
-<td><img width="200" src="images/코스선택 - 내가 만든 코스.png" alt="코스선택 - 내가 만든 코스"/></td>
-<td><img width="200" src="images/메인화면 - 코스 경로.png" alt="메인화면 - 코스 경로"/></td>
+<td><img width="250" src="images/코스선택 - 리스트.png" alt="코스선택 - 리스트"/></td>
+<td><img width="250" src="images/코스선택 - 상세.png" alt="코스선택 - 상세"/></td>
+</tr>
+</tr>
+<td><img width="250" src="images/코스선택 - 최근에 달린 코스.png" alt="코스선택 - 최근에 달린 코스"/></td>
+<td><img width="250" src="images/코스선택 - 내가 만든 코스.png" alt="코스선택 - 내가 만든 코스"/></td>
+<td><img width="250" src="images/메인화면 - 코스 경로.png" alt="메인화면 - 코스 경로"/></td>
 </tr>
 </table>
 
@@ -176,14 +178,14 @@ GPT 기반 AI가 사용자에게 맞춤형 마라톤 훈련 커리큘럼을 제�
 
 <table>
 <tr>
-<td><img width="200" src="images/AI 매니저 - 미생성.png" alt="AI 매니저 - 미생성"/></td>
-<td><img width="200" src="images/AI 매니저 - 메인.png" alt="AI 매니저 - 메인"/></td>
-<td><img width="200" src="images/AI 매니저 - 목표 설정1.png" alt="AI 매니저 - 목표 설정1"/></td>
-<td><img width="200" src="images/AI 매니저 - 목표 설정2.png" alt="AI 매니저 - 목표 설정2"/></td>
+<td><img width="250" src="images/AI 매니저 - 미생성.png" alt="AI 매니저 - 미생성"/></td>
+<td><img width="250" src="images/AI 매니저 - 메인.png" alt="AI 매니저 - 메인"/></td>
+<td><img width="250" src="images/AI 매니저 - 목표 설정1.png" alt="AI 매니저 - 목표 설정1"/></td>
 </tr>
 <tr>
-<td><img width="200" src="images/AI 매니저 - 생성중.png" alt="AI 매니저 - 생성중"/></td>
-<td><img width="200" src="images/AI 매니저 - 커리큘럼 변경.png" alt="AI 매니저 - 커리큘럼 변경"/></td>
+<td><img width="250" src="images/AI 매니저 - 목표 설정2.png" alt="AI 매니저 - 목표 설정2"/></td>
+<td><img width="250" src="images/AI 매니저 - 생성중.png" alt="AI 매니저 - 생성중"/></td>
+<td><img width="250" src="images/AI 매니저 - 커리큘럼 변경.png" alt="AI 매니저 - 커리큘럼 변경"/></td>
 </tr>
 </table>
 
@@ -198,12 +200,14 @@ GPT 기반 AI가 사용자에게 맞춤형 마라톤 훈련 커리큘럼을 제�
 - **초대코드 공유**: 그룹 초대코드 공유 기능
 
 <table>
+<tr?>
+<td><img width="250" src="images/그룹 - 미가입.png" alt="그룹 - 미가입"/></td>
+<td><img width="250" src="images/그룹 - 메인.png" alt="그룹 - 메인"/></td>
+<td><img width="250" src="images/그룹 - 생성.png" alt="그룹 - 생성"/></td>
+</tr>
 <tr>
-<td><img width="200" src="images/그룹 - 미가입.png" alt="그룹 - 미가입"/></td>
-<td><img width="200" src="images/그룹 - 메인.png" alt="그룹 - 메인"/></td>
-<td><img width="200" src="images/그룹 - 생성.png" alt="그룹 - 생성"/></td>
-<td><img width="200" src="images/그룹 - 초대코드 가입.png" alt="그룹 - 초대코드 가입"/></td>
-<td><img width="200" src="images/그룹 - 초대코드 공유.png" alt="그룹 - 초대코드 공유"/></td>
+<td><img width="250" src="images/그룹 - 초대코드 가입.png" alt="그룹 - 초대코드 가입"/></td>
+<td><img width="250" src="images/그룹 - 초대코드 공유.png" alt="그룹 - 초대코드 공유"/></td>
 </tr>
 </table>
 
@@ -218,10 +222,10 @@ GPT 기반 AI가 사용자에게 맞춤형 마라톤 훈련 커리큘럼을 제�
 
 <table>
 <tr>
-<td><img width="200" src="images/히스토리 - 메인.png" alt="히스토리 - 메인"/></td>
-<td><img width="200" src="images/히스토리 - 필터.png" alt="히스토리 - 필터"/></td>
-<td><img width="200" src="images/히스토리 - 그룹원 정보.png" alt="히스토리 - 그룹원 정보"/></td>
-<td><img width="200" src="images/차트.png" alt="차트"/></td>
+<td><img width="250" src="images/히스토리 - 메인.png" alt="히스토리 - 메인"/></td>
+<td><img width="250" src="images/히스토리 - 필터.png" alt="히스토리 - 필터"/></td>
+<td><img width="250" src="images/히스토리 - 그룹원 정보.png" alt="히스토리 - 그룹원 정보"/></td>
+<td><img width="250" src="images/차트.png" alt="차트"/></td>
 </tr>
 </table>
 
@@ -263,14 +267,14 @@ GPT 기반 AI가 사용자에게 맞춤형 마라톤 훈련 커리큘럼을 제�
 
 <table>
 <tr>
-<td><img width="200" src="images/스마트인솔 - 메인화면.png" alt="스마트인솔 - 메인화면"/></td>
-<td><img width="200" src="images/스마트인솔 - 블루투스 페어링.png" alt="스마트인솔 - 블루투스 페어링"/></td>
-<td><img width="200" src="images/스마트인솔 - 페어링 성공.png" alt="스마트인솔 - 페어링 성공"/></td>
+<td><img width="250" src="images/스마트인솔 - 메인화면.png" alt="스마트인솔 - 메인화면"/></td>
+<td><img width="250" src="images/스마트인솔 - 블루투스 페어링.png" alt="스마트인솔 - 블루투스 페어링"/></td>
+<td><img width="250" src="images/스마트인솔 - 페어링 성공.png" alt="스마트인솔 - 페어링 성공"/></td>
 </tr>
 <tr>
-<td><img width="200" src="images/스마트인솔 - 진단시작.png" alt="스마트인솔 - 진단시작"/></td>
-<td><img width="200" src="images/스마트인솔 - 분석1.png" alt="스마트인솔 - 분석1"/></td>
-<td><img width="200" src="images/스마트인솔 - 분석2.png" alt="스마트인솔 - 분석2"/></td>
+<td><img width="250" src="images/스마트인솔 - 진단시작.png" alt="스마트인솔 - 진단시작"/></td>
+<td><img width="250" src="images/스마트인솔 - 분석1.png" alt="스마트인솔 - 분석1"/></td>
+<td><img width="250" src="images/스마트인솔 - 분석2.png" alt="스마트인솔 - 분석2"/></td>
 </tr>
 </table>
 
