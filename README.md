@@ -119,9 +119,13 @@ RunMate는 마라톤을 목표로 하는 사용자를 위해 AI 기반 훈련 �
 - **로그인**: 기존 계정으로 로그인하여 개인화된 러닝 경험 제공
 - **회원가입**: 개인정보 입력을 통해 맞춤형 AI 커리큘럼 생성 기반 마련
 
-<img width="250" src="images/로그인.png" alt="로그인 화면" style="display: inline-block; margin-right: 10px;"/>
-<img width="250" src="images/회원가입 - ID,PW.png" alt="회원가입 - ID/PW" style="display: inline-block; margin-right: 10px;"/>
-<img width="250" src="images/회원가입 - 개인정보.png" alt="회원가입 - 개인정보" style="display: inline-block; margin-right: 10px;"/>
+<table>
+<tr>
+<td><img width="250" src="images/로그인.png" alt="로그인 화면"/></td>
+<td><img width="250" src="images/회원가입 - ID,PW.png" alt="회원가입 - ID/PW"/></td>
+<td><img width="250" src="images/회원가입 - 개인정보.png" alt="회원가입 - 개인정보"/></td>
+</tr>
+</table>
 
 ### 2. 메인 러닝 화면
 
@@ -132,10 +136,14 @@ RunMate는 마라톤을 목표로 하는 사용자를 위해 AI 기반 훈련 �
 - **일시정지**: 러닝 중 일시정지 시 현재 상태 유지
 - **페이스 설정**: 목표 페이스 설정으로 안정적인 러닝 지원
 
-<img width="200" src="images/메인화면.png" alt="메인화면" style="display: inline-block; margin-right: 10px;"/>
-<img width="200" src="images/메인화면 - 시작.png" alt="메인화면 - 시작" style="display: inline-block; margin-right: 10px;"/>
-<img width="200" src="images/메인화면 - 일시정지.png" alt="메인화면 - 일시정지" style="display: inline-block; margin-right: 10px;"/>
-<img width="200" src="images/메인화면 - 페이스설정.png" alt="메인화면 - 페이스설정" style="display: inline-block; margin-right: 10px;"/>
+<table>
+<tr>
+<td><img width="200" src="images/메인화면.png" alt="메인화면"/></td>
+<td><img width="200" src="images/메인화면 - 시작.png" alt="메인화면 - 시작"/></td>
+<td><img width="200" src="images/메인화면 - 일시정지.png" alt="메인화면 - 일시정지"/></td>
+<td><img width="200" src="images/메인화면 - 페이스설정.png" alt="메인화면 - 페이스설정"/></td>
+</tr>
+</table>
 
 ### 3. 코스 선택 및 관리
 
@@ -147,11 +155,15 @@ RunMate는 마라톤을 목표로 하는 사용자를 위해 AI 기반 훈련 �
 - **내가 만든 코스**: 사용자가 직접 생성한 코스 바로가기
 - **코스 선택**: 코스 선택한 후 메인화면에 경로 표시
 
-<img width="200" src="images/코스선택 - 리스트.png" alt="코스선택 - 리스트" style="display: inline-block; margin-right: 10px;"/>
-<img width="200" src="images/코스선택 - 상세.png" alt="코스선택 - 상세" style="display: inline-block; margin-right: 10px;"/>
-<img width="200" src="images/코스선택 - 최근에 달린 코스.png" alt="코스선택 - 최근에 달린 코스" style="display: inline-block; margin-right: 10px;"/>
-<img width="200" src="images/코스선택 - 내가 만든 코스.png" alt="코스선택 - 내가 만든 코스" style="display: inline-block; margin-right: 10px;"/>
-<img width="200" src="images/메인화면 - 코스 경로.png" alt="메인화면 - 코스 경로" style="display: inline-block; margin-right: 10px;"/>
+<table>
+<tr>
+<td><img width="200" src="images/코스선택 - 리스트.png" alt="코스선택 - 리스트"/></td>
+<td><img width="200" src="images/코스선택 - 상세.png" alt="코스선택 - 상세"/></td>
+<td><img width="200" src="images/코스선택 - 최근에 달린 코스.png" alt="코스선택 - 최근에 달린 코스"/></td>
+<td><img width="200" src="images/코스선택 - 내가 만든 코스.png" alt="코스선택 - 내가 만든 코스"/></td>
+<td><img width="200" src="images/메인화면 - 코스 경로.png" alt="메인화면 - 코스 경로"/></td>
+</tr>
+</table>
 
 ### 4. AI 매니저 기능
 
@@ -162,12 +174,18 @@ GPT 기반 AI가 사용자에게 맞춤형 마라톤 훈련 커리큘럼을 제�
 - **커리큘럼 생성**: AI가 분석한 맞춤형 훈련 스케줄 제공
 - **커리큘럼 변경**: 커리큘럼 새로 만들기
 
-<img width="200" src="images/AI 매니저 - 미생성.png" alt="AI 매니저 - 미생성" style="display: inline-block; margin-right: 10px;"/>
-<img width="200" src="images/AI 매니저 - 메인.png" alt="AI 매니저 - 메인" style="display: inline-block; margin-right: 10px;"/>
-<img width="200" src="images/AI 매니저 - 목표 설정1.png" alt="AI 매니저 - 목표 설정1" style="display: inline-block; margin-right: 10px;"/>
-<img width="200" src="images/AI 매니저 - 목표 설정2.png" alt="AI 매니저 - 목표 설정2" style="display: inline-block; margin-right: 10px;"/>
-<img width="200" src="images/AI 매니저 - 생성중.png" alt="AI 매니저 - 생성중" style="display: inline-block; margin-right: 10px;"/>
-<img width="200" src="images/AI 매니저 - 커리큘럼 변경.png" alt="AI 매니저 - 커리큘럼 변경" style="display: inline-block; margin-right: 10px;"/>
+<table>
+<tr>
+<td><img width="200" src="images/AI 매니저 - 미생성.png" alt="AI 매니저 - 미생성"/></td>
+<td><img width="200" src="images/AI 매니저 - 메인.png" alt="AI 매니저 - 메인"/></td>
+<td><img width="200" src="images/AI 매니저 - 목표 설정1.png" alt="AI 매니저 - 목표 설정1"/></td>
+<td><img width="200" src="images/AI 매니저 - 목표 설정2.png" alt="AI 매니저 - 목표 설정2"/></td>
+</tr>
+<tr>
+<td><img width="200" src="images/AI 매니저 - 생성중.png" alt="AI 매니저 - 생성중"/></td>
+<td><img width="200" src="images/AI 매니저 - 커리큘럼 변경.png" alt="AI 매니저 - 커리큘럼 변경"/></td>
+</tr>
+</table>
 
 ### 5. 그룹 러닝 기능
 
@@ -179,11 +197,15 @@ GPT 기반 AI가 사용자에게 맞춤형 마라톤 훈련 커리큘럼을 제�
 - **초대코드 가입**: 초대코드를 통한 그룹 참여
 - **초대코드 공유**: 그룹 초대코드 공유 기능
 
-<img width="200" src="images/그룹 - 미가입.png" alt="그룹 - 미가입" style="display: inline-block; margin-right: 10px;"/>
-<img width="200" src="images/그룹 - 메인.png" alt="그룹 - 메인" style="display: inline-block; margin-right: 10px;"/>
-<img width="200" src="images/그룹 - 생성.png" alt="그룹 - 생성" style="display: inline-block; margin-right: 10px;"/>
-<img width="200" src="images/그룹 - 초대코드 가입.png" alt="그룹 - 초대코드 가입" style="display: inline-block; margin-right: 10px;"/>
-<img width="200" src="images/그룹 - 초대코드 공유.png" alt="그룹 - 초대코드 공유" style="display: inline-block; margin-right: 10px;"/>
+<table>
+<tr>
+<td><img width="200" src="images/그룹 - 미가입.png" alt="그룹 - 미가입"/></td>
+<td><img width="200" src="images/그룹 - 메인.png" alt="그룹 - 메인"/></td>
+<td><img width="200" src="images/그룹 - 생성.png" alt="그룹 - 생성"/></td>
+<td><img width="200" src="images/그룹 - 초대코드 가입.png" alt="그룹 - 초대코드 가입"/></td>
+<td><img width="200" src="images/그룹 - 초대코드 공유.png" alt="그룹 - 초대코드 공유"/></td>
+</tr>
+</table>
 
 ### 6. 러닝 히스토리 및 분석
 
@@ -194,10 +216,14 @@ GPT 기반 AI가 사용자에게 맞춤형 마라톤 훈련 커리큘럼을 제�
 - **그룹원 정보**: 그룹 러닝 시 다른 멤버들의 기록 확인
 - **차트 분석**: 러닝 데이터 시각화 및 트렌드 분석
 
-<img width="200" src="images/히스토리 - 메인.png" alt="히스토리 - 메인" style="display: inline-block; margin-right: 10px;"/>
-<img width="200" src="images/히스토리 - 필터.png" alt="히스토리 - 필터" style="display: inline-block; margin-right: 10px;"/>
-<img width="200" src="images/히스토리 - 그룹원 정보.png" alt="히스토리 - 그룹원 정보" style="display: inline-block; margin-right: 10px;"/>
-<img width="200" src="images/차트.png" alt="차트" style="display: inline-block; margin-right: 10px;"/>
+<table>
+<tr>
+<td><img width="200" src="images/히스토리 - 메인.png" alt="히스토리 - 메인"/></td>
+<td><img width="200" src="images/히스토리 - 필터.png" alt="히스토리 - 필터"/></td>
+<td><img width="200" src="images/히스토리 - 그룹원 정보.png" alt="히스토리 - 그룹원 정보"/></td>
+<td><img width="200" src="images/차트.png" alt="차트"/></td>
+</tr>
+</table>
 
 ### 7. 스마트워치 연동
 
@@ -208,16 +234,22 @@ GPT 기반 AI가 사용자에게 맞춤형 마라톤 훈련 커리큘럼을 제�
 - **일시정지 화면**: BPM, 시간 등 상세 정보 표시
 - **러닝 기록**: 워치에서 간편하게 러닝 기록 확인
 
-<img width="150" src="images/스마트워치 - 달리기중1.png" alt="스마트워치 - 달리기중1" style="display: inline-block; margin-right: 10px;"/>
-<img width="150" src="images/스마트워치 - 달리기중2.png" alt="스마트워치 - 달리기중2" style="display: inline-block; margin-right: 10px;"/>
-<img width="150" src="images/스마트워치 - 달리기중3.png" alt="스마트워치 - 달리기중3" style="display: inline-block; margin-right: 10px;"/>
-<img width="150" src="images/스마트워치 - 페이스 설정.png" alt="스마트워치 - 페이스 설정" style="display: inline-block; margin-right: 10px;"/>
-<img width="150" src="images/스마트워치 - 페이스.png" alt="스마트워치 - 페이스" style="display: inline-block; margin-right: 10px;"/>
-<img width="150" src="images/스마트워치 - 일시정지 - BPM.png" alt="스마트워치 - 일시정지 - BPM" style="display: inline-block; margin-right: 10px;"/>
-<img width="150" src="images/스마트워치 - 일시정지 - 시간.png" alt="스마트워치 - 일시정지 - 시간" style="display: inline-block; margin-right: 10px;"/>
-<img width="150" src="images/스마트워치 - 러닝기록.png" alt="스마트워치 - 러닝기록" style="display: inline-block; margin-right: 10px;"/>
-<img width="150" src="images/스마트워치 - 시작버튼.png" alt="스마트워치 - 시작버튼" style="display: inline-block; margin-right: 10px;"/>
-<img width="150" src="images/스마트워치 - 버튼.png" alt="스마트워치 - 버튼" style="display: inline-block; margin-right: 10px;"/>
+<table>
+<tr>
+<td><img width="150" src="images/스마트워치 - 달리기중1.png" alt="스마트워치 - 달리기중1"/></td>
+<td><img width="150" src="images/스마트워치 - 달리기중2.png" alt="스마트워치 - 달리기중2"/></td>
+<td><img width="150" src="images/스마트워치 - 달리기중3.png" alt="스마트워치 - 달리기중3"/></td>
+<td><img width="150" src="images/스마트워치 - 페이스 설정.png" alt="스마트워치 - 페이스 설정"/></td>
+<td><img width="150" src="images/스마트워치 - 페이스.png" alt="스마트워치 - 페이스"/></td>
+</tr>
+<tr>
+<td><img width="150" src="images/스마트워치 - 일시정지 - BPM.png" alt="스마트워치 - 일시정지 - BPM"/></td>
+<td><img width="150" src="images/스마트워치 - 일시정지 - 시간.png" alt="스마트워치 - 일시정지 - 시간"/></td>
+<td><img width="150" src="images/스마트워치 - 러닝기록.png" alt="스마트워치 - 러닝기록"/></td>
+<td><img width="150" src="images/스마트워치 - 시작버튼.png" alt="스마트워치 - 시작버튼"/></td>
+<td><img width="150" src="images/스마트워치 - 버튼.png" alt="스마트워치 - 버튼"/></td>
+</tr>
+</table>
 
 ### 8. 스마트 인솔 연동
 
@@ -229,12 +261,18 @@ GPT 기반 AI가 사용자에게 맞춤형 마라톤 훈련 커리큘럼을 제�
 - **진단 시작**: 발걸음 분석 시작
 - **분석 결과**: 상세한 발걸음 분석 데이터 제공
 
-<img width="200" src="images/스마트인솔 - 메인화면.png" alt="스마트인솔 - 메인화면" style="display: inline-block; margin-right: 10px;"/>
-<img width="200" src="images/스마트인솔 - 블루투스 페어링.png" alt="스마트인솔 - 블루투스 페어링" style="display: inline-block; margin-right: 10px;"/>
-<img width="200" src="images/스마트인솔 - 페어링 성공.png" alt="스마트인솔 - 페어링 성공" style="display: inline-block; margin-right: 10px;"/>
-<img width="200" src="images/스마트인솔 - 진단시작.png" alt="스마트인솔 - 진단시작" style="display: inline-block; margin-right: 10px;"/>
-<img width="200" src="images/스마트인솔 - 분석1.png" alt="스마트인솔 - 분석1" style="display: inline-block; margin-right: 10px;"/>
-<img width="200" src="images/스마트인솔 - 분석2.png" alt="스마트인솔 - 분석2" style="display: inline-block; margin-right: 10px;"/>
+<table>
+<tr>
+<td><img width="200" src="images/스마트인솔 - 메인화면.png" alt="스마트인솔 - 메인화면"/></td>
+<td><img width="200" src="images/스마트인솔 - 블루투스 페어링.png" alt="스마트인솔 - 블루투스 페어링"/></td>
+<td><img width="200" src="images/스마트인솔 - 페어링 성공.png" alt="스마트인솔 - 페어링 성공"/></td>
+</tr>
+<tr>
+<td><img width="200" src="images/스마트인솔 - 진단시작.png" alt="스마트인솔 - 진단시작"/></td>
+<td><img width="200" src="images/스마트인솔 - 분석1.png" alt="스마트인솔 - 분석1"/></td>
+<td><img width="200" src="images/스마트인솔 - 분석2.png" alt="스마트인솔 - 분석2"/></td>
+</tr>
+</table>
 
 ## 📌AI 활용내역
 
