@@ -44,6 +44,11 @@
 [![Firebase](https://img.shields.io/badge/Firebase-039BE5?logo=Firebase&logoColor=white)](#)
 [![IntelliJ IDEA](https://img.shields.io/badge/IntelliJIDEA-000000?logo=intellij-idea&logoColor=white)](#)
 
+### 크롤링 & 데이터 처리
+
+[![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)](#)
+[![Node.js](https://img.shields.io/badge/Node.js-43853D?logo=node.js&logoColor=white)](#)
+
 ### 인프라
 
 [![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff)](#)
@@ -160,7 +165,7 @@ RunMate는 마라톤을 목표로 하는 사용자를 위해 AI 기반 훈련 �
 <td><img width="250" src="images/코스선택 - 리스트.png" alt="코스선택 - 리스트"/></td>
 <td><img width="250" src="images/코스선택 - 상세.png" alt="코스선택 - 상세"/></td>
 </tr>
-</tr>
+<tr>
 <td><img width="250" src="images/코스선택 - 최근에 달린 코스.png" alt="코스선택 - 최근에 달린 코스"/></td>
 <td><img width="250" src="images/코스선택 - 내가 만든 코스.png" alt="코스선택 - 내가 만든 코스"/></td>
 <td><img width="250" src="images/메인화면 - 코스 경로.png" alt="메인화면 - 코스 경로"/></td>
@@ -200,7 +205,7 @@ GPT 기반 AI가 사용자에게 맞춤형 마라톤 훈련 커리큘럼을 제�
 - **초대코드 공유**: 그룹 초대코드 공유 기능
 
 <table>
-<tr?>
+<tr>
 <td><img width="250" src="images/그룹 - 미가입.png" alt="그룹 - 미가입"/></td>
 <td><img width="250" src="images/그룹 - 메인.png" alt="그룹 - 메인"/></td>
 <td><img width="250" src="images/그룹 - 생성.png" alt="그룹 - 생성"/></td>
